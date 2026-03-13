@@ -1,0 +1,3024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>PROTOCOL HEALTH</title>
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Protocol Health">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0a;
+  --surface: #111111;
+  --surface2: #1a1a1a;
+  --border: #222222;
+  --accent: #c8f542;
+  --accent2: #f5a623;
+  --fast: #7b68ee;
+  --fast-dim: rgba(123,104,238,0.15);
+  --text: #e8e8e8;
+  --muted: #555;
+  --danger: #ff4444;
+  --green: #3ddc84;
+  --green-dim: rgba(61,220,132,0.1);
+  --plan-overlay: rgba(255,255,255,0.06);
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; min-height:100vh; padding-bottom:50px; overflow-x:hidden; }
+
+/* HEADER */
+.header { padding:22px 18px 12px; border-bottom:1px solid var(--border); display:flex; align-items:flex-end; justify-content:space-between; }
+.header-left h1 { font-family:'Bebas Neue',sans-serif; font-size:2.6rem; letter-spacing:3px; color:var(--accent); line-height:1; }
+.header-left p { font-family:'DM Mono',monospace; font-size:0.58rem; color:var(--muted); letter-spacing:2px; text-transform:uppercase; margin-top:3px; }
+.header-right { display:flex; align-items:center; gap:10px; }
+.weight-badge { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:6px 12px; text-align:right; }
+.weight-badge .w-num { font-family:'Bebas Neue',sans-serif; font-size:1.6rem; color:var(--accent2); line-height:1; }
+.weight-badge .w-label { font-family:'DM Mono',monospace; font-size:0.5rem; color:var(--muted); letter-spacing:1px; }
+.settings-btn { background:var(--surface2); border:1px solid var(--border); border-radius:8px; width:36px; height:36px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.2s; font-size:1rem; flex-shrink:0; }
+.settings-btn:hover { border-color:var(--accent); }
+
+/* PLAN BADGE */
+.plan-badge { padding:4px 10px; background:var(--surface2); border:1px solid var(--border); border-radius:20px; font-family:'DM Mono',monospace; font-size:0.55rem; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin:8px 18px; display:inline-block; }
+.plan-badge.agro { border-color:#ff6b35; color:#ff6b35; background:rgba(255,107,53,0.08); }
+
+/* TABS */
+.tabs { display:flex; border-bottom:1px solid var(--border); overflow-x:auto; scrollbar-width:none; }
+.tabs::-webkit-scrollbar { display:none; }
+.tab { flex:1; min-width:55px; padding:11px 4px; background:none; border:none; color:var(--muted); font-family:'DM Mono',monospace; font-size:0.55rem; letter-spacing:1px; text-transform:uppercase; cursor:pointer; border-bottom:2px solid transparent; transition:all 0.2s; white-space:nowrap; }
+.tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+
+/* SECTIONS */
+.section { display:none; padding:14px 18px; }
+.section.active { display:block; }
+
+/* GOAL BAR */
+.goal-strip { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:11px 13px; margin-bottom:14px; display:flex; gap:12px; align-items:center; }
+.goal-block { text-align:center; }
+.goal-val { font-family:'Bebas Neue',sans-serif; font-size:1.3rem; line-height:1; }
+.goal-val.current { color:var(--accent2); }
+.goal-val.target { color:var(--accent); }
+.goal-val.remain { color:var(--text); }
+.goal-lbl { font-family:'DM Mono',monospace; font-size:0.48rem; color:var(--muted); letter-spacing:1px; text-transform:uppercase; margin-top:2px; }
+.goal-divider { width:1px; height:30px; background:var(--border); flex-shrink:0; }
+.goal-bar-wrap { flex:1; }
+.goal-bar-track { height:5px; background:var(--border); border-radius:3px; overflow:hidden; margin-bottom:4px; }
+.goal-bar-fill { height:100%; background:linear-gradient(90deg,var(--accent2),var(--accent)); border-radius:3px; transition:width 0.4s ease; }
+.goal-pct { font-family:'DM Mono',monospace; font-size:0.58rem; color:var(--muted); }
+
+/* DURATION BAR */
+.duration-strip { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:10px 13px; margin-bottom:14px; display:none; }
+.duration-strip.visible { display:block; }
+.duration-top { display:flex; justify-content:space-between; margin-bottom:6px; }
+.duration-top span { font-family:'DM Mono',monospace; font-size:0.6rem; color:var(--muted); letter-spacing:1px; }
+.duration-top .dpct { color:var(--accent); }
+.duration-bar-track { height:4px; background:var(--border); border-radius:2px; overflow:hidden; }
+.duration-bar-fill { height:100%; background:var(--accent); border-radius:2px; transition:width 0.4s; }
+
+/* PROGRESS */
+.progress-wrap { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:11px; margin-bottom:14px; }
+.progress-top { display:flex; justify-content:space-between; margin-bottom:7px; }
+.progress-top span { font-family:'DM Mono',monospace; font-size:0.6rem; color:var(--muted); letter-spacing:1px; }
+.progress-top .pct { color:var(--accent); font-weight:500; }
+.progress-bar { height:4px; background:var(--border); border-radius:2px; overflow:hidden; }
+.progress-fill { height:100%; background:var(--accent); border-radius:2px; transition:width 0.3s; }
+
+.day-label { font-family:'Bebas Neue',sans-serif; font-size:1.2rem; letter-spacing:2px; color:var(--muted); margin-bottom:12px; }
+.day-label span { color:var(--accent); }
+
+/* CHECKLIST */
+.checklist-group { margin-bottom:18px; }
+.group-header { display:flex; align-items:center; gap:7px; margin-bottom:9px; }
+.group-tag { font-family:'DM Mono',monospace; font-size:0.52rem; letter-spacing:2px; text-transform:uppercase; padding:2px 7px; border-radius:3px; font-weight:500; }
+.tag-morning { background:#1a2a00; color:var(--accent); }
+.tag-evening { background:#1a1500; color:var(--accent2); }
+.tag-food { background:#1a0a0a; color:#ff7070; }
+.tag-rules { background:#0a1a1a; color:#70c8ff; }
+.tag-fast { background:var(--fast-dim); color:var(--fast); border:1px solid var(--fast); }
+.tag-stretch { background:#1a0a1a; color:#dd88ff; }
+.group-time { font-family:'DM Mono',monospace; font-size:0.58rem; color:var(--muted); }
+
+.check-item { display:flex; align-items:flex-start; gap:11px; padding:10px 11px; background:var(--surface); border:1px solid var(--border); border-radius:8px; margin-bottom:6px; cursor:pointer; transition:all 0.15s; user-select:none; }
+.check-item:hover { border-color:#333; }
+.check-item.done { border-color:var(--accent); background:#0f1a00; }
+.check-item.done .item-title { text-decoration:line-through; color:var(--muted); }
+.checkbox { width:17px; height:17px; border:2px solid var(--border); border-radius:3px; flex-shrink:0; margin-top:1px; display:flex; align-items:center; justify-content:center; transition:all 0.15s; }
+.check-item.done .checkbox { background:var(--accent); border-color:var(--accent); }
+.checkbox-tick { color:#000; font-size:10px; font-weight:bold; display:none; }
+.check-item.done .checkbox-tick { display:block; }
+.item-content { flex:1; }
+.item-title { font-size:0.82rem; font-weight:500; margin-bottom:2px; transition:all 0.15s; }
+.item-sub { font-size:0.67rem; color:var(--muted); font-family:'DM Mono',monospace; line-height:1.5; }
+
+.fast-day-banner { background:var(--fast-dim); border:1px solid var(--fast); border-radius:8px; padding:11px 13px; margin-bottom:14px; display:none; }
+.fast-day-banner.visible { display:block; }
+.fast-banner-title { font-family:'Bebas Neue',sans-serif; font-size:0.95rem; letter-spacing:2px; color:var(--fast); margin-bottom:3px; }
+.fast-banner-sub { font-family:'DM Mono',monospace; font-size:0.62rem; color:#9988cc; line-height:1.6; }
+
+/* SECTION TITLE */
+.section-title { font-family:'Bebas Neue',sans-serif; font-size:1.1rem; letter-spacing:3px; color:var(--muted); margin-bottom:11px; margin-top:4px; }
+.section-title span { color:var(--text); }
+.section-note { font-size:0.7rem; color:var(--muted); margin-bottom:12px; line-height:1.6; font-family:'DM Mono',monospace; }
+
+/* WORKOUT CARDS */
+.workout-card { background:var(--surface); border:1px solid var(--border); border-radius:10px; overflow:hidden; margin-bottom:12px; }
+.workout-card-header { padding:11px 13px; background:var(--surface2); display:flex; justify-content:space-between; align-items:center; cursor:pointer; }
+.workout-card-header h3 { font-family:'Bebas Neue',sans-serif; font-size:0.95rem; letter-spacing:2px; color:var(--accent); }
+.wch-right { text-align:right; }
+.workout-card-header .meta { font-family:'DM Mono',monospace; font-size:0.58rem; color:var(--muted); }
+.workout-body { max-height:0; overflow:hidden; transition:max-height 0.3s ease; }
+.workout-body.open { max-height:2000px; }
+.exercise-row { display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center; padding:9px 13px; border-bottom:1px solid var(--border); }
+.exercise-row:last-child { border-bottom:none; }
+.ex-name { font-size:0.8rem; font-weight:500; }
+.ex-detail { font-family:'DM Mono',monospace; font-size:0.6rem; color:var(--muted); margin-top:2px; }
+.ex-sets { font-family:'DM Mono',monospace; font-size:0.68rem; color:var(--accent2); text-align:right; white-space:nowrap; }
+.chevron { color:var(--muted); font-size:0.7rem; transition:transform 0.2s; display:block; margin-top:3px; }
+.chevron.open { transform:rotate(180deg); }
+
+/* WEEK GRID */
+.week-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-bottom:16px; }
+.day-pill { background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:6px 2px; text-align:center; }
+.day-pill.today { border-color:var(--accent); }
+.day-pill-name { font-family:'DM Mono',monospace; font-size:0.48rem; color:var(--muted); letter-spacing:1px; margin-bottom:2px; }
+.day-pill-type { font-size:0.85rem; }
+
+/* RULES */
+.rule-card { background:var(--surface); border:1px solid var(--border); border-left:3px solid var(--accent); border-radius:8px; padding:11px 13px; margin-bottom:8px; }
+.rule-num { font-family:'DM Mono',monospace; font-size:0.52rem; color:var(--muted); letter-spacing:2px; margin-bottom:3px; }
+.rule-text { font-size:0.82rem; font-weight:500; line-height:1.4; }
+.rule-sub { font-size:0.7rem; color:var(--muted); margin-top:3px; line-height:1.5; }
+
+/* CALENDAR */
+.month-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.month-nav-btn { background:var(--surface); border:1px solid var(--border); color:var(--text); padding:6px 12px; border-radius:6px; font-family:'DM Mono',monospace; font-size:0.65rem; cursor:pointer; transition:all 0.15s; letter-spacing:1px; }
+.month-nav-btn:hover { border-color:var(--accent); color:var(--accent); }
+.month-title { font-family:'Bebas Neue',sans-serif; font-size:1.2rem; letter-spacing:3px; color:var(--text); }
+.month-title span { color:var(--accent2); }
+.cal-day-headers { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; margin-bottom:3px; }
+.cal-day-hdr { text-align:center; font-family:'DM Mono',monospace; font-size:0.5rem; color:var(--muted); padding:2px 0; }
+.cal-grid-main { display:grid; grid-template-columns:repeat(7,1fr); gap:3px; margin-bottom:12px; }
+.cal-cell { aspect-ratio:1; background:var(--surface); border:1px solid var(--border); border-radius:6px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; transition:all 0.15s; position:relative; overflow:hidden; }
+.cal-cell.empty { background:none; border-color:transparent; cursor:default; }
+.cal-cell.today-cal { border-color:var(--accent); box-shadow:0 0 7px rgba(200,245,66,0.12); }
+.cal-cell.future-cal { opacity:0.35; }
+.cal-cell.cal-done { background:var(--green-dim); border-color:var(--green); }
+.cal-cell.cal-missed { background:rgba(255,68,68,0.07); border-color:rgba(255,68,68,0.2); }
+.cal-cell.cal-fast { background:var(--fast-dim); border-color:var(--fast); }
+.cal-cell.cal-partial { background:rgba(245,166,35,0.1); border-color:var(--accent2); }
+.cal-cell.plan-day { background:#ffffff !important; color:#000000 !important; }
+.cal-cell.plan-day .cal-num { color:#000000 !important; }
+.cal-cell.plan-day .cal-wt { color:#333333 !important; }
+.cal-num { font-weight:700; font-size:0.82rem; color:var(--text); line-height:1; }
+.cal-cell.cal-done .cal-num { color:var(--green); }
+.cal-cell.cal-fast .cal-num { color:var(--fast); }
+.cal-cell.cal-partial .cal-num { color:var(--accent2); }
+.cal-cell.cal-missed .cal-num { color:#ff7070; }
+.cal-wt { font-family:'DM Mono',monospace; font-size:0.42rem; color:var(--muted); margin-top:1px; }
+.cal-cell.cal-done .cal-wt { color:var(--green); }
+.cal-legend { display:flex; flex-wrap:wrap; gap:7px; margin-bottom:14px; }
+.leg-item { display:flex; align-items:center; gap:4px; font-family:'DM Mono',monospace; font-size:0.55rem; color:var(--muted); }
+.leg-dot { width:9px; height:9px; border-radius:2px; border:1px solid; }
+.month-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-bottom:12px; }
+.mstat { background:var(--surface); border:1px solid var(--border); border-radius:7px; padding:8px 6px; text-align:center; }
+.mstat-val { font-family:'Bebas Neue',sans-serif; font-size:1.1rem; color:var(--accent); }
+.mstat-val.green { color:var(--green); }
+.mstat-val.orange { color:var(--accent2); }
+.mstat-val.purple { color:var(--fast); }
+.mstat-lbl { font-family:'DM Mono',monospace; font-size:0.47rem; color:var(--muted); letter-spacing:1px; text-transform:uppercase; margin-top:1px; }
+
+/* WEIGHT LOG */
+.weight-input-wrap { display:flex; gap:7px; margin-bottom:16px; }
+.weight-input { flex:1; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:10px 13px; color:var(--text); font-family:'DM Mono',monospace; font-size:0.9rem; outline:none; transition:border-color 0.2s; }
+.weight-input:focus { border-color:var(--accent); }
+.log-btn { background:var(--accent); color:#000; border:none; border-radius:8px; padding:10px 16px; font-family:'Bebas Neue',sans-serif; font-size:0.9rem; letter-spacing:2px; cursor:pointer; }
+.weight-history { background:var(--surface); border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+.weight-history-header { padding:9px 13px; background:var(--surface2); font-family:'DM Mono',monospace; font-size:0.58rem; color:var(--muted); letter-spacing:2px; text-transform:uppercase; display:grid; grid-template-columns:1fr auto auto; gap:12px; }
+.weight-entry { display:grid; grid-template-columns:1fr auto auto; gap:12px; align-items:center; padding:10px 13px; border-top:1px solid var(--border); }
+.we-date { font-family:'DM Mono',monospace; font-size:0.68rem; color:var(--muted); }
+.we-weight { font-family:'DM Mono',monospace; font-size:0.82rem; font-weight:500; }
+.we-delta { font-family:'DM Mono',monospace; font-size:0.68rem; min-width:42px; text-align:right; }
+.delta-down { color:var(--accent); }
+.delta-up { color:var(--danger); }
+.delta-same { color:var(--muted); }
+.empty-state { padding:26px; text-align:center; font-family:'DM Mono',monospace; font-size:0.68rem; color:var(--muted); line-height:1.8; }
+
+/* RESET/ACTION BTNS */
+.reset-btn { width:100%; background:none; border:1px solid var(--border); border-radius:8px; padding:10px; color:var(--muted); font-family:'DM Mono',monospace; font-size:0.62rem; letter-spacing:2px; cursor:pointer; margin-top:7px; transition:all 0.2s; }
+.reset-btn:hover { border-color:var(--danger); color:var(--danger); }
+.action-row { display:flex; gap:7px; margin-top:7px; }
+.action-row .reset-btn { margin-top:0; flex:1; }
+
+/* MODALS */
+.modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.88); z-index:1000; padding:16px; overflow-y:auto; }
+.modal-overlay.active { display:flex; align-items:flex-start; justify-content:center; padding-top:28px; }
+.modal { background:var(--bg); border:1px solid var(--border); border-radius:14px; max-width:440px; width:100%; overflow:hidden; animation:slideUp 0.22s ease; }
+@keyframes slideUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+.modal-top { background:var(--surface2); padding:14px 17px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+.modal-top h2 { font-family:'Bebas Neue',sans-serif; font-size:1.2rem; letter-spacing:2px; color:var(--accent); }
+.modal-date-sub { font-family:'DM Mono',monospace; font-size:0.62rem; color:var(--muted); margin-top:2px; }
+.close-x { background:none; border:1px solid var(--border); color:var(--muted); width:28px; height:28px; border-radius:6px; font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.15s; flex-shrink:0; }
+.close-x:hover { border-color:var(--accent); color:var(--accent); }
+.modal-body { padding:16px; }
+.field-group { margin-bottom:13px; }
+.field-label { font-family:'DM Mono',monospace; font-size:0.58rem; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin-bottom:5px; display:block; }
+.field-input { width:100%; padding:9px 11px; background:var(--surface); border:1px solid var(--border); border-radius:8px; color:var(--text); font-family:'DM Mono',monospace; font-size:0.88rem; outline:none; transition:border-color 0.15s; }
+.field-input:focus { border-color:var(--accent); }
+.field-input::placeholder { color:var(--muted); }
+textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',sans-serif; font-size:0.8rem; line-height:1.5; }
+.check-row-modal { display:flex; align-items:center; gap:9px; padding:8px 10px; background:var(--surface); border:1px solid var(--border); border-radius:7px; margin-bottom:6px; cursor:pointer; }
+.check-row-modal input[type="checkbox"] { width:15px; height:15px; accent-color:var(--accent); cursor:pointer; }
+.check-row-modal label { font-size:0.8rem; color:var(--text); cursor:pointer; }
+.fast-toggle { width:100%; padding:9px; background:var(--fast-dim); border:1px solid var(--fast); border-radius:8px; color:var(--fast); font-family:'DM Mono',monospace; font-size:0.68rem; letter-spacing:1.5px; cursor:pointer; text-transform:uppercase; transition:all 0.15s; margin-bottom:13px; }
+.fast-toggle.active { background:var(--fast); color:#000; font-weight:bold; }
+.save-btn { width:100%; padding:12px; background:var(--accent); color:#000; border:none; border-radius:9px; font-family:'Bebas Neue',sans-serif; font-size:0.95rem; letter-spacing:2px; cursor:pointer; transition:opacity 0.15s; }
+.save-btn:active { opacity:0.85; }
+.fast-protocol-box { background:var(--fast-dim); border:1px solid var(--fast); border-radius:8px; padding:11px; margin-bottom:13px; }
+.fast-protocol-title { font-family:'DM Mono',monospace; font-size:0.58rem; letter-spacing:2px; text-transform:uppercase; color:var(--fast); margin-bottom:7px; }
+.fast-protocol-body { font-size:0.75rem; color:#aa99dd; line-height:1.7; }
+
+/* EXPORT */
+.export-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:2000; padding:20px; overflow-y:auto; }
+.export-overlay.active { display:flex; align-items:flex-start; justify-content:center; padding-top:28px; }
+.export-box { background:var(--bg); border:1px solid var(--border); border-radius:14px; max-width:500px; width:100%; padding:20px; max-height:80vh; overflow-y:auto; }
+.export-box h3 { font-family:'Bebas Neue',sans-serif; font-size:1.1rem; letter-spacing:2px; color:var(--accent); margin-bottom:11px; }
+.export-text { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:13px; font-family:'DM Mono',monospace; font-size:0.68rem; color:var(--text); line-height:1.8; white-space:pre-wrap; max-height:50vh; overflow-y:auto; margin-bottom:9px; }
+.copy-btn { width:100%; padding:11px; background:var(--accent); color:#000; border:none; border-radius:8px; font-weight:700; font-size:0.82rem; cursor:pointer; margin-bottom:7px; font-family:'Bebas Neue',sans-serif; letter-spacing:2px; }
+
+/* ══ SETTINGS PANEL ══ */
+.settings-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:3000; padding:16px; overflow-y:auto; }
+.settings-overlay.active { display:flex; align-items:flex-start; justify-content:center; padding-top:20px; }
+.settings-panel { background:var(--bg); border:1px solid var(--border); border-radius:14px; max-width:460px; width:100%; overflow:hidden; animation:slideUp 0.25s ease; }
+.settings-header { background:var(--surface2); padding:16px 18px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+.settings-header h2 { font-family:'Bebas Neue',sans-serif; font-size:1.4rem; letter-spacing:3px; color:var(--accent); }
+.settings-body { padding:18px; }
+.settings-section { margin-bottom:24px; }
+.settings-section-title { font-family:'DM Mono',monospace; font-size:0.6rem; letter-spacing:2px; text-transform:uppercase; color:var(--accent2); margin-bottom:12px; padding-bottom:6px; border-bottom:1px solid var(--border); }
+.plan-select { display:none; } /* hidden — replaced by custom dropdown */
+.custom-select { position:relative; width:100%; margin-bottom:10px; user-select:none; }
+.custom-select-trigger { width:100%; padding:11px 36px 11px 13px; background:var(--surface); border:1px solid var(--border); border-radius:8px; color:var(--text); font-family:'DM Mono',monospace; font-size:0.8rem; cursor:pointer; display:flex; align-items:center; justify-content:space-between; transition:border-color 0.15s; box-sizing:border-box; }
+.custom-select-trigger::after { content:''; width:10px; height:10px; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-size:contain; flex-shrink:0; transition:transform 0.2s; }
+.custom-select.open .custom-select-trigger { border-color:var(--accent); }
+.custom-select.open .custom-select-trigger::after { transform:rotate(180deg); }
+.custom-select-dropdown { display:none; position:absolute; top:calc(100% + 4px); left:0; right:0; background:var(--surface); border:1px solid var(--accent); border-radius:8px; z-index:5000; overflow:hidden; box-shadow:0 8px 24px rgba(0,0,0,0.5); }
+.custom-select.open .custom-select-dropdown { display:block; }
+.custom-select-option { padding:11px 14px; font-family:'DM Mono',monospace; font-size:0.78rem; color:var(--muted); cursor:pointer; transition:background 0.1s, color 0.1s; border-bottom:1px solid var(--border); }
+.custom-select-option:last-child { border-bottom:none; }
+.custom-select-option:hover { background:var(--surface2); color:var(--text); }
+.custom-select-option.selected { color:var(--accent); background:rgba(255,200,0,0.05); }
+.plan-select:focus { border-color:var(--accent); }
+.plan-description { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:12px; margin-bottom:12px; font-size:0.75rem; color:var(--muted); line-height:1.6; }
+.plan-description.agro-desc { border-color:rgba(255,107,53,0.3); background:rgba(255,107,53,0.05); color:#ffaa88; }
+.confirm-plan-btn { width:100%; padding:12px; background:var(--surface2); border:1px solid var(--accent); border-radius:9px; color:var(--accent); font-family:'Bebas Neue',sans-serif; font-size:1rem; letter-spacing:2px; cursor:pointer; transition:all 0.2s; }
+.confirm-plan-btn:hover { background:var(--accent); color:#000; }
+.duration-inputs { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+.duration-single { margin-bottom:10px; }
+.calc-result { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:12px; margin-top:10px; display:none; }
+.calc-result.visible { display:block; }
+.calc-result-title { font-family:'DM Mono',monospace; font-size:0.58rem; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
+.calc-result-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.calc-result-item { text-align:center; }
+.calc-result-val { font-family:'Bebas Neue',sans-serif; font-size:1.4rem; color:var(--accent); line-height:1; }
+.calc-result-lbl { font-family:'DM Mono',monospace; font-size:0.5rem; color:var(--muted); letter-spacing:1px; text-transform:uppercase; margin-top:2px; }
+.schedule-btn { width:100%; padding:12px; background:var(--accent); color:#000; border:none; border-radius:9px; font-family:'Bebas Neue',sans-serif; font-size:1rem; letter-spacing:2px; cursor:pointer; margin-top:10px; display:none; }
+.schedule-btn.visible { display:block; }
+
+/* CONFIRM POPUP */
+.popup-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.88); z-index:4000; align-items:center; justify-content:center; padding:20px; }
+.popup-overlay.active { display:flex; }
+.popup-box { background:var(--bg); border:1px solid var(--border); border-radius:14px; max-width:360px; width:100%; padding:22px; animation:slideUp 0.2s ease; }
+.popup-box h3 { font-family:'Bebas Neue',sans-serif; font-size:1.2rem; letter-spacing:2px; color:var(--accent); margin-bottom:8px; }
+.popup-box p { font-size:0.8rem; color:var(--muted); line-height:1.6; margin-bottom:16px; }
+.popup-btns { display:flex; gap:8px; }
+.popup-yes { flex:1; padding:11px; background:var(--accent); color:#000; border:none; border-radius:8px; font-family:'Bebas Neue',sans-serif; font-size:0.95rem; letter-spacing:2px; cursor:pointer; }
+.popup-no { flex:1; padding:11px; background:none; border:1px solid var(--border); border-radius:8px; color:var(--muted); font-family:'DM Mono',monospace; font-size:0.7rem; cursor:pointer; }
+
+/* PROJECTION STRIP */
+.projection-strip { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:11px 13px; margin-bottom:14px; }
+.projection-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+.projection-label { font-family:'DM Mono',monospace; font-size:0.58rem; color:var(--muted); letter-spacing:1px; text-transform:uppercase; }
+.projection-vals { display:flex; gap:14px; align-items:baseline; }
+.proj-main { font-family:'Bebas Neue',sans-serif; font-size:1.4rem; line-height:1; }
+.proj-main.good { color:var(--accent); }
+.proj-main.warn { color:var(--accent2); }
+.proj-main.bad { color:var(--danger); }
+.proj-sub { font-family:'DM Mono',monospace; font-size:0.6rem; color:var(--muted); }
+.proj-range { font-family:'DM Mono',monospace; font-size:0.6rem; color:var(--muted); }
+.proj-basis { font-family:'DM Mono',monospace; font-size:0.55rem; color:var(--muted); margin-top:4px; line-height:1.6; }
+.proj-divider { height:1px; background:var(--border); margin:7px 0; }
+
+/* EXPORT RANGE */
+.export-range { display:flex; gap:7px; margin-bottom:11px; flex-wrap:wrap; }
+.export-range input[type="date"] { flex:1; min-width:120px; padding:8px 10px; background:var(--surface); border:1px solid var(--border); border-radius:8px; color:var(--text); font-family:'DM Mono',monospace; font-size:0.75rem; outline:none; }
+.export-range input[type="date"]:focus { border-color:var(--accent); }
+.export-range-btn { padding:8px 14px; background:var(--accent); color:#000; border:none; border-radius:8px; font-family:'Bebas Neue',sans-serif; font-size:0.85rem; letter-spacing:2px; cursor:pointer; }
+.export-checkboxes { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:11px; }
+.export-check-item { display:flex; align-items:center; gap:5px; background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:5px 9px; cursor:pointer; }
+.export-check-item input { accent-color:var(--accent); cursor:pointer; }
+.export-check-item label { font-family:'DM Mono',monospace; font-size:0.6rem; color:var(--muted); cursor:pointer; letter-spacing:1px; text-transform:uppercase; }
+
+/* UNIFIED MODAL CHECKLIST */
+.modal-check-group { margin-bottom:13px; }
+.modal-group-label { font-family:'DM Mono',monospace; font-size:0.52rem; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:6px; padding:2px 6px; border-radius:3px; display:inline-block; }
+.modal-check-item { display:flex; align-items:flex-start; gap:9px; padding:8px 10px; background:var(--surface); border:1px solid var(--border); border-radius:7px; margin-bottom:5px; cursor:pointer; user-select:none; transition:all 0.15s; }
+.modal-check-item.done { border-color:var(--accent); background:#0f1a00; }
+.modal-check-item.done .m-title { text-decoration:line-through; color:var(--muted); }
+.modal-cb { width:15px; height:15px; border:2px solid var(--border); border-radius:3px; flex-shrink:0; margin-top:1px; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:bold; color:transparent; transition:all 0.15s; }
+.modal-check-item.done .modal-cb { background:var(--accent); border-color:var(--accent); color:#000; }
+.m-title { font-size:0.78rem; font-weight:500; }
+.m-sub { font-size:0.62rem; color:var(--muted); font-family:'DM Mono',monospace; margin-top:2px; line-height:1.4; }
+
+/* MACRO DISPLAY */
+.macro-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-bottom:14px; }
+.macro-box { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:9px 6px; text-align:center; }
+.macro-val { font-family:'Bebas Neue',sans-serif; font-size:1.2rem; color:var(--accent); line-height:1; }
+.macro-lbl { font-family:'DM Mono',monospace; font-size:0.48rem; color:var(--muted); letter-spacing:1px; text-transform:uppercase; margin-top:2px; }
+
+.snack-grid { display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-bottom:14px; }
+.snack-item { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:9px 11px; }
+.snack-name { font-size:0.78rem; font-weight:500; margin-bottom:2px; }
+.snack-cal { font-family:'DM Mono',monospace; font-size:0.6rem; color:var(--accent2); }
+.snack-note { font-family:'DM Mono',monospace; font-size:0.58rem; color:var(--muted); margin-top:2px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>PROTOCOL</h1>
+    <p id="planSubtitle">No gym. No excuses. No loop.</p>
+  </div>
+  <div class="header-right">
+    <div class="weight-badge">
+      <div class="w-num" id="currentWeightDisplay">104</div>
+      <div class="w-label">KG NOW</div>
+    </div>
+    <div class="settings-btn" onclick="openSettings()" title="Settings">⚙</div>
+  </div>
+</div>
+
+<div class="plan-badge" id="planBadge">DEFAULT PROTOCOL</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('today',this)">TODAY</button>
+  <button class="tab" onclick="switchTab('months',this)">MONTHS</button>
+  <button class="tab" onclick="switchTab('workouts',this)">WORKOUTS</button>
+  <button class="tab" onclick="switchTab('nutrition',this)">NUTRITION</button>
+  <button class="tab" onclick="switchTab('rules',this)">RULES</button>
+  <button class="tab" onclick="switchTab('track',this)">TRACK</button>
+</div>
+
+<!-- ══ TODAY ══ -->
+<div class="section active" id="tab-today">
+  <div style="height:10px"></div>
+  <div class="goal-strip">
+    <div class="goal-block"><div class="goal-val current" id="gs-current">104</div><div class="goal-lbl">Current</div></div>
+    <div class="goal-divider"></div>
+    <div class="goal-block"><div class="goal-val target" id="gs-target">91</div><div class="goal-lbl">Target</div></div>
+    <div class="goal-divider"></div>
+    <div class="goal-block"><div class="goal-val remain" id="gs-remain">13</div><div class="goal-lbl">To go</div></div>
+    <div class="goal-divider"></div>
+    <div class="goal-bar-wrap">
+      <div class="goal-bar-track"><div class="goal-bar-fill" id="goalBarFill" style="width:0%"></div></div>
+      <div class="goal-pct" id="goalPct">0% done</div>
+    </div>
+  </div>
+  <div class="duration-strip" id="durationStrip">
+    <div class="duration-top"><span id="durationLabel">PLAN PROGRESS</span><span class="dpct" id="durationPct">0%</span></div>
+    <div class="duration-bar-track"><div class="duration-bar-fill" id="durationFill" style="width:0%"></div></div>
+  </div>
+  <!-- PROJECTION STRIP -->
+  <div class="projection-strip" id="projectionStrip">
+    <div class="projection-row">
+      <span class="projection-label">PROJECTED SUNDAY WEIGHT</span>
+      <div class="projection-vals">
+        <span class="proj-main" id="projSundayKg">—</span>
+        <span class="proj-sub" id="projDelta"></span>
+      </div>
+    </div>
+    <div class="proj-divider"></div>
+    <div class="projection-row">
+      <span class="proj-range" id="projRange">LOW — <span id="projLow">—</span> · HIGH — <span id="projHigh">—</span></span>
+    </div>
+    <div class="proj-basis" id="projBasis">Log weight daily for projection to calculate.</div>
+  </div>
+  <div id="activePlanBanner" style="border-radius:8px;padding:10px 13px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;border:1px solid var(--border);">
+    <div>
+      <div style="font-family:'DM Mono',monospace;font-size:0.52rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:3px;">ACTIVE PLAN</div>
+      <div id="activePlanName" style="font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;">DEFAULT PROTOCOL</div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-family:'DM Mono',monospace;font-size:0.52rem;letter-spacing:1px;color:var(--muted);margin-bottom:3px;">CAL CEILING</div>
+      <div id="activePlanCal" style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--accent2);">1500 CAL</div>
+    </div>
+  </div>
+  <div class="fast-day-banner" id="fastBanner">
+    <div class="fast-banner-title">⚡ WATER FAST DAY</div>
+    <div class="fast-banner-sub">Zero food today. Water + electrolytes only.<br>500ml on wake · salt water mid-morning · black coffee/green tea allowed · electrolyte tablet pre-training</div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-top"><span>TODAY'S MINIMUM</span><span class="pct" id="todayPct">0%</span></div>
+    <div class="progress-bar"><div class="progress-fill" id="todayFill" style="width:0%"></div></div>
+  </div>
+  <div class="day-label"><span id="todayDayName">—</span> CHECKLIST</div>
+
+  <!-- MORNING -->
+  <div class="checklist-group">
+    <div class="group-header"><span class="group-tag tag-morning">MORNING</span><span class="group-time">6:45–7:15 AM</span></div>
+    <div class="check-item" onclick="toggle(this)" data-id="m1"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">Wake & 500ml water immediately</div><div class="item-sub">Before phone. Non-negotiable.</div></div></div>
+    <div class="check-item" onclick="toggle(this)" data-id="m2"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">10 min daily mobility (CARs + neck)</div><div class="item-sub">Hip CARs × 5 each · Cat-cow × 10 · Thoracic rotation × 8/side · Wrist CARs · Neck nods</div></div></div>
+    <div class="check-item" onclick="toggle(this)" data-id="m3"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">Morning workout (20 min)</div><div class="item-sub" id="todayMorningSub">See WORKOUTS tab → today's morning session</div></div></div>
+  </div>
+
+  <!-- FOOD (hidden on fast day) -->
+  <div class="checklist-group" id="foodGroup">
+    <div class="group-header"><span class="group-tag tag-food">EATING</span><span class="group-time" id="foodGroupTime">1000 cal ceiling</span></div>
+    <div class="check-item" onclick="toggle(this)" data-id="f1"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">Protein in first meal (60-70g target)</div><div class="item-sub">Eggs · chicken · tuna · lentils. Anchor the meal here first.</div></div></div>
+    <div class="check-item" onclick="toggle(this)" data-id="f2"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">Stayed under calorie ceiling</div><div class="item-sub" id="calCeilingNote">Hard ceiling. Never more.</div></div></div>
+    <div class="check-item" onclick="toggle(this)" data-id="f3"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">Last meal before 6PM</div><div class="item-sub">16+ hour overnight fast every day.</div></div></div>
+    <div class="check-item" onclick="toggle(this)" data-id="f4"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">3L+ water across the day</div><div class="item-sub">500ml wake · 500ml pre-meal · sip rest continuously</div></div></div>
+    <div class="check-item" onclick="toggle(this)" data-id="f5"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">No liquid calories</div><div class="item-sub">Water · black coffee · plain green tea only.</div></div></div>
+  </div>
+
+  <!-- FAST DAY (shown on fast day) -->
+  <div class="checklist-group" id="fastGroup" style="display:none">
+    <div class="group-header"><span class="group-tag tag-fast">WATER FAST</span><span class="group-time">Zero food protocol</span></div>
+    <div class="check-item" onclick="toggle(this)" data-id="wf1"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">500ml water + pinch salt on waking</div><div class="item-sub">Prevents headaches. Do this before anything else.</div></div></div>
+    <div class="check-item" onclick="toggle(this)" data-id="wf2"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">Electrolyte tablet mid-morning</div><div class="item-sub">Sodium + potassium. Non-negotiable on a fast.</div></div></div>
+    <div class="check-item" onclick="toggle(this)" data-id="wf3"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">Black coffee or green tea only</div><div class="item-sub">Appetite suppression. Zero calories. Allowed.</div></div></div>
+    <div class="check-item" onclick="toggle(this)" data-id="wf4"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">3.5L+ water total today</div><div class="item-sub">Sip constantly. Don't chug all at once.</div></div></div>
+    <div class="check-item" onclick="toggle(this)" data-id="wf5"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">No food consumed today</div><div class="item-sub">Fast is unbroken. If you break it — log it honestly.</div></div></div>
+    <div class="check-item" onclick="toggle(this)" data-id="wf6"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">Magnesium 400mg before sleep</div><div class="item-sub">Prevents cramps. Sleep quality tanks on fasts without this.</div></div></div>
+  </div>
+
+  <!-- EVENING -->
+  <div class="checklist-group">
+    <div class="group-header"><span class="group-tag tag-evening">EVENING</span><span class="group-time">6:15–7:15 PM · 45–60 min</span></div>
+    <div class="check-item" onclick="toggle(this)" data-id="e1"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">Change clothes immediately on arriving home</div><div class="item-sub">Trigger signal. Don't sit down first.</div></div></div>
+    <div class="check-item" onclick="toggle(this)" data-id="e2"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">Evening session (40–45 min)</div><div class="item-sub" id="todayEveningSub">See WORKOUTS tab → today's evening session</div></div></div>
+    <div class="check-item" onclick="toggle(this)" data-id="e3"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">Post-workout stretch protocol</div><div class="item-sub" id="todayStretchSub">See WORKOUTS tab → today's cooldown stretches</div></div></div>
+  </div>
+
+  <!-- NIGHT -->
+  <div class="checklist-group">
+    <div class="group-header"><span class="group-tag tag-rules">NIGHT</span><span class="group-time">Before sleep</span></div>
+    <div class="check-item" onclick="toggle(this)" data-id="n1"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">Log morning weight in TRACK tab</div><div class="item-sub">Weigh first thing after waking, before food.</div></div></div>
+    <div class="check-item" onclick="toggle(this)" data-id="n2"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">Sleep before midnight</div><div class="item-sub">Recovery is training. Don't skip it.</div></div></div>
+  </div>
+
+  <button class="reset-btn" onclick="resetToday()">↺ RESET TODAY'S CHECKLIST</button>
+</div>
+
+<!-- ══ MONTHS ══ -->
+<div class="section" id="tab-months">
+  <div style="height:10px"></div>
+  <div class="month-nav">
+    <button class="month-nav-btn" onclick="changeMonth(-1)">◀ PREV</button>
+    <div class="month-title" id="monthTitle">MARCH <span>2026</span></div>
+    <button class="month-nav-btn" onclick="changeMonth(1)">NEXT ▶</button>
+  </div>
+  <div class="month-stats" id="monthStats"></div>
+  <div class="cal-legend">
+    <div class="leg-item"><div class="leg-dot" style="background:var(--green-dim);border-color:var(--green)"></div>Done</div>
+    <div class="leg-item"><div class="leg-dot" style="background:var(--fast-dim);border-color:var(--fast)"></div>Fast</div>
+    <div class="leg-item"><div class="leg-dot" style="background:rgba(245,166,35,0.1);border-color:var(--accent2)"></div>Partial</div>
+    <div class="leg-item"><div class="leg-dot" style="background:rgba(255,68,68,0.07);border-color:rgba(255,68,68,0.2)"></div>Missed</div>
+    <div class="leg-item"><div class="leg-dot" style="background:#ffffff;border-color:#ffffff"></div>Plan day</div>
+  </div>
+  <div class="cal-day-headers">
+    <div class="cal-day-hdr">SUN</div><div class="cal-day-hdr">MON</div><div class="cal-day-hdr">TUE</div>
+    <div class="cal-day-hdr">WED</div><div class="cal-day-hdr">THU</div><div class="cal-day-hdr">FRI</div><div class="cal-day-hdr">SAT</div>
+  </div>
+  <div class="cal-grid-main" id="calGridMain"></div>
+  <div class="action-row">
+    <button class="reset-btn" onclick="openExport()" style="border-color:var(--accent);color:var(--accent)">↗ EXPORT LOGS</button>
+    <button class="reset-btn" id="manageSchedBtn" onclick="openManageSchedule()" style="display:none;border-color:#ff8855;color:#ff8855">⚙ MANAGE SCHEDULE</button>
+  </div>
+</div>
+
+<!-- ══ WORKOUTS ══ -->
+<div class="section" id="tab-workouts">
+  <div style="height:10px"></div>
+  <div class="week-grid" id="weekGrid"></div>
+  <div id="workoutContent"></div>
+</div>
+
+<!-- ══ NUTRITION ══ -->
+<div class="section" id="tab-nutrition">
+  <div style="height:10px"></div>
+  <div id="nutritionContent"></div>
+</div>
+
+<!-- ══ RULES ══ -->
+<div class="section" id="tab-rules">
+  <div style="height:10px"></div>
+  <div id="rulesContent"></div>
+</div>
+
+<!-- ══ TRACK ══ -->
+<div class="section" id="tab-track">
+  <div style="height:10px"></div>
+  <div class="section-title">WEIGHT <span>LOG</span></div>
+  <p class="section-note">Weigh first thing morning, after toilet, before food. Same conditions every time.</p>
+  <div class="weight-input-wrap">
+    <input class="weight-input" type="number" id="weightInput" placeholder="e.g. 103.5" step="0.1" min="60" max="250">
+    <button class="log-btn" onclick="logWeight()">LOG</button>
+  </div>
+  <div class="weight-history">
+    <div class="weight-history-header"><span>DATE</span><span>KG</span><span>CHANGE</span></div>
+    <div id="weightEntries"><div class="empty-state">No entries yet.<br>Log your first weight above.</div></div>
+  </div>
+  <div style="height:18px"></div>
+  <div class="section-title">DAY <span>NOTES</span></div>
+  <p class="section-note">Notes logged from today's checklist or calendar day modal. Tap a day on MONTHS to add notes.</p>
+  <div id="recentNotes"><div class="empty-state">No notes logged yet.</div></div>
+  <div class="action-row" style="margin-top:14px">
+    <button class="reset-btn" onclick="openExport()" style="border-color:var(--accent);color:var(--accent)">↗ EXPORT LOGS</button>
+    <button class="reset-btn" onclick="clearWeightLog()">↺ CLEAR WEIGHTS</button>
+  </div>
+  <div style="height:10px"></div>
+  <div class="section-title">DATA <span>BACKUP</span></div>
+  <p class="section-note">Backup saves everything — weights, logs, fast days, schedule, settings. Restore from a backup file if Chrome data gets wiped.</p>
+  <div class="action-row">
+    <button class="reset-btn" onclick="backupData()" style="border-color:#50c878;color:#50c878">⬇ BACKUP TO FILE</button>
+    <button class="reset-btn" onclick="document.getElementById('restoreFileInput').click()" style="border-color:#70c8ff;color:#70c8ff">⬆ RESTORE FROM FILE</button>
+  </div>
+  <input type="file" id="restoreFileInput" accept=".json" style="display:none" onchange="restoreData(event)">
+  <div id="backupStatus" style="display:none;margin-top:10px;padding:10px 13px;border-radius:8px;font-family:'DM Mono',monospace;font-size:0.7rem;line-height:1.6"></div>
+</div>
+
+<!-- ══ DAY MODAL ══ -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-top">
+      <div><h2 id="mTitle">Day</h2><div class="modal-date-sub" id="mDate"></div></div>
+      <button class="close-x" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body" id="mBody"></div>
+  </div>
+</div>
+
+<!-- ══ EXPORT MODAL ══ -->
+<div class="export-overlay" id="exportOverlay">
+  <div class="export-box">
+    <h3>EXPORT LOGS</h3>
+    <p style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--muted);margin-bottom:12px;line-height:1.6">Select date range and what to include.</p>
+    <div class="export-range">
+      <input type="date" id="exportFrom" title="From date">
+      <input type="date" id="exportTo" title="To date">
+    </div>
+    <div class="export-checkboxes">
+      <div class="export-check-item"><input type="checkbox" id="exWeights" checked><label for="exWeights">Weights</label></div>
+      <div class="export-check-item"><input type="checkbox" id="exCompliance" checked><label for="exCompliance">Compliance</label></div>
+      <div class="export-check-item"><input type="checkbox" id="exNotes" checked><label for="exNotes">Notes</label></div>
+      <div class="export-check-item"><input type="checkbox" id="exWater" checked><label for="exWater">Water</label></div>
+      <div class="export-check-item"><input type="checkbox" id="exEnergy" checked><label for="exEnergy">Energy</label></div>
+    </div>
+    <button class="export-range-btn" onclick="generateExport()" style="width:100%;margin-bottom:10px">GENERATE</button>
+    <div class="export-text" id="exportText" style="display:none"></div>
+    <button class="copy-btn" id="exportCopyBtn" onclick="copyExport()" style="display:none">COPY TO CLIPBOARD</button>
+    <button class="reset-btn" onclick="document.getElementById('exportOverlay').classList.remove('active')" style="margin-top:6px">CLOSE</button>
+  </div>
+</div>
+
+<!-- ══ SETTINGS PANEL ══ -->
+<div class="settings-overlay" id="settingsOverlay">
+  <div class="settings-panel">
+    <div class="settings-header">
+      <h2>SETTINGS</h2>
+      <button class="close-x" onclick="closeSettings()">×</button>
+    </div>
+    <div class="settings-body">
+
+      <!-- PLAN SELECTION -->
+      <div class="settings-section">
+        <div class="settings-section-title">Training Plan</div>
+        <select class="plan-select" id="planSelect" onchange="onPlanSelectChange()">
+          <option value="default">DEFAULT PROTOCOL</option>
+          <option value="agro">AGRO CUT CALISTHENICS PLAN</option>
+        </select>
+        <div class="custom-select" id="planSelectCustom">
+          <div class="custom-select-trigger" id="planSelectTrigger" onclick="toggleCustomSelect('planSelectCustom')">DEFAULT PROTOCOL</div>
+          <div class="custom-select-dropdown">
+            <div class="custom-select-option selected" data-value="default" onclick="selectCustomOption('planSelectCustom','planSelect',this)">DEFAULT PROTOCOL</div>
+            <div class="custom-select-option" data-value="agro" onclick="selectCustomOption('planSelectCustom','planSelect',this)">AGRO CUT CALISTHENICS PLAN</div>
+          </div>
+        </div>
+        <div class="plan-description" id="planDescription">
+          General daily checklist with bodyweight workouts, basic nutrition rules, and water fast day support. No fixed duration — runs indefinitely until you switch plans.
+        </div>
+        <button class="confirm-plan-btn" onclick="confirmPlan()">CONFIRM PLAN</button>
+      </div>
+
+      <!-- DURATION / GOALS -->
+      <div class="settings-section">
+        <div class="settings-section-title">Goal Calculator</div>
+        <p style="font-size:0.75rem;color:var(--muted);margin:0 0 10px">Enter your numbers. App calculates required calories and how long it takes.</p>
+        <div class="duration-inputs">
+          <div>
+            <label class="field-label">Current weight (kg)</label>
+            <input class="field-input" type="number" id="settingCurrentKg" placeholder="104" step="0.1" min="50" max="250" oninput="calcDuration()">
+          </div>
+          <div>
+            <label class="field-label">Target weight (kg)</label>
+            <input class="field-input" type="number" id="settingTargetKg" placeholder="91" step="0.1" min="40" max="250" oninput="calcDuration()">
+          </div>
+        </div>
+        <div class="duration-inputs">
+          <div>
+            <label class="field-label">Days to hit target</label>
+            <input class="field-input" type="number" id="settingDays" placeholder="e.g. 60" step="1" min="1" max="730" oninput="calcDuration()">
+          </div>
+          <div>
+            <label class="field-label">OR target date</label>
+            <input class="field-input" type="date" id="settingTargetDate" oninput="calcDuration()">
+          </div>
+        </div>
+        <div class="duration-inputs">
+          <div>
+            <label class="field-label">Daily calories (override)</label>
+            <input class="field-input" type="number" id="settingCalories" placeholder="auto" step="50" min="0" max="5000" oninput="calcDuration()">
+          </div>
+          <div>
+            <label class="field-label">TDEE (cal burned/day at rest)</label>
+            <input class="field-input" type="number" id="settingTdee" placeholder="2600" step="50" min="1200" max="5000" oninput="calcDuration()">
+          </div>
+        </div>
+        <div class="duration-single">
+          <label class="field-label">Exercise burn (cal/day average)</label>
+          <input class="field-input" type="number" id="settingExercise" placeholder="0 — enter avg daily cal burned from training" step="50" min="0" max="2000" oninput="calcDuration()">
+        </div>
+        <div class="duration-single">
+          <label class="field-label">Plan start date</label>
+          <input class="field-input" type="date" id="settingStartDate">
+        </div>
+        <div class="duration-single">
+          <label class="field-label">Risk tolerance</label>
+          <select class="plan-select" id="settingRisk" onchange="calcDuration()">
+            <option value="standard">Standard — safe limits enforced</option>
+            <option value="aggressive" selected>Aggressive — your protocol (fasting + low cal)</option>
+            <option value="unrestricted">Unrestricted — show math, no blocks</option>
+          </select>
+          <div class="custom-select" id="riskSelectCustom" style="margin-top:4px">
+            <div class="custom-select-trigger" id="riskSelectTrigger" onclick="toggleCustomSelect('riskSelectCustom')">Aggressive — your protocol (fasting + low cal)</div>
+            <div class="custom-select-dropdown">
+              <div class="custom-select-option" data-value="standard" onclick="selectCustomOption('riskSelectCustom','settingRisk',this)">Standard — safe limits enforced</div>
+              <div class="custom-select-option selected" data-value="aggressive" onclick="selectCustomOption('riskSelectCustom','settingRisk',this)">Aggressive — your protocol (fasting + low cal)</div>
+              <div class="custom-select-option" data-value="unrestricted" onclick="selectCustomOption('riskSelectCustom','settingRisk',this)">Unrestricted — show math, no blocks</div>
+            </div>
+          </div>
+        </div>
+        <button class="reset-btn" style="margin-top:10px;border-color:var(--accent2);color:var(--accent2);width:100%" onclick="calcDuration()">CALCULATE</button>
+
+        <div class="calc-result" id="calcResult">
+          <div class="calc-result-title" id="calcResultTitle">PROJECTED PLAN</div>
+          <div class="calc-result-grid">
+            <div class="calc-result-item"><div class="calc-result-val" id="calcWeeks">—</div><div class="calc-result-lbl">Weeks</div></div>
+            <div class="calc-result-item"><div class="calc-result-val" id="calcDays">—</div><div class="calc-result-lbl">Total days</div></div>
+            <div class="calc-result-item"><div class="calc-result-val" id="calcCals">—</div><div class="calc-result-lbl">Cal/day needed</div></div>
+            <div class="calc-result-item"><div class="calc-result-val" id="calcRate">—</div><div class="calc-result-lbl">kg/week</div></div>
+          </div>
+          <div class="calc-result-grid" style="margin-top:6px">
+            <div class="calc-result-item"><div class="calc-result-val" id="calcDeficit">—</div><div class="calc-result-lbl">kcal deficit/wk</div></div>
+            <div class="calc-result-item"><div class="calc-result-val" id="calcEndDate">—</div><div class="calc-result-lbl">End date</div></div>
+            <div class="calc-result-item"><div class="calc-result-val" id="calcDietBurn">—</div><div class="calc-result-lbl">Diet deficit</div></div>
+            <div class="calc-result-item"><div class="calc-result-val" id="calcExBurn">—</div><div class="calc-result-lbl">Exercise contribution</div></div>
+          </div>
+          <div id="calcFlag" style="margin-top:8px;padding:7px 10px;border-radius:6px;font-size:0.75rem;font-weight:700;letter-spacing:1px;display:none"></div>
+          <div id="calcWarning" style="font-size:0.72rem;color:var(--muted);margin-top:6px;line-height:1.6;display:none"></div>
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <button class="reset-btn" id="useCalsBtn" onclick="applyCalculatedCalories()" style="display:none;border-color:var(--accent2);color:var(--accent2);flex:1">USE THESE CALORIES</button>
+          </div>
+        </div>
+        <button class="schedule-btn" id="scheduleBtn" onclick="promptSchedule()">ADD TO SCHEDULE</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══ CONFIRM POPUP ══ -->
+<div class="popup-overlay" id="popupOverlay">
+  <div class="popup-box">
+    <h3>ADD TO SCHEDULE?</h3>
+    <p id="popupText">This will highlight plan days on your month calendar. You can still log and track each day as normal.</p>
+    <div class="popup-btns">
+      <button class="popup-yes" onclick="applySchedule()">YES, ADD IT</button>
+      <button class="popup-no" onclick="document.getElementById('popupOverlay').classList.remove('active')">NOT NOW</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ GENERIC CONFIRM DIALOG (replaces native confirm/alert — blocked in sandboxed iframes) ══ -->
+<div class="popup-overlay" id="confirmDialog" style="z-index:9000">
+  <div class="popup-box">
+    <h3 id="confirmTitle">CONFIRM</h3>
+    <p id="confirmMsg" style="font-size:0.82rem;color:var(--muted);line-height:1.6;margin:0 0 14px"></p>
+    <div id="confirmExtra" style="margin-bottom:10px;display:none">
+      <label style="display:flex;align-items:center;gap:8px;font-size:0.76rem;color:var(--muted);cursor:pointer">
+        <input type="checkbox" id="confirmCheckbox" style="width:15px;height:15px">
+        <span id="confirmCheckLabel"></span>
+      </label>
+    </div>
+    <div class="popup-btns">
+      <button class="popup-yes" id="confirmYesBtn">CONFIRM</button>
+      <button class="popup-no" onclick="closeConfirmDialog()">CANCEL</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ALERT DIALOG (replaces native alert) ══ -->
+<div class="popup-overlay" id="alertDialog" style="z-index:9000">
+  <div class="popup-box">
+    <p id="alertMsg" style="font-size:0.82rem;color:var(--muted);line-height:1.6;margin:0 0 14px"></p>
+    <div class="popup-btns">
+      <button class="popup-yes" onclick="closeAlertDialog()">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MANAGE SCHEDULE MODAL ══ -->
+<div class="settings-overlay" id="manageSchedOverlay">
+  <div class="settings-panel">
+    <div class="settings-header">
+      <h2>MANAGE SCHEDULE</h2>
+      <button class="close-x" onclick="closeManageSchedule()">×</button>
+    </div>
+    <div class="settings-body">
+
+      <!-- CURRENT STATUS -->
+      <div class="settings-section" id="msCurrent">
+        <div class="settings-section-title">Current Schedule</div>
+        <div id="msStatusText" style="font-size:0.8rem;color:var(--muted);line-height:1.7"></div>
+      </div>
+
+      <!-- ADJUST -->
+      <div class="settings-section">
+        <div class="settings-section-title" style="color:#ff8855">ADJUST SCHEDULE</div>
+        <p style="font-size:0.75rem;color:var(--muted);margin:0 0 10px">Recalculates remaining days from today based on your actual progress and new inputs.</p>
+        <div class="duration-inputs">
+          <div>
+            <label class="field-label">New target weight (kg)</label>
+            <input class="field-input" type="number" id="msTargetKg" placeholder="91" step="0.1" min="40" max="250" oninput="calcAdjust()">
+          </div>
+          <div>
+            <label class="field-label">New daily calories</label>
+            <input class="field-input" type="number" id="msCalories" placeholder="1000" step="50" min="0" max="5000" oninput="calcAdjust()">
+          </div>
+        </div>
+        <div class="calc-result" id="adjustResult" style="display:none">
+          <div class="calc-result-title">ADJUSTED PROJECTION</div>
+          <div class="calc-result-grid">
+            <div class="calc-result-item"><div class="calc-result-val" id="adjWeeks">—</div><div class="calc-result-lbl">Weeks left</div></div>
+            <div class="calc-result-item"><div class="calc-result-val" id="adjDays">—</div><div class="calc-result-lbl">Days left</div></div>
+            <div class="calc-result-item"><div class="calc-result-val" id="adjRate">—</div><div class="calc-result-lbl">kg/week</div></div>
+            <div class="calc-result-item"><div class="calc-result-val" id="adjEndDate">—</div><div class="calc-result-lbl">New end date</div></div>
+          </div>
+          <div id="adjWarning" style="font-size:0.72rem;color:var(--accent2);margin-top:6px;display:none"></div>
+        </div>
+        <button class="schedule-btn" id="adjConfirmBtn" onclick="confirmAdjust()" style="display:none">CONFIRM ADJUSTMENT</button>
+      </div>
+
+      <!-- END TODAY -->
+      <div class="settings-section">
+        <div class="settings-section-title" style="color:var(--accent2)">END SCHEDULE TODAY</div>
+        <p style="font-size:0.75rem;color:var(--muted);margin:0 0 10px">Marks today as the final day. All past progress is kept. Calendar highlights trimmed to today.</p>
+        <button class="reset-btn" onclick="endScheduleToday()" style="border-color:var(--accent2);color:var(--accent2);width:100%">END SCHEDULE TODAY</button>
+      </div>
+
+      <!-- REMOVE -->
+      <div class="settings-section">
+        <div class="settings-section-title" style="color:var(--danger)">REMOVE SCHEDULE</div>
+        <p style="font-size:0.75rem;color:var(--muted);margin:0 0 10px">Wipes schedule structure completely. All logged data, weights, and notes are kept.</p>
+        <button class="reset-btn" onclick="removeSchedule()" style="border-color:var(--danger);color:var(--danger);width:100%">REMOVE SCHEDULE COMPLETELY</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── STORAGE KEYS ────────────────────────────────────────────────────────────
+// All localStorage keys live here in one place.
+// "ph" = Protocol Health. "v1" = version 1 (bump to v2 if schema changes to avoid reading stale data).
+// NEVER hardcode these strings elsewhere — always use SK.keyName.
+const SK = {
+  checklist: 'ph_ck_v1',   // legacy key (checklist state now lives inside dayLogs.checks — kept for compatibility)
+  weights:   'ph_wt_v1',   // array of { date, weight, ts } — sorted newest-first
+  dayLogs:   'ph_dl_v1',   // object keyed by dateStr — each value: { checks, weight, water, energy, notes, ts }
+  fastDays:  'ph_fd_v1',   // object keyed by dateStr — value: true if that day is a water fast
+  settings:  'ph_st_v1',   // single object: plan, currentKg, targetKg, calories, tdee, risk, startDate
+  schedule:  'ph_sc_v1'    // single object: days[], startDate, totalDays, planName, startWeight
+};
+
+// Static lookup arrays used throughout rendering
+const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DAYS_SHORT = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+
+// ─── UTILS ───────────────────────────────────────────────────────────────────
+// gs (get storage): safely reads and JSON-parses a localStorage key. Returns null on missing or parse error.
+function gs(k) { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } }
+// ss (set storage): safely JSON-stringifies and writes to localStorage. Silently fails if storage is full.
+function ss(k,v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+// todayStr: returns today as "YYYY-MM-DD" — the universal date format used everywhere in the app.
+function todayStr() { return new Date().toISOString().slice(0,10); }
+// dateToStr: converts a JS Date object to "YYYY-MM-DD" string, handling timezone correctly.
+function dateToStr(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+// strToDate: parses "YYYY-MM-DD" back to a JS Date (local time, not UTC — avoids off-by-one day bugs).
+function strToDate(s) { const [y,m,d]=s.split('-').map(Number); return new Date(y,m-1,d); }
+
+// ─── SETTINGS STATE ──────────────────────────────────────────────────────────
+// getSettings: always returns a full settings object with defaults. Never returns null.
+// Add any new settings fields here with a default value.
+function getSettings() {
+  return gs(SK.settings) || { plan:'default', currentKg:104, targetKg:91, calories:1500, tdee:2600, risk:'aggressive', startDate:null, exerciseBurn:0 };
+}
+function saveSettings(s) { ss(SK.settings, s); }
+
+// ─── CENTRAL UPDATE DISPATCHER ───────────────────────────────────────────────
+// The single source of truth for UI updates.
+// Every function that changes data calls dispatch('EVENT_NAME') instead of manually
+// calling a chain of update functions. This prevents bugs where one caller forgets to
+// refresh something another caller remembered.
+//
+// HOW IT WORKS:
+// 1. A data-changing function (e.g. logWeight) finishes writing to localStorage
+// 2. It calls dispatch('WEIGHT_LOGGED')
+// 3. dispatch looks up the event in DISPATCH_MAP and calls each listed target
+// 4. Each target maps to exactly one real function
+//
+// TO ADD A NEW EVENT: add a key here + add a case in the switch below. Nothing else changes.
+const DISPATCH_MAP = {
+  WEIGHT_LOGGED:     ['goalBar','projection','recentNotes','durationBar','manageSchedContext'],
+  DAY_SAVED:         ['calendarCell','monthStats','recentNotes','projection'],
+  FAST_DAY_TOGGLED:  ['fastUI','checklist','calendarCell','projection'],
+  PLAN_CHANGED:      ['allTabs','checklist','durationBar','projection','calendar'],
+  CALORIES_CHANGED:  ['projection','durationBar','nutritionMacros'],
+  SCHEDULE_SET:      ['durationBar','calendarHighlights','manageSchedBtn'],
+  SCHEDULE_ADJUSTED: ['durationBar','calendarHighlights','projection','manageSchedBtn'],
+  SCHEDULE_ENDED:    ['durationBar','calendarHighlights','manageSchedBtn'],
+  SCHEDULE_REMOVED:  ['durationBar','calendarHighlights','manageSchedBtn'],
+};
+
+// ─── CUSTOM DIALOGS (native confirm/alert blocked in sandboxed iframes) ──────
+// The browser's built-in confirm() and alert() are blocked inside GitHub Pages iframes.
+// These custom modal replacements render inside the app and work everywhere.
+//
+// showConfirm(title, msg, onYes, opts):
+//   title     — bold header text
+//   msg       — body text
+//   onYes     — callback function called when user confirms
+//   opts.yesLabel   — button label (default: 'CONFIRM')
+//   opts.danger     — if true, yes button turns red
+//   opts.checkLabel — if set, adds a checkbox the user can tick; value passed to onYes(checked)
+function showConfirm(title, msg, onYes, opts={}) {
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmMsg').textContent = msg;
+  document.getElementById('confirmYesBtn').textContent = opts.yesLabel || 'CONFIRM';
+  document.getElementById('confirmYesBtn').style.background = opts.danger ? 'var(--danger)' : '';
+  const extraEl = document.getElementById('confirmExtra');
+  if(opts.checkLabel) {
+    document.getElementById('confirmCheckLabel').textContent = opts.checkLabel;
+    document.getElementById('confirmCheckbox').checked = false;
+    extraEl.style.display = 'block';
+  } else {
+    extraEl.style.display = 'none';
+  }
+  document.getElementById('confirmYesBtn').onclick = () => {
+    const checked = opts.checkLabel ? document.getElementById('confirmCheckbox').checked : false;
+    closeConfirmDialog();
+    onYes(checked);
+  };
+  document.getElementById('confirmDialog').classList.add('active');
+}
+function closeConfirmDialog() { document.getElementById('confirmDialog').classList.remove('active'); }
+function showAlert(msg) {
+  document.getElementById('alertMsg').textContent = msg;
+  document.getElementById('alertDialog').classList.add('active');
+}
+function closeAlertDialog() { document.getElementById('alertDialog').classList.remove('active'); }
+
+// ─── CUSTOM SELECT HELPERS ───────────────────────────────────────────────────
+// Native <select> elements can't be styled on Android Chrome. These functions
+// drive fully custom dropdown menus that visually match the app, while keeping
+// a hidden native <select> in sync so all existing JS code using .value still works.
+//
+// toggleCustomSelect(id)         — opens/closes a custom dropdown by its wrapper ID
+// selectCustomOption(customId, nativeId, optEl) — marks an option selected, syncs native select, fires its onchange
+// syncCustomSelect(customId, nativeId) — reads the native select's current value and updates the visual state to match
+function toggleCustomSelect(id) {
+  const el = document.getElementById(id);
+  const isOpen = el.classList.contains('open');
+  // Close all open selects first
+  document.querySelectorAll('.custom-select.open').forEach(s => s.classList.remove('open'));
+  if(!isOpen) el.classList.add('open');
+}
+function selectCustomOption(customId, nativeId, optEl) {
+  const customEl = document.getElementById(customId);
+  const nativeEl = document.getElementById(nativeId);
+  // Update visual state
+  customEl.querySelectorAll('.custom-select-option').forEach(o => o.classList.remove('selected'));
+  optEl.classList.add('selected');
+  customEl.querySelector('.custom-select-trigger').textContent = optEl.textContent;
+  customEl.classList.remove('open');
+  // Sync native select value and fire its onchange
+  nativeEl.value = optEl.dataset.value;
+  nativeEl.dispatchEvent(new Event('change'));
+}
+function syncCustomSelect(customId, nativeId) {
+  const val = document.getElementById(nativeId).value;
+  const customEl = document.getElementById(customId);
+  const match = customEl.querySelector(`.custom-select-option[data-value="${val}"]`);
+  if(match) {
+    customEl.querySelectorAll('.custom-select-option').forEach(o => o.classList.remove('selected'));
+    match.classList.add('selected');
+    customEl.querySelector('.custom-select-trigger').textContent = match.textContent;
+  }
+}
+// Close custom selects when clicking outside
+document.addEventListener('click', e => {
+  if(!e.target.closest('.custom-select')) {
+    document.querySelectorAll('.custom-select.open').forEach(s => s.classList.remove('open'));
+  }
+});
+
+// dispatch: looks up the event name, finds all UI targets, and calls each one.
+// Only re-renders tabs that are currently visible — avoids wasted work.
+function dispatch(event) {
+  const targets = DISPATCH_MAP[event] || [];
+  targets.forEach(t => {
+    switch(t) {
+      case 'goalBar':           updateGoalBar(getLatestWeight()); break;
+      case 'projection':        updateProjection(); break;
+      case 'recentNotes':       renderRecentNotes(); break;
+      case 'durationBar':       updateDurationBar(); break;
+      case 'manageSchedContext':updateManageSchedContext(); break;
+      case 'manageSchedBtn':    updateManageSchedBtn(); break;
+      case 'calendarCell':
+      case 'monthStats':
+      case 'calendarHighlights':
+      case 'calendar':
+        if(document.getElementById('tab-months').classList.contains('active')) renderCalendar();
+        break;
+      case 'fastUI':            updateFastUI(); break;
+      case 'checklist':         loadChecklist(); break;
+      case 'nutritionMacros':   if(document.getElementById('tab-nutrition').classList.contains('active')) renderNutrition(); break;
+      case 'allTabs':
+        updateTodayTab();
+        if(document.getElementById('tab-workouts').classList.contains('active')) renderWorkouts();
+        if(document.getElementById('tab-nutrition').classList.contains('active')) renderNutrition();
+        if(document.getElementById('tab-rules').classList.contains('active')) renderRules();
+        break;
+    }
+  });
+}
+
+// ─── PLAN DEFINITIONS ────────────────────────────────────────────────────────
+// Each plan is a self-contained object describing everything about that protocol:
+// workout content, nutrition content, rules, checklist items, and day-of-week schedules.
+//
+// TO ADD A NEW PLAN:
+// 1. Add a new key here with all required fields (copy 'default' as a template)
+// 2. Add an <option> for it in the plan <select> in the HTML settings panel
+// 3. That's it — getActivePlan() picks it up automatically
+//
+// PLAN OBJECT FIELDS:
+//   name            — display name shown in header banner
+//   tdee            — estimated total daily energy expenditure (maintenance calories)
+//   fastDaysPerWeek — how many water fast days per week this plan uses
+//   badge / badgeClass — small pill text shown under the header
+//   subtitle        — one-line description shown in settings panel
+//   bannerColor/Bg/Border — colors used in the TODAY tab active plan banner
+//   fastDaysDow     — array of day-of-week numbers (0=Sun) used by autoSetPlanFastDays()
+//   weekIcons       — emoji icons shown in the 7-day week grid on the TODAY tab
+//   morningSub/eveningSub/stretchSub — day-of-week text shown under TODAY checklist items
+//   checklistNormal — array of checklist items for eating days
+//   checklistFast   — array of checklist items for water fast days
+//   foodGroupLabel  — label shown on the EATING section tag
+//   workoutContent(s) — function returning HTML string for the WORKOUTS tab
+//   nutritionContent(s) — function returning HTML string for the NUTRITION tab (s = settings)
+//   rulesContent()  — function returning HTML string for the RULES tab
+const PLANS = {
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // DEFAULT PROTOCOL
+  // ─────────────────────────────────────────────────────────────────────────
+  default: {
+    name: 'DEFAULT PROTOCOL',
+    tdee: 2600,
+    fastDaysPerWeek: 3,
+    badge: 'DEFAULT PROTOCOL',
+    badgeClass: '',
+    subtitle: 'No gym. No excuses. No loop.',
+    bannerColor: 'var(--text)',
+    bannerBg: 'var(--surface)',
+    bannerBorder: 'var(--border)',
+    fastDaysDow: [0, 3, 6], // Sun/Wed/Sat
+
+    // Week icons for workout grid
+    weekIcons: {0:'🚶',1:'💪',2:'🦵',3:'💪',4:'🦵',5:'💪',6:'🦵'},
+
+    // Day-of-week sub-texts for TODAY checklist items
+    morningSub: {
+      0:'SUNDAY — Rest day. Light walk or stretch only.',
+      1:'MONDAY — Morning A: Push + Core · Push-ups · Plank · Mountain climbers · Dead bug',
+      2:'TUESDAY — Morning B: Lower + Mobility · Squat · Reverse lunge · Glute bridge · World\'s greatest stretch',
+      3:'WEDNESDAY — Morning A: Push + Core · Push-ups · Plank · Mountain climbers',
+      4:'THURSDAY — Morning B: Lower + Mobility · Squat · Lunge · Glute bridge',
+      5:'FRIDAY — Morning A: Push + Core · Push-ups · Plank · Mountain climbers',
+      6:'SATURDAY — Morning B: Lower + Mobility · Squat · Lunge · World\'s greatest stretch'
+    },
+    eveningSub: {
+      0:'SUNDAY — Rest day.',
+      1:'MONDAY — Evening A: Upper Body · Push-up ladder · Pike push-up · Diamond push-up · Tricep dips',
+      2:'TUESDAY — Evening B: Lower + Glutes · Jump squat · Bulgarian split squat · Wall sit · Calf raise',
+      3:'WEDNESDAY — Evening C: Core + Conditioning · Burpees · Hollow body · Bicycle crunch · Sprawl',
+      4:'THURSDAY — Evening A: Upper Body · Same as Monday',
+      5:'FRIDAY — Evening B: Lower + Glutes · Same as Tuesday',
+      6:'SATURDAY — Evening C: Core + Conditioning · Same as Wednesday'
+    },
+    stretchSub: {
+      0:'Light mobility only — cat-cow, hip CARs.',
+      1:'Chest + shoulder stretch (doorframe). 5 min.',
+      2:'Pigeon + hip flexor. 5 min.',
+      3:'Full body stretch. Spine, hips, shoulders.',
+      4:'Chest + shoulder stretch. 5 min.',
+      5:'Pigeon + hip flexor. 5 min.',
+      6:'Full body stretch. 5 min.'
+    },
+
+    // Checklist items — normal day and fast day
+    // These are used by both TODAY tab and day modal
+    checklistNormal: [
+      { id:'m1', group:'MORNING', label:'Wake & 500ml water immediately', sub:'Before phone. Non-negotiable.' },
+      { id:'m2', group:'MORNING', label:'10 min daily mobility (CARs + neck)', sub:'Hip CARs × 5 · Cat-cow × 10 · Thoracic rotation · Wrist CARs · Neck nods' },
+      { id:'m3', group:'MORNING', label:'Morning workout (20 min)', sub:'Morning A/B — see WORKOUTS tab' },
+      { id:'f1', group:'EATING', label:'Protein in first meal (60-70g)', sub:'Eggs · chicken · tuna · lentils. Anchor here first.' },
+      { id:'f2', group:'EATING', label:'Stayed under calorie ceiling', sub:'Hard ceiling. Never more.' },
+      { id:'f3', group:'EATING', label:'Last meal before 6PM', sub:'12+ hour overnight fast every day.' },
+      { id:'f4', group:'EATING', label:'3L+ water across the day', sub:'500ml wake · 500ml pre-meal · sip continuously' },
+      { id:'f5', group:'EATING', label:'No liquid calories', sub:'Water · black coffee · plain green tea only.' },
+      { id:'e1', group:'EVENING', label:'Change clothes on arriving home', sub:'Trigger signal. Don\'t sit down first.' },
+      { id:'e2', group:'EVENING', label:'Evening session (40–45 min)', sub:'Evening A/B/C — see WORKOUTS tab' },
+      { id:'e3', group:'EVENING', label:'Post-workout stretch protocol', sub:'See WORKOUTS tab → today\'s cooldown' },
+      { id:'n1', group:'NIGHT', label:'Log morning weight in TRACK tab', sub:'Weigh first thing after waking, before food.' },
+      { id:'n2', group:'NIGHT', label:'Sleep before midnight', sub:'Recovery is training. Don\'t skip it.' }
+    ],
+    checklistFast: [
+      { id:'wf1', group:'FAST', label:'500ml water + pinch salt on waking', sub:'Prevents headaches. Do this before anything else.' },
+      { id:'wf2', group:'FAST', label:'Electrolyte tablet mid-morning', sub:'Sodium + potassium. Non-negotiable on a fast.' },
+      { id:'wf3', group:'FAST', label:'Black coffee or green tea only', sub:'Appetite suppression. Zero calories. Allowed.' },
+      { id:'wf4', group:'FAST', label:'3.5L+ water total today', sub:'Sip constantly. Don\'t chug all at once.' },
+      { id:'wf5', group:'FAST', label:'No food consumed today', sub:'Fast is unbroken. If you break it — log it honestly.' },
+      { id:'wf6', group:'FAST', label:'Magnesium 400mg before sleep', sub:'Prevents cramps. Sleep quality tanks on fasts without this.' }
+    ],
+
+    // Eating group tag styling
+    foodGroupLabel: 'EATING',
+    foodGroupBg: '',
+    foodGroupColor: '',
+
+    // Content renderers — return HTML strings
+    workoutContent() {
+      return `
+      <div class="section-title">MORNING <span>ACTIVATION</span></div>
+      <p class="section-note">20 min. No equipment. Alternate A/B daily.</p>
+
+      ${workoutCard('MORNING A — PUSH + CORE','20 MIN · MON/WED/FRI',
+        exRow('Jumping Jacks','Warm-up','2 min')+
+        exRow('Push-ups','Full range, chest to floor','3×10–15')+
+        exRow('Plank','Elbows, stay tight','3×30 sec')+
+        exRow('Mountain Climbers','Controlled pace','3×20')+
+        exRow('Dead Bug','Lower back stays glued to floor','2×8/side'),
+        stretchRow('Hip Flexor Stretch','30 sec each side','Cooldown')
+      )}
+
+      ${workoutCard('MORNING B — LOWER + MOBILITY','20 MIN · TUE/THU/SAT',
+        exRow('High Knees','Warm-up, 60% pace','2 min')+
+        exRow('Bodyweight Squat','Full depth','3×15')+
+        exRow('Reverse Lunge','Step back, knee hovers floor','3×10/leg')+
+        exRow('Glute Bridge','Pause at top, squeeze','3×15')+
+        exRow('World\'s Greatest Stretch','Hip, thoracic, hamstring combo','3/side×30s'),
+        stretchRow('Cat-Cow','Spine mobility cooldown','10 reps')
+      )}
+
+      <div style="height:8px"></div>
+      <div class="section-title">EVENING <span>SESSIONS</span></div>
+      <p class="section-note">40–45 min. Rotate A→B→C. Sunday = rest or walk only.</p>
+
+      ${workoutCard('EVENING A — UPPER BODY','40 MIN · MON/THU',
+        exRow('Push-up Ladder','10 down to 1','1 ladder')+
+        exRow('Pike Push-up','Shoulders','4×10')+
+        exRow('Diamond Push-up','Triceps','3×8')+
+        exRow('Tricep Dips','Chair/bed edge','3×12')+
+        exRow('Plank to Downdog','Flow, 2 sec each','3×10'),
+        stretchRow('Chest + Shoulder Stretch','Doorframe or behind-back clasp','5 min')
+      )}
+
+      ${workoutCard('EVENING B — LOWER + GLUTES','40 MIN · TUE/FRI',
+        exRow('Jump Squat','Land soft, full depth','4×10')+
+        exRow('Bulgarian Split Squat','Rear foot elevated','3×10/leg')+
+        exRow('Single-Leg Glute Bridge','Drive through heel','3×12/leg')+
+        exRow('Wall Sit','90° hold','3×45 sec')+
+        exRow('Calf Raise','Slow up, slow down','3×20'),
+        stretchRow('Pigeon Pose + Hip Flexor','60 sec each side','5 min')
+      )}
+
+      ${workoutCard('EVENING C — CORE + CONDITIONING','40 MIN · WED/SAT',
+        exRow('Burpee','Full extension at top','5×8')+
+        exRow('Hollow Body Hold','Arms overhead, back pressed down','4×25 sec')+
+        exRow('Bicycle Crunch','Slow and deliberate','3×20/side')+
+        exRow('V-Sit Hold','Legs up 45°, back straight','3×20 sec')+
+        exRow('Sprawl + Push-up','Drop to floor + push-up + stand','3×8'),
+        stretchRow('Full Body Stretch','Spine, hips, shoulders, hamstrings','5 min')
+      )}`;
+    },
+
+    nutritionContent(s) {
+      const cal = s.calories || 1500;
+      return `
+      <div class="section-title">DEFAULT <span>NUTRITION</span></div>
+      <p class="section-note">Flexible rules-based approach. Adjust calorie ceiling in Settings.</p>
+      <div class="macro-grid">
+        <div class="macro-box"><div class="macro-val">${cal}</div><div class="macro-lbl">Cal ceiling</div></div>
+        <div class="macro-box"><div class="macro-val" style="color:#ff9966">150g</div><div class="macro-lbl">Protein</div></div>
+        <div class="macro-box"><div class="macro-val" style="color:var(--accent2)">120g</div><div class="macro-lbl">Carbs</div></div>
+        <div class="macro-box"><div class="macro-val" style="color:#88ccff">45g</div><div class="macro-lbl">Fats</div></div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-num">EATING WINDOW</div>
+        <div class="rule-text">11AM–5:30PM. Two meals. Protein anchors every meal.</div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-num">WATER</div>
+        <div class="rule-text">3L minimum daily. 500ml on waking.</div>
+      </div>
+      <div class="rule-card" style="border-left-color:var(--danger)">
+        <div class="rule-num">NEVER</div>
+        <div class="rule-text">Liquid calories. Juice, soda, sweetened chai, energy drinks.</div>
+      </div>`;
+    },
+
+    rulesContent() {
+      return `
+      <div class="section-title">EATING <span>RULES</span></div>
+      ${ruleCard('RULE 01','Protein anchors every meal.','Eggs, chicken, tuna, lentils. Protein first, then fill the rest.')}
+      ${ruleCard('RULE 02','Last meal before 6PM.','Creates 12+ hour overnight fast automatically.')}
+      ${ruleCard('RULE 03','No liquid calories.','Water, black coffee, plain tea only.')}
+      ${ruleCard('RULE 04','3 litres of water daily.','500ml on wake. 250ml before each meal.')}
+      ${ruleCard('RULE 05','High volume, low calorie.','Vegetables eat freely. Protein always. Carbs around training.')}
+      <div class="section-title" style="margin-top:8px">DISCIPLINE <span>RULES</span></div>
+      ${ruleCard('RULE 06','Change clothes the moment you get home.','Sit down first = workout done.','var(--accent2)')}
+      ${ruleCard('RULE 07','One miss = noise. Two = pattern. Three = decision.','Minimum viable action beats zero.','var(--accent2)')}
+      ${ruleCard('RULE 08','India changes nothing.','20 min on a floor. Always.','var(--accent2)')}`;
+    }
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // AGRO CUT CALISTHENICS
+  // ─────────────────────────────────────────────────────────────────────────
+  agro: {
+    name: 'AGRO CUT CALISTHENICS',
+    tdee: 2600,
+    fastDaysPerWeek: 3,
+    badge: 'AGRO CUT CALISTHENICS',
+    badgeClass: 'agro',
+    subtitle: 'Cut. Build. No equipment. No quit.',
+    bannerColor: '#ff8855',
+    bannerBg: 'rgba(255,107,53,0.07)',
+    bannerBorder: 'rgba(255,107,53,0.35)',
+    fastDaysDow: [0, 3, 6], // Sun/Wed/Sat
+
+    weekIcons: {0:'🚶',1:'💪',2:'🦵',3:'🏃',4:'🤸',5:'💪',6:'🏃'},
+
+    morningSub: {
+      0:'SUNDAY — Active rest. Walk 30 min + full hip sequence (20 min)',
+      1:'MONDAY — Morning A: Push + Core · Hip CARs → Push-ups · Plank · Mountain climbers',
+      2:'TUESDAY — Morning B: Lower + Mobility · Hip CARs → Squats · Glute bridge · Reverse lunge',
+      3:'WEDNESDAY — Morning A: Push + Core · Hip CARs → Dead bug · Push-ups · Mountain climbers',
+      4:'THURSDAY — Morning B: Lower + Mobility · Hip CARs → Jump squats · Bulgarian split squat · Calf raise',
+      5:'FRIDAY — Morning A: Push + Core · Hip CARs → Archer push-up · Plank to downdog · Hollow body',
+      6:'SATURDAY — Morning B: Lower + Mobility · Hip CARs → Cossack squat · Good morning · Single-leg RDL'
+    },
+    eveningSub: {
+      0:'SUNDAY — Rest. Walk + full hip session. No structured workout.',
+      1:'MONDAY — Evening A: Push + Chest Definition · Decline push-up · Archer push-up · Planche lean · Handstand hold',
+      2:'TUESDAY — Evening B: Legs + Posterior Chain · Nordic curl · Bulgarian split squat · Good morning · Hollow body',
+      3:'WEDNESDAY — Midweek Run · 5 min walk → 20 min run → 5 min walk → jump squats/burpees/mountain climbers',
+      4:'THURSDAY — Evening A: Push + Chest Definition · Same as Monday',
+      5:'FRIDAY — Evening B: Legs + Posterior Chain · Same as Tuesday',
+      6:'SATURDAY — Run + Conditioning · 5 min walk → 30 min run → circuit: push-ups/jump squats/sprawls/plank'
+    },
+    stretchSub: {
+      0:'Sunday full hip session: 90/90 · frog · pigeon (extra right side) · cossack · deep squat (20 min)',
+      1:'Monday cooldown: Doorframe chest stretch · Shoulder dislocates with towel · Wrist extension (10 min)',
+      2:'Tuesday cooldown: 90/90 hip × 2 · Frog · Pigeon (right side +30 sec) · Figure-4 · Child\'s pose (15 min)',
+      3:'Wednesday post-run: Pigeon 60 sec/side · Hamstring stretch · Calf stretch (10 min)',
+      4:'Thursday cooldown: Full shoulder + wrist sequence · Thread the needle · Shoulder dislocates (15 min)',
+      5:'Friday cooldown: Rear shoulder · Doorframe chest · Wrist extension stretch (10 min)',
+      6:'Saturday post-run: Lower body flush — whatever feels tightest. Pigeon · hamstring · quad (10 min)'
+    },
+
+    checklistNormal: [
+      { id:'m1', group:'MORNING', label:'Wake & 500ml water immediately', sub:'Before phone. Non-negotiable.' },
+      { id:'m2', group:'MORNING', label:'10 min daily mobility (CARs + neck)', sub:'Hip CARs × 5 · Cat-cow × 10 · Thoracic rotation · Wrist CARs · Neck nods — AGRO morning A/B' },
+      { id:'m3', group:'MORNING', label:'Morning workout (20 min)', sub:'AGRO Morning A/B — see WORKOUTS tab for today\'s split' },
+      { id:'f1', group:'EATING', label:'Protein in first meal (60-70g)', sub:'Eggs · chicken · tuna · lentils. Anchor here first.' },
+      { id:'f2', group:'EATING', label:'Stayed under calorie ceiling', sub:'Hard ceiling. Never more.' },
+      { id:'f3', group:'EATING', label:'Last meal before 6PM', sub:'16+ hour overnight fast every day.' },
+      { id:'f4', group:'EATING', label:'3L+ water across the day', sub:'500ml wake · 500ml pre-meal · sip continuously' },
+      { id:'f5', group:'EATING', label:'No liquid calories', sub:'Water · black coffee · plain green tea only.' },
+      { id:'e1', group:'EVENING', label:'Change clothes on arriving home', sub:'Trigger signal. Don\'t sit down first.' },
+      { id:'e2', group:'EVENING', label:'Evening session (40–45 min)', sub:'AGRO Evening A/B/C — see WORKOUTS tab for today\'s session' },
+      { id:'e3', group:'EVENING', label:'Post-workout stretch protocol', sub:'AGRO cooldown — post-session stretch per day, see WORKOUTS tab' },
+      { id:'n1', group:'NIGHT', label:'Log morning weight in TRACK tab', sub:'Weigh first thing after waking, before food.' },
+      { id:'n2', group:'NIGHT', label:'Sleep before midnight', sub:'Recovery is training. Don\'t skip it.' }
+    ],
+    checklistFast: [
+      { id:'wf1', group:'FAST', label:'500ml water + pinch salt on waking', sub:'Prevents headaches. Do this before anything else.' },
+      { id:'wf2', group:'FAST', label:'Electrolyte tablet mid-morning', sub:'Sodium + potassium. Non-negotiable on a fast.' },
+      { id:'wf3', group:'FAST', label:'Black coffee or green tea only', sub:'Appetite suppression. Zero calories. Allowed.' },
+      { id:'wf4', group:'FAST', label:'3.5L+ water total today', sub:'Sip constantly. Don\'t chug all at once.' },
+      { id:'wf5', group:'FAST', label:'No food consumed today', sub:'Fast is unbroken. If you break it — log it honestly.' },
+      { id:'wf6', group:'FAST', label:'Magnesium 400mg before sleep', sub:'Prevents cramps. Sleep quality tanks on fasts without this.' }
+    ],
+
+    foodGroupLabel: 'AGRO EATING',
+    foodGroupBg: 'rgba(255,107,53,0.1)',
+    foodGroupColor: '#ff8855',
+
+    workoutContent() {
+      return `
+      <div class="section-title">MORNING <span>ACTIVATION</span> — 20 MIN</div>
+      <p class="section-note">Every morning before work. Alternate A/B. Includes 10 min daily mobility first.</p>
+
+      ${workoutCard('MON · MORNING A — PUSH + CORE','20 MIN',
+        exRow('Hip CARs + Cat-cow + Wrist CARs','Daily mobility first — non-negotiable','10 min')+
+        exRow('Jumping jacks','Warm-up','2 min')+
+        exRow('Push-ups','Full range, chest to floor','3×10–15')+
+        exRow('Plank','Elbows, stay tight','3×30 sec')+
+        exRow('Mountain climbers','Controlled pace','3×20'),
+        stretchRow('Chest opener','Doorframe or arms wide','60 sec')+
+        stretchRow('Shoulder dislocates','Towel/stick, full arc overhead','10 reps')
+      )}
+
+      ${workoutCard('TUE · MORNING B — LOWER + MOBILITY','20 MIN',
+        exRow('Hip CARs + Cat-cow + Wrist CARs','Daily mobility first','10 min')+
+        exRow('High knees','Warm-up, 60% pace','2 min')+
+        exRow('Bodyweight squat','Full depth, knees track toes','3×15')+
+        exRow('Glute bridge','Pause at top, squeeze hard','3×15')+
+        exRow('Reverse lunge','Step back, knee hovers floor','3×10/leg'),
+        stretchRow('Deep squat hold','Heels flat, doorframe if needed','90 sec')+
+        stretchRow('Hip CARs extra','Right hip gets 2 extra circles','1 min')
+      )}
+
+      ${workoutCard('WED · MORNING A — PUSH + CORE','20 MIN',
+        exRow('Hip CARs + Cat-cow + Wrist CARs','Daily mobility','10 min')+
+        exRow('Dead bug','Lower back glued to floor','2×8/side')+
+        exRow('Push-ups','Focus on upper chest squeeze','3×12')+
+        exRow('Mountain climbers','Steady pace','3×20')+
+        exRow('Plank','','3×30 sec'),
+        stretchRow('Wrist extension stretch','Fingers back toward knees','60 sec')
+      )}
+
+      ${workoutCard('THU · MORNING B — LOWER + MOBILITY','20 MIN',
+        exRow('Hip CARs + Cat-cow + Wrist CARs','Daily mobility','10 min')+
+        exRow('Jump squats','Land soft','3×10')+
+        exRow('Bulgarian split squat','Rear foot elevated','3×8/leg')+
+        exRow('Calf raise','Slow up, slow down','3×15'),
+        stretchRow('90/90 hip stretch','90 sec each side — right hip priority','3 min')+
+        stretchRow('Pigeon pose','Extra 30 sec on right side','3 min')
+      )}
+
+      ${workoutCard('FRI · MORNING A — PUSH + CORE','20 MIN',
+        exRow('Hip CARs + Cat-cow + Wrist CARs','Daily mobility','10 min')+
+        exRow('Archer push-up','Unilateral — upper chest focus','3×6/side')+
+        exRow('Plank to downdog','Flow, 2 sec each','3×8')+
+        exRow('Hollow body hold','Arms overhead, back pressed down','3×20 sec'),
+        stretchRow('Rear shoulder stretch','Arm across body','30 sec each')+
+        stretchRow('Doorframe chest stretch','Upper chest + anterior shoulder','60 sec')
+      )}
+
+      ${workoutCard('SAT · MORNING B — LOWER + MOBILITY','20 MIN',
+        exRow('Hip CARs + Cat-cow + Wrist CARs','Daily mobility','10 min')+
+        exRow('Cossack squat','Wide feet, lateral lunge — hip opener','3×8/side')+
+        exRow('Good morning (BW)','Hinge at hip, back straight','3×12')+
+        exRow('Single-leg RDL','Balance + hamstring stretch','3×8/leg'),
+        stretchRow('Frog stretch','Knees wide, push hips back','2 min')+
+        stretchRow('Hamstring stretch','One leg extended, reach forward','60 sec each')
+      )}
+
+      ${workoutCard('SUN · ACTIVE REST','WALK 30 MIN + FULL HIP SESSION',
+        exRow('Walk','Minimum 30 min outdoors. Not optional.','30 min'),
+        stretchRow('Full hip sequence','90/90 · frog · pigeon · cossack · deep squat','20 min')+
+        stretchRow('Neck isometrics','4 directions × 30 sec resist','2 min')+
+        stretchRow('Shoulder dislocates','Towel/stick','10 slow reps')+
+        stretchRow('Thread the needle','8/side, thoracic rotation','2 min')
+      )}
+
+      <div style="height:10px"></div>
+      <div class="section-title">EVENING <span>SESSIONS</span> — 40–45 MIN</div>
+      <p class="section-note">Rotate Mon=A · Tue=B · Wed=C · Thu=A · Fri=B · Sat=run+conditioning. Sun = rest.</p>
+
+      ${workoutCard('EVENING A — PUSH + CHEST DEFINITION','MON / THU · 40 MIN',
+        exRow('Push-up ladder','10 down to 1. Rest = time for next set.','1 ladder')+
+        exRow('Decline push-up','Feet on chair/bed — upper chest focus','4×12')+
+        exRow('Archer push-up','Unilateral chest strength','4×6/side')+
+        exRow('Pike push-up','Hips high, head toward floor — shoulders','3×10')+
+        exRow('Pseudo planche lean','Lean forward on straight arms, protract scapula','4×20 sec')+
+        exRow('Tricep dips','Chair edge or floor','3×12')+
+        exRow('Wall handstand hold','Every session — wrist + shoulder base','3×20-30 sec'),
+        stretchRow('Doorframe chest stretch','Upper chest + anterior shoulder','60 sec')+
+        stretchRow('Shoulder dislocates','Towel/stick — full arc','10 reps')+
+        stretchRow('Wrist extension stretch','Fingers pointing back','60 sec')
+      )}
+
+      ${workoutCard('EVENING B — LEGS + POSTERIOR CHAIN','TUE / FRI · 40 MIN',
+        exRow('Nordic hamstring curl','Feet under sofa/bed — hardest hamstring move','4×5')+
+        exRow('Bulgarian split squat','Rear foot elevated — quad + glute','4×10/leg')+
+        exRow('Single-leg RDL (BW)','Lower back + hamstring — control the descent','3×10/leg')+
+        exRow('Glute bridge march','Alternate legs, lower back stability','3×15')+
+        exRow('Good morning (BW)','Hip hinge, erector strengthening','3×12')+
+        exRow('Wall sit','90° hold, no sliding','3×45 sec')+
+        exRow('Hollow body hold','Lower back protection through anterior core','3×30 sec'),
+        stretchRow('Pigeon pose','90 sec each — right side extra 30 sec','3+ min')+
+        stretchRow('Figure-4 stretch','Lying on back, ankle over knee','60 sec each')+
+        stretchRow('Hamstring stretch','One leg extended reach','60 sec each')+
+        stretchRow('Child\'s pose','Lower back release','60 sec')
+      )}
+
+      ${workoutCard('EVENING C — SKILL + CORE + CALISTHENICS FOUNDATION','WED · 40 MIN',
+        exRow('Crow/frog stand attempts','Every session — multiple attempts','5 min')+
+        exRow('Tuck hold (crow position)','Build the balance — 4×15-20 sec holds','4×15-20 sec')+
+        exRow('L-sit tuck (floor)','Hands pressing down, tuck knees — hip flexor + straight arm strength','4×15 sec')+
+        exRow('Scapular push-up','Protract/retract — planche prerequisite','3×12')+
+        exRow('Inverted row (under table)','Back training without pull-up bar','4×10')+
+        exRow('Dead bug','Deep core, back pressed to floor','3×10/side')+
+        exRow('Hollow body rock','True core tension — rock gently','3×10')+
+        exRow('Dragon flag negative','Bed edge — you\'ll barely do it. Do it anyway.','3×3')+
+        exRow('Side plank + hip dip','Lateral core','3×12/side')+
+        exRow('Superman hold','Posterior chain endurance','3×30 sec'),
+        stretchRow('Full shoulder sequence','Thread needle · rear shoulder · chest open','10 min')+
+        stretchRow('Hip flexor lunge stretch','60 sec each side','2 min')+
+        stretchRow('Neck isometrics','4 directions × 30 sec','2 min')
+      )}
+
+      ${workoutCard('SAT — RUN + CONDITIONING','40–45 MIN TOTAL',
+        exRow('Walk warm-up','Easy pace','5 min')+
+        exRow('Run','Conversational pace. Don\'t gasp. Build weekly: add 5 min every 2 weeks.','30 min')+
+        exRow('Walk cooldown','Easy pace','5 min')+
+        exRow('Conditioning circuit','3 rounds: 10 push-ups + 10 jump squats + 10 sprawls + 30 sec plank','15 min'),
+        stretchRow('Lower body flush','Pigeon · hamstring · calf · quick quad','10 min')
+      )}
+
+      ${workoutCard('WED — RUN (MIDWEEK)','35 MIN TOTAL',
+        exRow('Walk warm-up','','5 min')+
+        exRow('Run','Conversational pace','20 min')+
+        exRow('Walk cooldown','','5 min')+
+        exRow('Jump squats + burpees + mountain climbers','3×10 each','10 min'),
+        stretchRow('Lower body flush','Pigeon · hamstring · calf','8 min')
+      )}
+
+      <div style="height:8px"></div>
+      <div class="section-title">NECK <span>STRENGTHENING</span></div>
+      <p class="section-note">Add to any session or do standalone. Takes 5 min. Don't skip — neck takes 6-8 weeks to feel stronger.</p>
+
+      ${workoutCard('NECK PROTOCOL — DAILY 5 MIN','ADD TO ANY SESSION',
+        exRow('Isometric resist — forward','Hand on forehead, resist with neck','30 sec')+
+        exRow('Isometric resist — back','Hand on back of head, resist','30 sec')+
+        exRow('Isometric resist — each side','Hand on temple, resist laterally','30 sec each')+
+        exRow('Chin tuck (neck nod)','Tuck chin straight back, like double chin — deep cervical flexors','15 reps')+
+        exRow('Prone neck extension','Face down, lift chin slowly from floor','10 reps')
+      )}`;
+    },
+
+    nutritionContent(s) {
+      const cal = s.calories || 1000;
+      const protein = Math.round(cal * 0.5 / 4);
+      const carbs = Math.round(cal * 0.3 / 4);
+      const fats = Math.round(cal * 0.2 / 9);
+      return `
+      <div class="section-title">AGRO CUT <span>NUTRITION</span></div>
+      <p class="section-note">Aggressive deficit. Muscle-sparing priority. 3 water fast days per week.</p>
+
+      <div class="macro-grid">
+        <div class="macro-box"><div class="macro-val" style="color:#ff8855">${cal}</div><div class="macro-lbl">Cal ceiling</div></div>
+        <div class="macro-box"><div class="macro-val" style="color:#ff9966">${protein}g</div><div class="macro-lbl">Protein</div></div>
+        <div class="macro-box"><div class="macro-val" style="color:var(--accent2)">${carbs}g</div><div class="macro-lbl">Carbs</div></div>
+        <div class="macro-box"><div class="macro-val" style="color:#88ccff">${fats}g</div><div class="macro-lbl">Fats</div></div>
+      </div>
+
+      <div class="rule-card" style="border-left-color:#ff8855">
+        <div class="rule-num">EATING WINDOW</div>
+        <div class="rule-text">11AM–5:30PM. Two meals only. Protein anchors every meal.</div>
+        <div class="rule-sub">Meal 1 (~${Math.round(cal*0.55)}cal): Protein-heavy, 60-70g protein · Meal 2 (~${Math.round(cal*0.45)}cal): Lighter, more vegetables</div>
+      </div>
+
+      <div class="rule-card">
+        <div class="rule-num">FAST DAY PROTOCOL — WED/SAT/SUN</div>
+        <div class="rule-text">Wake: 500ml water + salt · Mid-morning: electrolyte tablet · Throughout: 3.5L water · Pre-training: electrolyte 20 min before (70-80% intensity only) · Sleep: 400mg magnesium</div>
+        <div class="rule-sub" style="color:#cc4444">Stop if: palpitations · chest tightness · vision goes dark. Salt water + 50-100g carbs immediately.</div>
+      </div>
+
+      <div class="rule-card">
+        <div class="rule-num">MICRONUTRIENTS — PRIORITY ORDER</div>
+        <div class="rule-text">Magnesium 400mg · Potassium 3000-3500mg · Sodium (don't restrict) · Vitamin C · Iron · Zinc · Vitamin D</div>
+        <div class="rule-sub">Mg before bed — muscle recovery + sleep. Potassium: lentils, sweet potato. Sodium: pinch in water daily. Vitamin D: supplement if indoors most of day.</div>
+      </div>
+
+      <div class="section-title" style="margin-top:8px">CHEAP SNACKS</div>
+      <div class="snack-grid">
+        <div class="snack-item"><div class="snack-name">Cucumber</div><div class="snack-cal">15 cal/100g</div><div class="snack-note">Eat as much as you want</div></div>
+        <div class="snack-item"><div class="snack-name">Cherry tomatoes</div><div class="snack-cal">18 cal/100g</div><div class="snack-note">Full bowl = ~50 cal</div></div>
+        <div class="snack-item"><div class="snack-name">Boiled egg</div><div class="snack-cal">70 cal each</div><div class="snack-note">6g protein. Batch cook.</div></div>
+        <div class="snack-item"><div class="snack-name">Roasted chickpeas</div><div class="snack-cal">120 cal/30g</div><div class="snack-note">Crunchy, filling</div></div>
+        <div class="snack-item"><div class="snack-name">Watermelon</div><div class="snack-cal">30 cal/100g</div><div class="snack-note">Kills sweet cravings</div></div>
+        <div class="snack-item"><div class="snack-name">Carrots</div><div class="snack-cal">40 cal/100g</div><div class="snack-note">Dense, feels real</div></div>
+        <div class="snack-item"><div class="snack-name">Plain popcorn</div><div class="snack-cal">30 cal/cup</div><div class="snack-note">Air-popped, no butter</div></div>
+        <div class="snack-item"><div class="snack-name">Pumpkin seeds</div><div class="snack-cal">85 cal/20g</div><div class="snack-note">Zinc + magnesium</div></div>
+      </div>
+
+      <div class="section-title">DRINKS</div>
+      <div class="rule-card" style="border-left-color:var(--green)">
+        <div class="rule-num">ALLOWED — ALWAYS</div>
+        <div class="rule-text">Water · Black coffee · Plain green tea · Sparkling water · Salt water</div>
+        <div class="rule-sub">Cold water marginally boosts metabolism. Black coffee before training increases fat oxidation. Green tea EGCG is studied and genuine.</div>
+      </div>
+      <div class="rule-card" style="border-left-color:var(--danger)">
+        <div class="rule-num">NEVER</div>
+        <div class="rule-text">Juice · soda · sweetened chai · energy drinks · milk with sugar · flavoured water</div>
+        <div class="rule-sub">All spike insulin, add hidden calories, or both. These break your deficit every time.</div>
+      </div>
+
+      <div class="section-title" style="margin-top:8px">MEAL SOURCES</div>
+      <div class="rule-card">
+        <div class="rule-num">PROTEIN — KEEP STOCKED</div>
+        <div class="rule-text">Eggs · canned tuna · grilled chicken breast · lentils/dal · Greek yogurt · boiled chickpeas</div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-num">CARBS — TRAINING DAYS ONLY</div>
+        <div class="rule-text">Oats · white rice (small portion) · sweet potato · banana pre-workout</div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-num">VEGETABLES — EAT FREELY</div>
+        <div class="rule-text">Spinach · cucumber · tomato · broccoli · zucchini · green beans</div>
+        <div class="rule-sub">Fill your plate with these. Near-zero calories, huge volume. This is what makes ${cal} cal feel like more food than it is.</div>
+      </div>
+      <div class="rule-card" style="border-left-color:var(--danger)">
+        <div class="rule-num">THE ONE THING THAT BREAKS YOUR DEFICIT</div>
+        <div class="rule-text">Unplanned social eating</div>
+        <div class="rule-sub">Fix: eat a protein snack 30 min before any social meal. You arrive not hungry. You eat less automatically. No willpower required.</div>
+      </div>`;
+    },
+
+    rulesContent() {
+      return `
+      <div class="section-title">EATING <span>RULES</span></div>
+      ${ruleCard('RULE 01','1000 cal/day. Never more.','Hard ceiling. Protein anchors every meal. Hit protein before filling anything else. This is what protects muscle during the cut.')}
+      ${ruleCard('RULE 02','Last meal before 6PM. No exceptions.','Creates 16+ hour overnight fast automatically. Already your default — lock it permanently.')}
+      ${ruleCard('RULE 03','No liquid calories. Ever.','Water · black coffee · plain tea only. Juice, sweetened chai, soda — these break your deficit invisibly.')}
+      ${ruleCard('RULE 04','3 litres of water daily. Minimum.','500ml on wake. 250ml before each meal. Half the time you think you\'re hungry, you\'re dehydrated.')}
+      ${ruleCard('RULE 05','High volume, low calorie foods fill the gap.','Cucumber, tomato, spinach, lentils. These are near-zero calories but huge volume. Eat them freely. When social eating: take protein, skip bread and rice silently.')}
+      <div class="section-title" style="margin-top:8px">TRAINING <span>RULES</span></div>
+      ${ruleCard('RULE 06','Change clothes the moment you get home.','Behaviour trigger. Sitting down first = workout is done. You know this.','var(--accent2)')}
+      ${ruleCard('RULE 07','Daily mobility 10 min every morning. Non-negotiable.','Tight hips block L-sit. Tight shoulders block handstand. Stiff thoracic spine blocks planche lean. This is not optional.','var(--accent2)')}
+      ${ruleCard('RULE 08','Calisthenics skills require daily practice of foundations.','Crow, handstand, L-sit — progress is invisible for weeks then it clicks. Don\'t skip the foundations because they feel pointless. That\'s exactly when they\'re working.','var(--accent2)')}
+      ${ruleCard('RULE 09','Fast days: 70-80% intensity only.','Training fasted is fine — you\'ve done it for weeks. But don\'t push 100% on zero calories. You\'ll compromise the session and risk the symptoms.','var(--accent2)')}
+      <div class="section-title" style="margin-top:8px">DISCIPLINE <span>RULES</span></div>
+      ${ruleCard('RULE 10','One miss = noise. Two = pattern. Three = decision.','At day two: lower the bar. 10 push-ups + stretch = not breaking the streak. Minimum beats zero every time.','#70c8ff')}
+      ${ruleCard('RULE 11','Boredom = add progression, not novelty.','Every 2 weeks: +1 rep, -5 sec rest, or harder variation. Progress kills boredom. Novelty is avoidance.','#70c8ff')}
+      ${ruleCard('RULE 12','Friends not on a mission are not your benchmark.','They\'re comfortable. You have a reason they don\'t. No explanation required.','#70c8ff')}
+      ${ruleCard('RULE 13','India changes nothing.','20 min on a floor. The body goes everywhere. The mission doesn\'t pause.','#70c8ff')}`;
+    }
+  }
+
+};
+
+// ─── ACTIVE PLAN HELPER ──────────────────────────────────────────────────────
+// Single entry point for all plan-dependent rendering.
+// Add new plans to PLANS above — nothing else needs to change.
+// Falls back to 'default' if settings has an unknown plan key.
+function getActivePlan() {
+  const key = getSettings().plan || 'default';
+  return PLANS[key] || PLANS.default;
+}
+
+// ─── TABS ────────────────────────────────────────────────────────────────────
+// switchTab: hides all sections and shows only the requested one.
+// Also triggers content rendering for tabs that build HTML dynamically.
+// Called by the bottom nav bar buttons — each passes its own element as 'btn'.
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  if(btn) btn.classList.add('active');
+  if(id==='months') renderCalendar();
+  if(id==='workouts') renderWorkouts();
+  if(id==='nutrition') renderNutrition();
+  if(id==='rules') renderRules();
+  if(id==='track') { renderWeights(); renderRecentNotes(); }
+}
+
+// ─── TODAY ───────────────────────────────────────────────────────────────────
+// The TODAY tab is the primary daily driver. It shows:
+// - Active plan banner
+// - Checklist (eating day or fast day depending on SK.fastDays[today])
+// - Progress bar (% of checklist items ticked)
+// - Fast day banner + protocol details if today is a fast day
+
+// Set the day name in the header immediately on load
+const FULL_DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+document.getElementById('todayDayName').textContent = FULL_DAYS[new Date().getDay()];
+
+// isFastDay: checks if a given dateStr is marked as a water fast in storage
+function isFastDay(dateStr) { return !!(gs(SK.fastDays)||{})[dateStr]; }
+
+// updateTodayTab: refreshes the banner, calorie ceiling text, and all day-specific
+// sub-text under the checklist groups to match the active plan and current day-of-week
+function updateTodayTab() {
+  const s = getSettings();
+  const plan = getActivePlan();
+  const day = new Date().getDay();
+  const cal = s.calories || 1000;
+
+  // Active plan banner
+  const banner = document.getElementById('activePlanBanner');
+  const bannerName = document.getElementById('activePlanName');
+  const bannerCal = document.getElementById('activePlanCal');
+  if(banner && bannerName && bannerCal) {
+    bannerName.textContent = plan.name;
+    bannerName.style.color = plan.bannerColor;
+    bannerCal.textContent = cal + ' CAL';
+    banner.style.background = plan.bannerBg;
+    banner.style.borderColor = plan.bannerBorder;
+  }
+
+  document.getElementById('calCeilingNote').textContent = `${cal} cal hard ceiling. Never more.`;
+  document.getElementById('foodGroupTime').textContent = `${cal} cal ceiling`;
+
+  const mSub = document.getElementById('todayMorningSub');
+  if(mSub) mSub.textContent = plan.morningSub[day] || '';
+
+  const eSub = document.getElementById('todayEveningSub');
+  if(eSub) eSub.textContent = plan.eveningSub[day] || '';
+
+  const stSub = document.getElementById('todayStretchSub');
+  if(stSub) stSub.textContent = plan.stretchSub[day] || 'See WORKOUTS tab → today\'s cooldown';
+
+  const planTag = document.querySelector('#foodGroup .group-tag');
+  if(planTag) {
+    planTag.textContent = plan.foodGroupLabel || 'EATING';
+    planTag.style.background = plan.foodGroupBg || '';
+    planTag.style.color = plan.foodGroupColor || '';
+  }
+}
+
+// autoSetPlanFastDays: when a schedule is created, automatically marks the correct
+// days as water fasts based on the plan's fastDaysDow array.
+// e.g. AGRO plan uses [0,3,6] = Sunday, Wednesday, Saturday as fasts.
+function autoSetPlanFastDays(startDateStr, totalDays) {
+  const plan = getActivePlan();
+  const fastDow = plan.fastDaysDow || [0, 3, 6];
+  const fd = gs(SK.fastDays) || {};
+  const start = new Date(startDateStr);
+  for(let i = 0; i < totalDays; i++) {
+    const d = new Date(start); d.setDate(d.getDate() + i);
+    if(fastDow.includes(d.getDay())) fd[dateToStr(d)] = true;
+  }
+  ss(SK.fastDays, fd);
+  updateFastUI();
+}
+
+// updateFastUI: shows/hides the fast day banner and swaps the eating checklist
+// for the fast day checklist on the TODAY tab.
+function updateFastUI() {
+  const fast = isFastDay(todayStr());
+  document.getElementById('fastBanner').classList.toggle('visible', fast);
+  document.getElementById('foodGroup').style.display = fast ? 'none' : '';
+  document.getElementById('fastGroup').style.display = fast ? '' : 'none';
+}
+
+// ─── UNIFIED DAY LOG — single source of truth ────────────────────────────────
+// All per-day data (checklist state, weight, water, energy, notes) lives in SK.dayLogs.
+// Structure: { "2026-03-11": { checks: { m1: true, m2: false, ... }, weight: 103.5, water: 3, energy: 'normal', notes: '...' } }
+//
+// Both the TODAY tab and the day modal in MONTHS read/write the SAME key for the same date.
+// This ensures they are always in sync — no separate "today's checklist" storage.
+
+// getDayLog: returns the full log object for a given date, or {} if none exists yet
+function getDayLog(dateStr) {
+  return (gs(SK.dayLogs)||{})[dateStr] || {};
+}
+
+// saveDayLogField: merges partial updates into a day log without overwriting other fields.
+// e.g. saveDayLogField('2026-03-11', { weight: 103.5 }) only touches the weight field.
+function saveDayLogField(dateStr, fields) {
+  const all = gs(SK.dayLogs)||{};
+  if(!all[dateStr]) all[dateStr] = {};
+  Object.assign(all[dateStr], fields);
+  ss(SK.dayLogs, all);
+}
+
+// loadChecklist: reads today's checks from storage and applies done/undone CSS to each item
+function loadChecklist() {
+  const log = getDayLog(todayStr());
+  const checks = log.checks || {};
+  document.querySelectorAll('.check-item').forEach(item=>{
+    item.classList.toggle('done', !!checks[item.dataset.id]);
+  });
+  updateProgress();
+}
+
+// toggle: called when a checklist item is tapped on the TODAY tab.
+// Flips its done state, saves all checks to storage, updates the progress bar,
+// and fires DAY_SAVED so the calendar cell color updates too.
+function toggle(el) {
+  el.classList.toggle('done');
+  const checks = {};
+  document.querySelectorAll('.check-item').forEach(item=>{
+    checks[item.dataset.id] = item.classList.contains('done');
+  });
+  saveDayLogField(todayStr(), { checks });
+  updateProgress();
+  dispatch('DAY_SAVED');
+}
+
+// resetToday: clears all checklist ticks for today and saves the cleared state
+function resetToday() {
+  document.querySelectorAll('.check-item').forEach(i=>i.classList.remove('done'));
+  saveDayLogField(todayStr(), { checks:{} });
+  updateProgress();
+  dispatch('DAY_SAVED');
+}
+
+// updateProgress: counts visible checklist items, calculates % done, updates the bar
+function updateProgress() {
+  let total=0, done=0;
+  document.querySelectorAll('.check-item').forEach(item=>{
+    const grp = item.closest('.checklist-group');
+    if(grp && grp.style.display==='none') return;
+    total++; if(item.classList.contains('done')) done++;
+  });
+  const pct = total ? Math.round((done/total)*100) : 0;
+  document.getElementById('todayPct').textContent = pct+'%';
+  document.getElementById('todayFill').style.width = pct+'%';
+}
+
+// ─── WEIGHT / GOAL BAR ───────────────────────────────────────────────────────
+
+// getLatestWeight: returns the most recent logged weight, or the settings.currentKg fallback.
+// This is the primary source of "current weight" used everywhere in the app.
+function getLatestWeight() {
+  const w = gs(SK.weights)||[];
+  return w.length ? w[0].weight : (getSettings().currentKg||104);
+}
+
+// updateGoalBar: calculates % progress from start weight to target and fills the bar.
+// Start weight = oldest logged entry (not settings.currentKg) — avoids bar resetting
+// if the user updates settings later with a lower current weight.
+function updateGoalBar(current) {
+  const s = getSettings();
+  const target = s.targetKg || 91;
+  // Start = oldest logged weight entry, fall back to settings.currentKg
+  const weights = gs(SK.weights)||[];
+  const start = weights.length ? weights[weights.length-1].weight : (s.currentKg || current);
+  const totalDrop = start - target;
+  const dropped = start - current;
+  const pct = totalDrop > 0 ? Math.min(100, Math.max(0, Math.round((dropped / totalDrop) * 100))) : 0;
+  const remain = Math.max(0, (current - target)).toFixed(1);
+  document.getElementById('currentWeightDisplay').textContent = current;
+  document.getElementById('gs-current').textContent = current;
+  document.getElementById('gs-target').textContent = target;
+  document.getElementById('gs-remain').textContent = remain;
+  document.getElementById('goalBarFill').style.width = pct + '%';
+  document.getElementById('goalPct').textContent = pct + '% done';
+}
+
+// updateDurationBar: shows the schedule progress strip (DAY X / TOTAL DAYS).
+// Hidden if no schedule is active.
+function updateDurationBar() {
+  const sched = gs(SK.schedule);
+  if(!sched || !sched.startDate || !sched.totalDays) {
+    document.getElementById('durationStrip').classList.remove('visible');
+    return;
+  }
+  const start = strToDate(sched.startDate);
+  const now = new Date(); now.setHours(0,0,0,0);
+  const elapsed = Math.max(0, Math.floor((now - start)/86400000));
+  const pct = Math.min(100, Math.round((elapsed/sched.totalDays)*100));
+  document.getElementById('durationStrip').classList.add('visible');
+  document.getElementById('durationLabel').textContent = `${sched.planName||'PLAN'} — DAY ${elapsed+1} / ${sched.totalDays}`;
+  document.getElementById('durationPct').textContent = pct+'%';
+  document.getElementById('durationFill').style.width = pct+'%';
+}
+
+// ─── WEIGHT PROJECTION ───────────────────────────────────────────────────────
+// Projects end-of-week weight based on a blend of two signals:
+//   1. OBSERVED RATE  — actual kg/day loss from logged weight history (up to last 7 entries)
+//   2. FORMULA RATE   — theoretical kg/day from (tdee - calories) deficit math
+//
+// The blend shifts from formula-heavy (early, little data) to observed-heavy (more data logged).
+// A compliance modifier adjusts downward if checklist completion rate is low.
+// Fast days ahead are accounted for separately (full TDEE deficit, not diet deficit).
+//
+// Output:
+//   - Projected weight this Sunday
+//   - Delta from today (e.g. "−0.8kg by Sun")
+//   - Best case / Worst case band (±15% of projected drop)
+//   - Basis line showing data points used, observed rate, compliance %
+function updateProjection() {
+  const weights = gs(SK.weights)||[];
+  const fastDays = gs(SK.fastDays)||{};
+  const dayLogs = gs(SK.dayLogs)||{};
+  const s = getSettings();
+
+  const strip = document.getElementById('projectionStrip');
+  if(!strip) return;
+
+  // Need at least 2 data points
+  if(weights.length < 2) {
+    document.getElementById('projBasis').textContent = weights.length===1
+      ? 'Log at least 2 days of weight to generate a projection.'
+      : 'Log weight daily for projection to calculate.';
+    document.getElementById('projSundayKg').textContent = '—';
+    document.getElementById('projDelta').textContent = '';
+    document.getElementById('projLow').textContent = '—';
+    document.getElementById('projHigh').textContent = '—';
+    return;
+  }
+
+  // Use up to last 7 weight entries
+  const recent = weights.slice(0, Math.min(7, weights.length));
+  const latest = recent[0];
+  const oldest = recent[recent.length-1];
+  const daySpan = Math.max(1, (strToDate(latest.date) - strToDate(oldest.date)) / 86400000);
+  const rawDailyLoss = (oldest.weight - latest.weight) / daySpan; // kg/day (positive = losing)
+
+  // Count fast days in next 7 days from today
+  const now = new Date(); now.setHours(0,0,0,0);
+  let fastDaysAhead = 0;
+  let eatingDaysAhead = 0;
+  for(let i=0;i<7;i++){
+    const d=new Date(now); d.setDate(d.getDate()+i);
+    const ds=dateToStr(d);
+    if(fastDays[ds]) fastDaysAhead++; else eatingDaysAhead++;
+  }
+
+  // Compliance modifier: use last 7 calendar days, not weight entry window
+  const now7 = new Date(); now7.setHours(0,0,0,0);
+  const recentLogs = [];
+  for(let i=0;i<7;i++){
+    const d=new Date(now7); d.setDate(d.getDate()-i);
+    const log=dayLogs[dateToStr(d)];
+    if(log) recentLogs.push(log);
+  }
+  let complianceScore = 0.85;
+  if(recentLogs.length >= 3){
+    const avgCompliance = recentLogs.reduce((sum,l)=>{
+      const checks = Object.values(l.checks||{});
+      return sum + (checks.length ? checks.filter(Boolean).length/checks.length : 0.5);
+    },0) / recentLogs.length;
+    complianceScore = avgCompliance;
+  }
+
+  // Days until Sunday
+  const todayDow = now.getDay(); // 0=Sun
+  const daysToSunday = todayDow === 0 ? 7 : 7 - todayDow;
+
+  // Projection: base rate adjusted for upcoming fast days
+  const tdee = s.tdee || 2600;
+  const cal = s.calories || 1500;
+  const fastDayDeficit = tdee / 7700; // kg lost on a full fast day
+  const eatDayDeficit = Math.max(0, (tdee - cal)) / 7700; // kg lost on eating day
+
+  // Blend observed rate with formula rate
+  const formulaRate = ((fastDaysAhead * fastDayDeficit) + (eatingDaysAhead * eatDayDeficit)) / 7;
+  const observedRate = rawDailyLoss;
+  const observedWeight = Math.min(0.75, recent.length / 10);
+  const blendedRate = (observedRate * observedWeight) + (formulaRate * (1 - observedWeight));
+  const adjustedRate = blendedRate * complianceScore;
+
+  const projectedDrop = adjustedRate * daysToSunday;
+  const projSunday = parseFloat((latest.weight - projectedDrop).toFixed(1));
+  const delta = parseFloat((projectedDrop).toFixed(1));
+
+  // Confidence band — labelled best/worst case
+  const bandSize = Math.abs(projectedDrop) * 0.15;
+  const bestCase = parseFloat((projSunday - bandSize).toFixed(1));  // more loss = better
+  const worstCase = parseFloat((projSunday + bandSize).toFixed(1)); // less loss = worse
+
+  const sundayEl = document.getElementById('projSundayKg');
+  const deltaEl = document.getElementById('projDelta');
+  sundayEl.textContent = projSunday + ' kg';
+  deltaEl.textContent = delta > 0 ? `−${delta}kg by Sun` : delta < 0 ? `+${Math.abs(delta)}kg by Sun` : 'no change';
+
+  const target = s.targetKg || 91;
+  sundayEl.className = 'proj-main ' + (projSunday <= target ? 'good' : projSunday < latest.weight ? 'good' : 'warn');
+
+  document.getElementById('projLow').textContent = bestCase + 'kg';
+  document.getElementById('projHigh').textContent = worstCase + 'kg';
+
+  const basisParts = [];
+  basisParts.push(`Based on ${recent.length} day${recent.length>1?'s':''} of data`);
+  basisParts.push(`${observedRate>0?'-':'+'} ${Math.abs(observedRate).toFixed(2)}kg/day observed`);
+  basisParts.push(`${fastDaysAhead} fast day${fastDaysAhead!==1?'s':''} ahead`);
+  basisParts.push(`${Math.round(complianceScore*100)}% compliance`);
+  document.getElementById('projBasis').textContent = basisParts.join(' · ');
+}
+function buildWeekGrid() {
+  const grid = document.getElementById('weekGrid');
+  const today = new Date().getDay();
+  const plan = getActivePlan();
+  grid.innerHTML = '';
+  DAYS_SHORT.forEach((d,i)=>{
+    const pill = document.createElement('div');
+    pill.className = 'day-pill'+(i===today?' today':'');
+    pill.innerHTML = `<div class="day-pill-name">${d}</div><div class="day-pill-type">${plan.weekIcons[i]||'•'}</div>`;
+    grid.appendChild(pill);
+  });
+}
+
+// ─── WORKOUT CONTENT ─────────────────────────────────────────────────────────
+// renderWorkouts: rebuilds the WORKOUTS tab HTML from the active plan's workoutContent().
+// Also rebuilds the week grid (emoji pill row showing today's session type).
+// Workout cards are collapsible — click header to expand/collapse.
+function renderWorkouts() {
+  const plan = getActivePlan();
+  const s = getSettings();
+  const container = document.getElementById('workoutContent');
+  buildWeekGrid();
+  container.innerHTML = plan.workoutContent(s);
+  container.querySelectorAll('.workout-card-header').forEach(h=>{
+    h.addEventListener('click', ()=>toggleWorkout(h));
+  });
+}
+
+function toggleWorkout(header) {
+  const body = header.nextElementSibling;
+  const chev = header.querySelector('.chevron');
+  body.classList.toggle('open'); chev.classList.toggle('open');
+}
+
+// exRow: returns an HTML row for one exercise (name + detail + sets/duration)
+function exRow(name, detail, sets) {
+  return `<div class="exercise-row"><div><div class="ex-name">${name}</div><div class="ex-detail">${detail}</div></div><div class="ex-sets">${sets}</div></div>`;
+}
+
+// workoutCard: wraps exercise rows in a collapsible card with a header and optional stretch rows
+function workoutCard(title, meta, rows, stretchRows='') {
+  return `<div class="workout-card">
+    <div class="workout-card-header">
+      <h3>${title}</h3>
+      <div class="wch-right"><div class="meta">${meta}</div><span class="chevron">▼</span></div>
+    </div>
+    <div class="workout-body">${rows}${stretchRows ? `<div style="background:rgba(221,136,255,0.05);border-top:1px solid var(--border);padding:6px 0">${stretchRows}</div>` : ''}</div>
+  </div>`;
+}
+
+// stretchRow: same as exRow but rendered in purple to distinguish cooldown/stretch work
+function stretchRow(name, detail, duration) {
+  return `<div class="exercise-row"><div><div class="ex-name" style="color:#dd88ff">${name}</div><div class="ex-detail">${detail}</div></div><div class="ex-sets" style="color:#dd88ff">${duration}</div></div>`;
+}
+
+// ─── NUTRITION CONTENT ───────────────────────────────────────────────────────
+// renderNutrition: rebuilds NUTRITION tab from active plan's nutritionContent(s).
+// Passes settings so macros can reflect the current calorie ceiling.
+function renderNutrition() {
+  const plan = getActivePlan();
+  const s = getSettings();
+  document.getElementById('nutritionContent').innerHTML = plan.nutritionContent(s);
+}
+
+// ruleCard: returns an HTML card for one rule (number, title, sub-text, optional accent color)
+function ruleCard(num, title, sub, color='var(--accent)') {
+  return `<div class="rule-card" style="border-left-color:${color}"><div class="rule-num">${num}</div><div class="rule-text">${title}</div>${sub ? `<div class="rule-sub">${sub}</div>` : ''}</div>`;
+}
+
+// ─── RULES CONTENT ───────────────────────────────────────────────────────────
+// renderRules: rebuilds RULES tab from active plan's rulesContent()
+function renderRules() {
+  const plan = getActivePlan();
+  const s = getSettings();
+  document.getElementById('rulesContent').innerHTML = plan.rulesContent(s);
+}
+
+// ─── CALENDAR ────────────────────────────────────────────────────────────────
+// The MONTHS tab shows a calendar grid. Each day cell is color-coded:
+//   Green  — all checklist items done
+//   Purple — water fast day
+//   Orange — partial (some items done)
+//   Red    — day has passed with no log (missed)
+//   White border — day is part of the active schedule
+// Tap any cell to open the day modal for details or to log past data.
+
+// calYear/calMonth track which month is currently displayed
+let calYear = new Date().getFullYear();
+let calMonth = new Date().getMonth();
+
+// changeMonth: moves the calendar forward (+1) or backward (-1) one month
+function changeMonth(dir) {
+  calMonth += dir;
+  if(calMonth>11){calMonth=0;calYear++;} if(calMonth<0){calMonth=11;calYear--;}
+  renderCalendar();
+}
+
+function renderCalendar() {
+  document.getElementById('monthTitle').innerHTML = `${MONTHS_LIST[calMonth]} <span>${calYear}</span>`;
+  const now = new Date(); now.setHours(0,0,0,0);
+  const firstDay = new Date(calYear,calMonth,1).getDay();
+  const daysInMonth = new Date(calYear,calMonth+1,0).getDate();
+  const dayLogs = gs(SK.dayLogs)||{};
+  const fastDays = gs(SK.fastDays)||{};
+  const weights = gs(SK.weights)||[];
+  const sched = gs(SK.schedule)||{};
+  const planDaySet = new Set(sched.days||[]);
+  const weightMap = {};
+  weights.forEach(w=>{ weightMap[w.date]=w.weight; });
+
+  let done=0,fasts=0,missed=0,partial=0;
+  const grid = document.getElementById('calGridMain');
+  grid.innerHTML = '';
+
+  for(let i=0;i<firstDay;i++){const e=document.createElement('div');e.className='cal-cell empty';grid.appendChild(e);}
+
+  for(let d=1;d<=daysInMonth;d++){
+    const dt = new Date(calYear,calMonth,d); dt.setHours(0,0,0,0);
+    const dateStr = dateToStr(dt);
+    const isFuture = dt>now;
+    const isToday = dt.getTime()===now.getTime();
+    const isFast = !!fastDays[dateStr];
+    const log = dayLogs[dateStr];
+    const wt = weightMap[dateStr];
+    const isPlanDay = planDaySet.has(dateStr);
+
+    let cls = 'cal-cell';
+    if(isToday) cls+=' today-cal';
+    if(isFuture) cls+=' future-cal';
+    if(isPlanDay) cls+=' plan-day';
+
+    if(!isFuture){
+      if(isFast){cls+=' cal-fast'; fasts++;}
+      else if(log){
+        const checks = Object.values(log.checks||{}).filter(Boolean).length;
+        const total = Object.keys(log.checks||{}).length;
+        if(checks>0&&checks<total){cls+=' cal-partial';partial++;}
+        else if(checks===total&&total>0){cls+=' cal-done';done++;}
+        else{cls+=' cal-missed';missed++;}
+      } else if(!isToday){cls+=' cal-missed';missed++;}
+    }
+
+    const cell = document.createElement('div');
+    cell.className = cls;
+    cell.innerHTML = `<span class="cal-num">${d}</span>${wt?`<span class="cal-wt">${wt}kg</span>`:''}`;
+    cell.onclick = ()=>openDayModal(dateStr,dt);
+    grid.appendChild(cell);
+  }
+
+  document.getElementById('monthStats').innerHTML = `
+    <div class="mstat"><div class="mstat-val green">${done}</div><div class="mstat-lbl">Done</div></div>
+    <div class="mstat"><div class="mstat-val purple">${fasts}</div><div class="mstat-lbl">Fasts</div></div>
+    <div class="mstat"><div class="mstat-val orange">${partial}</div><div class="mstat-lbl">Partial</div></div>
+    <div class="mstat"><div class="mstat-val" style="color:var(--danger)">${missed}</div><div class="mstat-lbl">Missed</div></div>`;
+}
+
+// ─── DAY MODAL ───────────────────────────────────────────────────────────────
+// Opened by tapping any calendar cell. Shows:
+// - Toggle to mark day as water fast
+// - Weight and water intake inputs
+// - Full interactive checklist for past days (or a read-only summary for today)
+// - Energy level selector
+// - Notes textarea
+// - SAVE DAY button writes everything to SK.dayLogs[dateStr]
+//
+// For TODAY: checklist is shown as a count only — use the TODAY tab to tick off items.
+// For PAST DAYS: full interactive checklist displayed directly in the modal.
+function openDayModal(dateStr, dt) {
+  const log = getDayLog(dateStr);
+  const fastDays = gs(SK.fastDays)||{};
+  const isFast = !!fastDays[dateStr];
+  const isToday = dateStr === todayStr();
+  const now = new Date(); now.setHours(0,0,0,0);
+  const isFuture = dt > now;
+
+  document.getElementById('mTitle').textContent = dt.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+  document.getElementById('mDate').textContent = dt.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+
+  let html = `<button class="fast-toggle ${isFast?'active':''}" onclick="toggleFastDay('${dateStr}')">
+    ${isFast?'⚡ WATER FAST DAY — TAP TO UNSET':'+ SET AS WATER FAST DAY'}
+  </button>`;
+
+  if(isFast) html+=`<div class="fast-protocol-box"><div class="fast-protocol-title">⚡ FAST PROTOCOL</div>
+    <div class="fast-protocol-body">Wake: 500ml water + salt · Mid-morning: electrolyte tablet · Allowed: water/black coffee/green tea · Pre-training: electrolyte 20 min before · Sleep: 400mg magnesium<br><strong style="color:#cc4444">Stop if:</strong> palpitations · chest tightness · vision goes dark</div></div>`;
+
+  if(!isFuture) {
+    // Weight and water fields
+    html += `
+    <div class="field-group"><label class="field-label">Weight (kg) — morning, before food</label>
+    <input type="number" step="0.1" class="field-input" id="mWeight" value="${log.weight||''}" placeholder="e.g. 103.5"></div>
+    <div class="field-group"><label class="field-label">Water intake (L)</label>
+    <input type="number" step="0.25" class="field-input" id="mWater" value="${log.water||''}" placeholder="e.g. 3.0"></div>`;
+
+    // Unified checklist — full items, same as TODAY tab
+    if(isToday) {
+      html += `<div class="field-group"><label class="field-label">Today's Checklist — tap items on TODAY tab to check off</label>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--muted);line-height:1.8">`;
+      const items = isFast ? getActivePlan().checklistFast : getActivePlan().checklistNormal;
+      const checks = log.checks || {};
+      let doneCount = 0;
+      items.forEach(item => { if(checks[item.id]) doneCount++; });
+      html += `${doneCount}/${items.length} complete. Use the TODAY tab to check off items — this syncs automatically.</div></div>`;
+    } else {
+      // Past day — show full interactive checklist
+      const items = isFast ? getActivePlan().checklistFast : getActivePlan().checklistNormal;
+      const checks = log.checks || {};
+      let currentGroup = '';
+      html += `<div class="field-group"><label class="field-label">Day Checklist</label>`;
+      items.forEach(item => {
+        if(item.group !== currentGroup) {
+          if(currentGroup) html += `</div>`;
+          currentGroup = item.group;
+          const tagColor = item.group==='MORNING'?'tag-morning':item.group==='EATING'?'tag-food':item.group==='EVENING'?'tag-evening':item.group==='FAST'?'tag-fast':'tag-rules';
+          html += `<div class="modal-check-group"><div class="modal-group-label ${tagColor}" style="margin-bottom:6px">${item.group}</div>`;
+        }
+        const done = !!checks[item.id];
+        html += `<div class="modal-check-item ${done?'done':''}" onclick="toggleModalCheck(this,'${dateStr}','${item.id}')">
+          <div class="modal-cb">${done?'✓':''}</div>
+          <div><div class="m-title">${item.label}</div><div class="m-sub">${item.sub}</div></div>
+        </div>`;
+      });
+      html += `</div></div>`;
+    }
+
+    // Energy + notes
+    html += `<div class="field-group"><label class="field-label">Energy level</label>
+    <select class="field-input" id="mEnergy" style="cursor:pointer">
+      <option value="">— select —</option>
+      <option value="high" ${log.energy==='high'?'selected':''}>High — sharp & focused</option>
+      <option value="normal" ${log.energy==='normal'?'selected':''}>Normal — functional</option>
+      <option value="low" ${log.energy==='low'?'selected':''}>Low — dragging</option>
+      <option value="crashed" ${log.energy==='crashed'?'selected':''}>Crashed — barely made it</option>
+    </select></div>
+    <div class="field-group"><label class="field-label">Notes</label>
+    <textarea class="field-input" id="mNotes" placeholder="How did today go?">${log.notes||''}</textarea></div>
+    <button class="save-btn" onclick="saveDayLog('${dateStr}')">SAVE DAY</button>`;
+  }
+
+  document.getElementById('mBody').innerHTML = html;
+  document.getElementById('modalOverlay').classList.add('active');
+}
+
+// toggleModalCheck: called when a past-day checklist item is tapped inside the day modal.
+// Updates storage for that specific date without touching today's checklist.
+function toggleModalCheck(el, dateStr, itemId) {
+  el.classList.toggle('done');
+  const cb = el.querySelector('.modal-cb');
+  const isDone = el.classList.contains('done');
+  cb.textContent = isDone ? '✓' : '';
+  el.querySelector('.m-title').style.textDecoration = isDone ? 'line-through' : '';
+  // Read current checks for this day and update
+  const log = getDayLog(dateStr);
+  const checks = Object.assign({}, log.checks||{});
+  checks[itemId] = isDone;
+  saveDayLogField(dateStr, { checks });
+  renderCalendar();
+}
+
+// toggleFastDay: marks or unmarks a date as a water fast day, then re-opens the modal
+// so the UI immediately reflects the change (fast protocol box appears/disappears).
+function toggleFastDay(dateStr) {
+  const fd = gs(SK.fastDays)||{};
+  if(fd[dateStr]) delete fd[dateStr]; else fd[dateStr]=true;
+  ss(SK.fastDays, fd);
+  dispatch('FAST_DAY_TOGGLED');
+  const [y,m,d]=dateStr.split('-').map(Number);
+  openDayModal(dateStr,new Date(y,m-1,d));
+}
+
+// saveDayLog: reads all fields from the open day modal and writes them to SK.dayLogs.
+// If a weight was entered it also adds/updates the weight log entry for that date.
+function saveDayLog(dateStr) {
+  const wt = parseFloat(document.getElementById('mWeight')?.value);
+  const water = parseFloat(document.getElementById('mWater')?.value);
+  const energy = document.getElementById('mEnergy')?.value||null;
+  const notes = document.getElementById('mNotes')?.value||'';
+
+  const fields = { energy: energy||null, notes, ts: Date.now() };
+  if(!isNaN(water) && water >= 0) fields.water = water;
+  saveDayLogField(dateStr, fields);
+
+  if(!isNaN(wt) && wt > 40) {
+    const weights = gs(SK.weights)||[];
+    const idx = weights.findIndex(w=>w.date===dateStr);
+    if(idx>=0) weights.splice(idx,1);
+    weights.unshift({date:dateStr, weight:wt, ts:Date.now()});
+    weights.sort((a,b)=>b.date.localeCompare(a.date));
+    ss(SK.weights, weights);
+    saveDayLogField(dateStr, { weight: wt });
+    renderWeights();
+    dispatch('WEIGHT_LOGGED');
+  }
+  closeModal();
+  dispatch('DAY_SAVED');
+}
+
+function closeModal() { document.getElementById('modalOverlay').classList.remove('active'); }
+document.getElementById('modalOverlay').addEventListener('click',e=>{if(e.target.id==='modalOverlay')closeModal();});
+
+// ─── WEIGHT LOG ──────────────────────────────────────────────────────────────
+// logWeight: reads the TRACK tab weight input, validates it (40–250kg),
+// upserts today's entry in SK.weights (replaces if today already exists),
+// then fires WEIGHT_LOGGED to update goal bar, projection, etc.
+function logWeight() {
+  const input = document.getElementById('weightInput');
+  const val = parseFloat(input.value);
+  if(isNaN(val)||val<40||val>250){input.style.borderColor='var(--danger)';setTimeout(()=>input.style.borderColor='',1000);return;}
+  const weights = gs(SK.weights)||[];
+  const today = todayStr();
+  const idx = weights.findIndex(w=>w.date===today);
+  if(idx>=0) weights.splice(idx,1);
+  weights.unshift({date:today, weight:val, ts:Date.now()});
+  weights.sort((a,b)=>b.date.localeCompare(a.date));
+  ss(SK.weights, weights);
+  saveDayLogField(today, { weight: val });
+  input.value='';
+  renderWeights();
+  dispatch('WEIGHT_LOGGED');
+}
+
+// renderWeights: rebuilds the weight history list in the TRACK tab.
+// Shows date, weight, and delta (+/-) vs previous entry.
+function renderWeights() {
+  const weights = gs(SK.weights)||[];
+  const container = document.getElementById('weightEntries');
+  if(!weights.length){container.innerHTML='<div class="empty-state">No entries yet.<br>Log your first weight above.</div>';return;}
+  container.innerHTML = weights.map((e,i)=>{
+    const prev=weights[i+1];
+    let delta='—',cls='delta-same';
+    if(prev){const d=e.weight-prev.weight;delta=(d>0?'+':'')+d.toFixed(1)+'kg';cls=d<0?'delta-down':d>0?'delta-up':'delta-same';}
+    return `<div class="weight-entry"><div class="we-date">${e.date}</div><div class="we-weight">${e.weight} kg</div><div class="we-delta ${cls}">${delta}</div></div>`;
+  }).join('');
+  if(weights.length) updateGoalBar(weights[0].weight);
+}
+
+// clearWeightLog: destroys all weight entries after user confirmation
+function clearWeightLog() {
+  showConfirm('CLEAR WEIGHTS', 'Clear all weight entries? This cannot be undone.', () => {
+    ss(SK.weights,[]);
+    renderWeights();
+    updateGoalBar(getSettings().currentKg||104);
+    updateProjection();
+  }, { yesLabel:'CLEAR ALL', danger:true });
+}
+
+// ─── RECENT NOTES (TRACK TAB) ────────────────────────────────────────────────
+// Shows the last 14 days that have any logged data (weight, water, energy, notes, checklist).
+// Provides a quick-glance history without opening the calendar.
+function renderRecentNotes() {
+  const dayLogs = gs(SK.dayLogs)||{};
+  const container = document.getElementById('recentNotes');
+  if(!container) return;
+  const entries = Object.entries(dayLogs)
+    .filter(([,log])=>log.notes||log.energy||log.water||log.weight)
+    .sort(([a],[b])=>b.localeCompare(a))
+    .slice(0,14);
+  if(!entries.length){container.innerHTML='<div class="empty-state">No day logs yet. Tap any day on the MONTHS calendar to add notes.</div>';return;}
+  container.innerHTML = entries.map(([dateStr,log])=>{
+    const parts = [];
+    if(log.weight) parts.push(`<span style="color:var(--accent2)">${log.weight}kg</span>`);
+    if(log.water) parts.push(`<span style="color:#70c8ff">${log.water}L water</span>`);
+    if(log.energy) parts.push(`<span style="color:var(--muted)">${log.energy}</span>`);
+    const checks = Object.values(log.checks||{});
+    if(checks.length) parts.push(`<span style="color:var(--green)">${checks.filter(Boolean).length}/${checks.length} done</span>`);
+    return `<div class="weight-entry" style="flex-direction:column;align-items:flex-start;gap:5px">
+      <div style="display:flex;justify-content:space-between;width:100%">
+        <span class="we-date">${dateStr}</span>
+        <span style="display:flex;gap:8px;font-family:'DM Mono',monospace;font-size:0.65rem">${parts.join(' · ')}</span>
+      </div>
+      ${log.notes?`<div style="font-size:0.76rem;color:var(--text);line-height:1.5;padding-top:2px">${log.notes}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+// ─── SETTINGS ────────────────────────────────────────────────────────────────
+// openSettings: pre-fills all inputs from current storage values, then shows the overlay.
+// Note: current weight is read from getLatestWeight() not settings.currentKg —
+// this way the field always shows actual logged weight, not a stale settings value.
+function openSettings() {
+  const s = getSettings();
+  document.getElementById('planSelect').value = s.plan||'default';
+  // Pre-fill current weight from latest logged entry, not stale settings value
+  document.getElementById('settingCurrentKg').value = getLatestWeight();
+  document.getElementById('settingTargetKg').value = s.targetKg||'';
+  document.getElementById('settingCalories').value = s.calories||'';
+  document.getElementById('settingTdee').value = s.tdee||2600;
+  document.getElementById('settingExercise').value = s.exerciseBurn||'';
+  document.getElementById('settingDays').value = '';
+  document.getElementById('settingTargetDate').value = '';
+  document.getElementById('settingStartDate').value = s.startDate||todayStr();
+  document.getElementById('settingRisk').value = s.risk||'aggressive';
+  onPlanSelectChange();
+  syncCustomSelect('planSelectCustom', 'planSelect');
+  syncCustomSelect('riskSelectCustom', 'settingRisk');
+  document.getElementById('settingsOverlay').classList.add('active');
+}
+
+function closeSettings() { document.getElementById('settingsOverlay').classList.remove('active'); }
+
+// onPlanSelectChange: fires when the plan dropdown changes — updates the description
+// text below it and recalculates the goal calculator in real time
+function onPlanSelectChange() {
+  const val = document.getElementById('planSelect').value;
+  const plan = PLANS[val] || PLANS.default;
+  const desc = document.getElementById('planDescription');
+  desc.textContent = plan.subtitle || '';
+  desc.className = 'plan-description' + (plan.badgeClass ? ' agro-desc' : '');
+  calcDuration();
+}
+
+// confirmPlan: saves all settings inputs to storage, updates the header badge,
+// and dispatches PLAN_CHANGED + CALORIES_CHANGED to refresh all tabs
+function confirmPlan() {
+  const val = document.getElementById('planSelect').value;
+  const s = getSettings();
+  s.plan = val;
+  const calInput = parseFloat(document.getElementById('settingCalories').value);
+  if(!isNaN(calInput) && calInput >= 0) s.calories = calInput;
+  const tdeeInput = parseFloat(document.getElementById('settingTdee').value);
+  if(!isNaN(tdeeInput) && tdeeInput >= 1200) s.tdee = tdeeInput;
+  const exerciseInput = parseFloat(document.getElementById('settingExercise').value);
+  s.exerciseBurn = (!isNaN(exerciseInput) && exerciseInput >= 0) ? exerciseInput : 0;
+  const curInput = parseFloat(document.getElementById('settingCurrentKg').value);
+  const tgtInput = parseFloat(document.getElementById('settingTargetKg').value);
+  if(!isNaN(curInput) && curInput > 0) s.currentKg = curInput;
+  if(!isNaN(tgtInput) && tgtInput > 0) s.targetKg = tgtInput;
+  s.risk = document.getElementById('settingRisk').value || 'aggressive';
+  saveSettings(s);
+  applyPlanUI(val);
+  dispatch('PLAN_CHANGED');
+  dispatch('CALORIES_CHANGED');
+  updateGoalBar(getLatestWeight());
+  const btn = document.querySelector('.confirm-plan-btn');
+  btn.textContent = '✓ PLAN CONFIRMED';
+  setTimeout(()=>{btn.textContent='CONFIRM PLAN';},1500);
+}
+
+// applyPlanUI: updates the header plan badge and subtitle to match the given plan key.
+// Called on init and whenever the plan changes.
+function applyPlanUI(plan) {
+  const p = PLANS[plan] || PLANS.default;
+  const badge = document.getElementById('planBadge');
+  badge.textContent = p.badge;
+  badge.className = 'plan-badge' + (p.badgeClass ? ' '+p.badgeClass : '');
+  document.getElementById('planSubtitle').textContent = p.subtitle;
+}
+
+// ─── UNIFIED GOAL CALCULATOR ─────────────────────────────────────────────────
+// Runs in real time as the user fills in settings. Two calculation modes:
+//
+//   MODE A — Deadline given (days or target date):
+//     Calculates what calorie ceiling is required to hit the goal on time.
+//     Formula: cal = tdee - ((weeklyDeficit - fastDays*tdee) / eatDays)
+//
+//   MODE B — Calories given:
+//     Calculates how many days it will take at that intake.
+//     Formula: days = totalCalDeficit / dailyDeficit
+//
+// SANITY GATES (risk-aware):
+//   Standard    — blocks below 800 cal/day or above 1.5kg/week
+//   Aggressive  — blocks weekly average below 400 cal or above 2.5kg/week
+//   Unrestricted — shows math only, no blocks
+//
+// Outputs: ACHIEVABLE / AGGRESSIVE / UNREALISTIC flag, cal/day, kg/week,
+// projected end date, and split of diet vs exercise burn needed.
+function calcDuration() {
+  const curKg  = parseFloat(document.getElementById('settingCurrentKg').value);
+  const tgtKg  = parseFloat(document.getElementById('settingTargetKg').value);
+  const tdee   = parseFloat(document.getElementById('settingTdee').value) || 2600;
+  const planVal= document.getElementById('planSelect').value;
+  const risk   = document.getElementById('settingRisk').value || 'aggressive';
+  const startDateStr = document.getElementById('settingStartDate').value;
+
+  // Days can come from either the days field OR the target date field
+  let totalDays = parseInt(document.getElementById('settingDays').value);
+  const tgtDateStr = document.getElementById('settingTargetDate').value;
+  if(isNaN(totalDays) && tgtDateStr) {
+    const today0 = new Date(); today0.setHours(0,0,0,0);
+    const tgtD   = new Date(tgtDateStr); tgtD.setHours(0,0,0,0);
+    totalDays = Math.round((tgtD - today0) / 86400000);
+  }
+
+  // User-overridden calorie ceiling (optional — if blank we calculate it)
+  const calOverride = parseFloat(document.getElementById('settingCalories').value);
+  const hasCalOverride = !isNaN(calOverride) && calOverride >= 0;
+
+  // Exercise burn: cal/day the user burns from training on top of TDEE.
+  // This is a REAL deficit contribution — it reduces how much diet restriction is needed.
+  // If 0 or blank, exercise contributes nothing to the math (conservative default).
+  const exerciseBurnPerDay = parseFloat(document.getElementById('settingExercise')?.value) || 0;
+  const totalTdeePerDay = tdee + exerciseBurnPerDay; // effective daily burn = rest TDEE + exercise
+
+  const flagEl    = document.getElementById('calcFlag');
+  const warnEl    = document.getElementById('calcWarning');
+  const resultEl  = document.getElementById('calcResult');
+  const useCalsBtn= document.getElementById('useCalsBtn');
+  const schedBtn  = document.getElementById('scheduleBtn');
+
+  // Clear state
+  flagEl.style.display='none'; warnEl.style.display='none';
+  useCalsBtn.style.display='none';
+
+  // Need at minimum: current kg and target kg
+  if(isNaN(curKg)||isNaN(tgtKg)){
+    resultEl.classList.remove('visible'); schedBtn.classList.remove('visible'); return;
+  }
+
+  // Hard rejects
+  if(tgtKg >= curKg) {
+    flagEl.textContent = '✗ TARGET WEIGHT IS HIGHER THAN CURRENT';
+    flagEl.style.cssText='display:block;background:rgba(255,68,68,0.12);color:var(--danger);padding:7px 10px;border-radius:6px;font-size:0.75rem;font-weight:700;letter-spacing:1px';
+    resultEl.classList.add('visible'); schedBtn.classList.remove('visible'); return;
+  }
+  if(!isNaN(totalDays) && totalDays <= 0) {
+    flagEl.textContent = '✗ TARGET DATE HAS ALREADY PASSED';
+    flagEl.style.cssText='display:block;background:rgba(255,68,68,0.12);color:var(--danger);padding:7px 10px;border-radius:6px;font-size:0.75rem;font-weight:700;letter-spacing:1px';
+    resultEl.classList.add('visible'); schedBtn.classList.remove('visible'); return;
+  }
+
+  const plan = PLANS[planVal] || PLANS.default;
+  const fastDaysPerWeek = plan.fastDaysPerWeek || 0;
+  const eatDaysPerWeek  = 7 - fastDaysPerWeek;
+  const totalKg         = curKg - tgtKg;
+  const totalCalDeficit = totalKg * 7700;
+
+  let calcDays, calcCals, weeklyDeficit, dailyDeficit, impliedRate;
+
+  if(!isNaN(totalDays) && totalDays > 0) {
+    // User gave a deadline — calculate required calories
+    dailyDeficit = totalCalDeficit / totalDays;
+    weeklyDeficit = dailyDeficit * 7;
+    // Exercise burns on BOTH eating days and fast days — subtract from required diet deficit.
+    // weeklyDeficit = total caloric deficit needed from all sources.
+    // Exercise covers some of it, so diet (eating + fasting) only needs to cover the rest.
+    const weeklyExerciseContribution = exerciseBurnPerDay * 7;
+    const weeklyDeficitAfterExercise = Math.max(0, weeklyDeficit - weeklyExerciseContribution);
+
+    // Fast days contribute fastDaysPerWeek * tdee (base TDEE, not including exercise which is already subtracted)
+    const fastDayContribution = fastDaysPerWeek * tdee;
+    const dietWeeklyDeficit = weeklyDeficitAfterExercise - fastDayContribution;
+    if(eatDaysPerWeek > 0 && dietWeeklyDeficit > 0) {
+      calcCals = Math.round(tdee - (dietWeeklyDeficit / eatDaysPerWeek));
+    } else {
+      calcCals = tdee; // fasting + exercise already cover the full deficit — eating days at maintenance
+    }
+    calcDays = totalDays;
+    impliedRate = (weeklyDeficit / 7700).toFixed(2);
+  } else if(hasCalOverride) {
+    // User gave calories — calculate how long it takes
+    // Exercise contribution reduces how much diet needs to do — adds to effective deficit
+    calcCals = calOverride;
+    weeklyDeficit = (eatDaysPerWeek * Math.max(0, tdee - calcCals)) + (fastDaysPerWeek * tdee) + (exerciseBurnPerDay * 7);
+    if(weeklyDeficit <= 0) {
+      flagEl.textContent = '✗ CALORIES TOO HIGH — NO DEFICIT';
+      flagEl.style.cssText='display:block;background:rgba(255,68,68,0.12);color:var(--danger);padding:7px 10px;border-radius:6px;font-size:0.75rem;font-weight:700;letter-spacing:1px';
+      resultEl.classList.add('visible'); schedBtn.classList.remove('visible'); return;
+    }
+    dailyDeficit = weeklyDeficit / 7;
+    calcDays = Math.ceil(totalCalDeficit / dailyDeficit);
+    impliedRate = (weeklyDeficit / 7700).toFixed(2);
+  } else {
+    // Not enough info yet
+    resultEl.classList.remove('visible'); schedBtn.classList.remove('visible'); return;
+  }
+
+  const calcWeeks = Math.ceil(calcDays / 7);
+  const kgPerWeek = parseFloat(impliedRate);
+  const dietDeficit = Math.max(0, tdee - calcCals);
+  // exerciseNeeded: how much daily burn exercise must contribute beyond diet alone.
+  // When calcCals === tdee (fast days cover the full deficit), diet contributes 0 deficit
+  // on eating days — but the fast days are doing the work, so exerciseNeeded is 0, not dailyDeficit.
+  // We use weeklyDeficit to account for fasting, then back out what diet covers per day.
+  // exerciseContribution: what the user's exercise actually adds to the daily deficit.
+  // Shown as a positive number — "your training covers X cal/day of this deficit."
+  // No longer calculated as a gap — it's a direct input the user provided.
+  const exerciseContribution = exerciseBurnPerDay;
+
+  // Weekly average calories (accounts for fast days)
+  const weeklyCalIntake = calcCals * eatDaysPerWeek;
+  const weeklyAvgCals = weeklyCalIntake / 7;
+
+  // ── SANITY GATES (risk-aware) ──
+  // STANDARD:     enforces conservative clinical limits — no aggressive deficits
+  //   Unrealistic: < 800 cal/day OR > 1.5 kg/week
+  //   Aggressive:  800–1200 cal/day OR 1.0–1.5 kg/week
+  //   Achievable:  > 1200 cal/day AND < 1.0 kg/week
+  //
+  // AGGRESSIVE:   your protocol — fasting + low cal is expected, higher thresholds
+  //   Unrealistic: weekly avg intake < 300 cal/day (extreme even for fasting)
+  //   Aggressive:  > 2.5 kg/week
+  //   Achievable:  everything else (includes 2 kg/week)
+  //
+  // UNRESTRICTED: shows math only, flags only if calcCals went negative (impossible)
+  const warnings = [];
+  let flagLevel = 'ok'; // ok / aggressive / unrealistic
+
+  if(risk === 'standard') {
+    if(calcCals < 800) {
+      flagLevel = 'unrealistic';
+      const safeKgPerWeek = ((eatDaysPerWeek*(tdee-800)) + (fastDaysPerWeek*tdee) + (exerciseBurnPerDay*7)) / 7700;
+      const safeDays = Math.ceil(totalCalDeficit / (safeKgPerWeek * 7700 / 7));
+      warnings.push(`Eating days require only ${calcCals} cal — below 800 cal safe minimum for standard protocol. At 800 cal/day: ~${Math.ceil(safeDays/7)} weeks.`);
+    } else if(calcCals < 1200) {
+      if(flagLevel === 'ok') flagLevel = 'aggressive';
+      warnings.push(`${calcCals} cal/day on eating days is very low for a standard protocol. Manageable short-term but monitor energy and muscle retention.`);
+    }
+    if(kgPerWeek > 1.5) {
+      flagLevel = 'unrealistic';
+      const realisticDays = Math.ceil(totalCalDeficit / (1.5 * 7700 / 7));
+      warnings.push(`${kgPerWeek}kg/week exceeds the sustainable standard maximum of 1.5kg/week. Realistic timeline at 1.5kg/wk: ~${Math.ceil(realisticDays/7)} weeks.`);
+    } else if(kgPerWeek > 1.0) {
+      if(flagLevel === 'ok') flagLevel = 'aggressive';
+      warnings.push(`${kgPerWeek}kg/week is on the high end for a standard protocol — manageable with good nutrition compliance.`);
+    }
+  } else if(risk === 'aggressive') {
+    // weeklyAvgCals: average daily intake across all 7 days (fast days = 0 food)
+    // This is the real floor check — not single-day calories
+    if(weeklyAvgCals < 300) {
+      flagLevel = 'unrealistic';
+      warnings.push(`Weekly average intake is ${Math.round(weeklyAvgCals)} cal/day — extreme even for an aggressive fasting protocol. Risk of muscle catabolism and metabolic crash.`);
+    } else if(kgPerWeek > 2.5) {
+      flagLevel = 'aggressive';
+      warnings.push(`${kgPerWeek}kg/week is a high rate. Survivable on a short protocol — monitor strength and energy closely.`);
+    }
+    // 2 kg/week at aggressive risk = achievable. No flag needed.
+  }
+
+  // Unrestricted: only flag if the math broke (calcCals went negative)
+  if(risk === 'unrestricted' && calcCals < 0) {
+    flagLevel = 'unrealistic';
+    warnings.push(`Required eating-day calories went negative — physically impossible. Extend the timeline or increase exercise.`);
+  } else if(risk === 'unrestricted' && kgPerWeek > 3) {
+    flagLevel = 'aggressive';
+    warnings.push(`${kgPerWeek}kg/week — operating outside any standard range. Math shown as-is.`);
+  }
+
+  // End date
+  let endDateStr = '—';
+  if(startDateStr) {
+    const sd = new Date(startDateStr);
+    sd.setDate(sd.getDate() + calcDays);
+    endDateStr = sd.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  }
+
+  // Write results
+  document.getElementById('calcWeeks').textContent = calcWeeks;
+  document.getElementById('calcDays').textContent   = calcDays;
+  document.getElementById('calcCals').textContent   = calcCals >= 0 ? calcCals : 0;
+  document.getElementById('calcRate').textContent   = kgPerWeek + 'kg/wk';
+  document.getElementById('calcDeficit').textContent= Math.round(weeklyDeficit/1000)+'k/wk';
+  document.getElementById('calcEndDate').textContent= endDateStr;
+  document.getElementById('calcDietBurn').textContent = Math.round(dietDeficit)+'cal';
+  document.getElementById('calcExBurn').textContent   = exerciseContribution > 0 ? '+'+Math.round(exerciseContribution)+'cal/day' : 'none entered';
+
+  // Flag
+  if(flagLevel === 'ok') {
+    flagEl.textContent = '✓ ACHIEVABLE';
+    flagEl.style.cssText='display:block;background:rgba(80,200,120,0.12);color:var(--green);padding:7px 10px;border-radius:6px;font-size:0.75rem;font-weight:700;letter-spacing:1px';
+  } else if(flagLevel === 'aggressive') {
+    flagEl.textContent = '⚡ AGGRESSIVE';
+    flagEl.style.cssText='display:block;background:rgba(245,166,35,0.12);color:var(--accent2);padding:7px 10px;border-radius:6px;font-size:0.75rem;font-weight:700;letter-spacing:1px';
+  } else {
+    flagEl.textContent = '✗ UNREALISTIC — SEE NOTES';
+    flagEl.style.cssText='display:block;background:rgba(255,68,68,0.12);color:var(--danger);padding:7px 10px;border-radius:6px;font-size:0.75rem;font-weight:700;letter-spacing:1px';
+  }
+  flagEl.style.display='block';
+
+  if(warnings.length) {
+    warnEl.textContent = warnings.join(' · ');
+    warnEl.style.display='block';
+  }
+
+  useCalsBtn.style.display = 'block';
+  resultEl.classList.add('visible');
+  schedBtn.classList.add('visible');
+
+  window._pendingSchedule = {
+    totalDays: calcDays, startDateStr, planVal,
+    curKg, tgtKg, cal: Math.max(0, calcCals)
+  };
+}
+
+// applyCalculatedCalories: takes the calculated cal/day from the result panel
+// and writes it to both the input field and settings storage
+function applyCalculatedCalories() {
+  const calcCals = parseInt(document.getElementById('calcCals').textContent);
+  if(isNaN(calcCals)) return;
+  document.getElementById('settingCalories').value = calcCals;
+  const s = getSettings();
+  s.calories = calcCals;
+  saveSettings(s);
+  dispatch('CALORIES_CHANGED');
+}
+
+// promptSchedule: shows a confirmation popup before creating a schedule.
+// The pending schedule data is stored in window._pendingSchedule by calcDuration().
+function promptSchedule() {
+  if(!window._pendingSchedule) return;
+  const {totalDays, startDateStr} = window._pendingSchedule;
+  document.getElementById('popupText').textContent = `This will highlight ${totalDays} days on your calendar starting ${startDateStr}. Day completion still works the same way.`;
+  document.getElementById('popupOverlay').classList.add('active');
+}
+
+// applySchedule: commits the pending schedule to storage.
+// Saves settings, builds the days[] array for calendar highlighting,
+// stores startWeight for Manage Schedule ADJUST to reference later,
+// auto-sets fast days, and navigates to the MONTHS tab.
+function applySchedule() {
+  document.getElementById('popupOverlay').classList.remove('active');
+  const p = window._pendingSchedule;
+  if(!p) return;
+
+  const s = getSettings();
+  s.plan = p.planVal;
+  s.currentKg = p.curKg;
+  s.targetKg = p.tgtKg;
+  s.calories = p.cal;
+  s.startDate = p.startDateStr;
+  saveSettings(s);
+
+  const days = [];
+  const start = new Date(p.startDateStr);
+  for(let i=0;i<p.totalDays;i++){
+    const d = new Date(start);
+    d.setDate(d.getDate()+i);
+    days.push(dateToStr(d));
+  }
+  // Store startWeight so Manage Schedule ADJUST can reference it
+  ss(SK.schedule, {
+    days,
+    startDate: p.startDateStr,
+    totalDays: p.totalDays,
+    planName: PLANS[p.planVal].badge,
+    startWeight: p.curKg
+  });
+
+  applyPlanUI(p.planVal);
+  if(p.planVal === 'agro' || (PLANS[p.planVal]||{}).fastDaysPerWeek > 0) {
+    autoSetPlanFastDays(p.startDateStr, p.totalDays);
+  }
+  dispatch('SCHEDULE_SET');
+  dispatch('PLAN_CHANGED');
+  updateGoalBar(p.curKg);
+  closeSettings();
+
+  const monthsBtn = Array.from(document.querySelectorAll('.tab')).find(t => t.textContent.trim() === 'MONTHS');
+  switchTab('months', monthsBtn || null);
+  setTimeout(() => renderCalendar(), 50);
+}
+
+// ─── MANAGE SCHEDULE ────────────────────────────────────────────────────────
+// The "⚙ MANAGE SCHEDULE" button appears on MONTHS tab when a schedule is active.
+// Three actions available:
+//
+//   ADJUST  — recalculates remaining days using a blend of actual achieved rate
+//             and the formula rate at the new calorie target. More accurate than
+//             running the calculator from scratch because it uses real progress data.
+//
+//   END TODAY — trims the schedule's days[] array to today. Past data is untouched.
+//               Used when you finish early or want to start fresh.
+//
+//   REMOVE  — wipes the schedule entirely from storage. Option to also clear future
+//             auto-set fast days.
+
+// updateManageSchedBtn: shows/hides the button depending on whether a schedule exists
+function updateManageSchedBtn() {
+  const btn = document.getElementById('manageSchedBtn');
+  if(!btn) return;
+  const sched = gs(SK.schedule);
+  btn.style.display = sched ? 'block' : 'none';
+}
+
+function updateManageSchedContext() {
+  // Called by dispatcher when weight is logged — keeps adjust modal data fresh
+  // (no-op if modal isn't open, but updates internal state)
+}
+
+function openManageSchedule() {
+  const sched = gs(SK.schedule);
+  if(!sched) return;
+  const s = getSettings();
+
+  // Current status text
+  const startW  = sched.startWeight || s.currentKg || '?';
+  const curW    = getLatestWeight();
+  const elapsed = Math.max(0, Math.floor((new Date() - new Date(sched.startDate)) / 86400000));
+  const lost    = parseFloat((startW - curW).toFixed(1));
+  const rate    = elapsed > 0 ? parseFloat((lost / elapsed * 7).toFixed(2)) : 0;
+  const remain  = parseFloat((curW - (s.targetKg||91)).toFixed(1));
+
+  document.getElementById('msStatusText').innerHTML =
+    `Started: <b>${sched.startDate}</b> · Day <b>${elapsed+1}</b> of <b>${sched.totalDays}</b><br>` +
+    `Start weight: <b>${startW}kg</b> → Current: <b>${curW}kg</b><br>` +
+    `Lost: <b>${Math.max(0,lost)}kg</b> · Rate: <b>${rate}kg/week actual</b><br>` +
+    `Still to target: <b>${Math.max(0,remain)}kg</b>`;
+
+  // Pre-fill adjust fields
+  document.getElementById('msTargetKg').value = s.targetKg||91;
+  document.getElementById('msCalories').value = s.calories||1000;
+  document.getElementById('adjustResult').style.display = 'none';
+  document.getElementById('adjConfirmBtn').style.display = 'none';
+
+  document.getElementById('manageSchedOverlay').classList.add('active');
+  calcAdjust();
+}
+
+function closeManageSchedule() {
+  document.getElementById('manageSchedOverlay').classList.remove('active');
+}
+
+// calcAdjust: recalculates the schedule end date using a blended rate.
+// observedWeight (0–0.7) — how much to trust actual rate vs formula rate.
+// Blends toward observed data as more days pass (capped at 0.7 to always keep some formula signal).
+function calcAdjust() {
+  const sched = gs(SK.schedule);
+  if(!sched) return;
+  const s = getSettings();
+
+  const newTarget = parseFloat(document.getElementById('msTargetKg').value);
+  const newCal    = parseFloat(document.getElementById('msCalories').value);
+  const tdee      = s.tdee || 2600;
+
+  if(isNaN(newTarget) || isNaN(newCal)) {
+    document.getElementById('adjustResult').style.display='none';
+    document.getElementById('adjConfirmBtn').style.display='none';
+    return;
+  }
+
+  const curW    = getLatestWeight();
+  const startW  = sched.startWeight || s.currentKg || curW;
+  const elapsed = Math.max(1, Math.floor((new Date() - new Date(sched.startDate)) / 86400000));
+  const lost    = Math.max(0, startW - curW);
+  const actualRate = lost / elapsed; // kg/day actual
+
+  const plan = PLANS[s.plan||'default'] || PLANS.default;
+  const fastDaysPerWeek = plan.fastDaysPerWeek || 0;
+  const eatDaysPerWeek  = 7 - fastDaysPerWeek;
+  const weeklyDeficit   = (eatDaysPerWeek * Math.max(0, tdee - newCal)) + (fastDaysPerWeek * tdee);
+  const formulaRate     = weeklyDeficit / 7 / 7700; // kg/day formula
+
+  // Blend actual rate with formula rate
+  const observedWeight = Math.min(0.7, elapsed / 60);
+  const blendedRate    = (actualRate * observedWeight) + (formulaRate * (1 - observedWeight));
+
+  const remainKg   = Math.max(0, curW - newTarget);
+  const remainDays = blendedRate > 0 ? Math.ceil((remainKg * 7700) / (blendedRate * 7700)) : 999;
+  const kgPerWeek  = parseFloat((blendedRate * 7).toFixed(2));
+
+  const endD = new Date();
+  endD.setDate(endD.getDate() + remainDays);
+  const endDateStr = endD.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+
+  document.getElementById('adjWeeks').textContent   = Math.ceil(remainDays/7);
+  document.getElementById('adjDays').textContent    = remainDays;
+  document.getElementById('adjRate').textContent    = kgPerWeek+'kg/wk';
+  document.getElementById('adjEndDate').textContent = endDateStr;
+
+  const warn = document.getElementById('adjWarning');
+  if(kgPerWeek > 2) {
+    warn.textContent = '⚡ Rate is aggressive — factoring in actual data, expect some variance.';
+    warn.style.display='block';
+  } else { warn.style.display='none'; }
+
+  document.getElementById('adjustResult').style.display='block';
+  document.getElementById('adjConfirmBtn').style.display='block';
+
+  // Store for confirm
+  window._pendingAdjust = { remainDays, newTarget, newCal, endDate: dateToStr(endD) };
+}
+
+// confirmAdjust: applies the adjusted schedule — rebuilds days[] from today forward
+// for remainDays, then saves updated target and calories to settings
+function confirmAdjust() {
+  const adj = window._pendingAdjust;
+  if(!adj) return;
+  const sched = gs(SK.schedule);
+  if(!sched) return;
+
+  // Rebuild days array from today forward for remainDays
+  const today0 = new Date(); today0.setHours(0,0,0,0);
+  const newDays = [...(sched.days||[]).filter(d => d < dateToStr(today0))];
+  for(let i=0;i<adj.remainDays;i++){
+    const d = new Date(today0); d.setDate(d.getDate()+i);
+    newDays.push(dateToStr(d));
+  }
+  sched.days     = newDays;
+  sched.totalDays= newDays.length;
+  ss(SK.schedule, sched);
+
+  const s = getSettings();
+  s.calories  = adj.newCal;
+  s.targetKg  = adj.newTarget;
+  saveSettings(s);
+
+  dispatch('SCHEDULE_ADJUSTED');
+  dispatch('CALORIES_CHANGED');
+  updateGoalBar(getLatestWeight());
+  closeManageSchedule();
+  setTimeout(()=>renderCalendar(),50);
+}
+
+function endScheduleToday() {
+  showConfirm('END SCHEDULE TODAY', 'Mark today as the final day? All past progress is kept.', () => {
+    const sched = gs(SK.schedule);
+    if(!sched) return;
+    const today = todayStr();
+    sched.days     = (sched.days||[]).filter(d => d <= today);
+    sched.totalDays= sched.days.length;
+    sched.endDate  = today;
+    ss(SK.schedule, sched);
+    dispatch('SCHEDULE_ENDED');
+    closeManageSchedule();
+    setTimeout(()=>renderCalendar(),50);
+  }, { yesLabel:'END TODAY' });
+}
+
+function removeSchedule() {
+  showConfirm(
+    'REMOVE SCHEDULE',
+    'Wipe schedule structure completely? All logged weights, notes, and day logs are kept.',
+    (clearFastDays) => {
+      if(clearFastDays) {
+        const today = todayStr();
+        const fd = gs(SK.fastDays)||{};
+        Object.keys(fd).forEach(d=>{ if(d > today) delete fd[d]; });
+        ss(SK.fastDays, fd);
+      }
+      ss(SK.schedule, null);
+      dispatch('SCHEDULE_REMOVED');
+      closeManageSchedule();
+      setTimeout(()=>renderCalendar(),50);
+    },
+    { yesLabel:'REMOVE', danger:true, checkLabel:'Also clear future auto-set fast days' }
+  );
+}
+
+document.getElementById('manageSchedOverlay').addEventListener('click', e=>{
+  if(e.target.id==='manageSchedOverlay') closeManageSchedule();
+});
+
+// ─── BACKUP / RESTORE ────────────────────────────────────────────────────────
+// WHY THIS EXISTS:
+// localStorage is wiped when Chrome's "Clear browsing data > Cookies and site data" is run.
+// This is a real risk on Android. These functions let you export a complete snapshot and
+// restore it at any time — no server, no account, just a JSON file saved to Google Drive.
+//
+// backupData:
+//   - Reads every SK.* key from localStorage
+//   - Packages into { version, exportedAt, data:{...} }
+//   - Triggers a file download named "protocol-health-backup-YYYY-MM-DD.json"
+//   - Shows a 6-second status message
+//
+// restoreData:
+//   - Reads the picked JSON file
+//   - Validates version starts with 'ph_'
+//   - Asks for confirmation before overwriting
+//   - Writes all keys back to localStorage
+//   - Runs full UI refresh (same sequence as init)
+
+// backupData: downloads all app data as a JSON file
+function backupData() {
+  const backup = {
+    version: 'ph_v1',
+    exportedAt: new Date().toISOString(),
+    data: {}
+  };
+  // Dump every storage key
+  Object.entries(SK).forEach(([key, storageKey]) => {
+    const val = gs(storageKey);
+    if(val !== null) backup.data[key] = val;
+  });
+
+  const json = JSON.stringify(backup, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const date = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = `protocol-health-backup-${date}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  showBackupStatus('✓ Backup downloaded. Save it somewhere safe — Google Drive, email to yourself, etc.', 'var(--green)');
+}
+
+// restoreData: triggered by the hidden file input when a file is picked.
+// Validates the file, confirms with user, writes all keys, refreshes UI.
+function restoreData(event) {
+  const file = event.target.files[0];
+  if(!file) return;
+  // Reset input so same file can be re-selected
+  event.target.value = '';
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const backup = JSON.parse(e.target.result);
+
+      // Validate structure
+      if(!backup.version || !backup.data) {
+        showBackupStatus('✗ Invalid backup file. Must be a Protocol Health backup JSON.', 'var(--danger)');
+        return;
+      }
+      if(!backup.version.startsWith('ph_')) {
+        showBackupStatus('✗ File does not appear to be a Protocol Health backup.', 'var(--danger)');
+        return;
+      }
+
+      // Count what we're restoring
+      const keys = Object.keys(backup.data);
+      if(!keys.length) {
+        showBackupStatus('✗ Backup file contains no data.', 'var(--danger)');
+        return;
+      }
+
+      // Confirm before overwriting
+      const exported = backup.exportedAt ? new Date(backup.exportedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : 'unknown date';
+      showConfirm(
+        'RESTORE BACKUP',
+        `This will overwrite ALL current app data with the backup from ${exported}. This cannot be undone.`,
+        () => {
+          // Write all keys back to localStorage
+          Object.entries(backup.data).forEach(([key, val]) => {
+            const storageKey = SK[key];
+            if(storageKey) ss(storageKey, val);
+          });
+          // Full UI refresh
+          const s = getSettings();
+          applyPlanUI(s.plan||'default');
+          updateFastUI();
+          updateTodayTab();
+          loadChecklist();
+          buildWeekGrid();
+          renderWeights();
+          updateGoalBar(getLatestWeight());
+          updateDurationBar();
+          updateProjection();
+          renderRecentNotes();
+          updateManageSchedBtn();
+          syncCustomSelect('planSelectCustom','planSelect');
+          syncCustomSelect('riskSelectCustom','settingRisk');
+          showBackupStatus(`✓ Restored ${keys.length} data sets from backup (${exported}). All data reloaded.`, 'var(--green)');
+        },
+        { yesLabel: 'RESTORE', danger: true }
+      );
+    } catch(err) {
+      showBackupStatus('✗ Could not read file. Make sure it is a valid JSON backup file.', 'var(--danger)');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function showBackupStatus(msg, color) {
+  const el = document.getElementById('backupStatus');
+  el.textContent = msg;
+  el.style.cssText = `display:block;margin-top:10px;padding:10px 13px;border-radius:8px;font-family:'DM Mono',monospace;font-size:0.7rem;line-height:1.6;background:var(--surface);border:1px solid ${color};color:${color}`;
+  setTimeout(() => { el.style.display = 'none'; }, 6000);
+}
+
+// ─── EXPORT — RANGE BASED ────────────────────────────────────────────────────
+// Different from backup — this generates a human-readable plain text log
+// for a selected date range, intended for sharing or reviewing in a notes app.
+// Backup = machine-readable full snapshot. Export = human-readable selected range.
+function openExport() {
+  // Default range: last 30 days
+  const to = new Date();
+  const from = new Date(); from.setDate(from.getDate()-30);
+  document.getElementById('exportFrom').value = dateToStr(from);
+  document.getElementById('exportTo').value = dateToStr(to);
+  document.getElementById('exportText').style.display = 'none';
+  document.getElementById('exportCopyBtn').style.display = 'none';
+  document.getElementById('exportOverlay').classList.add('active');
+}
+
+function generateExport() {
+  const fromStr = document.getElementById('exportFrom').value;
+  const toStr = document.getElementById('exportTo').value;
+  const incWeights = document.getElementById('exWeights').checked;
+  const incCompliance = document.getElementById('exCompliance').checked;
+  const incNotes = document.getElementById('exNotes').checked;
+  const incWater = document.getElementById('exWater').checked;
+  const incEnergy = document.getElementById('exEnergy').checked;
+
+  if(!fromStr||!toStr){showAlert('Select a date range first.');return;}
+  if(fromStr>toStr){showAlert('From date must be before To date.');return;}
+
+  const dayLogs = gs(SK.dayLogs)||{};
+  const fastDays = gs(SK.fastDays)||{};
+  const weights = gs(SK.weights)||[];
+  const s = getSettings();
+
+  let text = `PROTOCOL HEALTH — LOG EXPORT\n`;
+  text += `Plan: ${PLANS[s.plan||'default'].name}\n`;
+  text += `Goal: ${s.currentKg||'?'}kg → ${s.targetKg||'?'}kg\n`;
+  text += `Range: ${fromStr} → ${toStr}\n`;
+  text += `Exported: ${new Date().toLocaleDateString('en-US',{weekday:'short',year:'numeric',month:'long',day:'numeric'})}\n`;
+  text += '─'.repeat(44)+'\n\n';
+
+  if(incWeights){
+    const filtered = weights.filter(w=>w.date>=fromStr&&w.date<=toStr);
+    if(filtered.length){
+      text+=`WEIGHT LOG\n`;
+      filtered.forEach((w,i)=>{
+        const prev=filtered[i+1];
+        const delta=prev?` (${(w.weight-prev.weight)>=0?'+':''}${(w.weight-prev.weight).toFixed(1)}kg)`:'';
+        text+=`  ${w.date}: ${w.weight}kg${delta}\n`;
+      });
+      text+='\n';
+    }
+  }
+
+  const fastList = Object.keys(fastDays).filter(d=>d>=fromStr&&d<=toStr).sort();
+  if(fastList.length){text+=`WATER FAST DAYS\n`;fastList.forEach(d=>{text+=`  ${d}\n`;});text+='\n';}
+
+  // Day logs
+  const logDates = Object.keys(dayLogs).filter(d=>d>=fromStr&&d<=toStr).sort().reverse();
+  if(logDates.length){
+    text+=`DAY LOGS\n${'─'.repeat(30)}\n`;
+    logDates.forEach(dateStr=>{
+      const log=dayLogs[dateStr];
+      const fast=fastDays[dateStr]?' ⚡ FAST':'';
+      text+=`\n${dateStr}${fast}\n`;
+      if(incWeights&&log.weight) text+=`  Weight: ${log.weight}kg\n`;
+      if(incWater&&log.water) text+=`  Water: ${log.water}L\n`;
+      if(incEnergy&&log.energy) text+=`  Energy: ${log.energy}\n`;
+      if(incCompliance&&log.checks){
+        const p=Object.values(log.checks).filter(Boolean).length;
+        const t=Object.keys(log.checks).length;
+        text+=`  Compliance: ${p}/${t}\n`;
+        // List what was done
+        const allItems = [...getActivePlan().checklistNormal,...getActivePlan().checklistFast];
+        const doneItems = allItems.filter(i=>log.checks[i.id]).map(i=>i.label);
+        if(doneItems.length) text+=`    ✓ ${doneItems.join('\n    ✓ ')}\n`;
+      }
+      if(incNotes&&log.notes) text+=`  Notes: ${log.notes}\n`;
+    });
+  }
+
+  if(!logDates.length&&!weights.length) text+='No data found in this date range.\n';
+
+  const box = document.getElementById('exportText');
+  box.textContent = text;
+  box.style.display = 'block';
+  document.getElementById('exportCopyBtn').style.display = 'block';
+}
+
+function copyExport() {
+  navigator.clipboard.writeText(document.getElementById('exportText').textContent)
+    .then(()=>{ const btn=document.getElementById('exportCopyBtn'); btn.textContent='✓ COPIED'; setTimeout(()=>btn.textContent='COPY TO CLIPBOARD',1500); })
+    .catch(()=>showAlert('Select all and copy manually.'));
+}
+
+document.getElementById('exportOverlay').addEventListener('click',e=>{if(e.target.id==='exportOverlay')document.getElementById('exportOverlay').classList.remove('active');});
+document.getElementById('settingsOverlay').addEventListener('click',e=>{if(e.target.id==='settingsOverlay')closeSettings();});
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+// Runs once on page load. Reads settings and weights from storage, applies the
+// active plan to all UI elements, and populates the TODAY tab.
+// Order matters: applyPlanUI must run before updateTodayTab so the banner is correct.
+(function init(){
+  const s = getSettings();
+  applyPlanUI(s.plan||'default');
+  updateFastUI();
+  updateTodayTab();
+  loadChecklist();
+  buildWeekGrid();
+  renderWeights();
+  updateGoalBar(getLatestWeight());
+  updateDurationBar();
+  updateProjection();
+  renderRecentNotes();
+  updateManageSchedBtn();
+})();
+</script>
+<script>
+// ─── SERVICE WORKER REGISTRATION ─────────────────────────────────────────────
+// Registers sw.js as the app's service worker after the page has fully loaded.
+// The service worker handles offline caching — once registered and cached,
+// the app loads even with no internet connection.
+// Runs only if the browser supports service workers (all modern mobile browsers do).
+if('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .catch(err => console.log('SW registration failed:', err));
+  });
+}
+</script>
+</body>
+</html>
