@@ -345,9 +345,26 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
 .snack-name { font-size:0.78rem; font-weight:500; margin-bottom:2px; }
 .snack-cal { font-family:'DM Mono',monospace; font-size:0.6rem; color:var(--accent2); }
 .snack-note { font-family:'DM Mono',monospace; font-size:0.58rem; color:var(--muted); margin-top:2px; }
+
+/* UPDATE BANNER */
+.update-banner { position:fixed; top:0; left:0; right:0; z-index:9999; background:var(--surface2); border-bottom:1px solid var(--accent); padding:14px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px; transform:translateY(-100%); transition:transform 0.3s ease; }
+.update-banner.visible { transform:translateY(0); }
+.update-banner-text { flex:1; }
+.update-banner-ver { font-family:'Bebas Neue',sans-serif; font-size:1.1rem; color:var(--accent); letter-spacing:1px; line-height:1; }
+.update-banner-msg { font-family:'DM Mono',monospace; font-size:0.6rem; color:var(--muted); letter-spacing:0.5px; margin-top:3px; }
+.update-banner-close { background:none; border:1px solid var(--border); border-radius:6px; color:var(--muted); font-family:'DM Mono',monospace; font-size:0.6rem; letter-spacing:1px; padding:5px 12px; cursor:pointer; flex-shrink:0; transition:all 0.2s; }
+.update-banner-close:hover { border-color:var(--accent); color:var(--accent); }
 </style>
 </head>
 <body>
+
+<div class="update-banner" id="updateBanner">
+  <div class="update-banner-text">
+    <div class="update-banner-ver" id="updateBannerVer"></div>
+    <div class="update-banner-msg" id="updateBannerMsg"></div>
+  </div>
+  <button class="update-banner-close" onclick="dismissUpdate()">OK</button>
+</div>
 
 <div class="header">
   <div class="header-left">
@@ -814,8 +831,18 @@ const SK = {
   dayLogs:   'ph_dl_v1',   // object keyed by dateStr — each value: { checks, weight, water, energy, notes, ts }
   fastDays:  'ph_fd_v1',   // object keyed by dateStr — value: true if that day is a water fast
   settings:  'ph_st_v1',   // single object: plan, currentKg, targetKg, calories, tdee, risk, startDate
-  schedule:  'ph_sc_v1'    // single object: days[], startDate, totalDays, planName, startWeight
+  schedule:  'ph_sc_v1',   // single object: days[], startDate, totalDays, planName, startWeight
+  seenVer:   'ph_sv_v1'    // string — last APP_VERSION the user dismissed the update banner for
 };
+
+// ─── APP VERSION ─────────────────────────────────────────────────────────────
+// User-facing version number. Only bumped for notable updates — NOT on every deploy.
+// Patch (+0.0.1): 1–3 small bug fixes, text/style tweaks. NO popup shown.
+// Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
+// Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
+// CACHE_NAME in sw.js still bumps on every deploy independently.
+const APP_VERSION = '1.0.0';
+const APP_VERSION_MSG = 'Initial versioned release.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -903,6 +930,32 @@ function showAlert(msg) {
   document.getElementById('alertDialog').classList.add('active');
 }
 function closeAlertDialog() { document.getElementById('alertDialog').classList.remove('active'); }
+
+// ─── VERSION UPDATE BANNER ──────────────────────────────────────────────────
+// Shows a dismissible banner once per APP_VERSION on minor/major bumps.
+// Patch updates (third digit only) are silent — no banner shown.
+function checkVersionUpdate() {
+  const seen = gs(SK.seenVer);
+  if(seen === APP_VERSION) return;
+  // Determine if this is a minor/major bump (popup-worthy) or just a patch
+  if(seen) {
+    const [sMaj,sMin] = seen.split('.').map(Number);
+    const [cMaj,cMin] = APP_VERSION.split('.').map(Number);
+    // If only the patch digit changed, skip popup
+    if(sMaj === cMaj && sMin === cMin) {
+      ss(SK.seenVer, APP_VERSION);
+      return;
+    }
+  }
+  // Show the banner
+  document.getElementById('updateBannerVer').textContent = 'PROTOCOL HEALTH v' + APP_VERSION;
+  document.getElementById('updateBannerMsg').textContent = APP_VERSION_MSG;
+  setTimeout(() => document.getElementById('updateBanner').classList.add('visible'), 300);
+}
+function dismissUpdate() {
+  document.getElementById('updateBanner').classList.remove('visible');
+  ss(SK.seenVer, APP_VERSION);
+}
 
 // ─── CUSTOM SELECT HELPERS ───────────────────────────────────────────────────
 // Native <select> elements can't be styled on Android Chrome. These functions
@@ -3027,6 +3080,7 @@ document.getElementById('settingsOverlay').addEventListener('click',e=>{if(e.tar
   updateProjection();
   renderRecentNotes();
   updateManageSchedBtn();
+  checkVersionUpdate();
 })();
 </script>
 <script>
