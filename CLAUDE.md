@@ -6,6 +6,41 @@
 
 ---
 
+## Executive Summary
+
+Protocol Health is a single-file PWA (`index.html`, ~3000 lines) hosted on GitHub Pages. No backend, no database, no dependencies beyond Google Fonts. All data lives in localStorage.
+
+**What it does:**
+1. **Daily compliance tracking** — structured checklist tailored to the active training plan (eating day vs fast day versions)
+2. **Weight tracking** — daily logging, goal progress bar, forward-looking weight projection to Sunday
+3. **Goal calculator** — models fasting days, exercise burn, TDEE, and compliance rate to output required calorie ceiling or timeline
+
+**Architecture:**
+- Single HTML file with inline CSS and JS. No build step, no framework, no bundler.
+- Two training plans exist (default and agro) as self-contained objects in a `PLANS` constant. Adding a plan = add one object + two `<option>` elements.
+- Central dispatcher pattern — all data writes end with `dispatch("EVENT_NAME")`, never direct UI calls.
+- Custom modal system (`showConfirm`/`showAlert`) because native dialogs are blocked in GitHub Pages iframes.
+- Custom dropdown system because native `<select>` can't be styled on Android Chrome.
+- PWA with service worker (cache-first strategy, offline-capable).
+- All localStorage keys centralized in an `SK` object.
+
+**Versioning:**
+- `CACHE_NAME` in `sw.js` bumps every deploy to `main` (cache busting, silent)
+- `APP_VERSION` in `index.html` bumps only on notable changes (user-facing banner on minor/major bumps, silent on patches)
+
+**Key constraints:**
+- Single file — no separate CSS/JS files
+- No external APIs or CDN dependencies
+- `dateToStr()` for all date keys, never `toISOString()` (UTC off-by-one bug)
+- `getActivePlan()` is the only entry point for plan-dependent logic
+- Mobile-first, dark theme only, bodyweight-first training
+
+**Current storage keys:** weight log, day logs (checks/weight/water/energy/notes), fast days, settings, schedule, last seen app version.
+
+**Six tabs:** Today (checklist), Months (calendar), Workouts, Nutrition, Rules, Track (weight logging + backup/restore).
+
+---
+
 ## 1. What This App Is and Why It Exists
 
 Protocol Health is a personal fitness tracking PWA built from scratch to match one specific protocol — not adapted from a template, not built for a general audience. Every existing fitness tracker was either too generic, required a subscription, demanded gym access, or could not be configured precisely enough. This app exists because none of them were good enough.
@@ -479,6 +514,8 @@ const APP_VERSION_MSG = 'Added streak tracking.';     // ← short description o
 ```
 
 > **Rule:** Always update `APP_VERSION_MSG` when bumping minor or major. The message appears in the update banner — it should be one short sentence describing what the user will notice.
+
+> **Non-Negotiable:** Every commit that changes `index.html` must include an `APP_VERSION` bump according to the thresholds above. Never skip this — the version bump is part of the change, not a separate step. Accumulate changes within a session and apply the appropriate bump level (patch/minor/major) based on the total scope of changes in that commit.
 
 ---
 
