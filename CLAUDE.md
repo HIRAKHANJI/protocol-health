@@ -397,7 +397,8 @@ The service worker caches files under `CACHE_NAME` in `sw.js`. If this name does
 
 **Current version:** `protocol-health-v7`
 
-> **Rule: Bump `CACHE_NAME` on every significant update.**
+> **Rule: Bump `CACHE_NAME` on every significant update to `main`.**
+> - Only bump when merging or pushing to `main` — feature branches do not need cache version increments
 > - On any JS logic change, new feature, or bug fix → increment: `v6` → `v7` → `v8`
 > - On pure content changes (text, nutrition rules, workout descriptions) → optional but safe to bump
 > - **Always bump when:** changing storage key schemas, adding new dispatch events, restructuring plans
@@ -429,13 +430,15 @@ const CACHE_NAME = 'protocol-health-v7'; // ← increment this on every signific
 4. If update is not appearing: Chrome DevTools → Application → Service Workers → click "Update" or "Unregister" then reload
 5. If still stuck: bump `CACHE_NAME` in `sw.js`, push again — guaranteed fresh load
 
-### Safe Commit Pattern for Claude Code
+### Safe Commit Pattern for Claude Code (merging to `main`)
 
 1. Make changes to `index.html`
-2. Increment `CACHE_NAME` in `sw.js` (`v6` → `v7`)
+2. Increment `CACHE_NAME` in `sw.js` (`v6` → `v7`) — only needed when pushing/merging to `main`
 3. Commit both files together with a clear message describing the change
 4. Do not split `index.html` and `sw.js` into separate commits — always push together
 5. Never force-push to `main` — GitHub Pages may serve an inconsistent state during a force push
+
+> **On feature branches:** commit `index.html` freely without touching `sw.js`. Bump `CACHE_NAME` once as part of the merge to `main`.
 
 ---
 
