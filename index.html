@@ -882,7 +882,7 @@ function saveSettings(s) { ss(SK.settings, s); }
 //
 // TO ADD A NEW EVENT: add a key here + add a case in the switch below. Nothing else changes.
 const DISPATCH_MAP = {
-  WEIGHT_LOGGED:     ['goalBar','projection','recentNotes','durationBar','manageSchedContext'],
+  WEIGHT_LOGGED:     ['goalBar','projection','recentNotes','durationBar'],
   DAY_SAVED:         ['calendarCell','monthStats','recentNotes','projection'],
   FAST_DAY_TOGGLED:  ['fastUI','checklist','calendarCell','projection'],
   PLAN_CHANGED:      ['allTabs','checklist','durationBar','projection','calendar'],
@@ -1011,7 +1011,6 @@ function dispatch(event) {
       case 'projection':        updateProjection(); break;
       case 'recentNotes':       renderRecentNotes(); break;
       case 'durationBar':       updateDurationBar(); break;
-      case 'manageSchedContext':updateManageSchedContext(); break;
       case 'manageSchedBtn':    updateManageSchedBtn(); break;
       case 'calendarCell':
       case 'monthStats':
@@ -2160,7 +2159,7 @@ function toggleModalCheck(el, dateStr, itemId) {
   const checks = Object.assign({}, log.checks||{});
   checks[itemId] = isDone;
   saveDayLogField(dateStr, { checks });
-  renderCalendar();
+  dispatch('DAY_SAVED');
 }
 
 // toggleFastDay: marks or unmarks a date as a water fast day, then re-opens the modal
@@ -2641,7 +2640,7 @@ function applySchedule() {
   });
 
   applyPlanUI(p.planVal);
-  if(p.planVal === 'agro' || (PLANS[p.planVal]||{}).fastDaysPerWeek > 0) {
+  if((PLANS[p.planVal]||{}).fastDaysPerWeek > 0) {
     autoSetPlanFastDays(p.startDateStr, p.totalDays);
   }
   dispatch('SCHEDULE_SET');
@@ -2674,11 +2673,6 @@ function updateManageSchedBtn() {
   if(!btn) return;
   const sched = gs(SK.schedule);
   btn.style.display = sched ? 'block' : 'none';
-}
-
-function updateManageSchedContext() {
-  // Called by dispatcher when weight is logged — keeps adjust modal data fresh
-  // (no-op if modal isn't open, but updates internal state)
 }
 
 function openManageSchedule() {
@@ -2933,21 +2927,14 @@ function restoreData(event) {
             const storageKey = SK[key];
             if(storageKey) ss(storageKey, val);
           });
-          // Full UI refresh
+          // Full UI refresh via dispatcher
           const s = getSettings();
           applyPlanUI(s.plan||'default');
-          updateFastUI();
-          updateTodayTab();
-          loadChecklist();
-          buildWeekGrid();
-          renderWeights();
-          updateGoalBar(getLatestWeight());
-          updateDurationBar();
-          updateProjection();
-          renderRecentNotes();
-          updateManageSchedBtn();
           syncCustomSelect('planSelectCustom','planSelect');
           syncCustomSelect('riskSelectCustom','settingRisk');
+          dispatch('PLAN_CHANGED');
+          dispatch('WEIGHT_LOGGED');
+          dispatch('SCHEDULE_SET');
           showBackupStatus(`✓ Restored ${keys.length} data sets from backup (${exported}). All data reloaded.`, 'var(--green)');
         },
         { yesLabel: 'RESTORE', danger: true }
