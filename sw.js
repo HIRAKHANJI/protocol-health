@@ -19,7 +19,7 @@
 // VERSION: bump CACHE_NAME (e.g. 'protocol-health-v6') when you deploy a major update.
 // This forces old caches to be deleted and new files to be fetched fresh.
 
-const CACHE_NAME = 'protocol-health-v5';
+const CACHE_NAME = 'protocol-health-v6';
 
 // ─── INSTALL ─────────────────────────────────────────────────────────────────
 // Runs once when the service worker is first registered (or when CACHE_NAME changes).
@@ -82,7 +82,7 @@ self.addEventListener('fetch', event => {
 
   // Special case: always try cache first for the main HTML file.
   // If not cached yet (first load), fall through to network.
-  if(url.pathname.endsWith('index.html') || url.pathname === '/') {
+  if(url.pathname.endsWith('index.html') || url.pathname === '/' || url.pathname.endsWith('/')) {
     event.respondWith(
       caches.match(event.request).then(cached => cached || fetch(event.request))
     );
