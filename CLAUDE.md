@@ -480,6 +480,8 @@ const APP_VERSION_MSG = 'Added streak tracking.';     // ← short description o
 
 > **Rule:** Always update `APP_VERSION_MSG` when bumping minor or major. The message appears in the update banner — it should be one short sentence describing what the user will notice.
 
+> **Non-Negotiable:** Every commit that changes `index.html` must include an `APP_VERSION` bump according to the thresholds above. Never skip this — the version bump is part of the change, not a separate step. Accumulate changes within a session and apply the appropriate bump level (patch/minor/major) based on the total scope of changes in that commit.
+
 ---
 
 ## 13. Quick Reference
