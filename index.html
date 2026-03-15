@@ -841,8 +841,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '1.0.0';
-const APP_VERSION_MSG = 'Initial versioned release.';
+const APP_VERSION = '1.0.1';
+const APP_VERSION_MSG = 'Fixed AGRO workout schedule — moved skill session to Thursday.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -1247,7 +1247,7 @@ const PLANS = {
     bannerBorder: 'rgba(255,107,53,0.35)',
     fastDaysDow: [0, 3, 6], // Sun/Wed/Sat
 
-    weekIcons: {0:'🚶',1:'💪',2:'🦵',3:'🏃',4:'🤸',5:'💪',6:'🏃'},
+    weekIcons: {0:'🚶',1:'💪',2:'🦵',3:'🏃',4:'🤸',5:'🦵',6:'🏃'},
 
     morningSub: {
       0:'SUNDAY — Active rest. Walk 30 min + full hip sequence (20 min)',
@@ -1263,7 +1263,7 @@ const PLANS = {
       1:'MONDAY — Evening A: Push + Chest Definition · Decline push-up · Archer push-up · Planche lean · Handstand hold',
       2:'TUESDAY — Evening B: Legs + Posterior Chain · Nordic curl · Bulgarian split squat · Good morning · Hollow body',
       3:'WEDNESDAY — Midweek Run · 5 min walk → 20 min run → 5 min walk → jump squats/burpees/mountain climbers',
-      4:'THURSDAY — Evening A: Push + Chest Definition · Same as Monday',
+      4:'THURSDAY — Evening C: Skill + Core + Calisthenics Foundation · Crow stand · L-sit · Scapular push-up · Dragon flag',
       5:'FRIDAY — Evening B: Legs + Posterior Chain · Same as Tuesday',
       6:'SATURDAY — Run + Conditioning · 5 min walk → 30 min run → circuit: push-ups/jump squats/sprawls/plank'
     },
@@ -1272,7 +1272,7 @@ const PLANS = {
       1:'Monday cooldown: Doorframe chest stretch · Shoulder dislocates with towel · Wrist extension (10 min)',
       2:'Tuesday cooldown: 90/90 hip × 2 · Frog · Pigeon (right side +30 sec) · Figure-4 · Child\'s pose (15 min)',
       3:'Wednesday post-run: Pigeon 60 sec/side · Hamstring stretch · Calf stretch (10 min)',
-      4:'Thursday cooldown: Full shoulder + wrist sequence · Thread the needle · Shoulder dislocates (15 min)',
+      4:'Thursday cooldown: Full shoulder sequence · Thread needle · Hip flexor lunge stretch · Neck isometrics (14 min)',
       5:'Friday cooldown: Rear shoulder · Doorframe chest · Wrist extension stretch (10 min)',
       6:'Saturday post-run: Lower body flush — whatever feels tightest. Pigeon · hamstring · quad (10 min)'
     },
@@ -1376,9 +1376,9 @@ const PLANS = {
 
       <div style="height:10px"></div>
       <div class="section-title">EVENING <span>SESSIONS</span> — 40–45 MIN</div>
-      <p class="section-note">Rotate Mon=A · Tue=B · Wed=C · Thu=A · Fri=B · Sat=run+conditioning. Sun = rest.</p>
+      <p class="section-note">Rotate Mon=A · Tue=B · Wed=run · Thu=C · Fri=B · Sat=run+conditioning. Sun = rest.</p>
 
-      ${workoutCard('EVENING A — PUSH + CHEST DEFINITION','MON / THU · 40 MIN',
+      ${workoutCard('EVENING A — PUSH + CHEST DEFINITION','MON · 40 MIN',
         exRow('Push-up ladder','10 down to 1. Rest = time for next set.','1 ladder')+
         exRow('Decline push-up','Feet on chair/bed — upper chest focus','4×12')+
         exRow('Archer push-up','Unilateral chest strength','4×6/side')+
@@ -1405,7 +1405,7 @@ const PLANS = {
         stretchRow('Child\'s pose','Lower back release','60 sec')
       )}
 
-      ${workoutCard('EVENING C — SKILL + CORE + CALISTHENICS FOUNDATION','WED · 40 MIN',
+      ${workoutCard('EVENING C — SKILL + CORE + CALISTHENICS FOUNDATION','THU · 40 MIN',
         exRow('Crow/frog stand attempts','Every session — multiple attempts','5 min')+
         exRow('Tuck hold (crow position)','Build the balance — 4×15-20 sec holds','4×15-20 sec')+
         exRow('L-sit tuck (floor)','Hands pressing down, tuck knees — hip flexor + straight arm strength','4×15 sec')+
