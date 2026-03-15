@@ -827,7 +827,7 @@ function gs(k) { try { return JSON.parse(localStorage.getItem(k)); } catch { ret
 // ss (set storage): safely JSON-stringifies and writes to localStorage. Silently fails if storage is full.
 function ss(k,v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
 // todayStr: returns today as "YYYY-MM-DD" — the universal date format used everywhere in the app.
-function todayStr() { return new Date().toISOString().slice(0,10); }
+function todayStr() { return dateToStr(new Date()); }
 // dateToStr: converts a JS Date object to "YYYY-MM-DD" string, handling timezone correctly.
 function dateToStr(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 // strToDate: parses "YYYY-MM-DD" back to a JS Date (local time, not UTC — avoids off-by-one day bugs).
@@ -1399,7 +1399,7 @@ const PLANS = {
     },
 
     nutritionContent(s) {
-      const cal = s.calories || 1000;
+      const cal = s.calories || 1500;
       const protein = Math.round(cal * 0.5 / 4);
       const carbs = Math.round(cal * 0.3 / 4);
       const fats = Math.round(cal * 0.2 / 9);
@@ -1477,10 +1477,11 @@ const PLANS = {
       </div>`;
     },
 
-    rulesContent() {
+    rulesContent(s) {
+      const cal = s.calories || 1500;
       return `
       <div class="section-title">EATING <span>RULES</span></div>
-      ${ruleCard('RULE 01','1000 cal/day. Never more.','Hard ceiling. Protein anchors every meal. Hit protein before filling anything else. This is what protects muscle during the cut.')}
+      ${ruleCard('RULE 01',cal+' cal/day. Never more.','Hard ceiling. Protein anchors every meal. Hit protein before filling anything else. This is what protects muscle during the cut.')}
       ${ruleCard('RULE 02','Last meal before 6PM. No exceptions.','Creates 16+ hour overnight fast automatically. Already your default — lock it permanently.')}
       ${ruleCard('RULE 03','No liquid calories. Ever.','Water · black coffee · plain tea only. Juice, sweetened chai, soda — these break your deficit invisibly.')}
       ${ruleCard('RULE 04','3 litres of water daily. Minimum.','500ml on wake. 250ml before each meal. Half the time you think you\'re hungry, you\'re dehydrated.')}
@@ -1545,7 +1546,7 @@ function updateTodayTab() {
   const s = getSettings();
   const plan = getActivePlan();
   const day = new Date().getDay();
-  const cal = s.calories || 1000;
+  const cal = s.calories || 1500;
 
   // Active plan banner
   const banner = document.getElementById('activePlanBanner');
@@ -1586,7 +1587,7 @@ function autoSetPlanFastDays(startDateStr, totalDays) {
   const plan = getActivePlan();
   const fastDow = plan.fastDaysDow || [0, 3, 6];
   const fd = gs(SK.fastDays) || {};
-  const start = new Date(startDateStr);
+  const start = strToDate(startDateStr);
   for(let i = 0; i < totalDays; i++) {
     const d = new Date(start); d.setDate(d.getDate() + i);
     if(fastDow.includes(d.getDay())) fd[dateToStr(d)] = true;
@@ -1963,7 +1964,16 @@ function renderCalendar() {
     if(isPlanDay) cls+=' plan-day';
 
     if(!isFuture){
-      if(isFast){cls+=' cal-fast'; fasts++;}
+      if(isFast){
+        // Fast days still need checklist completion to count
+        if(log){
+          const checks = Object.values(log.checks||{}).filter(Boolean).length;
+          const total = Object.keys(log.checks||{}).length;
+          if(checks===total&&total>0){cls+=' cal-fast'; fasts++;}
+          else if(checks>0){cls+=' cal-partial';partial++;}
+          else{cls+=' cal-fast'; fasts++;}  // no checklist logged yet — show as fast day
+        } else {cls+=' cal-fast'; fasts++;}  // no log at all — show as fast day
+      }
       else if(log){
         const checks = Object.values(log.checks||{}).filter(Boolean).length;
         const total = Object.keys(log.checks||{}).length;
@@ -2055,15 +2065,26 @@ function openDayModal(dateStr, dt) {
       html += `</div></div>`;
     }
 
-    // Energy + notes
+    // Energy + notes (custom dropdown — native <select> can't be styled on Android Chrome)
+    const energyVal = log.energy || '';
+    const energyOptions = [
+      {value:'', label:'— select —'},
+      {value:'high', label:'High — sharp & focused'},
+      {value:'normal', label:'Normal — functional'},
+      {value:'low', label:'Low — dragging'},
+      {value:'crashed', label:'Crashed — barely made it'}
+    ];
+    const energyTriggerText = (energyOptions.find(o=>o.value===energyVal)||energyOptions[0]).label;
     html += `<div class="field-group"><label class="field-label">Energy level</label>
-    <select class="field-input" id="mEnergy" style="cursor:pointer">
-      <option value="">— select —</option>
-      <option value="high" ${log.energy==='high'?'selected':''}>High — sharp & focused</option>
-      <option value="normal" ${log.energy==='normal'?'selected':''}>Normal — functional</option>
-      <option value="low" ${log.energy==='low'?'selected':''}>Low — dragging</option>
-      <option value="crashed" ${log.energy==='crashed'?'selected':''}>Crashed — barely made it</option>
-    </select></div>
+    <select class="field-input plan-select" id="mEnergy">
+      ${energyOptions.map(o=>`<option value="${o.value}" ${o.value===energyVal?'selected':''}>${o.label}</option>`).join('')}
+    </select>
+    <div class="custom-select" id="energySelectCustom">
+      <div class="custom-select-trigger" id="energySelectTrigger" onclick="toggleCustomSelect('energySelectCustom')">${energyTriggerText}</div>
+      <div class="custom-select-dropdown">
+        ${energyOptions.map(o=>`<div class="custom-select-option${o.value===energyVal?' selected':''}" data-value="${o.value}" onclick="selectCustomOption('energySelectCustom','mEnergy',this)">${o.label}</div>`).join('')}
+      </div>
+    </div></div>
     <div class="field-group"><label class="field-label">Notes</label>
     <textarea class="field-input" id="mNotes" placeholder="How did today go?">${log.notes||''}</textarea></div>
     <button class="save-btn" onclick="saveDayLog('${dateStr}')">SAVE DAY</button>`;
@@ -2470,7 +2491,7 @@ function calcDuration() {
   // End date
   let endDateStr = '—';
   if(startDateStr) {
-    const sd = new Date(startDateStr);
+    const sd = strToDate(startDateStr);
     sd.setDate(sd.getDate() + calcDays);
     endDateStr = sd.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
   }
@@ -2552,7 +2573,7 @@ function applySchedule() {
   saveSettings(s);
 
   const days = [];
-  const start = new Date(p.startDateStr);
+  const start = strToDate(p.startDateStr);
   for(let i=0;i<p.totalDays;i++){
     const d = new Date(start);
     d.setDate(d.getDate()+i);
@@ -2616,7 +2637,7 @@ function openManageSchedule() {
   // Current status text
   const startW  = sched.startWeight || s.currentKg || '?';
   const curW    = getLatestWeight();
-  const elapsed = Math.max(0, Math.floor((new Date() - new Date(sched.startDate)) / 86400000));
+  const elapsed = Math.max(0, Math.floor((new Date() - strToDate(sched.startDate)) / 86400000));
   const lost    = parseFloat((startW - curW).toFixed(1));
   const rate    = elapsed > 0 ? parseFloat((lost / elapsed * 7).toFixed(2)) : 0;
   const remain  = parseFloat((curW - (s.targetKg||91)).toFixed(1));
@@ -2629,7 +2650,7 @@ function openManageSchedule() {
 
   // Pre-fill adjust fields
   document.getElementById('msTargetKg').value = s.targetKg||91;
-  document.getElementById('msCalories').value = s.calories||1000;
+  document.getElementById('msCalories').value = s.calories||1500;
   document.getElementById('adjustResult').style.display = 'none';
   document.getElementById('adjConfirmBtn').style.display = 'none';
 
@@ -2661,14 +2682,15 @@ function calcAdjust() {
 
   const curW    = getLatestWeight();
   const startW  = sched.startWeight || s.currentKg || curW;
-  const elapsed = Math.max(1, Math.floor((new Date() - new Date(sched.startDate)) / 86400000));
+  const elapsed = Math.max(1, Math.floor((new Date() - strToDate(sched.startDate)) / 86400000));
   const lost    = Math.max(0, startW - curW);
   const actualRate = lost / elapsed; // kg/day actual
 
   const plan = PLANS[s.plan||'default'] || PLANS.default;
   const fastDaysPerWeek = plan.fastDaysPerWeek || 0;
+  const exerciseBurn = s.exerciseBurn || 0;
   const eatDaysPerWeek  = 7 - fastDaysPerWeek;
-  const weeklyDeficit   = (eatDaysPerWeek * Math.max(0, tdee - newCal)) + (fastDaysPerWeek * tdee);
+  const weeklyDeficit   = (eatDaysPerWeek * Math.max(0, tdee - newCal)) + (fastDaysPerWeek * tdee) + (exerciseBurn * 7);
   const formulaRate     = weeklyDeficit / 7 / 7700; // kg/day formula
 
   // Blend actual rate with formula rate
@@ -2676,7 +2698,7 @@ function calcAdjust() {
   const blendedRate    = (actualRate * observedWeight) + (formulaRate * (1 - observedWeight));
 
   const remainKg   = Math.max(0, curW - newTarget);
-  const remainDays = blendedRate > 0 ? Math.ceil((remainKg * 7700) / (blendedRate * 7700)) : 999;
+  const remainDays = blendedRate > 0 ? Math.ceil(remainKg / blendedRate) : 999;
   const kgPerWeek  = parseFloat((blendedRate * 7).toFixed(2));
 
   const endD = new Date();

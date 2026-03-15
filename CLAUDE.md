@@ -50,11 +50,164 @@ A moderate, sustainable approach. 3 water fast days per week (Sun/Wed/Sat). 1500
 **AGRO CUT CALISTHENICS**
 An aggressive cut protocol. Same 3 fast days per week. 1000 cal ceiling on eating days. Higher volume training, running sessions added (Wed and Sat), calisthenics skill work (crow stand, L-sit, handstand foundations), neck strengthening protocol. Designed for accelerated fat loss while building functional strength.
 
-> **Plan Architecture Rule:** Each plan is a fully self-contained object in the `PLANS` constant in `index.html`. Adding a new plan = add one object to `PLANS` + one `<option>` in the settings HTML select. Nothing else in the codebase needs to change. `getActivePlan()` handles the rest. Plan objects contain: name, badge, subtitle, fast day schedule, week icons, day-specific checklist sub-text, workout HTML, nutrition HTML, rules HTML, and checklist item arrays.
+> **Plan Architecture Rule:** Each plan is a fully self-contained object in the `PLANS` constant in `index.html`. Adding a new plan = add one object to `PLANS` + two `<option>` elements (native select + custom dropdown). Nothing else in the codebase needs to change. `getActivePlan()` handles the rest.
 
 ---
 
-## 4. Technical Architecture
+## 4. How to Add a New Plan
+
+Adding a plan requires exactly two changes:
+
+### Step 1: Add the plan object to `PLANS` in `index.html`
+
+Add a new key to the `PLANS` constant. The key becomes the plan's internal ID (e.g. `combat`, `maintenance`, `bulkcut`). Every field below is required.
+
+```javascript
+PLANS.myplan = {
+
+  // ─── IDENTITY ──────────────────────────────────────────────
+  name: 'MY PLAN NAME',            // Displayed in plan banner, settings, schedule
+  badge: 'MY PLAN',                // Short label for badges/tags
+  badgeClass: 'agro-badge',        // CSS class for badge styling ('' for default, 'agro-badge' for red)
+  subtitle: 'Short tagline here.', // Shown under plan name in settings
+
+  // ─── BANNER STYLING ────────────────────────────────────────
+  bannerColor: 'var(--text)',       // Text color for TODAY tab banner
+  bannerBg: 'var(--surface)',       // Background for TODAY tab banner
+  bannerBorder: 'var(--border)',    // Border for TODAY tab banner
+
+  // ─── CORE PROTOCOL NUMBERS ─────────────────────────────────
+  tdee: 2600,                      // Total daily energy expenditure (cal)
+  fastDaysPerWeek: 3,              // Integer — used in deficit math
+  fastDaysDow: [0, 3, 6],          // Day-of-week indices (0=Sun, 6=Sat) for auto-set fast days
+
+  // ─── WEEK ICONS (workout grid on WORKOUTS tab) ────────────
+  weekIcons: {0:'🚶', 1:'💪', 2:'🦵', 3:'💪', 4:'🦵', 5:'💪', 6:'🦵'},
+
+  // ─── DAY-SPECIFIC SUB-TEXT (shown under TODAY checklist items) ──
+  // Keys are day-of-week (0=Sun, 6=Sat). Values are short strings.
+  morningSub: {
+    0:'SUNDAY — Rest day.',
+    1:'MONDAY — Morning session details...',
+    // ... all 7 days
+  },
+  eveningSub: { /* same structure — 0-6 */ },
+  stretchSub: { /* same structure — 0-6 */ },
+
+  // ─── CHECKLIST ITEMS ───────────────────────────────────────
+  // checklistNormal: shown on eating days
+  // checklistFast: shown on water fast days
+  //
+  // Each item: { id, group, label, sub }
+  //   id    — unique string key (stored in localStorage checks object)
+  //   group — category tag: 'MORNING', 'EATING', 'EVENING', 'NIGHT', 'FAST', or ANY custom string
+  //   label — main text the user sees
+  //   sub   — smaller detail text below the label
+  //
+  // You can add ANY number of items and ANY group names.
+  // Groups are rendered as collapsible sections with color-coded tags.
+  // Tag colors are assigned by group name:
+  //   MORNING → tag-morning, EATING → tag-food, EVENING → tag-evening,
+  //   FAST → tag-fast, everything else → tag-rules
+  //
+  // To add a custom group color, add a CSS class in the <style> section:
+  //   .tag-mygroup { background: rgba(R,G,B,0.15); color: #hex; }
+  // Then use group:'MYGROUP' in checklist items and add a case in the
+  // tag color assignment in openDayModal().
+  checklistNormal: [
+    { id:'m1', group:'MORNING', label:'Wake & hydrate', sub:'500ml water immediately.' },
+    { id:'f1', group:'EATING',  label:'Hit protein target', sub:'Protein first in every meal.' },
+    { id:'e1', group:'EVENING', label:'Evening session', sub:'See WORKOUTS tab.' },
+    // ... add as many as needed
+  ],
+  checklistFast: [
+    { id:'wf1', group:'FAST', label:'Water + salt on waking', sub:'Prevents headaches.' },
+    // ... add as many as needed
+  ],
+
+  // ─── EATING GROUP STYLING (TODAY tab) ──────────────────────
+  foodGroupLabel: 'EATING',        // Label shown on the eating section header
+  foodGroupBg: '',                 // Background override ('' = default)
+  foodGroupColor: '',              // Text color override ('' = default)
+
+  // ─── CONTENT FUNCTIONS (return HTML strings) ───────────────
+  // These generate the tab content. They receive settings object where needed.
+
+  workoutContent() {
+    // Return full HTML for WORKOUTS tab.
+    // Use workoutCard(title, subtitle, rows) and exRow(name, notes, reps) helpers.
+    return `
+      <div class="section-title">MY PLAN <span>WORKOUTS</span></div>
+      ${workoutCard('SESSION A', 'UPPER BODY',
+        exRow('Push-ups','Standard form','3 × 15') +
+        exRow('Pike push-up','Shoulders','3 × 10')
+      )}`;
+  },
+
+  nutritionContent(s) {
+    // s = getSettings(). Use s.calories for dynamic calorie display.
+    const cal = s.calories || 1500;
+    const protein = Math.round(cal * 0.4 / 4);
+    return `
+      <div class="section-title">MY PLAN <span>NUTRITION</span></div>
+      <div class="macro-grid">
+        <div class="macro-box"><div class="macro-val">${cal}</div><div class="macro-lbl">Cal ceiling</div></div>
+        <div class="macro-box"><div class="macro-val">${protein}g</div><div class="macro-lbl">Protein</div></div>
+      </div>`;
+  },
+
+  rulesContent(s) {
+    // s = getSettings(). Use s.calories if rules reference the calorie ceiling.
+    const cal = s.calories || 1500;
+    return `
+      <div class="section-title">EATING <span>RULES</span></div>
+      ${ruleCard('RULE 01', cal+' cal/day ceiling.', 'Details here.')}
+      ${ruleCard('RULE 02', 'No liquid calories.', 'Water, coffee, tea only.')}`;
+  }
+};
+```
+
+### Step 2: Add the plan to the settings HTML (two places)
+
+Find the plan selector in the settings panel HTML. Add both a native `<option>` (hidden, keeps JS `.value` working) and a custom dropdown `<div>`:
+
+```html
+<!-- Native select (hidden — class="plan-select") -->
+<option value="myplan">MY PLAN NAME</option>
+
+<!-- Custom dropdown (visible — inside .custom-select-dropdown) -->
+<div class="custom-select-option" data-value="myplan"
+     onclick="selectCustomOption('planSelectCustom','planSelect',this)">MY PLAN NAME</div>
+```
+
+### That's It
+
+Nothing else changes. `getActivePlan()` reads `settings.plan`, looks up `PLANS[settings.plan]`, and returns the object. Every tab renderer calls the plan's content functions. The checklist system reads `checklistNormal` / `checklistFast`. The calendar, schedule, and goal calculator all use `fastDaysPerWeek` and `fastDaysDow`.
+
+### What You CAN Customize Per Plan
+
+| Area | How | Limits |
+|------|-----|--------|
+| **Checklist items** | Add/remove items in `checklistNormal` and `checklistFast` arrays | Unlimited items, any `id` string (must be unique within the plan) |
+| **Checklist groups** | Set any `group` string on items — groups auto-render as sections | Built-in tag colors: MORNING, EATING, EVENING, FAST, NIGHT. Custom groups get `tag-rules` styling by default. Add CSS class for custom colors. |
+| **Workout sections** | Return any HTML from `workoutContent()` | Use `workoutCard()` + `exRow()` helpers for consistency, or write raw HTML |
+| **Nutrition content** | Return any HTML from `nutritionContent(s)` | Has access to settings for dynamic values (calories, macros) |
+| **Rules content** | Return any HTML from `rulesContent(s)` | Has access to settings. Use `ruleCard()` helper for consistent styling |
+| **Fast day schedule** | Set `fastDaysDow` array and `fastDaysPerWeek` | Any combination of weekdays. Must match (e.g. 3 days in array = `fastDaysPerWeek: 3`) |
+| **Banner appearance** | Set `bannerColor`, `bannerBg`, `bannerBorder` | Any CSS color values |
+| **Macro split** | Calculate in `nutritionContent(s)` from `s.calories` | Entirely custom math per plan |
+
+### What You CANNOT Customize Per Plan (Without Code Changes)
+
+- **Tab structure** — the 6 tabs (Today, Months, Workouts, Nutrition, Rules, Track) are fixed in HTML
+- **Checklist behavior** — ticking items, saving to storage, calendar classification logic is shared code
+- **Goal calculator** — uses `fastDaysPerWeek` and `tdee` from the plan but the calculation model is shared
+- **Weight tracking** — independent of plans, shared across all
+- **Schedule system** — uses plan's `fastDaysDow` for auto-set but otherwise shared
+
+---
+
+## 5. Technical Architecture
 
 ### File Structure
 
@@ -62,7 +215,7 @@ An aggressive cut protocol. Same 3 fast days per week. 1000 cal ceiling on eatin
 |------|---------|
 | `index.html` | The entire app — HTML, CSS, and all JavaScript in one file. ~3000 lines. No build process, no bundler, no framework. |
 | `manifest.json` | PWA manifest. App name, icons, display mode (standalone = fullscreen), theme color. |
-| `sw.js` | Service Worker. Caches all app files after first load for offline use. Cache-first strategy. Current cache name: `protocol-health-v5`. Bump version on major deploys. |
+| `sw.js` | Service Worker. Caches all app files after first load for offline use. Cache-first strategy. Current cache name: `protocol-health-v6`. Bump version on major deploys. |
 | `icon-192.png` | Home screen icon at 192×192px. |
 | `icon-512.png` | Splash screen icon at 512×512px. |
 
@@ -110,7 +263,7 @@ const DISPATCH_MAP = {
 
 ---
 
-## 5. App Tab Structure
+## 6. App Tab Structure
 
 | Tab | Purpose |
 |-----|---------|
@@ -118,12 +271,12 @@ const DISPATCH_MAP = {
 | **MONTHS** | Calendar view. Each cell color-coded: green = full compliance, purple = fast day, orange = partial, red = missed. Tap any cell to open day modal — log past weight, water, energy, notes, edit past checklists. Also shows schedule highlight overlay. |
 | **WORKOUTS** | Collapsible workout cards generated from active plan's `workoutContent()` function. Shows 7-day week grid with today highlighted. |
 | **NUTRITION** | Generated from active plan's `nutritionContent(s)`. Macro targets, meal timing rules, fast day protocol, snack list, allowed/banned drinks. |
-| **RULES** | Generated from active plan's `rulesContent()`. Eating rules + training rules + discipline rules. Static reference content. |
+| **RULES** | Generated from active plan's `rulesContent(s)`. Eating rules + training rules + discipline rules. Can reference settings (e.g. calorie ceiling). |
 | **TRACK** | Weight logging input, weight history list, goal bar, weight projection, recent day logs, data backup/restore, and text export. |
 
 ---
 
-## 6. Goal Calculator Logic
+## 7. Goal Calculator Logic
 
 The settings panel contains a goal calculator that models the user's deficit protocol. It accounts for fasting days, exercise burn, and compliance rate — not just TDEE.
 
@@ -161,7 +314,7 @@ The TRACK tab projects weight at end of week using a blended rate model:
 
 ---
 
-## 7. Schedule System
+## 8. Schedule System
 
 A schedule is an optional overlay that highlights a block of days on the calendar and drives the duration progress bar. It does not replace the checklist — it is a planning layer on top.
 
@@ -176,7 +329,7 @@ A schedule is an optional overlay that highlights a block of days on the calenda
 
 ---
 
-## 8. Backup System
+## 9. Backup System
 
 localStorage is wiped when the user clears Chrome browsing data. The backup system is the only recovery mechanism.
 
@@ -189,7 +342,7 @@ localStorage is wiped when the user clears Chrome browsing data. The backup syst
 
 ---
 
-## 9. The Improvement Project
+## 10. The Improvement Project
 
 This app is in active development. Updates are made through Claude Code connected directly to the GitHub repository. The single-file architecture makes this straightforward — there is no build system, no compiled output, no package manager for the app itself.
 
@@ -226,7 +379,7 @@ This app is in active development. Updates are made through Claude Code connecte
 
 ---
 
-## 10. Deployment & Update Rules
+## 11. Deployment & Update Rules
 
 Protocol Health is hosted on GitHub Pages. Updates are deployed by pushing changed files to the `main` branch. There is no build step, no CI/CD pipeline — push the file, it is live within ~60 seconds.
 
@@ -242,17 +395,17 @@ Push to GitHub → GitHub Pages serves new files (~60s)
 
 The service worker caches files under `CACHE_NAME` in `sw.js`. If this name does not change, the SW may keep serving the old cached version even after new files are pushed.
 
-**Current version:** `protocol-health-v5`
+**Current version:** `protocol-health-v6`
 
 > **Rule: Bump `CACHE_NAME` on every significant update.**
-> - On any JS logic change, new feature, or bug fix → increment: `v5` → `v6` → `v7`
+> - On any JS logic change, new feature, or bug fix → increment: `v6` → `v7` → `v8`
 > - On pure content changes (text, nutrition rules, workout descriptions) → optional but safe to bump
 > - **Always bump when:** changing storage key schemas, adding new dispatch events, restructuring plans
 > - Never skip the bump when unsure — a stale cache is harder to debug than an unnecessary version increment
 
 ```javascript
-// sw.js — line 1
-const CACHE_NAME = 'protocol-health-v5'; // ← increment this on every significant push
+// sw.js — line 22
+const CACHE_NAME = 'protocol-health-v6'; // ← increment this on every significant push
 ```
 
 ### Files That Must Be Pushed Together
@@ -279,14 +432,14 @@ const CACHE_NAME = 'protocol-health-v5'; // ← increment this on every signific
 ### Safe Commit Pattern for Claude Code
 
 1. Make changes to `index.html`
-2. Increment `CACHE_NAME` in `sw.js` (`v5` → `v6`)
+2. Increment `CACHE_NAME` in `sw.js` (`v6` → `v7`)
 3. Commit both files together with a clear message describing the change
 4. Do not split `index.html` and `sw.js` into separate commits — always push together
 5. Never force-push to `main` — GitHub Pages may serve an inconsistent state during a force push
 
 ---
 
-## 11. Quick Reference
+## 12. Quick Reference
 
 ```
 Repository:   github.com/HIRAKHANJI/protocol-health
@@ -306,5 +459,5 @@ Active plan:  getActivePlan() — never reference PLANS[x] directly elsewhere
 Data writes:  always end with dispatch("EVENT_NAME")
 Dialogs:      showConfirm(), showAlert() — never native confirm/alert
 Dates:        dateToStr(d), strToDate(s), todayStr() — never toISOString()
-Cache:        sw.js CACHE_NAME = "protocol-health-v5" — bump on every significant push
+Cache:        sw.js CACHE_NAME = "protocol-health-v6" — bump on every significant push
 ```
