@@ -2170,8 +2170,7 @@ function toggleFastDay(dateStr) {
   if(fd[dateStr]) delete fd[dateStr]; else fd[dateStr]=true;
   ss(SK.fastDays, fd);
   dispatch('FAST_DAY_TOGGLED');
-  const [y,m,d]=dateStr.split('-').map(Number);
-  openDayModal(dateStr,new Date(y,m-1,d));
+  openDayModal(dateStr,strToDate(dateStr));
 }
 
 // saveDayLog: reads all fields from the open day modal and writes them to SK.dayLogs.
@@ -2690,7 +2689,7 @@ function openManageSchedule() {
   // Current status text
   const startW  = sched.startWeight || s.currentKg || '?';
   const curW    = getLatestWeight();
-  const elapsed = Math.max(0, Math.floor((new Date() - strToDate(sched.startDate)) / 86400000));
+  const elapsed = Math.max(0, Math.floor((new Date().getTime() - strToDate(sched.startDate).getTime()) / 86400000));
   const lost    = parseFloat((startW - curW).toFixed(1));
   const rate    = elapsed > 0 ? parseFloat((lost / elapsed * 7).toFixed(2)) : 0;
   const remain  = parseFloat((curW - (s.targetKg||91)).toFixed(1));
@@ -2735,7 +2734,7 @@ function calcAdjust() {
 
   const curW    = getLatestWeight();
   const startW  = sched.startWeight || s.currentKg || curW;
-  const elapsed = Math.max(1, Math.floor((new Date() - strToDate(sched.startDate)) / 86400000));
+  const elapsed = Math.max(1, Math.floor((new Date().getTime() - strToDate(sched.startDate).getTime()) / 86400000));
   const lost    = Math.max(0, startW - curW);
   const actualRate = lost / elapsed; // kg/day actual
 
@@ -2869,7 +2868,7 @@ document.getElementById('manageSchedOverlay').addEventListener('click', e=>{
 function backupData() {
   const backup = {
     version: 'ph_v1',
-    exportedAt: new Date().toISOString(),
+    exportedAt: dateToStr(new Date()),
     data: {}
   };
   // Dump every storage key
@@ -2882,7 +2881,7 @@ function backupData() {
   const blob = new Blob([json], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  const date = new Date().toISOString().slice(0,10);
+  const date = dateToStr(new Date());
   a.href = url;
   a.download = `protocol-health-backup-${date}.json`;
   document.body.appendChild(a);

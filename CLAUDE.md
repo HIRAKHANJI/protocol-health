@@ -215,7 +215,7 @@ Nothing else changes. `getActivePlan()` reads `settings.plan`, looks up `PLANS[s
 |------|---------|
 | `index.html` | The entire app — HTML, CSS, and all JavaScript in one file. ~3000 lines. No build process, no bundler, no framework. |
 | `manifest.json` | PWA manifest. App name, icons, display mode (standalone = fullscreen), theme color. |
-| `sw.js` | Service Worker. Caches all app files after first load for offline use. Cache-first strategy. Current cache name: `protocol-health-v6`. Bump version on major deploys. |
+| `sw.js` | Service Worker. Caches all app files after first load for offline use. Cache-first strategy. Current cache name: `protocol-health-v7`. Bump version on major deploys. |
 | `icon-192.png` | Home screen icon at 192×192px. |
 | `icon-512.png` | Splash screen icon at 512×512px. |
 
@@ -395,7 +395,7 @@ Push to GitHub → GitHub Pages serves new files (~60s)
 
 The service worker caches files under `CACHE_NAME` in `sw.js`. If this name does not change, the SW may keep serving the old cached version even after new files are pushed.
 
-**Current version:** `protocol-health-v6`
+**Current version:** `protocol-health-v7`
 
 > **Rule: Bump `CACHE_NAME` on every significant update.**
 > - On any JS logic change, new feature, or bug fix → increment: `v6` → `v7` → `v8`
@@ -405,7 +405,7 @@ The service worker caches files under `CACHE_NAME` in `sw.js`. If this name does
 
 ```javascript
 // sw.js — line 22
-const CACHE_NAME = 'protocol-health-v6'; // ← increment this on every significant push
+const CACHE_NAME = 'protocol-health-v7'; // ← increment this on every significant push
 ```
 
 ### Files That Must Be Pushed Together
@@ -500,6 +500,6 @@ Active plan:  getActivePlan() — never reference PLANS[x] directly elsewhere
 Data writes:  always end with dispatch("EVENT_NAME")
 Dialogs:      showConfirm(), showAlert() — never native confirm/alert
 Dates:        dateToStr(d), strToDate(s), todayStr() — never toISOString()
-Cache:        sw.js CACHE_NAME = "protocol-health-v6" — bump on every significant push
+Cache:        sw.js CACHE_NAME = "protocol-health-v7" — bump on every significant push
 App version:  APP_VERSION = "1.0.0" — bump on notable updates (see Section 12)
 ```
