@@ -19,7 +19,7 @@
 // VERSION: bump CACHE_NAME (e.g. 'protocol-health-v6') when you deploy a major update.
 // This forces old caches to be deleted and new files to be fetched fresh.
 
-const CACHE_NAME = 'protocol-health-v6';
+const CACHE_NAME = 'protocol-health-v7';
 
 // ─── INSTALL ─────────────────────────────────────────────────────────────────
 // Runs once when the service worker is first registered (or when CACHE_NAME changes).

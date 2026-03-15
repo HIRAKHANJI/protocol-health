@@ -439,7 +439,47 @@ const CACHE_NAME = 'protocol-health-v6'; // ← increment this on every signific
 
 ---
 
-## 12. Quick Reference
+## 12. App Versioning (`APP_VERSION`)
+
+The app has two independent version numbers that serve different purposes:
+
+| Version | Location | Purpose | Bumps when |
+|---------|----------|---------|-----------|
+| `CACHE_NAME` (`protocol-health-vN`) | `sw.js` | Cache busting — forces fresh file download | Every deploy. Silent, invisible to user. |
+| `APP_VERSION` (`X.Y.Z`) | `index.html` | User-facing version — triggers update banner | Only on notable updates. User sees it. |
+
+### Version Format: `X.Y.Z` (Semantic)
+
+| Bump | Threshold | Shows banner? | Examples |
+|------|-----------|---------------|----------|
+| **+0.0.1** (patch) | 1–3 small bug fixes, text corrections, styling tweaks | No | Fixed calendar color, typo in rule text, padding fix |
+| **+0.1.0** (minor) | A new feature, a meaningful UI change, or 4+ bug fixes bundled together | Yes | Added streak counter, redesigned settings panel, new checklist group |
+| **+1.0.0** (major) | New plan added, major rework of a core system, or something that changes how you use the app | Yes | New combat training plan, schedule system rewrite, new tab added |
+
+**Current version:** `1.0.0`
+
+### How It Works
+
+1. `APP_VERSION` and `APP_VERSION_MSG` are constants at the top of the script in `index.html`
+2. On app load, `checkVersionUpdate()` compares `APP_VERSION` to the last seen version stored in `SK.seenVer`
+3. If the major or minor digit changed → show a slide-down banner with the version and message
+4. If only the patch digit changed → silently update `SK.seenVer`, no banner
+5. User taps OK → banner dismissed, version saved, never shown again for that version
+
+### How to Bump
+
+When making changes, update these two lines near the top of the script in `index.html`:
+
+```javascript
+const APP_VERSION = '1.1.0';                          // ← bump according to rules above
+const APP_VERSION_MSG = 'Added streak tracking.';     // ← short description of what changed
+```
+
+> **Rule:** Always update `APP_VERSION_MSG` when bumping minor or major. The message appears in the update banner — it should be one short sentence describing what the user will notice.
+
+---
+
+## 13. Quick Reference
 
 ```
 Repository:   github.com/HIRAKHANJI/protocol-health
@@ -453,6 +493,7 @@ Storage keys (all in SK object at top of script):
   ph_fd_v1  — fast days
   ph_st_v1  — settings
   ph_sc_v1  — schedule
+  ph_sv_v1  — last seen app version (for update banner)
 
 Plans:        PLANS.default, PLANS.agro (add more as needed)
 Active plan:  getActivePlan() — never reference PLANS[x] directly elsewhere
@@ -460,4 +501,5 @@ Data writes:  always end with dispatch("EVENT_NAME")
 Dialogs:      showConfirm(), showAlert() — never native confirm/alert
 Dates:        dateToStr(d), strToDate(s), todayStr() — never toISOString()
 Cache:        sw.js CACHE_NAME = "protocol-health-v6" — bump on every significant push
+App version:  APP_VERSION = "1.0.0" — bump on notable updates (see Section 12)
 ```
