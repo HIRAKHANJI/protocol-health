@@ -354,6 +354,59 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
 .update-banner-msg { font-family:'DM Mono',monospace; font-size:0.6rem; color:var(--muted); letter-spacing:0.5px; margin-top:3px; }
 .update-banner-close { background:none; border:1px solid var(--border); border-radius:6px; color:var(--muted); font-family:'DM Mono',monospace; font-size:0.6rem; letter-spacing:1px; padding:5px 12px; cursor:pointer; flex-shrink:0; transition:all 0.2s; }
 .update-banner-close:hover { border-color:var(--accent); color:var(--accent); }
+
+/* FOOD LOG */
+.food-log-wrap { background:var(--surface); border:1px solid var(--border); border-radius:10px; overflow:hidden; margin-bottom:14px; }
+.food-input-row { display:flex; gap:6px; padding:10px; }
+.food-input-row input { flex:1; background:var(--surface2); border:1px solid var(--border); border-radius:7px; padding:8px 10px; color:var(--text); font-family:'DM Mono',monospace; font-size:0.8rem; outline:none; transition:border-color 0.15s; }
+.food-input-row input:focus { border-color:var(--accent); }
+.food-input-row input::placeholder { color:var(--muted); }
+.food-input-name { min-width:0; flex:2 !important; }
+.food-input-cal { max-width:80px; flex:0 0 80px !important; }
+.food-input-notes { min-width:0; }
+.food-add-btn { background:var(--accent); color:#000; border:none; border-radius:7px; padding:8px 12px; font-family:'Bebas Neue',sans-serif; font-size:0.8rem; letter-spacing:1px; cursor:pointer; white-space:nowrap; flex-shrink:0; }
+.food-suggestions { position:absolute; left:0; right:0; top:100%; z-index:500; background:var(--surface2); border:1px solid var(--accent); border-radius:0 0 8px 8px; max-height:220px; overflow-y:auto; display:none; }
+.food-suggestions.visible { display:block; }
+.food-sug-item { padding:10px 12px; font-family:'DM Mono',monospace; font-size:0.75rem; color:var(--text); cursor:pointer; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; min-height:44px; align-items:center; }
+.food-sug-item:last-child { border-bottom:none; }
+.food-sug-item:hover, .food-sug-item:active { background:var(--surface); color:var(--accent); }
+.food-sug-cal { color:var(--muted); font-size:0.65rem; }
+.food-entry { display:flex; justify-content:space-between; align-items:center; padding:8px 12px; border-top:1px solid var(--border); }
+.food-entry-info { flex:1; min-width:0; }
+.food-entry-name { font-size:0.78rem; font-weight:500; }
+.food-entry-notes { font-family:'DM Mono',monospace; font-size:0.58rem; color:var(--muted); margin-top:1px; }
+.food-entry-cal { font-family:'DM Mono',monospace; font-size:0.75rem; color:var(--accent2); margin:0 10px; white-space:nowrap; }
+.food-entry-del { background:none; border:1px solid var(--border); color:var(--muted); width:24px; height:24px; border-radius:5px; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all 0.15s; }
+.food-entry-del:hover { border-color:var(--danger); color:var(--danger); }
+.food-total-bar { padding:10px 12px; background:var(--surface2); display:flex; justify-content:space-between; align-items:center; font-family:'DM Mono',monospace; font-size:0.7rem; }
+.food-total-val { font-family:'Bebas Neue',sans-serif; font-size:1.1rem; line-height:1; }
+.cal-under { color:var(--green); }
+.cal-near { color:var(--accent2); }
+.cal-over { color:var(--danger); }
+.today-cal-strip { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:8px 13px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; transition:all 0.15s; }
+.today-cal-strip:active { border-color:var(--accent); }
+
+/* EXERCISE LEVEL SELECTOR */
+.level-badge { background:var(--surface2); border:1px solid var(--accent); color:var(--accent); border-radius:5px; padding:3px 7px; font-family:'DM Mono',monospace; font-size:0.55rem; letter-spacing:1px; cursor:pointer; white-space:nowrap; transition:all 0.15s; flex-shrink:0; }
+.level-badge:hover, .level-badge:active { background:var(--accent); color:#000; }
+.level-badge-unset { border-color:var(--muted); color:var(--muted); }
+.level-max { color:var(--muted); font-size:0.5rem; }
+.level-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.88); z-index:5500; padding:16px; overflow-y:auto; }
+.level-modal-overlay.active { display:flex; align-items:flex-end; justify-content:center; }
+.level-modal { background:var(--bg); border:1px solid var(--border); border-radius:14px 14px 0 0; max-width:440px; width:100%; max-height:75vh; overflow-y:auto; animation:slideUp 0.22s ease; }
+.level-modal-header { padding:14px 17px; background:var(--surface2); border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:1; }
+.level-modal-header h3 { font-family:'Bebas Neue',sans-serif; font-size:1.1rem; letter-spacing:2px; color:var(--accent); }
+.level-row { display:flex; align-items:center; gap:10px; padding:12px 17px; border-bottom:1px solid var(--border); cursor:pointer; transition:all 0.15s; }
+.level-row:last-child { border-bottom:none; }
+.level-row:hover, .level-row:active { background:var(--surface2); }
+.level-row.current { border-left:3px solid var(--accent); background:rgba(200,245,66,0.05); }
+.level-num { font-family:'Bebas Neue',sans-serif; font-size:1rem; color:var(--muted); min-width:28px; text-align:center; }
+.level-row.current .level-num { color:var(--accent); }
+.level-info { flex:1; min-width:0; }
+.level-ex-name { font-size:0.78rem; font-weight:500; }
+.level-ex-notes { font-family:'DM Mono',monospace; font-size:0.58rem; color:var(--muted); margin-top:2px; }
+.level-sets { font-family:'DM Mono',monospace; font-size:0.65rem; color:var(--accent2); white-space:nowrap; flex-shrink:0; }
+.ex-level-history { font-family:'DM Mono',monospace; font-size:0.62rem; color:var(--muted); padding:6px 12px; line-height:1.8; }
 </style>
 </head>
 <body>
@@ -438,6 +491,10 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
   <div class="fast-day-banner" id="fastBanner">
     <div class="fast-banner-title">⚡ WATER FAST DAY</div>
     <div class="fast-banner-sub">Zero food today. Water + electrolytes only.<br>500ml on wake · salt water mid-morning · black coffee/green tea allowed · electrolyte tablet pre-training</div>
+  </div>
+  <div class="today-cal-strip" id="todayCalStrip" style="display:none" onclick="switchTab('track',document.querySelectorAll('.tab')[5])">
+    <span style="font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:1px;color:var(--muted)">TODAY'S INTAKE</span>
+    <span id="todayCalStripVal" style="font-family:'Bebas Neue',sans-serif;font-size:1rem;"></span>
   </div>
   <div class="progress-wrap">
     <div class="progress-top"><span>TODAY'S MINIMUM</span><span class="pct" id="todayPct">0%</span></div>
@@ -555,6 +612,24 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
   <div class="section-title">DAY <span>NOTES</span></div>
   <p class="section-note">Notes logged from today's checklist or calendar day modal. Tap a day on MONTHS to add notes.</p>
   <div id="recentNotes"><div class="empty-state">No notes logged yet.</div></div>
+  <div style="height:18px"></div>
+  <div class="section-title">FOOD <span>LOG</span></div>
+  <p class="section-note">Log what you eat. Calories auto-total. Previously logged foods auto-suggest.</p>
+  <div class="food-log-wrap">
+    <div class="food-input-row">
+      <div style="position:relative;flex:2;min-width:0">
+        <input class="food-input-name" type="text" id="foodNameInput" placeholder="Food name" autocomplete="off" oninput="onFoodNameInput(this)">
+        <div class="food-suggestions" id="foodSuggestions"></div>
+      </div>
+      <input class="food-input-cal" type="number" id="foodCalInput" placeholder="Cal" min="0" step="1">
+      <button class="food-add-btn" onclick="addFoodFromTrack()">ADD</button>
+    </div>
+    <div id="foodEntries"></div>
+    <div class="food-total-bar" id="foodTotalBar" style="display:none">
+      <span id="foodTotalLabel">TODAY</span>
+      <span><span class="food-total-val" id="foodTotalVal">0</span> <span style="color:var(--muted);font-size:0.6rem">cal</span></span>
+    </div>
+  </div>
   <div class="action-row" style="margin-top:14px">
     <button class="reset-btn" onclick="openExport()" style="border-color:var(--accent);color:var(--accent)">↗ EXPORT LOGS</button>
     <button class="reset-btn" onclick="clearWeightLog()">↺ CLEAR WEIGHTS</button>
@@ -709,6 +784,7 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
           </div>
           <div id="calcFlag" style="margin-top:8px;padding:7px 10px;border-radius:6px;font-size:0.75rem;font-weight:700;letter-spacing:1px;display:none"></div>
           <div id="calcWarning" style="font-size:0.72rem;color:var(--muted);margin-top:6px;line-height:1.6;display:none"></div>
+          <div id="calcActualNote" style="font-size:0.65rem;color:var(--accent2);margin-top:6px;font-family:'DM Mono',monospace;display:none"></div>
           <div style="display:flex;gap:8px;margin-top:10px">
             <button class="reset-btn" id="useCalsBtn" onclick="applyCalculatedCalories()" style="display:none;border-color:var(--accent2);color:var(--accent2);flex:1">USE THESE CALORIES</button>
           </div>
@@ -760,6 +836,17 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
   </div>
 </div>
 
+<!-- ══ EXERCISE LEVEL SELECTOR MODAL ══ -->
+<div class="level-modal-overlay" id="levelModalOverlay">
+  <div class="level-modal">
+    <div class="level-modal-header">
+      <h3 id="levelModalTitle">SELECT LEVEL</h3>
+      <button class="close-x" onclick="closeLevelSelector()">×</button>
+    </div>
+    <div id="levelModalBody"></div>
+  </div>
+</div>
+
 <!-- ══ MANAGE SCHEDULE MODAL ══ -->
 <div class="settings-overlay" id="manageSchedOverlay">
   <div class="settings-panel">
@@ -798,6 +885,7 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
             <div class="calc-result-item"><div class="calc-result-val" id="adjEndDate">—</div><div class="calc-result-lbl">New end date</div></div>
           </div>
           <div id="adjWarning" style="font-size:0.72rem;color:var(--accent2);margin-top:6px;display:none"></div>
+          <div id="adjActualNote" style="font-size:0.65rem;color:var(--accent2);margin-top:6px;font-family:'DM Mono',monospace;display:none"></div>
         </div>
         <button class="schedule-btn" id="adjConfirmBtn" onclick="confirmAdjust()" style="display:none">CONFIRM ADJUSTMENT</button>
       </div>
@@ -832,7 +920,10 @@ const SK = {
   fastDays:  'ph_fd_v1',   // object keyed by dateStr — value: true if that day is a water fast
   settings:  'ph_st_v1',   // single object: plan, currentKg, targetKg, calories, tdee, risk, startDate
   schedule:  'ph_sc_v1',   // single object: days[], startDate, totalDays, planName, startWeight
-  seenVer:   'ph_sv_v1'    // string — last APP_VERSION the user dismissed the update banner for
+  seenVer:   'ph_sv_v1',   // string — last APP_VERSION the user dismissed the update banner for
+  foodLog:   'ph_fl_v1',   // object keyed by dateStr — each value: array of { id, name, calories, notes, ts }
+  foodLib:   'ph_fb_v1',   // array of { name, lastCalories, useCount } — sorted by useCount desc
+  exLevels:  'ph_ex_v1'    // object keyed by dateStr — each value: { groupId: levelIndex, ... }
 };
 
 // ─── APP VERSION ─────────────────────────────────────────────────────────────
@@ -841,8 +932,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '1.0.1';
-const APP_VERSION_MSG = 'Fixed AGRO workout schedule — moved skill session to Thursday.';
+const APP_VERSION = '1.1.0';
+const APP_VERSION_MSG = 'Food & calorie logger, exercise level selector, and pull work added to AGRO plan.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -868,6 +959,224 @@ function getSettings() {
 }
 function saveSettings(s) { ss(SK.settings, s); }
 
+// ─── FOOD LOG HELPERS ────────────────────────────────────────────────────────
+// getDayCalories: single source of truth for actual food intake on a given date.
+// Returns { total, entries, hasData } — used by projection, compliance, and all food UI.
+function getDayCalories(dateStr) {
+  const fl = gs(SK.foodLog) || {};
+  const entries = fl[dateStr] || [];
+  const total = entries.reduce((sum, e) => sum + (e.calories || 0), 0);
+  return { total, entries, hasData: entries.length > 0 };
+}
+
+// getAvgActualCalories: returns average actual calorie intake over last N days (eating days only).
+// Returns null if no food log data exists in the window.
+function getAvgActualCalories(days) {
+  const fd = gs(SK.fastDays) || {};
+  let sum = 0, count = 0;
+  const now = new Date(); now.setHours(0,0,0,0);
+  for(let i = 0; i < days; i++) {
+    const d = new Date(now); d.setDate(d.getDate() - i);
+    const ds = dateToStr(d);
+    if(fd[ds]) continue; // skip fast days
+    const dc = getDayCalories(ds);
+    if(dc.hasData) { sum += dc.total; count++; }
+  }
+  return count > 0 ? Math.round(sum / count) : null;
+}
+
+function addFoodEntry(dateStr, name, calories, notes) {
+  if(!name || !name.trim()) return;
+  const fl = gs(SK.foodLog) || {};
+  if(!fl[dateStr]) fl[dateStr] = [];
+  fl[dateStr].push({
+    id: 'fl_' + Date.now() + '_' + Math.random().toString(36).substr(2,4),
+    name: name.trim(),
+    calories: Math.max(0, parseInt(calories) || 0),
+    notes: (notes || '').trim(),
+    ts: Date.now()
+  });
+  ss(SK.foodLog, fl);
+  updateFoodLibrary(name.trim(), parseInt(calories) || 0);
+  dispatch('FOOD_LOGGED');
+}
+
+function removeFoodEntry(dateStr, entryId) {
+  const fl = gs(SK.foodLog) || {};
+  if(!fl[dateStr]) return;
+  fl[dateStr] = fl[dateStr].filter(e => e.id !== entryId);
+  if(!fl[dateStr].length) delete fl[dateStr];
+  ss(SK.foodLog, fl);
+  dispatch('FOOD_LOGGED');
+}
+
+function updateFoodLibrary(name, calories) {
+  const lib = gs(SK.foodLib) || [];
+  const lower = name.toLowerCase();
+  const existing = lib.find(f => f.name.toLowerCase() === lower);
+  if(existing) {
+    existing.lastCalories = calories;
+    existing.useCount = (existing.useCount || 0) + 1;
+    // preserve the casing of the most recent entry
+    existing.name = name;
+  } else {
+    lib.push({ name, lastCalories: calories, useCount: 1 });
+  }
+  lib.sort((a, b) => (b.useCount || 0) - (a.useCount || 0));
+  ss(SK.foodLib, lib);
+}
+
+// Autocomplete debounce timer
+let _foodSugTimer = null;
+
+function onFoodNameInput(input) {
+  clearTimeout(_foodSugTimer);
+  const val = input.value.trim();
+  const sugEl = document.getElementById('foodSuggestions');
+  if(!val || val.length < 1) { sugEl.classList.remove('visible'); return; }
+  _foodSugTimer = setTimeout(() => {
+    const lib = gs(SK.foodLib) || [];
+    const lower = val.toLowerCase();
+    const matches = lib.filter(f => f.name.toLowerCase().includes(lower)).slice(0, 5);
+    if(!matches.length) { sugEl.classList.remove('visible'); return; }
+    sugEl.innerHTML = matches.map(f =>
+      `<div class="food-sug-item" onmousedown="selectFoodSuggestion('${f.name.replace(/'/g,"\\'")}',${f.lastCalories})">
+        <span>${f.name}</span><span class="food-sug-cal">${f.lastCalories} cal</span>
+      </div>`
+    ).join('');
+    sugEl.classList.add('visible');
+  }, 200);
+}
+
+function selectFoodSuggestion(name, calories) {
+  document.getElementById('foodNameInput').value = name;
+  document.getElementById('foodCalInput').value = calories;
+  document.getElementById('foodSuggestions').classList.remove('visible');
+}
+
+function addFoodFromTrack() {
+  const name = document.getElementById('foodNameInput').value;
+  const cal = document.getElementById('foodCalInput').value;
+  if(!name.trim()) return;
+  addFoodEntry(todayStr(), name, cal, '');
+  document.getElementById('foodNameInput').value = '';
+  document.getElementById('foodCalInput').value = '';
+  document.getElementById('foodSuggestions').classList.remove('visible');
+}
+
+function addFoodFromModal(dateStr) {
+  const name = document.getElementById('mFoodName')?.value;
+  const cal = document.getElementById('mFoodCal')?.value;
+  if(!name || !name.trim()) return;
+  addFoodEntry(dateStr, name, cal, '');
+  // Re-open the modal to refresh
+  openDayModal(dateStr, strToDate(dateStr));
+}
+
+function removeFoodFromModal(dateStr, entryId) {
+  showConfirm('REMOVE FOOD', 'Remove this food entry?', () => {
+    removeFoodEntry(dateStr, entryId);
+    openDayModal(dateStr, strToDate(dateStr));
+  }, { yesLabel: 'REMOVE', danger: true });
+}
+
+function renderFoodLog() {
+  const container = document.getElementById('foodEntries');
+  const totalBar = document.getElementById('foodTotalBar');
+  if(!container) return;
+  const today = todayStr();
+  const dc = getDayCalories(today);
+  if(!dc.hasData) {
+    container.innerHTML = '';
+    totalBar.style.display = 'none';
+    return;
+  }
+  container.innerHTML = dc.entries.map(e =>
+    `<div class="food-entry">
+      <div class="food-entry-info"><div class="food-entry-name">${e.name}</div>${e.notes ? `<div class="food-entry-notes">${e.notes}</div>` : ''}</div>
+      <div class="food-entry-cal">${e.calories}</div>
+      <button class="food-entry-del" onclick="showConfirm('REMOVE','Remove ${e.name.replace(/'/g,"\\'")}?',()=>{removeFoodEntry('${today}','${e.id}')},{yesLabel:'REMOVE',danger:true})">×</button>
+    </div>`
+  ).join('');
+  const s = getSettings();
+  const ceiling = s.calories || 1500;
+  const remaining = ceiling - dc.total;
+  const cls = dc.total > ceiling ? 'cal-over' : (ceiling - dc.total) <= 100 ? 'cal-near' : 'cal-under';
+  totalBar.style.display = 'flex';
+  document.getElementById('foodTotalVal').textContent = dc.total;
+  document.getElementById('foodTotalVal').className = 'food-total-val ' + cls;
+  document.getElementById('foodTotalLabel').innerHTML = `TODAY <span style="color:var(--muted);font-size:0.58rem;margin-left:6px">${remaining >= 0 ? remaining + ' remaining' : Math.abs(remaining) + ' over'} / ${ceiling} ceiling</span>`;
+}
+
+function updateTodayCalStrip() {
+  const strip = document.getElementById('todayCalStrip');
+  if(!strip) return;
+  const dc = getDayCalories(todayStr());
+  if(!dc.hasData) { strip.style.display = 'none'; return; }
+  const s = getSettings();
+  const ceiling = s.calories || 1500;
+  const cls = dc.total > ceiling ? 'cal-over' : (ceiling - dc.total) <= 100 ? 'cal-near' : 'cal-under';
+  strip.style.display = 'flex';
+  document.getElementById('todayCalStripVal').className = cls;
+  document.getElementById('todayCalStripVal').textContent = dc.total + ' / ' + ceiling + ' CAL';
+}
+
+// ─── EXERCISE LEVEL HELPERS ──────────────────────────────────────────────────
+// getCurrentExerciseLevel: looks backward through ph_ex_v1 for the most recent level set for a group.
+// Returns null if no level has ever been set.
+function getCurrentExerciseLevel(groupId) {
+  const all = gs(SK.exLevels) || {};
+  // Check today first, then look backward up to 90 days
+  const now = new Date(); now.setHours(0,0,0,0);
+  for(let i = 0; i < 90; i++) {
+    const d = new Date(now); d.setDate(d.getDate() - i);
+    const ds = dateToStr(d);
+    if(all[ds] && all[ds][groupId] !== undefined) return all[ds][groupId];
+  }
+  return null;
+}
+
+function setExerciseLevel(groupId, level) {
+  const all = gs(SK.exLevels) || {};
+  const today = todayStr();
+  if(!all[today]) all[today] = {};
+  all[today][groupId] = level;
+  ss(SK.exLevels, all);
+  dispatch('EXERCISE_LEVEL_CHANGED');
+}
+
+function openLevelSelector(groupId) {
+  const prog = typeof EXERCISE_PROGRESSIONS !== 'undefined' ? EXERCISE_PROGRESSIONS[groupId] : null;
+  if(!prog) return;
+  const current = getCurrentExerciseLevel(groupId);
+  document.getElementById('levelModalTitle').textContent = prog.name + ' PROGRESSION';
+  document.getElementById('levelModalBody').innerHTML = prog.levels.map(l =>
+    `<div class="level-row${l.level === current ? ' current' : ''}" onclick="setExerciseLevel('${groupId}',${l.level});closeLevelSelector();if(document.getElementById('tab-workouts').classList.contains('active'))renderWorkouts();">
+      <div class="level-num">${l.level}</div>
+      <div class="level-info"><div class="level-ex-name">${l.exercise}</div><div class="level-ex-notes">${l.notes || ''}</div></div>
+      <div class="level-sets">${l.sets}</div>
+    </div>`
+  ).join('');
+  document.getElementById('levelModalOverlay').classList.add('active');
+}
+
+function closeLevelSelector() {
+  document.getElementById('levelModalOverlay').classList.remove('active');
+}
+
+// Close level modal on overlay click
+document.addEventListener('click', e => {
+  if(e.target.id === 'levelModalOverlay') closeLevelSelector();
+});
+
+// Close food suggestions on click outside
+document.addEventListener('click', e => {
+  if(!e.target.closest('.food-input-row')) {
+    const sug = document.getElementById('foodSuggestions');
+    if(sug) sug.classList.remove('visible');
+  }
+});
+
 // ─── CENTRAL UPDATE DISPATCHER ───────────────────────────────────────────────
 // The single source of truth for UI updates.
 // Every function that changes data calls dispatch('EVENT_NAME') instead of manually
@@ -891,6 +1200,8 @@ const DISPATCH_MAP = {
   SCHEDULE_ADJUSTED: ['durationBar','calendarHighlights','projection','manageSchedBtn'],
   SCHEDULE_ENDED:    ['durationBar','calendarHighlights','manageSchedBtn'],
   SCHEDULE_REMOVED:  ['durationBar','calendarHighlights','manageSchedBtn'],
+  FOOD_LOGGED:       ['projection','goalBar','recentNotes','foodSummary','todayCalStrip'],
+  EXERCISE_LEVEL_CHANGED: ['workoutLevelDisplay'],
 };
 
 // ─── CUSTOM DIALOGS (native confirm/alert blocked in sandboxed iframes) ──────
@@ -1021,6 +1332,11 @@ function dispatch(event) {
       case 'fastUI':            updateFastUI(); break;
       case 'checklist':         loadChecklist(); break;
       case 'nutritionMacros':   if(document.getElementById('tab-nutrition').classList.contains('active')) renderNutrition(); break;
+      case 'foodSummary':       renderFoodLog(); break;
+      case 'todayCalStrip':     updateTodayCalStrip(); break;
+      case 'workoutLevelDisplay':
+        if(document.getElementById('tab-workouts').classList.contains('active')) renderWorkouts();
+        break;
       case 'allTabs':
         updateTodayTab();
         if(document.getElementById('tab-workouts').classList.contains('active')) renderWorkouts();
@@ -1261,10 +1577,10 @@ const PLANS = {
     eveningSub: {
       0:'SUNDAY — Rest. Walk + full hip session. No structured workout.',
       1:'MONDAY — Evening A: Push + Chest Definition · Decline push-up · Archer push-up · Planche lean · Handstand hold',
-      2:'TUESDAY — Evening B: Legs + Posterior Chain · Nordic curl · Bulgarian split squat · Good morning · Hollow body',
+      2:'TUESDAY — Evening B: Legs + Posterior Chain · Nordic curl · Inverted row · Bulgarian split squat · Good morning',
       3:'WEDNESDAY — Midweek Run · 5 min walk → 20 min run → 5 min walk → jump squats/burpees/mountain climbers',
       4:'THURSDAY — Evening C: Skill + Core + Calisthenics Foundation · Crow stand · L-sit · Scapular push-up · Dragon flag',
-      5:'FRIDAY — Evening B: Legs + Posterior Chain · Same as Tuesday',
+      5:'FRIDAY — Evening B: Legs + Posterior Chain · Nordic curl · Inverted row · Bulgarian split squat · Good morning',
       6:'SATURDAY — Run + Conditioning · 5 min walk → 30 min run → circuit: push-ups/jump squats/sprawls/plank'
     },
     stretchSub: {
@@ -1313,8 +1629,8 @@ const PLANS = {
       ${workoutCard('MON · MORNING A — PUSH + CORE','20 MIN',
         exRow('Hip CARs + Cat-cow + Wrist CARs','Daily mobility first — non-negotiable','10 min')+
         exRow('Jumping jacks','Warm-up','2 min')+
-        exRow('Push-ups','Full range, chest to floor','3×10–15')+
-        exRow('Plank','Elbows, stay tight','3×30 sec')+
+        exRowWithLevel('push','Push-ups','Full range, chest to floor','3×10–15')+
+        exRowWithLevel('core','Plank','Elbows, stay tight','3×30 sec')+
         exRow('Mountain climbers','Controlled pace','3×20'),
         stretchRow('Chest opener','Doorframe or arms wide','60 sec')+
         stretchRow('Shoulder dislocates','Towel/stick, full arc overhead','10 reps')
@@ -1323,8 +1639,8 @@ const PLANS = {
       ${workoutCard('TUE · MORNING B — LOWER + MOBILITY','20 MIN',
         exRow('Hip CARs + Cat-cow + Wrist CARs','Daily mobility first','10 min')+
         exRow('High knees','Warm-up, 60% pace','2 min')+
-        exRow('Bodyweight squat','Full depth, knees track toes','3×15')+
-        exRow('Glute bridge','Pause at top, squeeze hard','3×15')+
+        exRowWithLevel('squat','Bodyweight squat','Full depth, knees track toes','3×15')+
+        exRowWithLevel('hinge','Glute bridge','Pause at top, squeeze hard','3×15')+
         exRow('Reverse lunge','Step back, knee hovers floor','3×10/leg'),
         stretchRow('Deep squat hold','Heels flat, doorframe if needed','90 sec')+
         stretchRow('Hip CARs extra','Right hip gets 2 extra circles','1 min')
@@ -1332,17 +1648,17 @@ const PLANS = {
 
       ${workoutCard('WED · MORNING A — PUSH + CORE','20 MIN',
         exRow('Hip CARs + Cat-cow + Wrist CARs','Daily mobility','10 min')+
-        exRow('Dead bug','Lower back glued to floor','2×8/side')+
-        exRow('Push-ups','Focus on upper chest squeeze','3×12')+
+        exRowWithLevel('core','Dead bug','Lower back glued to floor','2×8/side')+
+        exRowWithLevel('push','Push-ups','Focus on upper chest squeeze','3×12')+
         exRow('Mountain climbers','Steady pace','3×20')+
-        exRow('Plank','','3×30 sec'),
+        exRowWithLevel('core','Plank','','3×30 sec'),
         stretchRow('Wrist extension stretch','Fingers back toward knees','60 sec')
       )}
 
       ${workoutCard('THU · MORNING B — LOWER + MOBILITY','20 MIN',
         exRow('Hip CARs + Cat-cow + Wrist CARs','Daily mobility','10 min')+
-        exRow('Jump squats','Land soft','3×10')+
-        exRow('Bulgarian split squat','Rear foot elevated','3×8/leg')+
+        exRowWithLevel('squat','Jump squats','Land soft','3×10')+
+        exRowWithLevel('squat','Bulgarian split squat','Rear foot elevated','3×8/leg')+
         exRow('Calf raise','Slow up, slow down','3×15'),
         stretchRow('90/90 hip stretch','90 sec each side — right hip priority','3 min')+
         stretchRow('Pigeon pose','Extra 30 sec on right side','3 min')
@@ -1350,17 +1666,17 @@ const PLANS = {
 
       ${workoutCard('FRI · MORNING A — PUSH + CORE','20 MIN',
         exRow('Hip CARs + Cat-cow + Wrist CARs','Daily mobility','10 min')+
-        exRow('Archer push-up','Unilateral — upper chest focus','3×6/side')+
+        exRowWithLevel('push','Archer push-up','Unilateral — upper chest focus','3×6/side')+
         exRow('Plank to downdog','Flow, 2 sec each','3×8')+
-        exRow('Hollow body hold','Arms overhead, back pressed down','3×20 sec'),
+        exRowWithLevel('core','Hollow body hold','Arms overhead, back pressed down','3×20 sec'),
         stretchRow('Rear shoulder stretch','Arm across body','30 sec each')+
         stretchRow('Doorframe chest stretch','Upper chest + anterior shoulder','60 sec')
       )}
 
       ${workoutCard('SAT · MORNING B — LOWER + MOBILITY','20 MIN',
         exRow('Hip CARs + Cat-cow + Wrist CARs','Daily mobility','10 min')+
-        exRow('Cossack squat','Wide feet, lateral lunge — hip opener','3×8/side')+
-        exRow('Good morning (BW)','Hinge at hip, back straight','3×12')+
+        exRowWithLevel('squat','Cossack squat','Wide feet, lateral lunge — hip opener','3×8/side')+
+        exRowWithLevel('hinge','Good morning (BW)','Hinge at hip, back straight','3×12')+
         exRow('Single-leg RDL','Balance + hamstring stretch','3×8/leg'),
         stretchRow('Frog stretch','Knees wide, push hips back','2 min')+
         stretchRow('Hamstring stretch','One leg extended, reach forward','60 sec each')
@@ -1379,26 +1695,27 @@ const PLANS = {
       <p class="section-note">Rotate Mon=A · Tue=B · Wed=run · Thu=C · Fri=B · Sat=run+conditioning. Sun = rest.</p>
 
       ${workoutCard('EVENING A — PUSH + CHEST DEFINITION','MON · 40 MIN',
-        exRow('Push-up ladder','10 down to 1. Rest = time for next set.','1 ladder')+
-        exRow('Decline push-up','Feet on chair/bed — upper chest focus','4×12')+
-        exRow('Archer push-up','Unilateral chest strength','4×6/side')+
-        exRow('Pike push-up','Hips high, head toward floor — shoulders','3×10')+
-        exRow('Pseudo planche lean','Lean forward on straight arms, protract scapula','4×20 sec')+
+        exRowWithLevel('push','Push-up ladder','10 down to 1. Rest = time for next set.','1 ladder')+
+        exRowWithLevel('push','Decline push-up','Feet on chair/bed — upper chest focus','4×12')+
+        exRowWithLevel('push','Archer push-up','Unilateral chest strength','4×6/side')+
+        exRowWithLevel('shoulder','Pike push-up','Hips high, head toward floor — shoulders','3×10')+
+        exRowWithLevel('skill_planche','Pseudo planche lean','Lean forward on straight arms, protract scapula','4×20 sec')+
         exRow('Tricep dips','Chair edge or floor','3×12')+
-        exRow('Wall handstand hold','Every session — wrist + shoulder base','3×20-30 sec'),
+        exRowWithLevel('skill_handstand','Wall handstand hold','Every session — wrist + shoulder base','3×20-30 sec'),
         stretchRow('Doorframe chest stretch','Upper chest + anterior shoulder','60 sec')+
         stretchRow('Shoulder dislocates','Towel/stick — full arc','10 reps')+
         stretchRow('Wrist extension stretch','Fingers pointing back','60 sec')
       )}
 
-      ${workoutCard('EVENING B — LEGS + POSTERIOR CHAIN','TUE / FRI · 40 MIN',
-        exRow('Nordic hamstring curl','Feet under sofa/bed — hardest hamstring move','4×5')+
-        exRow('Bulgarian split squat','Rear foot elevated — quad + glute','4×10/leg')+
+      ${workoutCard('EVENING B — LEGS + POSTERIOR CHAIN','TUE / FRI · 45 MIN',
+        exRowWithLevel('hinge','Nordic hamstring curl','Feet under sofa/bed — hardest hamstring move','4×5')+
+        exRowWithLevel('pull','Inverted row (under table)','Grip edge, pull chest to table — back + biceps','3×8–10')+
+        exRowWithLevel('squat','Bulgarian split squat','Rear foot elevated — quad + glute','4×10/leg')+
         exRow('Single-leg RDL (BW)','Lower back + hamstring — control the descent','3×10/leg')+
         exRow('Glute bridge march','Alternate legs, lower back stability','3×15')+
-        exRow('Good morning (BW)','Hip hinge, erector strengthening','3×12')+
+        exRowWithLevel('hinge','Good morning (BW)','Hip hinge, erector strengthening','3×12')+
         exRow('Wall sit','90° hold, no sliding','3×45 sec')+
-        exRow('Hollow body hold','Lower back protection through anterior core','3×30 sec'),
+        exRowWithLevel('core','Hollow body hold','Lower back protection through anterior core','3×30 sec'),
         stretchRow('Pigeon pose','90 sec each — right side extra 30 sec','3+ min')+
         stretchRow('Figure-4 stretch','Lying on back, ankle over knee','60 sec each')+
         stretchRow('Hamstring stretch','One leg extended reach','60 sec each')+
@@ -1406,13 +1723,13 @@ const PLANS = {
       )}
 
       ${workoutCard('EVENING C — SKILL + CORE + CALISTHENICS FOUNDATION','THU · 40 MIN',
-        exRow('Crow/frog stand attempts','Every session — multiple attempts','5 min')+
-        exRow('Tuck hold (crow position)','Build the balance — 4×15-20 sec holds','4×15-20 sec')+
-        exRow('L-sit tuck (floor)','Hands pressing down, tuck knees — hip flexor + straight arm strength','4×15 sec')+
-        exRow('Scapular push-up','Protract/retract — planche prerequisite','3×12')+
-        exRow('Inverted row (under table)','Back training without pull-up bar','4×10')+
-        exRow('Dead bug','Deep core, back pressed to floor','3×10/side')+
-        exRow('Hollow body rock','True core tension — rock gently','3×10')+
+        exRowWithLevel('skill_crow','Crow/frog stand attempts','Every session — multiple attempts','5 min')+
+        exRowWithLevel('skill_crow','Tuck hold (crow position)','Build the balance — 4×15-20 sec holds','4×15-20 sec')+
+        exRowWithLevel('skill_lsit','L-sit tuck (floor)','Hands pressing down, tuck knees — hip flexor + straight arm strength','4×15 sec')+
+        exRowWithLevel('skill_planche','Scapular push-up','Protract/retract — planche prerequisite','3×12')+
+        exRowWithLevel('pull','Inverted row (under table)','Back training without pull-up bar','4×10')+
+        exRowWithLevel('core','Dead bug','Deep core, back pressed to floor','3×10/side')+
+        exRowWithLevel('core','Hollow body rock','True core tension — rock gently','3×10')+
         exRow('Dragon flag negative','Bed edge — you\'ll barely do it. Do it anyway.','3×3')+
         exRow('Side plank + hip dip','Lateral core','3×12/side')+
         exRow('Superman hold','Posterior chain endurance','3×30 sec'),
@@ -1553,6 +1870,132 @@ const PLANS = {
 
 };
 
+// ─── EXERCISE PROGRESSIONS ───────────────────────────────────────────────────
+// Reference data for all calisthenics progressions. UI is gated to AGRO plan only.
+const EXERCISE_PROGRESSIONS = {
+  push: {
+    name: 'PUSH', levels: [
+      { level:0, exercise:'Wall push-up', sets:'3 × 15', notes:'Hands on wall, standing. Zero floor contact.' },
+      { level:1, exercise:'Knee push-up', sets:'3 × 12', notes:'Knees on floor. Full chest-to-floor range.' },
+      { level:2, exercise:'Standard push-up', sets:'3 × 12–15', notes:'Full body. Chest to floor.' },
+      { level:3, exercise:'Wide push-up', sets:'3 × 12', notes:'Hands wider than shoulders. More chest.' },
+      { level:4, exercise:'Decline push-up', sets:'3 × 10–12', notes:'Feet elevated on chair/bed. Upper chest.' },
+      { level:5, exercise:'Diamond push-up', sets:'3 × 8–10', notes:'Hands form diamond. Tricep dominant.' },
+      { level:6, exercise:'Archer push-up', sets:'3 × 6–8/side', notes:'One arm extended laterally. Unilateral chest.' },
+      { level:7, exercise:'Pike push-up', sets:'3 × 8–10', notes:'Hips high, head toward floor. Shoulder dominant.' },
+      { level:8, exercise:'Pseudo-planche lean', sets:'4 × 20 sec', notes:'Fingers back, lean forward on straight arms.' },
+      { level:9, exercise:'One-arm push-up (assisted)', sets:'3 × 3–5/side', notes:'One hand on knee for assistance.' }
+    ]
+  },
+  pull: {
+    name: 'PULL', levels: [
+      { level:1, exercise:'Superman hold', sets:'3 × 20–30 sec', notes:'Face down, lift arms + chest. Rear delt activation.' },
+      { level:2, exercise:'Prone Y-T-W raises', sets:'3 × 10 each', notes:'Face down. Y, T, W positions. Rear delt + mid-trap.' },
+      { level:3, exercise:'Inverted row (knees bent)', sets:'3 × 8–10', notes:'Under table. Knees bent. Pull chest to edge.' },
+      { level:4, exercise:'Inverted row (legs straight)', sets:'3 × 8–10', notes:'Under table. Full body straight.' },
+      { level:5, exercise:'Inverted row (feet elevated)', sets:'3 × 6–8', notes:'Feet on chair, body horizontal.' },
+      { level:6, exercise:'Scapular push-up', sets:'3 × 12', notes:'Protract/retract shoulder blades. Planche prereq.' },
+      { level:7, exercise:'Thread the needle', sets:'3 × 8/side', notes:'From all-fours, rotate arm under body.' },
+      { level:8, exercise:'Towel row', sets:'3 × 8–10', notes:'Loop towel around door handle. Pull chest to door.' },
+      { level:9, exercise:'Archer row (towel)', sets:'3 × 6–8/side', notes:'One-arm towel row. Unilateral lat + rhomboid.' }
+    ]
+  },
+  shoulder: {
+    name: 'SHOULDER', levels: [
+      { level:1, exercise:'Pike push-up (bent knee)', sets:'3 × 8', notes:'Knees slightly bent. Reduced load.' },
+      { level:2, exercise:'Pike push-up (full)', sets:'3 × 8–10', notes:'Full pike position.' },
+      { level:3, exercise:'Decline pike push-up', sets:'3 × 6–8', notes:'Feet elevated on chair.' },
+      { level:4, exercise:'Wall handstand hold', sets:'3 × 20–30 sec', notes:'Hands on floor, feet on wall.' },
+      { level:5, exercise:'Wall handstand push-up (partial)', sets:'3 × 3–5', notes:'Small range from handstand.' },
+      { level:6, exercise:'Full handstand push-up', sets:'3 × 3–5', notes:'Full range from handstand. Advanced.' }
+    ]
+  },
+  squat: {
+    name: 'SQUAT', levels: [
+      { level:1, exercise:'Wall squat (hold)', sets:'3 × 30–45 sec', notes:'Back against wall. Isometric.' },
+      { level:2, exercise:'Box squat', sets:'3 × 10–12', notes:'Squat to chair, stand. Partial depth.' },
+      { level:3, exercise:'Bodyweight squat (partial)', sets:'3 × 12–15', notes:'Half depth.' },
+      { level:4, exercise:'Bodyweight squat (full)', sets:'3 × 15–20', notes:'Full depth. Ass to grass.' },
+      { level:5, exercise:'Jump squat', sets:'3 × 10', notes:'Explosive. Land soft.' },
+      { level:6, exercise:'Bulgarian split squat', sets:'3 × 8–10/leg', notes:'Rear foot elevated on chair.' },
+      { level:7, exercise:'Cossack squat', sets:'3 × 6–8/side', notes:'Wide feet, lateral lunge.' },
+      { level:8, exercise:'Pistol squat (assisted)', sets:'3 × 3–5/leg', notes:'Hold wall or doorframe.' },
+      { level:9, exercise:'Pistol squat (full)', sets:'3 × 3–5/leg', notes:'Unassisted single-leg squat. Elite.' }
+    ]
+  },
+  hinge: {
+    name: 'HINGE', levels: [
+      { level:1, exercise:'Glute bridge', sets:'3 × 15', notes:'Lying on back. Hip thrust both feet.' },
+      { level:2, exercise:'Glute bridge (single leg)', sets:'3 × 12/leg', notes:'One foot on floor. Unilateral.' },
+      { level:3, exercise:'Good morning (bodyweight)', sets:'3 × 12', notes:'Hands behind head. Hip hinge.' },
+      { level:4, exercise:'Bodyweight RDL', sets:'3 × 10–12/leg', notes:'Single-leg hinge. Balance + hamstring.' },
+      { level:5, exercise:'Glute bridge march', sets:'3 × 15', notes:'Alternate legs in bridge. Stability.' },
+      { level:6, exercise:'Nordic hamstring curl', sets:'3 × 3–5', notes:'Feet hooked. Lower slowly.' },
+      { level:7, exercise:'Nordic hamstring curl (full)', sets:'3 × 5–8', notes:'Full controlled descent and pull back.' }
+    ]
+  },
+  core: {
+    name: 'CORE', levels: [
+      { level:1, exercise:'Dead bug', sets:'3 × 8/side', notes:'Lower back glued to floor.' },
+      { level:2, exercise:'Plank', sets:'3 × 30–45 sec', notes:'Elbows or straight arms. Full tension.' },
+      { level:3, exercise:'Bicycle crunch', sets:'3 × 15–20/side', notes:'Slow and deliberate.' },
+      { level:4, exercise:'Hollow body hold', sets:'3 × 20–30 sec', notes:'Arms overhead. Back pressed down.' },
+      { level:5, exercise:'Hollow body rock', sets:'3 × 10', notes:'Rock gently. Maintain tension.' },
+      { level:6, exercise:'Leg raises (lying)', sets:'3 × 10–12', notes:'Legs straight. 1 inch off floor.' },
+      { level:7, exercise:'Hanging leg raises', sets:'3 × 10–12', notes:'Bar required. Legs straight.' },
+      { level:8, exercise:'L-sit tuck (floor)', sets:'3 × 15 sec', notes:'Hands pressing, tuck knees.' },
+      { level:9, exercise:'Dragon flag negative', sets:'3 × 3–5', notes:'Bed edge. Lower slowly.' },
+      { level:10, exercise:'Full L-sit', sets:'3 × 10–15 sec', notes:'Legs extended. Straight arm strength.' }
+    ]
+  },
+  skill_crow: {
+    name: 'CROW STAND', levels: [
+      { level:1, exercise:'Tuck hold (feet on floor)', sets:'3 × 15 sec', notes:'Hands on floor, knees on upper arms, shift weight.' },
+      { level:2, exercise:'Tuck hold (feet lifted)', sets:'4 × 15–20 sec', notes:'Lift feet off floor. Build balance.' },
+      { level:3, exercise:'Crow (one leg extended)', sets:'3 × 10 sec/side', notes:'Extend one leg from crow position.' },
+      { level:4, exercise:'Full crow stand', sets:'3 × 20 sec', notes:'Both legs tucked, stable hold.' }
+    ]
+  },
+  skill_handstand: {
+    name: 'HANDSTAND', levels: [
+      { level:1, exercise:'Wall handstand hold', sets:'3 × 20–30 sec', notes:'Feet on wall. Shoulder + wrist base.' },
+      { level:2, exercise:'Wall handstand (belly to wall)', sets:'3 × 20 sec', notes:'Walk feet up, chest near wall.' },
+      { level:3, exercise:'Kick-up practice', sets:'5 attempts', notes:'Kick up to wall, hold briefly.' },
+      { level:4, exercise:'Freestanding hold attempts', sets:'5 × max hold', notes:'Away from wall. Track duration.' }
+    ]
+  },
+  skill_lsit: {
+    name: 'L-SIT', levels: [
+      { level:1, exercise:'L-sit tuck', sets:'4 × 15 sec', notes:'Hands pressing, knees tucked to chest.' },
+      { level:2, exercise:'L-sit one leg extended', sets:'3 × 10 sec/side', notes:'Extend one leg, keep other tucked.' },
+      { level:3, exercise:'Full L-sit', sets:'3 × 10–15 sec', notes:'Both legs extended. Track duration.' }
+    ]
+  },
+  skill_planche: {
+    name: 'PLANCHE', levels: [
+      { level:1, exercise:'Pseudo-planche lean', sets:'4 × 20 sec', notes:'Fingers back, lean forward on straight arms.' },
+      { level:2, exercise:'Planche lean (deeper)', sets:'4 × 15 sec', notes:'More forward lean, wrists behind shoulders.' },
+      { level:3, exercise:'Tuck planche', sets:'3 × 10 sec', notes:'Tucked knees, feet off floor, body horizontal.' },
+      { level:4, exercise:'Straddle planche', sets:'3 × 5 sec', notes:'Legs wide, body horizontal. Very advanced.' }
+    ]
+  }
+};
+
+// exRowWithLevel: exercise row with level badge (AGRO plan only).
+// Shows the selected level's exercise if one is set, otherwise shows the fallback.
+function exRowWithLevel(groupId, fallbackName, fallbackDetail, fallbackSets) {
+  const level = getCurrentExerciseLevel(groupId);
+  const prog = EXERCISE_PROGRESSIONS[groupId];
+  if(level !== null && prog) {
+    const l = prog.levels.find(lv => lv.level === level);
+    if(l) {
+      return `<div class="exercise-row"><div><div class="ex-name">${l.exercise}</div><div class="ex-detail">${l.notes || fallbackDetail}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="ex-sets">${l.sets}</div><button class="level-badge" onclick="event.stopPropagation();openLevelSelector('${groupId}')">Lv${level}<span class="level-max">/${prog.levels[prog.levels.length-1].level}</span></button></div></div>`;
+    }
+  }
+  const maxLvl = prog ? prog.levels[prog.levels.length-1].level : '?';
+  return `<div class="exercise-row"><div><div class="ex-name">${fallbackName}</div><div class="ex-detail">${fallbackDetail}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="ex-sets">${fallbackSets}</div><button class="level-badge level-badge-unset" onclick="event.stopPropagation();openLevelSelector('${groupId}')">SET<span class="level-max">/${maxLvl}</span></button></div></div>`;
+}
+
 // ─── ACTIVE PLAN HELPER ──────────────────────────────────────────────────────
 // Single entry point for all plan-dependent rendering.
 // Add new plans to PLANS above — nothing else needs to change.
@@ -1575,7 +2018,7 @@ function switchTab(id, btn) {
   if(id==='workouts') renderWorkouts();
   if(id==='nutrition') renderNutrition();
   if(id==='rules') renderRules();
-  if(id==='track') { renderWeights(); renderRecentNotes(); }
+  if(id==='track') { renderWeights(); renderRecentNotes(); renderFoodLog(); }
 }
 
 // ─── TODAY ───────────────────────────────────────────────────────────────────
@@ -1824,18 +2267,26 @@ function updateProjection() {
   }
 
   // Compliance modifier: use last 7 calendar days, not weight entry window
+  // Now includes calorie compliance: if food log shows over-ceiling, penalise that day
   const now7 = new Date(); now7.setHours(0,0,0,0);
   const recentLogs = [];
   for(let i=0;i<7;i++){
     const d=new Date(now7); d.setDate(d.getDate()-i);
     const log=dayLogs[dateToStr(d)];
-    if(log) recentLogs.push(log);
+    if(log) recentLogs.push({ log, dateStr: dateToStr(d) });
   }
   let complianceScore = 0.85;
+  const settingsCal = s.calories || 1500;
   if(recentLogs.length >= 3){
-    const avgCompliance = recentLogs.reduce((sum,l)=>{
-      const checks = Object.values(l.checks||{});
-      return sum + (checks.length ? checks.filter(Boolean).length/checks.length : 0.5);
+    const avgCompliance = recentLogs.reduce((sum,entry)=>{
+      const checks = Object.values(entry.log.checks||{});
+      let dayScore = checks.length ? checks.filter(Boolean).length/checks.length : 0.5;
+      // Calorie compliance: if food log exceeds ceiling, penalise proportionally
+      const dc = getDayCalories(entry.dateStr);
+      if(dc.hasData && dc.total > settingsCal && !isFastDay(entry.dateStr)) {
+        dayScore *= Math.min(1, settingsCal / dc.total);
+      }
+      return sum + dayScore;
     },0) / recentLogs.length;
     complianceScore = avgCompliance;
   }
@@ -1845,13 +2296,35 @@ function updateProjection() {
   const daysToSunday = todayDow === 0 ? 7 : 7 - todayDow;
 
   // Projection: base rate adjusted for upcoming fast days
+  // Uses actual food log data for past days where available, falls back to s.calories
   const tdee = s.tdee || 2600;
   const cal = s.calories || 1500;
   const fastDayDeficit = tdee / 7700; // kg lost on a full fast day
-  const eatDayDeficit = Math.max(0, (tdee - cal)) / 7700; // kg lost on eating day
+
+  // Calculate formula rate using actual intake data where available
+  // For days ahead, use actual logged data if available (today), else use s.calories
+  let totalFormulaDeficit = 0;
+  for(let i=0;i<7;i++){
+    const d=new Date(now); d.setDate(d.getDate()+i);
+    const ds=dateToStr(d);
+    if(fastDays[ds]) {
+      // Fast day: check if food was actually logged (broken fast)
+      const dc = getDayCalories(ds);
+      if(dc.hasData) {
+        totalFormulaDeficit += Math.max(0, tdee - dc.total) / 7700;
+      } else {
+        totalFormulaDeficit += fastDayDeficit;
+      }
+    } else {
+      // Eating day: use actual logged data if available, else s.calories
+      const dc = getDayCalories(ds);
+      const dayCal = dc.hasData ? dc.total : cal;
+      totalFormulaDeficit += Math.max(0, (tdee - dayCal)) / 7700;
+    }
+  }
+  const formulaRate = totalFormulaDeficit / 7;
 
   // Blend observed rate with formula rate
-  const formulaRate = ((fastDaysAhead * fastDayDeficit) + (eatingDaysAhead * eatDayDeficit)) / 7;
   const observedRate = rawDailyLoss;
   const observedWeight = Math.min(0.75, recent.length / 10);
   const blendedRate = (observedRate * observedWeight) + (formulaRate * (1 - observedWeight));
@@ -2113,6 +2586,43 @@ function openDayModal(dateStr, dt) {
           <div class="modal-cb">${done?'✓':''}</div>
           <div><div class="m-title">${item.label}</div><div class="m-sub">${item.sub}</div></div>
         </div>`;
+      });
+      html += `</div></div>`;
+    }
+
+    // Food log for this day
+    const dayFoodData = getDayCalories(dateStr);
+    const mealCeiling = getSettings().calories || 1500;
+    html += `<div class="field-group"><label class="field-label">Food Log</label>`;
+    if(dayFoodData.entries.length) {
+      html += `<div class="food-log-wrap" style="margin-bottom:8px">`;
+      dayFoodData.entries.forEach(e => {
+        html += `<div class="food-entry">
+          <div class="food-entry-info"><div class="food-entry-name">${e.name}</div>${e.notes ? `<div class="food-entry-notes">${e.notes}</div>` : ''}</div>
+          <div class="food-entry-cal">${e.calories}</div>
+          <button class="food-entry-del" onclick="removeFoodFromModal('${dateStr}','${e.id}')">×</button>
+        </div>`;
+      });
+      const fCls = dayFoodData.total > mealCeiling ? 'cal-over' : (mealCeiling - dayFoodData.total) <= 100 ? 'cal-near' : 'cal-under';
+      const fRemain = mealCeiling - dayFoodData.total;
+      html += `<div class="food-total-bar"><span style="font-size:0.6rem">${fRemain >= 0 ? fRemain + ' remaining' : Math.abs(fRemain) + ' over'}</span><span class="food-total-val ${fCls}">${dayFoodData.total} cal</span></div>`;
+      html += `</div>`;
+    }
+    html += `<div style="display:flex;gap:6px;margin-top:4px">
+      <input class="field-input" type="text" id="mFoodName" placeholder="Food name" style="flex:2">
+      <input class="field-input" type="number" id="mFoodCal" placeholder="Cal" style="max-width:70px" min="0">
+      <button class="food-add-btn" onclick="addFoodFromModal('${dateStr}')">ADD</button>
+    </div></div>`;
+
+    // Exercise levels for this day (AGRO only)
+    const dayExLevels = (gs(SK.exLevels) || {})[dateStr];
+    if(dayExLevels && typeof EXERCISE_PROGRESSIONS !== 'undefined') {
+      html += `<div class="field-group"><label class="field-label">Exercise Levels</label><div class="ex-level-history">`;
+      Object.entries(dayExLevels).forEach(([gid, lvl]) => {
+        const prog = EXERCISE_PROGRESSIONS[gid];
+        if(prog && prog.levels[lvl]) {
+          html += `${prog.name}: Lv ${lvl} (${prog.levels[lvl].exercise})<br>`;
+        }
       });
       html += `</div></div>`;
     }
@@ -2575,6 +3085,18 @@ function calcDuration() {
     warnEl.style.display='block';
   }
 
+  // Show avg actual intake context if food log data exists
+  const avgActual = getAvgActualCalories(7);
+  const calcActualEl = document.getElementById('calcActualNote');
+  if(calcActualEl) {
+    if(avgActual !== null) {
+      calcActualEl.textContent = `Avg actual intake (last 7 eating days): ${avgActual} cal/day`;
+      calcActualEl.style.display = 'block';
+    } else {
+      calcActualEl.style.display = 'none';
+    }
+  }
+
   useCalsBtn.style.display = 'block';
   resultEl.classList.add('visible');
   schedBtn.classList.add('visible');
@@ -2761,6 +3283,18 @@ function calcAdjust() {
     warn.textContent = '⚡ Rate is aggressive — factoring in actual data, expect some variance.';
     warn.style.display='block';
   } else { warn.style.display='none'; }
+
+  // Show avg actual intake context from food log
+  const adjAvgActual = getAvgActualCalories(7);
+  const adjActualEl = document.getElementById('adjActualNote');
+  if(adjActualEl) {
+    if(adjAvgActual !== null) {
+      adjActualEl.textContent = `Avg actual intake (last 7 eating days): ${adjAvgActual} cal/day vs target: ${newCal} cal/day`;
+      adjActualEl.style.display = 'block';
+    } else {
+      adjActualEl.style.display = 'none';
+    }
+  }
 
   document.getElementById('adjustResult').style.display='block';
   document.getElementById('adjConfirmBtn').style.display='block';
@@ -3065,6 +3599,8 @@ document.getElementById('settingsOverlay').addEventListener('click',e=>{if(e.tar
   updateDurationBar();
   updateProjection();
   renderRecentNotes();
+  renderFoodLog();
+  updateTodayCalStrip();
   updateManageSchedBtn();
   checkVersionUpdate();
 })();
