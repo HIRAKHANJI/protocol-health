@@ -65,6 +65,8 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;lin
 /* PHONE MOCKUP */
 .phone-frame{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:14px;max-width:380px;margin:0 auto;box-shadow:0 20px 60px rgba(0,0,0,0.5);opacity:0;transform:translateY(40px);transition:opacity 0.7s ease,transform 0.7s ease;}
 .phone-frame.in-view{opacity:1;transform:translateY(0);}
+.phone-screen-content>*{opacity:0;transform:translateY(12px);transition:opacity 0.4s ease,transform 0.4s ease;}
+.phone-frame.content-in .phone-screen-content>*{opacity:1;transform:translateY(0);}
 .phone-screen{background:var(--bg);border-radius:12px;overflow:hidden;padding:16px;min-height:340px;display:flex;flex-direction:column;}
 .phone-screen-content{flex:1;}
 .phone-notch{width:80px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 0;flex-shrink:0;}
@@ -416,9 +418,21 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;lin
 </footer>
 
 <script>
-// Animate phone mockups when fully in view
+// Animate phone mockups when fully in view, then stagger inner content
 const obs = new IntersectionObserver((entries) => {
-  entries.forEach(e => { if(e.isIntersecting) { e.target.classList.add('in-view'); obs.unobserve(e.target); } });
+  entries.forEach(e => {
+    if(e.isIntersecting) {
+      e.target.classList.add('in-view');
+      obs.unobserve(e.target);
+      // After phone slide-up (0.7s), stagger each child inside .phone-screen-content
+      const children = e.target.querySelectorAll('.phone-screen-content > *');
+      children.forEach((child, i) => {
+        child.style.transitionDelay = (0.7 + i * 0.09) + 's';
+      });
+      // Trigger the stagger
+      requestAnimationFrame(() => e.target.classList.add('content-in'));
+    }
+  });
 }, { threshold: 0.8 });
 document.querySelectorAll('.phone-frame').forEach(el => obs.observe(el));
 </script>
