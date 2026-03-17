@@ -434,7 +434,7 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
 
 <div class="sw-reload-banner" id="swReloadBanner">
   <div class="sw-reload-text"><strong>New version available.</strong> Tap reload to update — your data is safe.</div>
-  <button class="sw-reload-btn" onclick="window.location.reload()">RELOAD</button>
+  <button class="sw-reload-btn" onclick="sessionStorage.setItem('ph_just_reloaded','1');window.location.reload()">RELOAD</button>
 </div>
 
 <div class="header">
@@ -950,8 +950,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '1.4.0';
-const APP_VERSION_MSG = 'App now auto-updates without reinstalling. Your data stays safe.';
+const APP_VERSION = '1.4.1';
+const APP_VERSION_MSG = 'Fixed reload banner not dismissing after tap.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -3687,12 +3687,20 @@ if('serviceWorker' in navigator) {
     }).catch(err => console.log('SW registration failed:', err));
   });
 
+  // After a user-triggered reload, suppress the banner for this page load
+  const justReloaded = sessionStorage.getItem('ph_just_reloaded');
+  if(justReloaded) sessionStorage.removeItem('ph_just_reloaded');
+
+  function showReloadBanner() {
+    if(justReloaded) return; // Already reloaded — don't nag again
+    const banner = document.getElementById('swReloadBanner');
+    if(banner) banner.classList.add('visible');
+  }
+
   // Listen for messages from the service worker
   navigator.serviceWorker.addEventListener('message', event => {
     if(event.data && (event.data.type === 'SW_UPDATED' || event.data.type === 'CONTENT_UPDATED')) {
-      // Show reload banner — user taps to get fresh content
-      const banner = document.getElementById('swReloadBanner');
-      if(banner) banner.classList.add('visible');
+      showReloadBanner();
     }
   });
 
@@ -3701,8 +3709,7 @@ if('serviceWorker' in navigator) {
   navigator.serviceWorker.addEventListener('controllerchange', () => {
     if(swRefreshing) return;
     swRefreshing = true;
-    const banner = document.getElementById('swReloadBanner');
-    if(banner) banner.classList.add('visible');
+    showReloadBanner();
   });
 }
 </script>
