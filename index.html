@@ -422,6 +422,34 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
 .level-ex-notes { font-family:'DM Mono',monospace; font-size:0.58rem; color:var(--muted); margin-top:2px; }
 .level-sets { font-family:'DM Mono',monospace; font-size:0.65rem; color:var(--accent2); white-space:nowrap; flex-shrink:0; }
 .ex-level-history { font-family:'DM Mono',monospace; font-size:0.62rem; color:var(--muted); padding:6px 12px; line-height:1.8; }
+
+/* FOOD LOGGER MODAL (TODAY tab) */
+.food-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.88); z-index:5000; padding:16px; overflow-y:auto; }
+.food-modal-overlay.active { display:flex; align-items:flex-end; justify-content:center; }
+.food-modal { background:var(--bg); border:1px solid var(--border); border-radius:14px 14px 0 0; max-width:440px; width:100%; max-height:80vh; overflow-y:auto; animation:slideUp 0.22s ease; }
+.food-modal-header { padding:14px 17px; background:var(--surface2); border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:1; }
+.food-modal-header h3 { font-family:'Bebas Neue',sans-serif; font-size:1.1rem; letter-spacing:2px; color:var(--accent); }
+.food-modal-body { padding:14px; }
+.food-log-btn { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:10px 13px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; transition:all 0.15s; width:100%; font-family:'DM Mono',monospace; font-size:0.68rem; color:var(--text); letter-spacing:0.5px; }
+.food-log-btn:active { border-color:var(--accent); }
+.food-log-btn .food-btn-label { color:var(--muted); font-size:0.6rem; letter-spacing:1px; }
+
+/* MANAGE NOTES MODAL */
+.notes-mgr-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.88); z-index:5000; padding:16px; overflow-y:auto; }
+.notes-mgr-overlay.active { display:flex; align-items:flex-start; justify-content:center; padding-top:28px; }
+.notes-mgr-modal { background:var(--bg); border:1px solid var(--border); border-radius:14px; max-width:440px; width:100%; max-height:80vh; overflow-y:auto; animation:slideUp 0.22s ease; }
+.notes-mgr-header { padding:14px 17px; background:var(--surface2); border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:1; }
+.notes-mgr-header h3 { font-family:'Bebas Neue',sans-serif; font-size:1.1rem; letter-spacing:2px; color:var(--accent); }
+.notes-mgr-body { padding:14px; }
+.note-mgr-item { display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border); }
+.note-mgr-item:last-child { border-bottom:none; }
+.note-mgr-cb { width:20px; height:20px; border:1px solid var(--border); border-radius:4px; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; margin-top:2px; transition:all 0.15s; color:transparent; font-size:12px; }
+.note-mgr-cb.selected { border-color:var(--danger); background:rgba(255,68,68,0.15); color:var(--danger); }
+.note-mgr-date { font-family:'DM Mono',monospace; font-size:0.65rem; color:var(--accent2); margin-bottom:3px; }
+.note-mgr-text { font-size:0.76rem; color:var(--text); line-height:1.5; }
+.note-mgr-meta { font-family:'DM Mono',monospace; font-size:0.58rem; color:var(--muted); margin-top:2px; }
+.notes-del-btn { background:var(--danger); color:#fff; border:none; border-radius:8px; padding:10px; font-family:'Bebas Neue',sans-serif; font-size:0.85rem; letter-spacing:2px; cursor:pointer; width:100%; margin-top:12px; display:none; transition:opacity 0.15s; }
+.notes-del-btn.visible { display:block; }
 </style>
 </head>
 <body>
@@ -513,10 +541,10 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
     <div class="fast-banner-title">⚡ WATER FAST DAY</div>
     <div class="fast-banner-sub">Zero food today. Water + electrolytes only.<br>500ml on wake · salt water mid-morning · black coffee/green tea allowed · electrolyte tablet pre-training</div>
   </div>
-  <div class="today-cal-strip" id="todayCalStrip" style="display:none" onclick="switchTab('track',document.querySelectorAll('.tab')[5])">
-    <span style="font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:1px;color:var(--muted)">TODAY'S INTAKE</span>
-    <span id="todayCalStripVal" style="font-family:'Bebas Neue',sans-serif;font-size:1rem;"></span>
-  </div>
+  <button class="food-log-btn" id="foodLogBtn" onclick="openFoodModal()">
+    <span class="food-btn-label">FOOD LOG</span>
+    <span id="todayCalStripVal" style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--muted)">TAP TO LOG</span>
+  </button>
   <div class="progress-wrap">
     <div class="progress-top"><span>TODAY'S MINIMUM</span><span class="pct" id="todayPct">0%</span></div>
     <div class="progress-bar"><div class="progress-fill" id="todayFill" style="width:0%"></div></div>
@@ -627,37 +655,10 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
   <div class="section-title">DAY <span>NOTES</span></div>
   <p class="section-note">Notes logged from today's checklist or calendar day modal. Tap a day on MONTHS to add notes.</p>
   <div id="recentNotes"><div class="empty-state">No notes logged yet.</div></div>
-  <div style="height:18px"></div>
-  <div class="section-title">FOOD <span>LOG</span></div>
-  <p class="section-note">Log what you eat. Calories auto-total. Previously logged foods auto-suggest.</p>
-  <div class="food-log-wrap">
-    <div class="food-input-row">
-      <div style="position:relative;flex:2;min-width:0">
-        <input class="food-input-name" type="text" id="foodNameInput" placeholder="Food name" autocomplete="off" oninput="onFoodNameInput(this)">
-        <div class="food-suggestions" id="foodSuggestions"></div>
-      </div>
-      <input class="food-input-cal" type="number" id="foodCalInput" placeholder="Cal" min="0" step="1">
-      <button class="food-add-btn" onclick="addFoodFromTrack()">ADD</button>
-    </div>
-    <div id="foodEntries"></div>
-    <div class="food-total-bar" id="foodTotalBar" style="display:none">
-      <span id="foodTotalLabel">TODAY</span>
-      <span><span class="food-total-val" id="foodTotalVal">0</span> <span style="color:var(--muted);font-size:0.6rem">cal</span></span>
-    </div>
-  </div>
   <div class="action-row" style="margin-top:14px">
-    <button class="reset-btn" onclick="openExport()" style="border-color:var(--accent);color:var(--accent)">↗ EXPORT LOGS</button>
+    <button class="reset-btn" onclick="openNotesMgr()" style="border-color:var(--accent);color:var(--accent)">⚙ MANAGE NOTES</button>
     <button class="reset-btn" onclick="clearWeightLog()">↺ CLEAR WEIGHTS</button>
   </div>
-  <div style="height:10px"></div>
-  <div class="section-title">DATA <span>BACKUP</span></div>
-  <p class="section-note">Backup saves everything — weights, logs, fast days, schedule, settings. Restore from a backup file if Chrome data gets wiped.</p>
-  <div class="action-row">
-    <button class="reset-btn" onclick="backupData()" style="border-color:#50c878;color:#50c878">⬇ BACKUP TO FILE</button>
-    <button class="reset-btn" onclick="document.getElementById('restoreFileInput').click()" style="border-color:#70c8ff;color:#70c8ff">⬆ RESTORE FROM FILE</button>
-  </div>
-  <input type="file" id="restoreFileInput" accept=".json" style="display:none" onchange="restoreData(event)">
-  <div id="backupStatus" style="display:none;margin-top:10px;padding:10px 13px;border-radius:8px;font-family:'DM Mono',monospace;font-size:0.7rem;line-height:1.6"></div>
 </div>
 
 <!-- ══ RULES ══ -->
@@ -813,6 +814,22 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
         <button class="schedule-btn" id="scheduleBtn" onclick="promptSchedule()">ADD TO SCHEDULE</button>
       </div>
 
+      <!-- DATA MANAGEMENT -->
+      <div class="settings-section">
+        <div class="settings-section-title">Data Management</div>
+        <p style="font-size:0.75rem;color:var(--muted);margin:0 0 10px">Backup saves everything — weights, logs, fast days, schedule, settings. Restore from a backup file if Chrome data gets wiped.</p>
+        <div class="action-row">
+          <button class="reset-btn" onclick="backupData()" style="border-color:#50c878;color:#50c878">⬇ BACKUP TO FILE</button>
+          <button class="reset-btn" onclick="document.getElementById('restoreFileInput').click()" style="border-color:#70c8ff;color:#70c8ff">⬆ RESTORE FROM FILE</button>
+        </div>
+        <input type="file" id="restoreFileInput" accept=".json" style="display:none" onchange="restoreData(event)">
+        <div id="backupStatus" style="display:none;margin-top:10px;padding:10px 13px;border-radius:8px;font-family:'DM Mono',monospace;font-size:0.7rem;line-height:1.6"></div>
+        <div style="height:8px"></div>
+        <div class="action-row">
+          <button class="reset-btn" onclick="openExport()" style="border-color:var(--accent);color:var(--accent);width:100%">↗ EXPORT LOGS</button>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -865,6 +882,49 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
       <button class="close-x" onclick="closeLevelSelector()">×</button>
     </div>
     <div id="levelModalBody"></div>
+  </div>
+</div>
+
+<!-- ══ FOOD LOGGER MODAL (TODAY tab) ══ -->
+<div class="food-modal-overlay" id="foodModalOverlay">
+  <div class="food-modal">
+    <div class="food-modal-header">
+      <h3>FOOD LOG</h3>
+      <button class="close-x" onclick="closeFoodModal()">×</button>
+    </div>
+    <div class="food-modal-body">
+      <div class="food-log-wrap" style="margin-bottom:0">
+        <div class="food-input-row">
+          <div style="position:relative;flex:2;min-width:0">
+            <input class="food-input-name" type="text" id="foodModalNameInput" placeholder="Food name" autocomplete="off" oninput="onFoodModalNameInput(this)">
+            <div class="food-suggestions" id="foodModalSuggestions"></div>
+          </div>
+          <input class="food-input-cal" type="number" id="foodModalCalInput" placeholder="Cal" min="0" step="1">
+          <button class="food-add-btn" onclick="addFoodFromModal2()">ADD</button>
+        </div>
+        <div id="foodModalEntries"></div>
+        <div class="food-total-bar" id="foodModalTotalBar" style="display:none">
+          <span id="foodModalTotalLabel">TODAY</span>
+          <span><span class="food-total-val" id="foodModalTotalVal">0</span> <span style="color:var(--muted);font-size:0.6rem">cal</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MANAGE NOTES MODAL ══ -->
+<div class="notes-mgr-overlay" id="notesMgrOverlay">
+  <div class="notes-mgr-modal">
+    <div class="notes-mgr-header">
+      <h3>MANAGE DAY NOTES</h3>
+      <button class="close-x" onclick="closeNotesMgr()">×</button>
+    </div>
+    <div class="notes-mgr-body" id="notesMgrBody">
+      <div class="empty-state">No notes to manage.</div>
+    </div>
+    <div style="padding:0 14px 14px">
+      <button class="notes-del-btn" id="notesDelBtn" onclick="deleteSelectedNotes()">DELETE SELECTED</button>
+    </div>
   </div>
 </div>
 
@@ -953,8 +1013,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '1.4.4';
-const APP_VERSION_MSG = 'Fixed reload banner persistence.';
+const APP_VERSION = '1.5.0';
+const APP_VERSION_MSG = 'Food logger moved to TODAY tab. Manage & delete day notes. Backup/export moved to Settings.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -1052,40 +1112,165 @@ function updateFoodLibrary(name, calories) {
 // Autocomplete debounce timer
 let _foodSugTimer = null;
 
-function onFoodNameInput(input) {
-  clearTimeout(_foodSugTimer);
+// onFoodNameInput and selectFoodSuggestion moved to food modal (onFoodModalNameInput / selectFoodModalSuggestion)
+
+// ─── FOOD LOGGER MODAL (TODAY tab) ──────────────────────────────────────────
+function openFoodModal() {
+  renderFoodModalEntries();
+  document.getElementById('foodModalOverlay').classList.add('active');
+  setTimeout(() => document.getElementById('foodModalNameInput').focus(), 200);
+}
+function closeFoodModal() {
+  document.getElementById('foodModalOverlay').classList.remove('active');
+  document.getElementById('foodModalSuggestions').classList.remove('visible');
+}
+
+let _foodModalSugTimer = null;
+function onFoodModalNameInput(input) {
+  clearTimeout(_foodModalSugTimer);
   const val = input.value.trim();
-  const sugEl = document.getElementById('foodSuggestions');
+  const sugEl = document.getElementById('foodModalSuggestions');
   if(!val || val.length < 1) { sugEl.classList.remove('visible'); return; }
-  _foodSugTimer = setTimeout(() => {
+  _foodModalSugTimer = setTimeout(() => {
     const lib = gs(SK.foodLib) || [];
     const lower = val.toLowerCase();
     const matches = lib.filter(f => f.name.toLowerCase().includes(lower)).slice(0, 5);
     if(!matches.length) { sugEl.classList.remove('visible'); return; }
     sugEl.innerHTML = matches.map(f =>
-      `<div class="food-sug-item" onmousedown="selectFoodSuggestion('${esc(f.name).replace(/'/g,"\\'")}',${f.lastCalories})">
+      `<div class="food-sug-item" onmousedown="selectFoodModalSuggestion('${esc(f.name).replace(/'/g,"\\'")}',${f.lastCalories})">
         <span>${esc(f.name)}</span><span class="food-sug-cal">${f.lastCalories} cal</span>
       </div>`
     ).join('');
     sugEl.classList.add('visible');
   }, 200);
 }
-
-function selectFoodSuggestion(name, calories) {
-  document.getElementById('foodNameInput').value = name;
-  document.getElementById('foodCalInput').value = calories;
-  document.getElementById('foodSuggestions').classList.remove('visible');
+function selectFoodModalSuggestion(name, calories) {
+  document.getElementById('foodModalNameInput').value = name;
+  document.getElementById('foodModalCalInput').value = calories;
+  document.getElementById('foodModalSuggestions').classList.remove('visible');
 }
-
-function addFoodFromTrack() {
-  const name = document.getElementById('foodNameInput').value;
-  const cal = document.getElementById('foodCalInput').value;
+function addFoodFromModal2() {
+  const name = document.getElementById('foodModalNameInput').value;
+  const cal = document.getElementById('foodModalCalInput').value;
   if(!name.trim()) return;
   addFoodEntry(todayStr(), name, cal, '');
-  document.getElementById('foodNameInput').value = '';
-  document.getElementById('foodCalInput').value = '';
-  document.getElementById('foodSuggestions').classList.remove('visible');
+  document.getElementById('foodModalNameInput').value = '';
+  document.getElementById('foodModalCalInput').value = '';
+  document.getElementById('foodModalSuggestions').classList.remove('visible');
 }
+function renderFoodModalEntries() {
+  const container = document.getElementById('foodModalEntries');
+  const totalBar = document.getElementById('foodModalTotalBar');
+  if(!container) return;
+  const today = todayStr();
+  const dc = getDayCalories(today);
+  if(!dc.hasData) {
+    container.innerHTML = '<div style="padding:12px;text-align:center;font-family:\'DM Mono\',monospace;font-size:0.7rem;color:var(--muted)">No food logged today.</div>';
+    totalBar.style.display = 'none';
+    return;
+  }
+  container.innerHTML = dc.entries.map(e =>
+    `<div class="food-entry">
+      <div class="food-entry-info"><div class="food-entry-name">${esc(e.name)}</div>${e.notes ? `<div class="food-entry-notes">${esc(e.notes)}</div>` : ''}</div>
+      <div class="food-entry-cal">${e.calories}</div>
+      <button class="food-entry-del" onclick="showConfirm('REMOVE','Remove ${esc(e.name).replace(/'/g,"\\'")}?',()=>{removeFoodEntry('${today}','${e.id}')},{yesLabel:'REMOVE',danger:true})">×</button>
+    </div>`
+  ).join('');
+  const s = getSettings();
+  const ceiling = s.calories || 1500;
+  const remaining = ceiling - dc.total;
+  const cls = dc.total > ceiling ? 'cal-over' : (ceiling - dc.total) <= 100 ? 'cal-near' : 'cal-under';
+  totalBar.style.display = 'flex';
+  document.getElementById('foodModalTotalVal').textContent = dc.total;
+  document.getElementById('foodModalTotalVal').className = 'food-total-val ' + cls;
+  document.getElementById('foodModalTotalLabel').innerHTML = `TODAY <span style="color:var(--muted);font-size:0.58rem;margin-left:6px">${remaining >= 0 ? remaining + ' remaining' : Math.abs(remaining) + ' over'} / ${ceiling} ceiling</span>`;
+}
+
+// Close food modal on overlay click
+document.addEventListener('click', e => {
+  if(e.target.id === 'foodModalOverlay') closeFoodModal();
+});
+// Close food modal suggestions on click outside
+document.addEventListener('click', e => {
+  if(!e.target.closest('.food-modal-body .food-input-row')) {
+    const sug = document.getElementById('foodModalSuggestions');
+    if(sug) sug.classList.remove('visible');
+  }
+});
+
+// ─── MANAGE DAY NOTES ──────────────────────────────────────────────────────
+let _selectedNotes = new Set();
+function openNotesMgr() {
+  _selectedNotes.clear();
+  const dayLogs = gs(SK.dayLogs) || {};
+  const entries = Object.entries(dayLogs)
+    .filter(([,log]) => log.notes && log.notes.trim())
+    .sort(([a],[b]) => b.localeCompare(a));
+  const body = document.getElementById('notesMgrBody');
+  if(!entries.length) {
+    body.innerHTML = '<div class="empty-state">No day notes to manage.</div>';
+    document.getElementById('notesDelBtn').classList.remove('visible');
+  } else {
+    body.innerHTML = entries.map(([dateStr, log]) => {
+      const dt = strToDate(dateStr);
+      const dayName = dt.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+      const parts = [];
+      if(log.weight) parts.push(log.weight + 'kg');
+      if(log.energy) parts.push(log.energy);
+      return `<div class="note-mgr-item" data-date="${dateStr}" onclick="toggleNoteSelection(this,'${dateStr}')">
+        <div class="note-mgr-cb" id="ncb-${dateStr}">✓</div>
+        <div style="flex:1;min-width:0">
+          <div class="note-mgr-date">${dayName} · ${dateStr}</div>
+          <div class="note-mgr-text">${esc(log.notes)}</div>
+          ${parts.length ? `<div class="note-mgr-meta">${parts.join(' · ')}</div>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+    document.getElementById('notesDelBtn').classList.remove('visible');
+  }
+  document.getElementById('notesMgrOverlay').classList.add('active');
+}
+function closeNotesMgr() {
+  document.getElementById('notesMgrOverlay').classList.remove('active');
+  _selectedNotes.clear();
+}
+function toggleNoteSelection(el, dateStr) {
+  const cb = document.getElementById('ncb-' + dateStr);
+  if(_selectedNotes.has(dateStr)) {
+    _selectedNotes.delete(dateStr);
+    cb.classList.remove('selected');
+  } else {
+    _selectedNotes.add(dateStr);
+    cb.classList.add('selected');
+  }
+  const btn = document.getElementById('notesDelBtn');
+  if(_selectedNotes.size > 0) {
+    btn.textContent = `DELETE ${_selectedNotes.size} SELECTED NOTE${_selectedNotes.size > 1 ? 'S' : ''}`;
+    btn.classList.add('visible');
+  } else {
+    btn.classList.remove('visible');
+  }
+}
+function deleteSelectedNotes() {
+  if(!_selectedNotes.size) return;
+  const count = _selectedNotes.size;
+  showConfirm('DELETE NOTES', `Delete ${count} day note${count > 1 ? 's' : ''}? This cannot be undone.`, () => {
+    const all = gs(SK.dayLogs) || {};
+    _selectedNotes.forEach(dateStr => {
+      if(all[dateStr]) {
+        delete all[dateStr].notes;
+      }
+    });
+    ss(SK.dayLogs, all);
+    _selectedNotes.clear();
+    closeNotesMgr();
+    dispatch('DAY_SAVED');
+  }, { yesLabel: 'DELETE', danger: true });
+}
+// Close notes manager on overlay click
+document.addEventListener('click', e => {
+  if(e.target.id === 'notesMgrOverlay') closeNotesMgr();
+});
 
 function addFoodFromModal(dateStr) {
   const name = document.getElementById('mFoodName')?.value;
@@ -1104,44 +1289,26 @@ function removeFoodFromModal(dateStr, entryId) {
 }
 
 function renderFoodLog() {
-  const container = document.getElementById('foodEntries');
-  const totalBar = document.getElementById('foodTotalBar');
-  if(!container) return;
-  const today = todayStr();
-  const dc = getDayCalories(today);
-  if(!dc.hasData) {
-    container.innerHTML = '';
-    totalBar.style.display = 'none';
-    return;
-  }
-  container.innerHTML = dc.entries.map(e =>
-    `<div class="food-entry">
-      <div class="food-entry-info"><div class="food-entry-name">${esc(e.name)}</div>${e.notes ? `<div class="food-entry-notes">${esc(e.notes)}</div>` : ''}</div>
-      <div class="food-entry-cal">${e.calories}</div>
-      <button class="food-entry-del" onclick="showConfirm('REMOVE','Remove ${esc(e.name).replace(/'/g,"\\'")}?',()=>{removeFoodEntry('${today}','${e.id}')},{yesLabel:'REMOVE',danger:true})">×</button>
-    </div>`
-  ).join('');
-  const s = getSettings();
-  const ceiling = s.calories || 1500;
-  const remaining = ceiling - dc.total;
-  const cls = dc.total > ceiling ? 'cal-over' : (ceiling - dc.total) <= 100 ? 'cal-near' : 'cal-under';
-  totalBar.style.display = 'flex';
-  document.getElementById('foodTotalVal').textContent = dc.total;
-  document.getElementById('foodTotalVal').className = 'food-total-val ' + cls;
-  document.getElementById('foodTotalLabel').innerHTML = `TODAY <span style="color:var(--muted);font-size:0.58rem;margin-left:6px">${remaining >= 0 ? remaining + ' remaining' : Math.abs(remaining) + ' over'} / ${ceiling} ceiling</span>`;
+  // Update the food modal entries if it's open
+  renderFoodModalEntries();
+  // Update the TODAY tab food button
+  updateTodayCalStrip();
 }
 
 function updateTodayCalStrip() {
-  const strip = document.getElementById('todayCalStrip');
-  if(!strip) return;
+  const valEl = document.getElementById('todayCalStripVal');
+  if(!valEl) return;
   const dc = getDayCalories(todayStr());
-  if(!dc.hasData) { strip.style.display = 'none'; return; }
+  if(!dc.hasData) {
+    valEl.style.color = 'var(--muted)';
+    valEl.textContent = 'TAP TO LOG';
+    return;
+  }
   const s = getSettings();
   const ceiling = s.calories || 1500;
   const cls = dc.total > ceiling ? 'cal-over' : (ceiling - dc.total) <= 100 ? 'cal-near' : 'cal-under';
-  strip.style.display = 'flex';
-  document.getElementById('todayCalStripVal').className = cls;
-  document.getElementById('todayCalStripVal').textContent = dc.total + ' / ' + ceiling + ' CAL';
+  valEl.className = cls;
+  valEl.textContent = dc.total + ' / ' + ceiling + ' CAL';
 }
 
 // ─── EXERCISE LEVEL HELPERS ──────────────────────────────────────────────────
@@ -1195,7 +1362,7 @@ document.addEventListener('click', e => {
 // Close food suggestions on click outside
 document.addEventListener('click', e => {
   if(!e.target.closest('.food-input-row')) {
-    const sug = document.getElementById('foodSuggestions');
+    const sug = document.getElementById('foodModalSuggestions');
     if(sug) sug.classList.remove('visible');
   }
 });
@@ -1223,7 +1390,7 @@ const DISPATCH_MAP = {
   SCHEDULE_ADJUSTED: ['durationBar','calendarHighlights','projection','manageSchedBtn'],
   SCHEDULE_ENDED:    ['durationBar','calendarHighlights','manageSchedBtn'],
   SCHEDULE_REMOVED:  ['durationBar','calendarHighlights','manageSchedBtn'],
-  FOOD_LOGGED:       ['projection','goalBar','recentNotes','foodSummary','todayCalStrip'],
+  FOOD_LOGGED:       ['projection','goalBar','recentNotes','foodModal','todayCalStrip'],
   EXERCISE_LEVEL_CHANGED: ['workoutLevelDisplay'],
 };
 
@@ -1355,7 +1522,7 @@ function dispatch(event) {
       case 'fastUI':            updateFastUI(); break;
       case 'checklist':         loadChecklist(); break;
       case 'nutritionMacros':   if(document.getElementById('tab-nutrition').classList.contains('active')) renderNutrition(); break;
-      case 'foodSummary':       renderFoodLog(); break;
+      case 'foodModal':         renderFoodModalEntries(); break;
       case 'todayCalStrip':     updateTodayCalStrip(); break;
       case 'workoutLevelDisplay':
         if(document.getElementById('tab-workouts').classList.contains('active')) renderWorkouts();
@@ -2058,7 +2225,7 @@ function switchTab(id, btn) {
   if(id==='workouts') renderWorkouts();
   if(id==='nutrition') renderNutrition();
   if(id==='rules') renderRules();
-  if(id==='track') { renderWeights(); renderRecentNotes(); renderFoodLog(); }
+  if(id==='track') { renderWeights(); renderRecentNotes(); }
 }
 
 // ─── TODAY ───────────────────────────────────────────────────────────────────
@@ -3653,7 +3820,6 @@ document.getElementById('settingsOverlay').addEventListener('click',e=>{if(e.tar
   updateDurationBar();
   updateProjection();
   renderRecentNotes();
-  renderFoodLog();
   updateTodayCalStrip();
   updateManageSchedBtn();
   checkVersionUpdate();
