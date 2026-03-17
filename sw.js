@@ -105,28 +105,11 @@ self.addEventListener('fetch', event => {
               cache.put(event.request, networkResponse.clone());
 
               // If we had a cached version and served it, check if the new one differs
-              if(cached) {
-                // Compare content lengths as a quick diff check
-                const oldLen = cached.headers.get('content-length');
-                const newLen = networkResponse.headers.get('content-length');
-                const oldEtag = cached.headers.get('etag');
-                const newEtag = networkResponse.headers.get('etag');
-                const oldMod = cached.headers.get('last-modified');
-                const newMod = networkResponse.headers.get('last-modified');
-
-                const changed = (oldEtag && newEtag && oldEtag !== newEtag) ||
-                                (oldMod && newMod && oldMod !== newMod) ||
-                                (oldLen && newLen && oldLen !== newLen);
-
-                if(changed) {
-                  // New content available — tell the page to show a reload banner
-                  self.clients.matchAll({ type: 'window' }).then(clients => {
-                    clients.forEach(client => {
-                      client.postMessage({ type: 'CONTENT_UPDATED' });
-                    });
-                  });
-                }
-              }
+              // Stale-while-revalidate: cache is already updated above.
+              // We do NOT notify the page here — header-based comparisons
+              // (etag, content-length) produce false positives on CDN edge
+              // servers (GitHub Pages). The reliable update signal is SW_UPDATED,
+              // which fires only when CACHE_NAME changes in sw.js.
             }
             return networkResponse;
           }).catch(() => {
