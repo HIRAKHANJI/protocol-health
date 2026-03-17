@@ -34,7 +34,7 @@ self.addEventListener('install', event => {
     caches.open(CACHE_NAME).then(cache => {
 
       // Critical files — these must be cached for the app to work offline
-      return cache.addAll(['./index.html', './manifest.json'])
+      return cache.addAll(['./app.html', './manifest.json'])
         .then(() => {
           // Best-effort files — icons and Google Fonts
           // Promise.allSettled means one failure won't block the others
@@ -95,7 +95,7 @@ self.addEventListener('fetch', event => {
   // index.html — stale-while-revalidate strategy
   // Serve cached version immediately for speed, then fetch fresh copy in background.
   // If the fresh copy is different, update the cache and notify the page.
-  if(url.pathname.endsWith('index.html') || url.pathname === '/' || url.pathname.endsWith('/')) {
+  if(url.pathname.endsWith('app.html') || url.pathname.endsWith('index.html') || url.pathname === '/' || url.pathname.endsWith('/')) {
     event.respondWith(
       caches.open(CACHE_NAME).then(cache => {
         return cache.match(event.request).then(cached => {

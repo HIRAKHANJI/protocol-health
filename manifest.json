@@ -3,7 +3,7 @@
   "short_name": "Protocol",
   "description": "By Faiz Syed — A HiraKhanji Project",
 
-  "start_url": "./index.html",
+  "start_url": "./app.html",
 
   "display": "standalone",
   "orientation": "portrait",
