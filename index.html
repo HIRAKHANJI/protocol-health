@@ -31,7 +31,8 @@
   --plan-overlay: rgba(255,255,255,0.06);
 }
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; min-height:100vh; padding-bottom:50px; overflow-x:hidden; }
+body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; min-height:100vh; padding-bottom:50px; overflow-x:hidden; scrollbar-width:none; }
+body::-webkit-scrollbar { display:none; }
 
 /* HEADER */
 .header { padding:22px 18px 12px; border-bottom:1px solid var(--border); display:flex; align-items:flex-end; justify-content:space-between; }
@@ -934,7 +935,7 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '1.3.0';
+const APP_VERSION = '1.3.1';
 const APP_VERSION_MSG = 'Workouts tab now shows only today\'s sessions expanded. Track and Rules tabs swapped.';
 
 // Static lookup arrays used throughout rendering
