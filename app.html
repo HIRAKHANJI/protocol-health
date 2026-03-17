@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Protocol Health">
-<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="PH_LOGO_192.png">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -448,9 +448,25 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
 .note-mgr-meta { font-family:'DM Mono',monospace; font-size:0.58rem; color:var(--muted); margin-top:2px; }
 .notes-del-btn { background:var(--danger); color:#fff; border:none; border-radius:8px; padding:10px; font-family:'Bebas Neue',sans-serif; font-size:0.85rem; letter-spacing:2px; cursor:pointer; width:100%; margin-top:12px; display:none; transition:opacity 0.15s; }
 .notes-del-btn.visible { display:block; }
+
+/* SPLASH SCREEN */
+.splash-screen{position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;background:#0a0a0a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity 0.5s ease,visibility 0.5s ease;}
+.splash-screen.fade-out{opacity:0;visibility:hidden;}
+.splash-logo{width:140px;height:140px;animation:splashPulse 1.2s ease-in-out infinite alternate;}
+.splash-title{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:4px;color:var(--text);line-height:1;}
+.splash-title span{color:var(--accent);}
+.splash-plan{font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
+@keyframes splashPulse{0%{transform:scale(1);opacity:0.85;}100%{transform:scale(1.04);opacity:1;}}
 </style>
 </head>
 <body>
+
+<!-- SPLASH SCREEN -->
+<div class="splash-screen" id="splashScreen">
+  <img src="PH_ARROWS_LOGO.png" class="splash-logo" alt="Protocol Health">
+  <div class="splash-title">PROTOCOL <span>HEALTH</span></div>
+  <div class="splash-plan" id="splashPlan"></div>
+</div>
 
 <div class="update-banner" id="updateBanner">
   <div class="update-banner-text">
@@ -1013,8 +1029,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '1.5.1';
-const APP_VERSION_MSG = 'Food logger moved to TODAY tab. Manage & delete day notes. Backup/export moved to Settings.';
+const APP_VERSION = '1.6.0';
+const APP_VERSION_MSG = 'New branded splash screen with arrows logo on app launch.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -3845,6 +3861,17 @@ document.getElementById('settingsOverlay').addEventListener('click',e=>{if(e.tar
 // Order matters: applyPlanUI must run before updateTodayTab so the banner is correct.
 (function init(){
   const s = getSettings();
+
+  // Splash screen — show plan name, then fade out
+  const splash = document.getElementById('splashScreen');
+  const splashPlan = document.getElementById('splashPlan');
+  if(splash) {
+    const plan = PLANS[s.plan||'default'] || PLANS.default;
+    splashPlan.textContent = plan.name || 'DEFAULT PROTOCOL';
+    setTimeout(() => { splash.classList.add('fade-out'); }, 1200);
+    setTimeout(() => { splash.remove(); }, 1700);
+  }
+
   applyPlanUI(s.plan||'default');
   updateFastUI();
   updateTodayTab();
