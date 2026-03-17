@@ -11,12 +11,13 @@
 //   3. FETCH    — every network request the app makes passes through here.
 //                 We intercept and return cached responses where available.
 //
-// CACHE STRATEGY: cache-first.
-//   - Check cache first. If found, return immediately (fast, works offline).
-//   - If not cached, fetch from network, cache the response, return it.
+// CACHE STRATEGY: cache-first with background revalidation for index.html.
+//   - index.html: serve cached version immediately, then fetch fresh copy in
+//     background. If the fresh copy differs, notify the page so user can reload.
+//   - Everything else: cache-first with network fallback.
 //   - This means the first load needs internet. Every load after is offline-capable.
 //
-// VERSION: bump CACHE_NAME (e.g. 'protocol-health-v6') when you deploy a major update.
+// VERSION: bump CACHE_NAME (e.g. 'protocol-health-v8') when you deploy a major update.
 // This forces old caches to be deleted and new files to be fetched fresh.
 
 const CACHE_NAME = 'protocol-health-v8';
@@ -57,6 +58,7 @@ self.addEventListener('install', event => {
 // ─── ACTIVATE ────────────────────────────────────────────────────────────────
 // Runs after install. We delete any old caches (different CACHE_NAME values)
 // so stale files from previous versions don't linger on the device.
+// After claiming clients, notify all open tabs that a new version is active.
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(cacheNames =>
@@ -70,21 +72,73 @@ self.addEventListener('activate', event => {
       // clients.claim: take control of all open tabs immediately
       // (without this, the new SW only controls tabs opened after activation)
       return self.clients.claim();
+    }).then(() => {
+      // Notify all open pages that a new SW version just activated.
+      // The page listens for this and shows a "tap to reload" banner.
+      return self.clients.matchAll({ type: 'window' }).then(clients => {
+        clients.forEach(client => {
+          client.postMessage({ type: 'SW_UPDATED', cache: CACHE_NAME });
+        });
+      });
     })
   );
 });
 
 // ─── FETCH ───────────────────────────────────────────────────────────────────
 // Intercepts every outgoing network request from the app.
-// Strategy: cache-first for local assets, with network fallback.
+// Strategy:
+//   - index.html: stale-while-revalidate (serve cache, update in background)
+//   - everything else: cache-first with network fallback
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
-  // Special case: always try cache first for the main HTML file.
-  // If not cached yet (first load), fall through to network.
+  // index.html — stale-while-revalidate strategy
+  // Serve cached version immediately for speed, then fetch fresh copy in background.
+  // If the fresh copy is different, update the cache and notify the page.
   if(url.pathname.endsWith('index.html') || url.pathname === '/' || url.pathname.endsWith('/')) {
     event.respondWith(
-      caches.match(event.request).then(cached => cached || fetch(event.request))
+      caches.open(CACHE_NAME).then(cache => {
+        return cache.match(event.request).then(cached => {
+          const fetchPromise = fetch(event.request).then(networkResponse => {
+            if(networkResponse && networkResponse.status === 200) {
+              // Update the cache with the fresh version
+              cache.put(event.request, networkResponse.clone());
+
+              // If we had a cached version and served it, check if the new one differs
+              if(cached) {
+                // Compare content lengths as a quick diff check
+                const oldLen = cached.headers.get('content-length');
+                const newLen = networkResponse.headers.get('content-length');
+                const oldEtag = cached.headers.get('etag');
+                const newEtag = networkResponse.headers.get('etag');
+                const oldMod = cached.headers.get('last-modified');
+                const newMod = networkResponse.headers.get('last-modified');
+
+                const changed = (oldEtag && newEtag && oldEtag !== newEtag) ||
+                                (oldMod && newMod && oldMod !== newMod) ||
+                                (oldLen && newLen && oldLen !== newLen);
+
+                if(changed) {
+                  // New content available — tell the page to show a reload banner
+                  self.clients.matchAll({ type: 'window' }).then(clients => {
+                    clients.forEach(client => {
+                      client.postMessage({ type: 'CONTENT_UPDATED' });
+                    });
+                  });
+                }
+              }
+            }
+            return networkResponse;
+          }).catch(() => {
+            // Network failed — if we have a cached version, it was already returned below
+            // If no cache either, return offline response
+            if(!cached) return new Response('Offline', { status: 503, statusText: 'Service Unavailable' });
+          });
+
+          // Return cached immediately if available, otherwise wait for network
+          return cached || fetchPromise;
+        });
+      })
     );
     return;
   }
