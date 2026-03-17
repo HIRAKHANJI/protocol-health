@@ -442,8 +442,8 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
   <button class="tab" onclick="switchTab('months',this)">MONTHS</button>
   <button class="tab" onclick="switchTab('workouts',this)">WORKOUTS</button>
   <button class="tab" onclick="switchTab('nutrition',this)">NUTRITION</button>
-  <button class="tab" onclick="switchTab('rules',this)">RULES</button>
   <button class="tab" onclick="switchTab('track',this)">TRACK</button>
+  <button class="tab" onclick="switchTab('rules',this)">RULES</button>
 </div>
 
 <!-- ══ TODAY ══ -->
@@ -591,12 +591,6 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
   <div id="nutritionContent"></div>
 </div>
 
-<!-- ══ RULES ══ -->
-<div class="section" id="tab-rules">
-  <div style="height:10px"></div>
-  <div id="rulesContent"></div>
-</div>
-
 <!-- ══ TRACK ══ -->
 <div class="section" id="tab-track">
   <div style="height:10px"></div>
@@ -645,6 +639,12 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
   </div>
   <input type="file" id="restoreFileInput" accept=".json" style="display:none" onchange="restoreData(event)">
   <div id="backupStatus" style="display:none;margin-top:10px;padding:10px 13px;border-radius:8px;font-family:'DM Mono',monospace;font-size:0.7rem;line-height:1.6"></div>
+</div>
+
+<!-- ══ RULES ══ -->
+<div class="section" id="tab-rules">
+  <div style="height:10px"></div>
+  <div id="rulesContent"></div>
 </div>
 
 <!-- ══ DAY MODAL ══ -->
@@ -934,8 +934,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '1.2.0';
-const APP_VERSION_MSG = 'Bug fixes: exercise levels, calendar plan-day colors, reset confirmation, and data safety improvements.';
+const APP_VERSION = '1.3.0';
+const APP_VERSION_MSG = 'Workouts tab now shows only today\'s sessions expanded. Track and Rules tabs swapped.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -1468,7 +1468,8 @@ const PLANS = {
         exRow('Plank','Elbows, stay tight','3×30 sec')+
         exRow('Mountain Climbers','Controlled pace','3×20')+
         exRow('Dead Bug','Lower back stays glued to floor','2×8/side'),
-        stretchRow('Hip Flexor Stretch','30 sec each side','Cooldown')
+        stretchRow('Hip Flexor Stretch','30 sec each side','Cooldown'),
+        'MON,WED,FRI'
       )}
 
       ${workoutCard('MORNING B — LOWER + MOBILITY','20 MIN · TUE/THU/SAT',
@@ -1477,7 +1478,8 @@ const PLANS = {
         exRow('Reverse Lunge','Step back, knee hovers floor','3×10/leg')+
         exRow('Glute Bridge','Pause at top, squeeze','3×15')+
         exRow('World\'s Greatest Stretch','Hip, thoracic, hamstring combo','3/side×30s'),
-        stretchRow('Cat-Cow','Spine mobility cooldown','10 reps')
+        stretchRow('Cat-Cow','Spine mobility cooldown','10 reps'),
+        'TUE,THU,SAT'
       )}
 
       <div style="height:8px"></div>
@@ -1490,7 +1492,8 @@ const PLANS = {
         exRow('Diamond Push-up','Triceps','3×8')+
         exRow('Tricep Dips','Chair/bed edge','3×12')+
         exRow('Plank to Downdog','Flow, 2 sec each','3×10'),
-        stretchRow('Chest + Shoulder Stretch','Doorframe or behind-back clasp','5 min')
+        stretchRow('Chest + Shoulder Stretch','Doorframe or behind-back clasp','5 min'),
+        'MON,THU'
       )}
 
       ${workoutCard('EVENING B — LOWER + GLUTES','40 MIN · TUE/FRI',
@@ -1499,7 +1502,8 @@ const PLANS = {
         exRow('Single-Leg Glute Bridge','Drive through heel','3×12/leg')+
         exRow('Wall Sit','90° hold','3×45 sec')+
         exRow('Calf Raise','Slow up, slow down','3×20'),
-        stretchRow('Pigeon Pose + Hip Flexor','60 sec each side','5 min')
+        stretchRow('Pigeon Pose + Hip Flexor','60 sec each side','5 min'),
+        'TUE,FRI'
       )}
 
       ${workoutCard('EVENING C — CORE + CONDITIONING','40 MIN · WED/SAT',
@@ -1508,7 +1512,8 @@ const PLANS = {
         exRow('Bicycle Crunch','Slow and deliberate','3×20/side')+
         exRow('V-Sit Hold','Legs up 45°, back straight','3×20 sec')+
         exRow('Sprawl + Push-up','Drop to floor + push-up + stand','3×8'),
-        stretchRow('Full Body Stretch','Spine, hips, shoulders, hamstrings','5 min')
+        stretchRow('Full Body Stretch','Spine, hips, shoulders, hamstrings','5 min'),
+        'WED,SAT'
       )}`;
     },
 
@@ -1637,7 +1642,8 @@ const PLANS = {
         exRowWithLevel('core','Plank','Elbows, stay tight','3×30 sec')+
         exRow('Mountain climbers','Controlled pace','3×20'),
         stretchRow('Chest opener','Doorframe or arms wide','60 sec')+
-        stretchRow('Shoulder dislocates','Towel/stick, full arc overhead','10 reps')
+        stretchRow('Shoulder dislocates','Towel/stick, full arc overhead','10 reps'),
+        'MON'
       )}
 
       ${workoutCard('TUE · MORNING B — LOWER + MOBILITY','20 MIN',
@@ -1647,7 +1653,8 @@ const PLANS = {
         exRowWithLevel('hinge','Glute bridge','Pause at top, squeeze hard','3×15')+
         exRow('Reverse lunge','Step back, knee hovers floor','3×10/leg'),
         stretchRow('Deep squat hold','Heels flat, doorframe if needed','90 sec')+
-        stretchRow('Hip CARs extra','Right hip gets 2 extra circles','1 min')
+        stretchRow('Hip CARs extra','Right hip gets 2 extra circles','1 min'),
+        'TUE'
       )}
 
       ${workoutCard('WED · MORNING A — PUSH + CORE','20 MIN',
@@ -1656,7 +1663,8 @@ const PLANS = {
         exRowWithLevel('push','Push-ups','Focus on upper chest squeeze','3×12')+
         exRow('Mountain climbers','Steady pace','3×20')+
         exRowWithLevel('core','Plank','','3×30 sec'),
-        stretchRow('Wrist extension stretch','Fingers back toward knees','60 sec')
+        stretchRow('Wrist extension stretch','Fingers back toward knees','60 sec'),
+        'WED'
       )}
 
       ${workoutCard('THU · MORNING B — LOWER + MOBILITY','20 MIN',
@@ -1665,7 +1673,8 @@ const PLANS = {
         exRowWithLevel('squat','Bulgarian split squat','Rear foot elevated','3×8/leg')+
         exRow('Calf raise','Slow up, slow down','3×15'),
         stretchRow('90/90 hip stretch','90 sec each side — right hip priority','3 min')+
-        stretchRow('Pigeon pose','Extra 30 sec on right side','3 min')
+        stretchRow('Pigeon pose','Extra 30 sec on right side','3 min'),
+        'THU'
       )}
 
       ${workoutCard('FRI · MORNING A — PUSH + CORE','20 MIN',
@@ -1674,7 +1683,8 @@ const PLANS = {
         exRow('Plank to downdog','Flow, 2 sec each','3×8')+
         exRowWithLevel('core','Hollow body hold','Arms overhead, back pressed down','3×20 sec'),
         stretchRow('Rear shoulder stretch','Arm across body','30 sec each')+
-        stretchRow('Doorframe chest stretch','Upper chest + anterior shoulder','60 sec')
+        stretchRow('Doorframe chest stretch','Upper chest + anterior shoulder','60 sec'),
+        'FRI'
       )}
 
       ${workoutCard('SAT · MORNING B — LOWER + MOBILITY','20 MIN',
@@ -1683,7 +1693,8 @@ const PLANS = {
         exRowWithLevel('hinge','Good morning (BW)','Hinge at hip, back straight','3×12')+
         exRow('Single-leg RDL','Balance + hamstring stretch','3×8/leg'),
         stretchRow('Frog stretch','Knees wide, push hips back','2 min')+
-        stretchRow('Hamstring stretch','One leg extended, reach forward','60 sec each')
+        stretchRow('Hamstring stretch','One leg extended, reach forward','60 sec each'),
+        'SAT'
       )}
 
       ${workoutCard('SUN · ACTIVE REST','WALK 30 MIN + FULL HIP SESSION',
@@ -1691,7 +1702,8 @@ const PLANS = {
         stretchRow('Full hip sequence','90/90 · frog · pigeon · cossack · deep squat','20 min')+
         stretchRow('Neck isometrics','4 directions × 30 sec resist','2 min')+
         stretchRow('Shoulder dislocates','Towel/stick','10 slow reps')+
-        stretchRow('Thread the needle','8/side, thoracic rotation','2 min')
+        stretchRow('Thread the needle','8/side, thoracic rotation','2 min'),
+        'SUN'
       )}
 
       <div style="height:10px"></div>
@@ -1708,7 +1720,8 @@ const PLANS = {
         exRowWithLevel('skill_handstand','Wall handstand hold','Every session — wrist + shoulder base','3×20-30 sec'),
         stretchRow('Doorframe chest stretch','Upper chest + anterior shoulder','60 sec')+
         stretchRow('Shoulder dislocates','Towel/stick — full arc','10 reps')+
-        stretchRow('Wrist extension stretch','Fingers pointing back','60 sec')
+        stretchRow('Wrist extension stretch','Fingers pointing back','60 sec'),
+        'MON'
       )}
 
       ${workoutCard('EVENING B — LEGS + POSTERIOR CHAIN','TUE / FRI · 45 MIN',
@@ -1723,7 +1736,8 @@ const PLANS = {
         stretchRow('Pigeon pose','90 sec each — right side extra 30 sec','3+ min')+
         stretchRow('Figure-4 stretch','Lying on back, ankle over knee','60 sec each')+
         stretchRow('Hamstring stretch','One leg extended reach','60 sec each')+
-        stretchRow('Child\'s pose','Lower back release','60 sec')
+        stretchRow('Child\'s pose','Lower back release','60 sec'),
+        'TUE,FRI'
       )}
 
       ${workoutCard('EVENING C — SKILL + CORE + CALISTHENICS FOUNDATION','THU · 40 MIN',
@@ -1739,7 +1753,8 @@ const PLANS = {
         exRow('Superman hold','Posterior chain endurance','3×30 sec'),
         stretchRow('Full shoulder sequence','Thread needle · rear shoulder · chest open','10 min')+
         stretchRow('Hip flexor lunge stretch','60 sec each side','2 min')+
-        stretchRow('Neck isometrics','4 directions × 30 sec','2 min')
+        stretchRow('Neck isometrics','4 directions × 30 sec','2 min'),
+        'THU'
       )}
 
       ${workoutCard('SAT — RUN + CONDITIONING','40–45 MIN TOTAL',
@@ -1747,7 +1762,8 @@ const PLANS = {
         exRow('Run','Conversational pace. Don\'t gasp. Build weekly: add 5 min every 2 weeks.','30 min')+
         exRow('Walk cooldown','Easy pace','5 min')+
         exRow('Conditioning circuit','3 rounds: 10 push-ups + 10 jump squats + 10 sprawls + 30 sec plank','15 min'),
-        stretchRow('Lower body flush','Pigeon · hamstring · calf · quick quad','10 min')
+        stretchRow('Lower body flush','Pigeon · hamstring · calf · quick quad','10 min'),
+        'SAT'
       )}
 
       ${workoutCard('WED — RUN (MIDWEEK)','35 MIN TOTAL',
@@ -1755,7 +1771,8 @@ const PLANS = {
         exRow('Run','Conversational pace','20 min')+
         exRow('Walk cooldown','','5 min')+
         exRow('Jump squats + burpees + mountain climbers','3×10 each','10 min'),
-        stretchRow('Lower body flush','Pigeon · hamstring · calf','8 min')
+        stretchRow('Lower body flush','Pigeon · hamstring · calf','8 min'),
+        'WED'
       )}
 
       <div style="height:8px"></div>
@@ -2386,7 +2403,16 @@ function renderWorkouts() {
   const container = document.getElementById('workoutContent');
   buildWeekGrid();
   container.innerHTML = plan.workoutContent(s);
-  container.querySelectorAll('.workout-card-header').forEach(h=>{
+  const todayDay = DAYS_SHORT[new Date().getDay()]; // 'SUN','MON', etc.
+  container.querySelectorAll('.workout-card').forEach(card=>{
+    const h = card.querySelector('.workout-card-header');
+    const body = card.querySelector('.workout-body');
+    const chev = h.querySelector('.chevron');
+    const daysAttr = card.dataset.days;
+    // Auto-expand cards for today, or cards with no data-days (always-show like NECK PROTOCOL)
+    if(!daysAttr || daysAttr === 'DAILY' || daysAttr.split(',').includes(todayDay)) {
+      body.classList.add('open'); chev.classList.add('open');
+    }
     h.addEventListener('click', ()=>toggleWorkout(h));
   });
 }
@@ -2403,8 +2429,9 @@ function exRow(name, detail, sets) {
 }
 
 // workoutCard: wraps exercise rows in a collapsible card with a header and optional stretch rows
-function workoutCard(title, meta, rows, stretchRows='') {
-  return `<div class="workout-card">
+// days: optional string of day abbreviations this card applies to (e.g. 'MON,WED,FRI' or 'DAILY')
+function workoutCard(title, meta, rows, stretchRows='', days='') {
+  return `<div class="workout-card"${days ? ` data-days="${days}"` : ''}>
     <div class="workout-card-header">
       <h3>${title}</h3>
       <div class="wch-right"><div class="meta">${meta}</div><span class="chevron">▼</span></div>
