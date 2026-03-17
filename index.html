@@ -398,8 +398,6 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
 .cal-under { color:var(--green); }
 .cal-near { color:var(--accent2); }
 .cal-over { color:var(--danger); }
-.today-cal-strip { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:8px 13px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; transition:all 0.15s; }
-.today-cal-strip:active { border-color:var(--accent); }
 
 /* EXERCISE LEVEL SELECTOR */
 .level-badge { background:var(--surface2); border:1px solid var(--accent); color:var(--accent); border-radius:5px; padding:3px 7px; font-family:'DM Mono',monospace; font-size:0.55rem; letter-spacing:1px; cursor:pointer; white-space:nowrap; transition:all 0.15s; flex-shrink:0; }
@@ -1290,12 +1288,6 @@ function removeFoodFromModal(dateStr, entryId) {
   }, { yesLabel: 'REMOVE', danger: true });
 }
 
-function renderFoodLog() {
-  // Update the food modal entries if it's open
-  renderFoodModalEntries();
-  // Update the TODAY tab food button
-  updateTodayCalStrip();
-}
 
 function updateTodayCalStrip() {
   const valEl = document.getElementById('todayCalStripVal');
