@@ -362,7 +362,7 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
 .update-banner-close:hover { border-color:var(--accent); color:var(--accent); }
 
 /* SW RELOAD BANNER — shown when service worker detects new content in background */
-.sw-reload-banner { position:fixed; bottom:60px; left:12px; right:12px; z-index:9998; background:var(--surface2); border:1px solid var(--accent); border-radius:10px; padding:12px 16px; display:flex; align-items:center; justify-content:space-between; gap:12px; transform:translateY(120%); transition:transform 0.3s ease; box-shadow:0 -4px 20px rgba(0,0,0,0.5); }
+.sw-reload-banner { position:fixed; bottom:60px; left:12px; right:12px; z-index:9998; background:var(--surface2); border:1px solid var(--accent); border-radius:10px; padding:12px 16px; display:flex; align-items:center; justify-content:space-between; gap:12px; transform:translateY(calc(100% + 80px)); transition:transform 0.3s ease; box-shadow:0 -4px 20px rgba(0,0,0,0.5); }
 .sw-reload-banner.visible { transform:translateY(0); }
 .sw-reload-text { font-family:'DM Mono',monospace; font-size:0.68rem; color:var(--muted); letter-spacing:0.5px; line-height:1.4; }
 .sw-reload-text strong { color:var(--accent); font-weight:500; }
@@ -953,7 +953,7 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '1.4.3';
+const APP_VERSION = '1.4.4';
 const APP_VERSION_MSG = 'Fixed reload banner persistence.';
 
 // Static lookup arrays used throughout rendering
