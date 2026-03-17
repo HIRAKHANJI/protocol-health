@@ -172,9 +172,11 @@ body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif
 .cal-cell.cal-missed { background:rgba(255,68,68,0.07); border-color:rgba(255,68,68,0.2); }
 .cal-cell.cal-fast { background:var(--fast-dim); border-color:var(--fast); }
 .cal-cell.cal-partial { background:rgba(245,166,35,0.1); border-color:var(--accent2); }
-.cal-cell.plan-day { background:#ffffff !important; color:#000000 !important; }
-.cal-cell.plan-day .cal-num { color:#000000 !important; }
-.cal-cell.plan-day .cal-wt { color:#333333 !important; }
+.cal-cell.plan-day { border-color:#ffffff !important; box-shadow:inset 0 0 0 1px #ffffff; }
+.cal-cell.plan-day.cal-done .cal-num { color:var(--green); }
+.cal-cell.plan-day.cal-fast .cal-num { color:var(--fast); }
+.cal-cell.plan-day.cal-partial .cal-num { color:var(--accent2); }
+.cal-cell.plan-day.cal-missed .cal-num { color:#ff7070; }
 .cal-num { font-weight:700; font-size:0.82rem; color:var(--text); line-height:1; }
 .cal-cell.cal-done .cal-num { color:var(--green); }
 .cal-cell.cal-fast .cal-num { color:var(--fast); }
@@ -932,14 +934,16 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '1.1.0';
-const APP_VERSION_MSG = 'Food & calorie logger, exercise level selector, and pull work added to AGRO plan.';
+const APP_VERSION = '1.2.0';
+const APP_VERSION_MSG = 'Bug fixes: exercise levels, calendar plan-day colors, reset confirmation, and data safety improvements.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const DAYS_SHORT = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
 
 // ─── UTILS ───────────────────────────────────────────────────────────────────
+// esc: escapes HTML special characters to prevent XSS when inserting user data via innerHTML
+function esc(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
 // gs (get storage): safely reads and JSON-parses a localStorage key. Returns null on missing or parse error.
 function gs(k) { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } }
 // ss (set storage): safely JSON-stringifies and writes to localStorage. Silently fails if storage is full.
@@ -1040,8 +1044,8 @@ function onFoodNameInput(input) {
     const matches = lib.filter(f => f.name.toLowerCase().includes(lower)).slice(0, 5);
     if(!matches.length) { sugEl.classList.remove('visible'); return; }
     sugEl.innerHTML = matches.map(f =>
-      `<div class="food-sug-item" onmousedown="selectFoodSuggestion('${f.name.replace(/'/g,"\\'")}',${f.lastCalories})">
-        <span>${f.name}</span><span class="food-sug-cal">${f.lastCalories} cal</span>
+      `<div class="food-sug-item" onmousedown="selectFoodSuggestion('${esc(f.name).replace(/'/g,"\\'")}',${f.lastCalories})">
+        <span>${esc(f.name)}</span><span class="food-sug-cal">${f.lastCalories} cal</span>
       </div>`
     ).join('');
     sugEl.classList.add('visible');
@@ -1093,9 +1097,9 @@ function renderFoodLog() {
   }
   container.innerHTML = dc.entries.map(e =>
     `<div class="food-entry">
-      <div class="food-entry-info"><div class="food-entry-name">${e.name}</div>${e.notes ? `<div class="food-entry-notes">${e.notes}</div>` : ''}</div>
+      <div class="food-entry-info"><div class="food-entry-name">${esc(e.name)}</div>${e.notes ? `<div class="food-entry-notes">${esc(e.notes)}</div>` : ''}</div>
       <div class="food-entry-cal">${e.calories}</div>
-      <button class="food-entry-del" onclick="showConfirm('REMOVE','Remove ${e.name.replace(/'/g,"\\'")}?',()=>{removeFoodEntry('${today}','${e.id}')},{yesLabel:'REMOVE',danger:true})">×</button>
+      <button class="food-entry-del" onclick="showConfirm('REMOVE','Remove ${esc(e.name).replace(/'/g,"\\'")}?',()=>{removeFoodEntry('${today}','${e.id}')},{yesLabel:'REMOVE',danger:true})">×</button>
     </div>`
   ).join('');
   const s = getSettings();
@@ -2147,10 +2151,12 @@ function toggle(el) {
 
 // resetToday: clears all checklist ticks for today and saves the cleared state
 function resetToday() {
-  document.querySelectorAll('.check-item').forEach(i=>i.classList.remove('done'));
-  saveDayLogField(todayStr(), { checks:{} });
-  updateProgress();
-  dispatch('DAY_SAVED');
+  showConfirm('RESET CHECKLIST', 'Clear all checked items for today?', () => {
+    document.querySelectorAll('.check-item').forEach(i=>i.classList.remove('done'));
+    saveDayLogField(todayStr(), { checks:{} });
+    updateProgress();
+    dispatch('DAY_SAVED');
+  }, { yesLabel:'RESET', danger:true });
 }
 
 // updateProgress: counts visible checklist items, calculates % done, updates the bar
@@ -2511,7 +2517,7 @@ function renderCalendar() {
     const cell = document.createElement('div');
     cell.className = cls;
     cell.innerHTML = `<span class="cal-num">${d}</span>${wt?`<span class="cal-wt">${wt}kg</span>`:''}`;
-    cell.onclick = ()=>openDayModal(dateStr,dt);
+    if(!isFuture) cell.onclick = ()=>openDayModal(dateStr,dt);
     grid.appendChild(cell);
   }
 
@@ -2598,7 +2604,7 @@ function openDayModal(dateStr, dt) {
       html += `<div class="food-log-wrap" style="margin-bottom:8px">`;
       dayFoodData.entries.forEach(e => {
         html += `<div class="food-entry">
-          <div class="food-entry-info"><div class="food-entry-name">${e.name}</div>${e.notes ? `<div class="food-entry-notes">${e.notes}</div>` : ''}</div>
+          <div class="food-entry-info"><div class="food-entry-name">${esc(e.name)}</div>${e.notes ? `<div class="food-entry-notes">${esc(e.notes)}</div>` : ''}</div>
           <div class="food-entry-cal">${e.calories}</div>
           <button class="food-entry-del" onclick="removeFoodFromModal('${dateStr}','${e.id}')">×</button>
         </div>`;
@@ -2620,8 +2626,9 @@ function openDayModal(dateStr, dt) {
       html += `<div class="field-group"><label class="field-label">Exercise Levels</label><div class="ex-level-history">`;
       Object.entries(dayExLevels).forEach(([gid, lvl]) => {
         const prog = EXERCISE_PROGRESSIONS[gid];
-        if(prog && prog.levels[lvl]) {
-          html += `${prog.name}: Lv ${lvl} (${prog.levels[lvl].exercise})<br>`;
+        const lvlData = prog ? prog.levels.find(l => l.level === lvl) : null;
+        if(prog && lvlData) {
+          html += `${prog.name}: Lv ${lvl} (${lvlData.exercise})<br>`;
         }
       });
       html += `</div></div>`;
@@ -2753,8 +2760,7 @@ function clearWeightLog() {
   showConfirm('CLEAR WEIGHTS', 'Clear all weight entries? This cannot be undone.', () => {
     ss(SK.weights,[]);
     renderWeights();
-    updateGoalBar(getSettings().currentKg||104);
-    updateProjection();
+    dispatch('WEIGHT_LOGGED');
   }, { yesLabel:'CLEAR ALL', danger:true });
 }
 
@@ -2782,7 +2788,7 @@ function renderRecentNotes() {
         <span class="we-date">${dateStr}</span>
         <span style="display:flex;gap:8px;font-family:'DM Mono',monospace;font-size:0.65rem">${parts.join(' · ')}</span>
       </div>
-      ${log.notes?`<div style="font-size:0.76rem;color:var(--text);line-height:1.5;padding-top:2px">${log.notes}</div>`:''}
+      ${log.notes?`<div style="font-size:0.76rem;color:var(--text);line-height:1.5;padding-top:2px">${esc(log.notes)}</div>`:''}
     </div>`;
   }).join('');
 }
@@ -3557,9 +3563,11 @@ function generateExport() {
         const p=Object.values(log.checks).filter(Boolean).length;
         const t=Object.keys(log.checks).length;
         text+=`  Compliance: ${p}/${t}\n`;
-        // List what was done
-        const allItems = [...getActivePlan().checklistNormal,...getActivePlan().checklistFast];
-        const doneItems = allItems.filter(i=>log.checks[i.id]).map(i=>i.label);
+        // List what was done — search ALL plans' checklists since we don't store which plan was active
+        const allItems = [];
+        Object.values(PLANS).forEach(pl => { allItems.push(...pl.checklistNormal, ...pl.checklistFast); });
+        const seen = new Set();
+        const doneItems = allItems.filter(i => log.checks[i.id] && !seen.has(i.id) && seen.add(i.id)).map(i=>i.label);
         if(doneItems.length) text+=`    ✓ ${doneItems.join('\n    ✓ ')}\n`;
       }
       if(incNotes&&log.notes) text+=`  Notes: ${log.notes}\n`;
