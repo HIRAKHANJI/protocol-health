@@ -367,8 +367,8 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
 .sw-reload-text { font-family:'DM Mono',monospace; font-size:0.68rem; color:var(--muted); letter-spacing:0.5px; line-height:1.4; }
 .sw-reload-text strong { color:var(--accent); font-weight:500; }
 .sw-reload-btn { background:var(--accent); color:#000; border:none; border-radius:6px; font-family:'Bebas Neue',sans-serif; font-size:0.85rem; letter-spacing:2px; padding:8px 16px; cursor:pointer; flex-shrink:0; white-space:nowrap; }
-.sw-reload-x { background:none; border:none; color:var(--muted); font-size:1.2rem; line-height:1; padding:4px 2px; cursor:pointer; flex-shrink:0; opacity:0.6; transition:opacity 0.15s; }
-.sw-reload-x:hover { opacity:1; color:var(--text); }
+.sw-reload-x { background:none; border:none; color:var(--muted); font-size:1.4rem; line-height:1; min-width:44px; min-height:44px; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; opacity:0.7; transition:opacity 0.15s; -webkit-tap-highlight-color:rgba(255,255,255,0.1); }
+.sw-reload-x:hover, .sw-reload-x:active { opacity:1; color:var(--text); }
 
 /* FOOD LOG */
 .food-log-wrap { background:var(--surface); border:1px solid var(--border); border-radius:10px; overflow:hidden; margin-bottom:14px; }
@@ -953,7 +953,7 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '1.4.2';
+const APP_VERSION = '1.4.3';
 const APP_VERSION_MSG = 'Fixed reload banner persistence.';
 
 // Static lookup arrays used throughout rendering
@@ -3690,36 +3690,39 @@ if('serviceWorker' in navigator) {
     }).catch(err => console.log('SW registration failed:', err));
   });
 
-  // ── Reload banner cooldown ──────────────────────────────────────────
-  // After dismiss (reload or X), ignore all triggers for 60 seconds.
-  // This prevents the banner from reappearing due to controllerchange,
-  // SW_UPDATED, or CONTENT_UPDATED re-firing on the reloaded page.
-  const SW_COOLDOWN_KEY = 'ph_sw_banner_dismissed';
-  const SW_COOLDOWN_MS  = 60000; // 60 seconds
+  // ── Reload banner — version-tied dismiss ────────────────────────────
+  // When the user dismisses (X or RELOAD), we store the SW cache version
+  // that triggered the banner. The banner won't show again until a
+  // genuinely new SW version arrives (different CACHE_NAME).
+  const SW_DISMISSED_KEY = 'ph_sw_banner_dismissed_ver';
+  let _swCacheVersion = null;   // set when SW_UPDATED message arrives
+  let _bannerDismissed = false; // session flag — prevents re-show within same page load
 
-  function isBannerOnCooldown() {
-    const ts = localStorage.getItem(SW_COOLDOWN_KEY);
-    if(!ts) return false;
-    return (Date.now() - Number(ts)) < SW_COOLDOWN_MS;
-  }
-
-  function showReloadBanner() {
-    if(isBannerOnCooldown()) return;
+  function showReloadBanner(cacheVer) {
+    if(_bannerDismissed) return;
+    // If we know the cache version, check if user already dismissed this one
+    const ver = cacheVer || _swCacheVersion;
+    if(ver) {
+      const dismissed = localStorage.getItem(SW_DISMISSED_KEY);
+      if(dismissed === ver) return;
+      _swCacheVersion = ver;
+    }
     const banner = document.getElementById('swReloadBanner');
     if(banner) banner.classList.add('visible');
   }
 
   // Called by both the RELOAD button and the X button
   window.dismissSwBanner = function() {
-    localStorage.setItem(SW_COOLDOWN_KEY, String(Date.now()));
+    _bannerDismissed = true;
+    if(_swCacheVersion) localStorage.setItem(SW_DISMISSED_KEY, _swCacheVersion);
     const banner = document.getElementById('swReloadBanner');
     if(banner) banner.classList.remove('visible');
   };
 
   // Listen for messages from the service worker
   navigator.serviceWorker.addEventListener('message', event => {
-    if(event.data && (event.data.type === 'SW_UPDATED' || event.data.type === 'CONTENT_UPDATED')) {
-      showReloadBanner();
+    if(event.data && event.data.type === 'SW_UPDATED') {
+      showReloadBanner(event.data.cache);
     }
   });
 
