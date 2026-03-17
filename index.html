@@ -367,6 +367,8 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
 .sw-reload-text { font-family:'DM Mono',monospace; font-size:0.68rem; color:var(--muted); letter-spacing:0.5px; line-height:1.4; }
 .sw-reload-text strong { color:var(--accent); font-weight:500; }
 .sw-reload-btn { background:var(--accent); color:#000; border:none; border-radius:6px; font-family:'Bebas Neue',sans-serif; font-size:0.85rem; letter-spacing:2px; padding:8px 16px; cursor:pointer; flex-shrink:0; white-space:nowrap; }
+.sw-reload-x { background:none; border:none; color:var(--muted); font-size:1.2rem; line-height:1; padding:4px 2px; cursor:pointer; flex-shrink:0; opacity:0.6; transition:opacity 0.15s; }
+.sw-reload-x:hover { opacity:1; color:var(--text); }
 
 /* FOOD LOG */
 .food-log-wrap { background:var(--surface); border:1px solid var(--border); border-radius:10px; overflow:hidden; margin-bottom:14px; }
@@ -434,7 +436,8 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
 
 <div class="sw-reload-banner" id="swReloadBanner">
   <div class="sw-reload-text"><strong>New version available.</strong> Tap reload to update — your data is safe.</div>
-  <button class="sw-reload-btn" onclick="sessionStorage.setItem('ph_just_reloaded','1');window.location.reload()">RELOAD</button>
+  <button class="sw-reload-btn" onclick="dismissSwBanner();window.location.reload()">RELOAD</button>
+  <button class="sw-reload-x" onclick="dismissSwBanner()" aria-label="Dismiss">&times;</button>
 </div>
 
 <div class="header">
@@ -950,8 +953,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '1.4.1';
-const APP_VERSION_MSG = 'Fixed reload banner not dismissing after tap.';
+const APP_VERSION = '1.4.2';
+const APP_VERSION_MSG = 'Fixed reload banner persistence.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -3687,15 +3690,31 @@ if('serviceWorker' in navigator) {
     }).catch(err => console.log('SW registration failed:', err));
   });
 
-  // After a user-triggered reload, suppress the banner for this page load
-  const justReloaded = sessionStorage.getItem('ph_just_reloaded');
-  if(justReloaded) sessionStorage.removeItem('ph_just_reloaded');
+  // ── Reload banner cooldown ──────────────────────────────────────────
+  // After dismiss (reload or X), ignore all triggers for 60 seconds.
+  // This prevents the banner from reappearing due to controllerchange,
+  // SW_UPDATED, or CONTENT_UPDATED re-firing on the reloaded page.
+  const SW_COOLDOWN_KEY = 'ph_sw_banner_dismissed';
+  const SW_COOLDOWN_MS  = 60000; // 60 seconds
+
+  function isBannerOnCooldown() {
+    const ts = localStorage.getItem(SW_COOLDOWN_KEY);
+    if(!ts) return false;
+    return (Date.now() - Number(ts)) < SW_COOLDOWN_MS;
+  }
 
   function showReloadBanner() {
-    if(justReloaded) return; // Already reloaded — don't nag again
+    if(isBannerOnCooldown()) return;
     const banner = document.getElementById('swReloadBanner');
     if(banner) banner.classList.add('visible');
   }
+
+  // Called by both the RELOAD button and the X button
+  window.dismissSwBanner = function() {
+    localStorage.setItem(SW_COOLDOWN_KEY, String(Date.now()));
+    const banner = document.getElementById('swReloadBanner');
+    if(banner) banner.classList.remove('visible');
+  };
 
   // Listen for messages from the service worker
   navigator.serviceWorker.addEventListener('message', event => {
