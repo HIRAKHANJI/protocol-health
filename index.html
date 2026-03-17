@@ -11,8 +11,8 @@ if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.s
 </script>
 <title>Protocol Health — Precision Fitness Tracking PWA</title>
 <meta name="description" content="A zero-dependency fitness tracking PWA. Daily checklists, weight projection, food logging, goal calculator. No accounts, no subscriptions, no cloud. Built for one protocol.">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="PH_LOGO_192.png">
+<link rel="apple-touch-icon" href="PH_LOGO_192.png">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -23,8 +23,8 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;lin
 
 /* NAV */
 .nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,10,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px;}
-.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:3px;color:var(--accent);}
-.nav-logo span{color:var(--text);}
+.nav-logo{display:flex;align-items:center;}
+.nav-logo img{height:28px;width:auto;}
 .nav-links{display:flex;gap:24px;align-items:center;}
 .nav-links a{font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--muted);text-decoration:none;letter-spacing:1px;transition:color 0.2s;}
 .nav-links a:hover{color:var(--accent);}
@@ -35,7 +35,9 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;lin
 .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:80px 24px 60px;position:relative;overflow:hidden;}
 .hero::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(200,245,66,0.06) 0%,transparent 70%);pointer-events:none;}
 .hero-badge{font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:2px;color:var(--accent);border:1px solid rgba(200,245,66,0.25);border-radius:20px;padding:5px 16px;margin-bottom:24px;display:inline-block;}
-.hero h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(3rem,8vw,5.5rem);letter-spacing:4px;line-height:0.95;margin-bottom:16px;}
+.hero-logo-row{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:16px;}
+.hero-arrows{width:clamp(50px,10vw,80px);height:auto;}
+.hero h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(3rem,8vw,5.5rem);letter-spacing:4px;line-height:0.95;margin:0;}
 .hero h1 span{color:var(--accent);}
 .hero-sub{font-family:'DM Mono',monospace;font-size:0.78rem;color:var(--muted);max-width:520px;line-height:1.8;margin-bottom:36px;letter-spacing:0.3px;}
 .hero-btns{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;}
@@ -61,8 +63,9 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;lin
 
 /* PHONE MOCKUP */
 .phone-frame{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:12px;max-width:280px;margin:0 auto;box-shadow:0 20px 60px rgba(0,0,0,0.5);}
-.phone-screen{background:var(--bg);border-radius:12px;overflow:hidden;padding:16px;min-height:340px;}
-.phone-notch{width:80px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 12px;}
+.phone-screen{background:var(--bg);border-radius:12px;overflow:hidden;padding:16px;min-height:340px;display:flex;flex-direction:column;}
+.phone-screen-content{flex:1;}
+.phone-notch{width:80px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 0;flex-shrink:0;}
 
 /* MOCK UI INSIDE PHONES */
 .mock-header{font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;color:var(--accent);margin-bottom:8px;}
@@ -117,7 +120,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;lin
 
 <!-- NAV -->
 <nav class="nav">
-  <div class="nav-logo">PROTOCOL <span>HEALTH</span></div>
+  <div class="nav-logo"><img src="PH_LOGO_192.png" alt="Protocol Health"></div>
   <div class="nav-links">
     <a href="#features">FEATURES</a>
     <a href="#principles">ABOUT</a>
@@ -128,7 +131,10 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;lin
 <!-- HERO -->
 <section class="hero">
   <div class="hero-badge">PROGRESSIVE WEB APP — ZERO DEPENDENCIES</div>
-  <h1>PROTOCOL <span>HEALTH</span></h1>
+  <div class="hero-logo-row">
+    <img src="PH_ARROWS_LOGO.png" class="hero-arrows" alt="">
+    <h1>PROTOCOL <span>HEALTH</span></h1>
+  </div>
   <p class="hero-sub">A precision fitness tracking PWA built for one protocol. Daily checklists. Weight projection. Food logging. Goal calculator. No accounts. No subscriptions. No cloud. Everything runs in your browser, offline-capable, installed like a native app.</p>
   <div class="hero-btns">
     <a href="app.html?install=true" class="btn-primary">INSTALL APP</a>
@@ -152,7 +158,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;lin
     </div>
     <div class="phone-frame">
       <div class="phone-screen">
-        <div class="phone-notch"></div>
+        <div class="phone-screen-content">
         <span style="display:inline-block;font-family:'DM Mono',monospace;font-size:0.45rem;letter-spacing:1px;padding:2px 8px;border-radius:4px;margin-bottom:8px;background:rgba(200,245,66,0.15);color:var(--accent);">DEFAULT PROTOCOL</span>
         <div class="mock-sub">TUESDAY CHECKLIST</div>
         <div class="mock-item"><span class="mock-item-label">Wake & hydrate 500ml</span><span class="mock-check">&#10003;</span></div>
@@ -162,6 +168,8 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;lin
         <div class="mock-item"><span class="mock-item-label">Stretch + cooldown</span><span class="mock-uncheck">&#9675;</span></div>
         <div class="mock-bar"><div class="mock-bar-fill mock-bar-orange"></div></div>
         <div class="mock-stat"><span>TODAY'S MINIMUM</span><span>40%</span></div>
+        </div>
+        <div class="phone-notch"></div>
       </div>
     </div>
   </div>
@@ -175,7 +183,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;lin
     </div>
     <div class="phone-frame">
       <div class="phone-screen">
-        <div class="phone-notch"></div>
+        <div class="phone-screen-content">
         <div class="mock-header">WEIGHT LOG</div>
         <div class="mock-weight-row"><span>2026-03-17</span><span>101.2 kg</span><span class="mock-delta-down">-0.4kg</span></div>
         <div class="mock-weight-row"><span>2026-03-16</span><span>101.6 kg</span><span class="mock-delta-down">-0.2kg</span></div>
@@ -187,6 +195,8 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;lin
         <div class="mock-stat"><span>DELTA</span><span>-0.6 kg by Sun</span></div>
         <div class="mock-bar"><div class="mock-bar-fill mock-bar-green"></div></div>
         <div class="mock-stat"><span>101.2 &rarr; 91.0</span><span>72% done</span></div>
+        </div>
+        <div class="phone-notch"></div>
       </div>
     </div>
   </div>
@@ -200,7 +210,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;lin
     </div>
     <div class="phone-frame">
       <div class="phone-screen">
-        <div class="phone-notch"></div>
+        <div class="phone-screen-content">
         <div class="mock-header">FOOD LOG</div>
         <div class="mock-food-item"><span>Chicken breast + rice</span><span class="mock-food-cal">520</span></div>
         <div class="mock-food-item"><span>Greek yogurt</span><span class="mock-food-cal">140</span></div>
@@ -211,6 +221,8 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;lin
           <span style="color:var(--muted)">430 remaining / 1500 ceiling</span>
           <span style="font-family:'Bebas Neue',sans-serif;font-size:0.9rem;color:var(--green);">1070</span>
         </div>
+        </div>
+        <div class="phone-notch"></div>
       </div>
     </div>
   </div>
@@ -224,7 +236,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;lin
     </div>
     <div class="phone-frame">
       <div class="phone-screen">
-        <div class="phone-notch"></div>
+        <div class="phone-screen-content">
         <div class="mock-header" style="font-size:0.85rem;">PROJECTED PLAN</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0;">
           <div style="background:var(--surface);border-radius:6px;padding:8px;text-align:center;">
@@ -245,6 +257,8 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;lin
           </div>
         </div>
         <div style="background:rgba(200,245,66,0.1);border-radius:6px;padding:6px 8px;font-family:'DM Mono',monospace;font-size:0.5rem;color:var(--accent);text-align:center;letter-spacing:1px;margin-top:4px;">AGGRESSIVE — ACHIEVABLE</div>
+        </div>
+        <div class="phone-notch"></div>
       </div>
     </div>
   </div>
@@ -258,7 +272,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;lin
     </div>
     <div class="phone-frame">
       <div class="phone-screen">
-        <div class="phone-notch"></div>
+        <div class="phone-screen-content">
         <div class="mock-header" style="font-size:0.85rem;">MARCH 2026</div>
         <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin:6px 0;">
           <div style="text-align:center;font-family:'DM Mono',monospace;font-size:0.35rem;color:var(--muted);padding:2px 0;">S</div>
@@ -296,6 +310,8 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;lin
           <div style="display:flex;align-items:center;gap:3px;font-family:'DM Mono',monospace;font-size:0.4rem;color:var(--muted);"><div style="width:6px;height:6px;background:var(--accent2);border-radius:2px;"></div>PARTIAL</div>
           <div style="display:flex;align-items:center;gap:3px;font-family:'DM Mono',monospace;font-size:0.4rem;color:var(--muted);"><div style="width:6px;height:6px;background:var(--danger);border-radius:2px;"></div>MISSED</div>
         </div>
+        </div>
+        <div class="phone-notch"></div>
       </div>
     </div>
   </div>
@@ -309,7 +325,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;lin
     </div>
     <div class="phone-frame">
       <div class="phone-screen">
-        <div class="phone-notch"></div>
+        <div class="phone-screen-content">
         <div class="mock-header" style="font-size:0.85rem;">WORKOUTS</div>
         <div class="mock-sub">TUESDAY — PUSH (UPPER)</div>
         <div class="mock-item"><span class="mock-item-label" style="font-size:0.55rem">Push-ups</span><span style="font-family:'DM Mono',monospace;font-size:0.45rem;color:var(--accent2)">3 &times; 15</span></div>
@@ -335,6 +351,8 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;lin
             <div style="font-family:'DM Mono',monospace;font-size:0.35rem;color:var(--muted);">CARBS</div>
           </div>
         </div>
+        </div>
+        <div class="phone-notch"></div>
       </div>
     </div>
   </div>
