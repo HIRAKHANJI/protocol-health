@@ -1029,8 +1029,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '1.6.0';
-const APP_VERSION_MSG = 'New branded splash screen with arrows logo on app launch.';
+const APP_VERSION = '1.6.1';
+const APP_VERSION_MSG = 'Faster splash screen.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -3868,8 +3868,8 @@ document.getElementById('settingsOverlay').addEventListener('click',e=>{if(e.tar
   if(splash) {
     const plan = PLANS[s.plan||'default'] || PLANS.default;
     splashPlan.textContent = plan.name || 'DEFAULT PROTOCOL';
-    setTimeout(() => { splash.classList.add('fade-out'); }, 3000);
-    setTimeout(() => { splash.remove(); }, 3500);
+    setTimeout(() => { splash.classList.add('fade-out'); }, 1750);
+    setTimeout(() => { splash.remove(); }, 2250);
   }
 
   applyPlanUI(s.plan||'default');

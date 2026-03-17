@@ -18,13 +18,14 @@ if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.s
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{--bg:#0a0a0a;--surface:#111111;--surface2:#1a1a1a;--border:#222;--text:#e8e8e8;--muted:#666;--accent:#c8f542;--accent2:#f5a623;--green:#50c878;--danger:#ff4444;}
 
-html{scroll-behavior:smooth;}
+html{scroll-behavior:smooth;scrollbar-width:none;}
+html::-webkit-scrollbar{display:none;}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;line-height:1.6;overflow-x:hidden;}
 
 /* NAV */
 .nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,10,10,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:56px;}
 .nav-logo{display:flex;align-items:center;}
-.nav-logo img{height:28px;width:auto;}
+.nav-logo img{height:40px;width:auto;}
 .nav-links{display:flex;gap:24px;align-items:center;}
 .nav-links a{font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--muted);text-decoration:none;letter-spacing:1px;transition:color 0.2s;}
 .nav-links a:hover{color:var(--accent);}
@@ -35,8 +36,8 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;lin
 .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:80px 24px 60px;position:relative;overflow:hidden;}
 .hero::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:600px;height:600px;background:radial-gradient(circle,rgba(200,245,66,0.06) 0%,transparent 70%);pointer-events:none;}
 .hero-badge{font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:2px;color:var(--accent);border:1px solid rgba(200,245,66,0.25);border-radius:20px;padding:5px 16px;margin-bottom:24px;display:inline-block;}
-.hero-logo-row{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:16px;}
-.hero-arrows{width:clamp(50px,10vw,80px);height:auto;}
+.hero-logo-row{display:inline-flex;align-items:center;justify-content:center;gap:16px;margin-bottom:16px;position:relative;}
+.hero-arrows{width:clamp(50px,10vw,80px);height:auto;flex-shrink:0;}
 .hero h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(3rem,8vw,5.5rem);letter-spacing:4px;line-height:0.95;margin:0;}
 .hero h1 span{color:var(--accent);}
 .hero-sub{font-family:'DM Mono',monospace;font-size:0.78rem;color:var(--muted);max-width:520px;line-height:1.8;margin-bottom:36px;letter-spacing:0.3px;}
@@ -62,7 +63,8 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;lin
 .feature-desc{font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--muted);line-height:1.8;max-width:400px;}
 
 /* PHONE MOCKUP */
-.phone-frame{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:12px;max-width:280px;margin:0 auto;box-shadow:0 20px 60px rgba(0,0,0,0.5);}
+.phone-frame{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:14px;max-width:380px;margin:0 auto;box-shadow:0 20px 60px rgba(0,0,0,0.5);opacity:0;transform:translateY(40px);transition:opacity 0.7s ease,transform 0.7s ease;}
+.phone-frame.in-view{opacity:1;transform:translateY(0);}
 .phone-screen{background:var(--bg);border-radius:12px;overflow:hidden;padding:16px;min-height:340px;display:flex;flex-direction:column;}
 .phone-screen-content{flex:1;}
 .phone-notch{width:80px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 0;flex-shrink:0;}
@@ -110,7 +112,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;lin
 @media(max-width:768px){
   .feature-grid,.feature-grid.reverse{grid-template-columns:1fr;direction:ltr;gap:24px;}
   .feature-grid.reverse > *{direction:ltr;}
-  .phone-frame{max-width:240px;}
+  .phone-frame{max-width:320px;}
   .principle-grid{grid-template-columns:1fr;}
   .nav-links a:not(.nav-cta){display:none;}
 }
@@ -132,8 +134,8 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;lin
 <section class="hero">
   <div class="hero-badge">PROGRESSIVE WEB APP — ZERO DEPENDENCIES</div>
   <div class="hero-logo-row">
-    <img src="PH_ARROWS_LOGO.png" class="hero-arrows" alt="">
     <h1>PROTOCOL <span>HEALTH</span></h1>
+    <img src="PH_ARROWS_LOGO.png" class="hero-arrows" alt="">
   </div>
   <p class="hero-sub">A precision fitness tracking PWA built for one protocol. Daily checklists. Weight projection. Food logging. Goal calculator. No accounts. No subscriptions. No cloud. Everything runs in your browser, offline-capable, installed like a native app.</p>
   <div class="hero-btns">
@@ -413,5 +415,12 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;lin
   <p>PROTOCOL HEALTH — A <a href="https://github.com/HIRAKHANJI" target="_blank">HiraKhanji</a> Project</p>
 </footer>
 
+<script>
+// Animate phone mockups when fully in view
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if(e.isIntersecting) { e.target.classList.add('in-view'); obs.unobserve(e.target); } });
+}, { threshold: 0.8 });
+document.querySelectorAll('.phone-frame').forEach(el => obs.observe(el));
+</script>
 </body>
 </html>
