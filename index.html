@@ -541,6 +541,10 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
     <div class="fast-banner-title">⚡ WATER FAST DAY</div>
     <div class="fast-banner-sub">Zero food today. Water + electrolytes only.<br>500ml on wake · salt water mid-morning · black coffee/green tea allowed · electrolyte tablet pre-training</div>
   </div>
+  <div class="weight-input-wrap" style="margin-bottom:10px">
+    <input class="weight-input" type="number" id="todayWeightInput" placeholder="Weight (kg)" step="0.1" min="40" max="250" style="font-size:0.8rem;padding:9px 12px">
+    <button class="log-btn" onclick="logWeightFromToday()" style="font-size:0.8rem;padding:9px 14px">LOG</button>
+  </div>
   <button class="food-log-btn" id="foodLogBtn" onclick="openFoodModal()">
     <span class="food-btn-label">FOOD LOG</span>
     <span id="todayCalStripVal" style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--muted)">TAP TO LOG</span>
@@ -788,8 +792,6 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
             </div>
           </div>
         </div>
-        <button class="reset-btn" style="margin-top:10px;border-color:var(--accent2);color:var(--accent2);width:100%" onclick="calcDuration()">CALCULATE</button>
-
         <div class="calc-result" id="calcResult">
           <div class="calc-result-title" id="calcResultTitle">PROJECTED PLAN</div>
           <div class="calc-result-grid">
@@ -1013,7 +1015,7 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '1.5.0';
+const APP_VERSION = '1.5.1';
 const APP_VERSION_MSG = 'Food logger moved to TODAY tab. Manage & delete day notes. Backup/export moved to Settings.';
 
 // Static lookup arrays used throughout rendering
@@ -2936,6 +2938,23 @@ document.getElementById('modalOverlay').addEventListener('click',e=>{if(e.target
 // logWeight: reads the TRACK tab weight input, validates it (40–250kg),
 // upserts today's entry in SK.weights (replaces if today already exists),
 // then fires WEIGHT_LOGGED to update goal bar, projection, etc.
+function logWeightFromToday() {
+  const input = document.getElementById('todayWeightInput');
+  const val = parseFloat(input.value);
+  if(isNaN(val)||val<40||val>250){input.style.borderColor='var(--danger)';setTimeout(()=>input.style.borderColor='',1000);return;}
+  const weights = gs(SK.weights)||[];
+  const today = todayStr();
+  const idx = weights.findIndex(w=>w.date===today);
+  if(idx>=0) weights.splice(idx,1);
+  weights.unshift({date:today, weight:val, ts:Date.now()});
+  weights.sort((a,b)=>b.date.localeCompare(a.date));
+  ss(SK.weights, weights);
+  saveDayLogField(today, { weight: val });
+  input.value='';
+  renderWeights();
+  dispatch('WEIGHT_LOGGED');
+}
+
 function logWeight() {
   const input = document.getElementById('weightInput');
   const val = parseFloat(input.value);
@@ -2999,11 +3018,28 @@ function renderRecentNotes() {
     return `<div class="weight-entry" style="flex-direction:column;align-items:flex-start;gap:5px">
       <div style="display:flex;justify-content:space-between;width:100%">
         <span class="we-date">${dateStr}</span>
-        <span style="display:flex;gap:8px;font-family:'DM Mono',monospace;font-size:0.65rem">${parts.join(' · ')}</span>
+        <span style="display:flex;gap:8px;align-items:center;font-family:'DM Mono',monospace;font-size:0.65rem">
+          ${parts.join(' · ')}
+          <button onclick="event.stopPropagation();deleteDayNote('${dateStr}')" style="background:none;border:1px solid var(--border);color:var(--muted);width:22px;height:22px;border-radius:5px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s;margin-left:4px" onmouseover="this.style.borderColor='var(--danger)';this.style.color='var(--danger)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'" title="Delete this day log">×</button>
+        </span>
       </div>
       ${log.notes?`<div style="font-size:0.76rem;color:var(--text);line-height:1.5;padding-top:2px">${esc(log.notes)}</div>`:''}
     </div>`;
   }).join('');
+}
+
+function deleteDayNote(dateStr) {
+  showConfirm('DELETE DAY LOG', `Delete all logged data for ${dateStr}? (notes, energy, water — weight log kept separately)`, () => {
+    const all = gs(SK.dayLogs) || {};
+    if(all[dateStr]) {
+      // Keep checks intact, clear everything else
+      const checks = all[dateStr].checks;
+      all[dateStr] = {};
+      if(checks) all[dateStr].checks = checks;
+      ss(SK.dayLogs, all);
+      dispatch('DAY_SAVED');
+    }
+  }, { yesLabel: 'DELETE', danger: true });
 }
 
 // ─── SETTINGS ────────────────────────────────────────────────────────────────
@@ -3336,6 +3372,13 @@ function applyCalculatedCalories() {
   s.calories = calcCals;
   saveSettings(s);
   dispatch('CALORIES_CHANGED');
+  // Visual feedback
+  const btn = document.getElementById('useCalsBtn');
+  const orig = btn.textContent;
+  btn.textContent = '✓ CALORIES SET TO ' + calcCals;
+  btn.style.borderColor = 'var(--green)';
+  btn.style.color = 'var(--green)';
+  setTimeout(() => { btn.textContent = orig; btn.style.borderColor = ''; btn.style.color = ''; }, 2000);
 }
 
 // promptSchedule: shows a confirmation popup before creating a schedule.
