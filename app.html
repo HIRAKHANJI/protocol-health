@@ -1057,8 +1057,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '1.7.1';
-const APP_VERSION_MSG = 'Performance radar chart on TRACK tab.';
+const APP_VERSION = '1.7.2';
+const APP_VERSION_MSG = 'Improved update detection for iOS PWA.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -4228,13 +4228,53 @@ window.addEventListener('beforeinstallprompt', e => {
 });
 
 if('serviceWorker' in navigator) {
+
+  // ── SW Registration ───────────────────────────────────────────────────
+  // Store the registration object so resume listeners can call reg.update()
+  let _swReg = null;
+
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('sw.js').then(reg => {
+      _swReg = reg;
 
       // Check for SW updates every 30 minutes while the app is open
       setInterval(() => { reg.update(); }, 30 * 60 * 1000);
 
     }).catch(err => console.log('SW registration failed:', err));
+  });
+
+  // ── iOS PWA resume detection ──────────────────────────────────────────
+  // iOS kills all JS when a PWA is swiped away. On reopen it restores from
+  // cache without checking for SW updates. These listeners force an update
+  // check every time the app returns to the foreground.
+  //
+  // visibilitychange: fires when tab/PWA goes hidden→visible (all platforms)
+  // pageshow: fires on bfcache restore (iOS back-forward cache) — the
+  //   persisted flag means the page was restored from memory, not freshly loaded
+  //
+  // Both are no-ops if _swReg hasn't been set yet (first load still in progress)
+  // and are harmless on Android/desktop — they just trigger an extra update()
+  // call that resolves immediately if nothing changed.
+
+  document.addEventListener('visibilitychange', () => {
+    if(document.visibilityState === 'visible' && _swReg) {
+      _swReg.update().catch(() => {});
+    }
+  });
+
+  window.addEventListener('pageshow', event => {
+    if(event.persisted && _swReg) {
+      _swReg.update().catch(() => {});
+    }
+  });
+
+  // ── Fallback: serviceWorker.ready ─────────────────────────────────────
+  // If the page loads with an already-active SW (common on iOS reopens),
+  // navigator.serviceWorker.ready resolves immediately with the active
+  // registration. We use it to ensure _swReg is set even if the 'load'
+  // event registration promise was from a previous session's cached page.
+  navigator.serviceWorker.ready.then(reg => {
+    if(!_swReg) _swReg = reg;
   });
 
   // ── Reload banner — version-tied dismiss ────────────────────────────
