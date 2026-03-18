@@ -223,9 +223,9 @@ body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif
 .radar-toggle { display:flex; gap:0; border:1px solid var(--border); border-radius:5px; overflow:hidden; }
 .radar-toggle-btn { background:none; border:none; color:var(--muted); font-family:'DM Mono',monospace; font-size:0.55rem; letter-spacing:1px; padding:4px 10px; cursor:pointer; transition:all 0.15s; }
 .radar-toggle-btn.active { background:var(--accent); color:#000; font-weight:500; }
-.radar-svg-wrap { display:flex; justify-content:center; align-items:center; }
-.radar-svg-wrap svg { max-width:100%; height:auto; }
-.radar-legend { display:grid; grid-template-columns:1fr 1fr; gap:4px 12px; margin-top:10px; }
+.radar-svg-wrap { display:flex; justify-content:center; align-items:center; overflow:visible; }
+.radar-svg-wrap svg { max-width:100%; height:auto; display:block; }
+.radar-legend { display:grid; grid-template-columns:1fr 1fr; gap:6px 12px; margin-top:12px; padding-top:10px; border-top:1px solid var(--border); }
 .radar-leg-item { display:flex; align-items:center; gap:6px; font-family:'DM Mono',monospace; font-size:0.52rem; color:var(--muted); }
 .radar-leg-dot { width:7px; height:7px; border-radius:2px; flex-shrink:0; }
 .radar-leg-val { color:var(--accent); margin-left:auto; font-weight:500; }
@@ -1057,7 +1057,7 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '1.7.0';
+const APP_VERSION = '1.7.1';
 const APP_VERSION_MSG = 'Performance radar chart on TRACK tab.';
 
 // Static lookup arrays used throughout rendering
@@ -2770,11 +2770,11 @@ function renderRadar() {
     return;
   }
 
-  // SVG params
-  const size = 280;
+  // SVG params — generous viewBox so labels never clip
+  const size = 340;
   const cx = size / 2;
   const cy = size / 2;
-  const maxR = 110;
+  const maxR = 100;
   const rings = 4; // guide rings at 25%, 50%, 75%, 100%
   const angleStep = (2 * Math.PI) / n;
   const startAngle = -Math.PI / 2; // top
@@ -2785,7 +2785,7 @@ function renderRadar() {
     y: cy + r * Math.sin(angle)
   });
 
-  let svg = `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">`;
+  let svg = `<svg viewBox="0 0 ${size} ${size}" width="100%" style="max-width:${size}px;display:block;margin:0 auto;" xmlns="http://www.w3.org/2000/svg">`;
 
   // Guide rings
   for (let r = 1; r <= rings; r++) {
@@ -2819,35 +2819,56 @@ function renderRadar() {
   svg += `<polygon points="${polyStr}" fill="rgba(200,245,66,0.12)" stroke="var(--accent)" stroke-width="1.5" stroke-linejoin="round"/>`;
 
   // Data points (dots) and labels
+  // Short labels so they fit on mobile
+  const shortLabels = { 'CHECKLIST':'CHECK', 'CALORIES':'CAL', 'FASTING':'FAST', 'WATER':'WATER', 'WEIGHT TREND':'WEIGHT', 'GOAL':'GOAL', 'CONSISTENCY':'CONSIST' };
   for (let i = 0; i < n; i++) {
     const angle = startAngle + i * angleStep;
     const val = Math.max(0, Math.min(100, axes[i].value));
     const r = (val / 100) * maxR;
     const p = pt(angle, r);
-    const labelP = pt(angle, maxR + 16);
+
+    // Push labels out with enough gap — further for top/bottom to avoid overlap
+    const isTop = (angle > -Math.PI * 0.75 && angle < -Math.PI * 0.25);
+    const isBottom = (angle > Math.PI * 0.25 && angle < Math.PI * 0.75);
+    const labelDist = (isTop || isBottom) ? maxR + 22 : maxR + 18;
+    const labelP = pt(angle, labelDist);
 
     // Dot
     svg += `<circle cx="${p.x}" cy="${p.y}" r="3" fill="${axes[i].color}" stroke="var(--bg)" stroke-width="1.5"/>`;
 
-    // Label
-    const anchor = Math.abs(labelP.x - cx) < 5 ? 'middle' : labelP.x < cx ? 'end' : 'start';
-    const dy = Math.abs(labelP.y - cy) < 5 ? '0.35em' : labelP.y < cy ? '0em' : '0.7em';
-    svg += `<text x="${labelP.x}" y="${labelP.y}" text-anchor="${anchor}" dy="${dy}" fill="#666" font-family="'DM Mono',monospace" font-size="7" letter-spacing="0.5">${axes[i].label}</text>`;
+    // Label + value on same line
+    const anchor = Math.abs(labelP.x - cx) < 8 ? 'middle' : labelP.x < cx ? 'end' : 'start';
+    const dy = labelP.y < cy ? '-0.2em' : '1em';
+    const displayLabel = shortLabels[axes[i].label] || axes[i].label;
+    svg += `<text x="${labelP.x}" y="${labelP.y}" text-anchor="${anchor}" dy="${dy}" fill="#666" font-family="'DM Mono',monospace" font-size="7.5" letter-spacing="0.5">${displayLabel}</text>`;
+    // Value beneath label
+    const valDy = labelP.y < cy ? '0.8em' : '2em';
+    svg += `<text x="${labelP.x}" y="${labelP.y}" text-anchor="${anchor}" dy="${valDy}" fill="${axes[i].color}" font-family="'DM Mono',monospace" font-size="7" font-weight="600">${axes[i].value}%</text>`;
   }
 
-  // Center % ring labels
-  for (let r = 1; r <= rings; r++) {
+  // Center % ring labels (only 50 and 100 to reduce clutter)
+  [2,4].forEach(r => {
     const radius = (r / rings) * maxR;
     const pct = r * 25;
     svg += `<text x="${cx + 3}" y="${cy - radius + 8}" fill="#333" font-family="'DM Mono',monospace" font-size="6">${pct}</text>`;
-  }
+  });
 
   svg += '</svg>';
   container.innerHTML = svg;
 
-  // Legend
+  // Legend — full labels with values
+  const windowLabel = radarWindow === 7 ? '7-DAY' : '30-DAY';
+  const legendNotes = {
+    'checklist': 'Avg completion',
+    'calories': 'Under ceiling',
+    'fasting': 'Fast adherence',
+    'water': 'Vs 3L target',
+    'weight': radarWindow === 7 ? '7d direction' : '30d loss rate',
+    'goal': 'All-time',
+    'consistency': 'Days logged'
+  };
   legend.innerHTML = axes.map(a =>
-    `<div class="radar-leg-item"><div class="radar-leg-dot" style="background:${a.color}"></div>${a.label}<span class="radar-leg-val">${a.value}%</span></div>`
+    `<div class="radar-leg-item"><div class="radar-leg-dot" style="background:${a.color}"></div><div style="display:flex;flex-direction:column;gap:1px;flex:1;min-width:0;"><span style="color:var(--text);font-size:0.52rem;">${a.label}</span><span style="font-size:0.42rem;opacity:0.6;">${legendNotes[a.key]||''}</span></div><span class="radar-leg-val">${a.value}%</span></div>`
   ).join('');
 }
 
