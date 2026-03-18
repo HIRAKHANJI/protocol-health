@@ -2762,13 +2762,9 @@ function renderRadar() {
     return;
   }
 
-  const axes = metrics.filter(m => m.value !== null);
+  // Always show all 7 axes — null means no data yet, render as 0
+  const axes = metrics.map(m => ({ ...m, value: m.value !== null ? m.value : 0, noData: m.value === null }));
   const n = axes.length;
-  if (n < 3) {
-    container.innerHTML = '<div class="radar-empty">Need at least 3 metrics with data.<br>Log more (checklist, weight, food, water) to unlock the radar.</div>';
-    legend.innerHTML = '';
-    return;
-  }
 
   // SVG params — generous viewBox so labels never clip
   const size = 340;
@@ -2833,17 +2829,21 @@ function renderRadar() {
     const labelDist = (isTop || isBottom) ? maxR + 22 : maxR + 18;
     const labelP = pt(angle, labelDist);
 
-    // Dot
-    svg += `<circle cx="${p.x}" cy="${p.y}" r="3" fill="${axes[i].color}" stroke="var(--bg)" stroke-width="1.5"/>`;
+    // Dot — dimmed if no data
+    const dotColor = axes[i].noData ? '#333' : axes[i].color;
+    svg += `<circle cx="${p.x}" cy="${p.y}" r="3" fill="${dotColor}" stroke="var(--bg)" stroke-width="1.5"/>`;
 
-    // Label + value on same line
+    // Label + value
     const anchor = Math.abs(labelP.x - cx) < 8 ? 'middle' : labelP.x < cx ? 'end' : 'start';
     const dy = labelP.y < cy ? '-0.2em' : '1em';
     const displayLabel = shortLabels[axes[i].label] || axes[i].label;
-    svg += `<text x="${labelP.x}" y="${labelP.y}" text-anchor="${anchor}" dy="${dy}" fill="#666" font-family="'DM Mono',monospace" font-size="7.5" letter-spacing="0.5">${displayLabel}</text>`;
-    // Value beneath label
+    const labelFill = axes[i].noData ? '#444' : '#666';
+    svg += `<text x="${labelP.x}" y="${labelP.y}" text-anchor="${anchor}" dy="${dy}" fill="${labelFill}" font-family="'DM Mono',monospace" font-size="7.5" letter-spacing="0.5">${displayLabel}</text>`;
+    // Value beneath label — show "—" for no-data
     const valDy = labelP.y < cy ? '0.8em' : '2em';
-    svg += `<text x="${labelP.x}" y="${labelP.y}" text-anchor="${anchor}" dy="${valDy}" fill="${axes[i].color}" font-family="'DM Mono',monospace" font-size="7" font-weight="600">${axes[i].value}%</text>`;
+    const valText = axes[i].noData ? '—' : `${axes[i].value}%`;
+    const valColor = axes[i].noData ? '#444' : axes[i].color;
+    svg += `<text x="${labelP.x}" y="${labelP.y}" text-anchor="${anchor}" dy="${valDy}" fill="${valColor}" font-family="'DM Mono',monospace" font-size="7" font-weight="600">${valText}</text>`;
   }
 
   // Center % ring labels (only 50 and 100 to reduce clutter)
@@ -2867,9 +2867,12 @@ function renderRadar() {
     'goal': 'All-time',
     'consistency': 'Days logged'
   };
-  legend.innerHTML = axes.map(a =>
-    `<div class="radar-leg-item"><div class="radar-leg-dot" style="background:${a.color}"></div><div style="display:flex;flex-direction:column;gap:1px;flex:1;min-width:0;"><span style="color:var(--text);font-size:0.52rem;">${a.label}</span><span style="font-size:0.42rem;opacity:0.6;">${legendNotes[a.key]||''}</span></div><span class="radar-leg-val">${a.value}%</span></div>`
-  ).join('');
+  legend.innerHTML = axes.map(a => {
+    const dotBg = a.noData ? '#333' : a.color;
+    const valDisplay = a.noData ? '<span style="color:#444;">—</span>' : `${a.value}%`;
+    const noteText = a.noData ? 'No data yet' : (legendNotes[a.key]||'');
+    return `<div class="radar-leg-item"><div class="radar-leg-dot" style="background:${dotBg}"></div><div style="display:flex;flex-direction:column;gap:1px;flex:1;min-width:0;"><span style="color:${a.noData ? '#555' : 'var(--text)'};font-size:0.52rem;">${a.label}</span><span style="font-size:0.42rem;opacity:0.6;">${noteText}</span></div><span class="radar-leg-val">${valDisplay}</span></div>`;
+  }).join('');
 }
 
 function buildWeekGrid() {
