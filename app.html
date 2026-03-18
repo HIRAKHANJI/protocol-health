@@ -215,6 +215,22 @@ body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif
 .delta-same { color:var(--muted); }
 .empty-state { padding:26px; text-align:center; font-family:'DM Mono',monospace; font-size:0.68rem; color:var(--muted); line-height:1.8; }
 
+/* RADAR CHART */
+.radar-wrap { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px; margin-bottom:16px; }
+.radar-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+.radar-title { font-family:'Bebas Neue',sans-serif; font-size:1rem; letter-spacing:2px; color:var(--muted); }
+.radar-title span { color:var(--text); }
+.radar-toggle { display:flex; gap:0; border:1px solid var(--border); border-radius:5px; overflow:hidden; }
+.radar-toggle-btn { background:none; border:none; color:var(--muted); font-family:'DM Mono',monospace; font-size:0.55rem; letter-spacing:1px; padding:4px 10px; cursor:pointer; transition:all 0.15s; }
+.radar-toggle-btn.active { background:var(--accent); color:#000; font-weight:500; }
+.radar-svg-wrap { display:flex; justify-content:center; align-items:center; }
+.radar-svg-wrap svg { max-width:100%; height:auto; }
+.radar-legend { display:grid; grid-template-columns:1fr 1fr; gap:4px 12px; margin-top:10px; }
+.radar-leg-item { display:flex; align-items:center; gap:6px; font-family:'DM Mono',monospace; font-size:0.52rem; color:var(--muted); }
+.radar-leg-dot { width:7px; height:7px; border-radius:2px; flex-shrink:0; }
+.radar-leg-val { color:var(--accent); margin-left:auto; font-weight:500; }
+.radar-empty { text-align:center; font-family:'DM Mono',monospace; font-size:0.68rem; color:var(--muted); padding:30px 0; line-height:1.8; }
+
 /* RESET/ACTION BTNS */
 .reset-btn { width:100%; background:none; border:1px solid var(--border); border-radius:8px; padding:10px; color:var(--muted); font-family:'DM Mono',monospace; font-size:0.62rem; letter-spacing:2px; cursor:pointer; margin-top:7px; transition:all 0.2s; }
 .reset-btn:hover { border-color:var(--danger); color:var(--danger); }
@@ -659,6 +675,18 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
 <!-- ══ TRACK ══ -->
 <div class="section" id="tab-track">
   <div style="height:10px"></div>
+  <!-- RADAR CHART -->
+  <div class="radar-wrap" id="radarWrap">
+    <div class="radar-header">
+      <div class="radar-title">PERFORMANCE <span>RADAR</span></div>
+      <div class="radar-toggle">
+        <button class="radar-toggle-btn active" onclick="setRadarWindow(7,this)">7D</button>
+        <button class="radar-toggle-btn" onclick="setRadarWindow(30,this)">30D</button>
+      </div>
+    </div>
+    <div class="radar-svg-wrap" id="radarSvg"></div>
+    <div class="radar-legend" id="radarLegend"></div>
+  </div>
   <div class="section-title">WEIGHT <span>LOG</span></div>
   <p class="section-note">Weigh first thing morning, after toilet, before food. Same conditions every time.</p>
   <div class="weight-input-wrap">
@@ -1029,8 +1057,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '1.6.1';
-const APP_VERSION_MSG = 'Faster splash screen.';
+const APP_VERSION = '1.7.0';
+const APP_VERSION_MSG = 'Performance radar chart on TRACK tab.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -2235,7 +2263,7 @@ function switchTab(id, btn) {
   if(id==='workouts') renderWorkouts();
   if(id==='nutrition') renderNutrition();
   if(id==='rules') renderRules();
-  if(id==='track') { renderWeights(); renderRecentNotes(); }
+  if(id==='track') { renderWeights(); renderRecentNotes(); renderRadar(); }
 }
 
 // ─── TODAY ───────────────────────────────────────────────────────────────────
@@ -2576,6 +2604,253 @@ function updateProjection() {
   basisParts.push(`${Math.round(complianceScore*100)}% compliance`);
   document.getElementById('projBasis').textContent = basisParts.join(' · ');
 }
+
+// ─── RADAR CHART ──────────────────────────────────────────────────────────────
+// Renders a pure-SVG spider/radar chart on the TRACK tab showing multi-metric
+// performance snapshot. Supports 7D and 30D windows.
+// Each axis is normalised to 0–100. Chart is drawn as filled polygon over
+// concentric guide rings.
+
+let radarWindow = 7; // default 7-day window
+
+function setRadarWindow(days, btn) {
+  radarWindow = days;
+  document.querySelectorAll('.radar-toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderRadar();
+}
+
+function computeRadarMetrics(days) {
+  const dayLogs = gs(SK.dayLogs) || {};
+  const fastDays = gs(SK.fastDays) || {};
+  const weights = gs(SK.weights) || [];
+  const s = getSettings();
+  const plan = getActivePlan();
+  const cal = s.calories || 1500;
+  const now = new Date(); now.setHours(0,0,0,0);
+
+  // Collect date strings for the window (looking back from yesterday for behavioral, today inclusive for weight)
+  const windowDates = [];
+  for (let i = 0; i < days; i++) {
+    const d = new Date(now); d.setDate(d.getDate() - i);
+    windowDates.push(dateToStr(d));
+  }
+
+  // 1. CHECKLIST COMPLIANCE — avg completion % across days with any log data
+  let checkTotal = 0, checkCount = 0;
+  windowDates.forEach(ds => {
+    const log = dayLogs[ds];
+    if (log && log.checks) {
+      const vals = Object.values(log.checks);
+      if (vals.length > 0) {
+        checkTotal += (vals.filter(Boolean).length / vals.length) * 100;
+        checkCount++;
+      }
+    }
+  });
+  const checklist = checkCount > 0 ? Math.round(checkTotal / checkCount) : null;
+
+  // 2. CALORIE DISCIPLINE — % of eating days at or under ceiling
+  let calUnder = 0, calTotal = 0;
+  windowDates.forEach(ds => {
+    if (fastDays[ds]) return; // skip fast days
+    const dc = getDayCalories(ds);
+    if (dc.hasData) {
+      calTotal++;
+      if (dc.total <= cal) calUnder++;
+    }
+  });
+  const calories = calTotal > 0 ? Math.round((calUnder / calTotal) * 100) : null;
+
+  // 3. FASTING ADHERENCE — % of scheduled fast days that were actually observed
+  // A fast day is "observed" if it's marked in fastDays AND (no food logged OR checklist has fast items done)
+  let fastScheduled = 0, fastCompleted = 0;
+  windowDates.forEach(ds => {
+    const dow = strToDate(ds).getDay();
+    if (plan.fastDaysDow.includes(dow)) {
+      // Only count days that aren't in the future
+      if (strToDate(ds) <= now) {
+        fastScheduled++;
+        if (fastDays[ds]) {
+          const dc = getDayCalories(ds);
+          if (!dc.hasData || dc.total === 0) fastCompleted++;
+          else fastCompleted += 0.3; // partial credit if fast day but ate something
+        }
+      }
+    }
+  });
+  const fasting = fastScheduled > 0 ? Math.round((fastCompleted / fastScheduled) * 100) : null;
+
+  // 4. WATER INTAKE — avg vs 3L target
+  let waterSum = 0, waterCount = 0;
+  windowDates.forEach(ds => {
+    const log = dayLogs[ds];
+    if (log && log.water && log.water > 0) {
+      waterSum += log.water;
+      waterCount++;
+    }
+  });
+  const waterTarget = 3.0; // liters
+  const water = waterCount > 0 ? Math.min(100, Math.round((waterSum / waterCount / waterTarget) * 100)) : null;
+
+  // 5. WEIGHT TREND — normalised score based on whether weight is moving in the right direction
+  // 100 = losing at or above target rate, 0 = gaining weight
+  let weightTrend = null;
+  if (weights.length >= 2) {
+    const windowWeights = weights.filter(w => {
+      const wd = strToDate(w.date);
+      const diff = (now - wd) / 86400000;
+      return diff >= 0 && diff <= days;
+    });
+    if (windowWeights.length >= 2) {
+      const newest = windowWeights[0].weight;
+      const oldest = windowWeights[windowWeights.length - 1].weight;
+      const dailyLoss = (oldest - newest) / Math.max(1, (strToDate(windowWeights[0].date) - strToDate(windowWeights[windowWeights.length-1].date)) / 86400000);
+      // Target: ~0.15 kg/day (about 1kg/week) = 100%. 0 = 50%. Gaining = 0%.
+      const targetRate = 0.15;
+      if (dailyLoss >= targetRate) weightTrend = 100;
+      else if (dailyLoss > 0) weightTrend = Math.round(50 + (dailyLoss / targetRate) * 50);
+      else if (dailyLoss === 0) weightTrend = 50;
+      else weightTrend = Math.max(0, Math.round(50 + (dailyLoss / targetRate) * 50));
+    }
+  }
+
+  // 6. GOAL PROGRESS — all-time, same regardless of window
+  let goalProgress = null;
+  if (weights.length > 0) {
+    const target = s.targetKg || 91;
+    const start = weights.length ? weights[weights.length - 1].weight : (s.currentKg || 104);
+    const current = weights[0].weight;
+    const totalDrop = start - target;
+    if (totalDrop > 0) {
+      goalProgress = Math.min(100, Math.max(0, Math.round(((start - current) / totalDrop) * 100)));
+    }
+  }
+
+  // 7. CONSISTENCY — % of days in window that have ANY logged data
+  let loggedDays = 0;
+  windowDates.forEach(ds => {
+    const log = dayLogs[ds];
+    const hasWeight = weights.some(w => w.date === ds);
+    const hasFood = getDayCalories(ds).hasData;
+    if ((log && (log.checks || log.water || log.energy || log.notes)) || hasWeight || hasFood) loggedDays++;
+  });
+  const consistency = Math.round((loggedDays / days) * 100);
+
+  return [
+    { key: 'checklist', label: 'CHECKLIST', value: checklist, color: 'var(--accent)' },
+    { key: 'calories', label: 'CALORIES', value: calories, color: 'var(--accent2)' },
+    { key: 'fasting', label: 'FASTING', value: fasting, color: 'var(--fast)' },
+    { key: 'water', label: 'WATER', value: water, color: '#4fc3f7' },
+    { key: 'weight', label: 'WEIGHT TREND', value: weightTrend, color: 'var(--green)' },
+    { key: 'goal', label: 'GOAL', value: goalProgress, color: '#ff7043' },
+    { key: 'consistency', label: 'CONSISTENCY', value: consistency, color: '#ce93d8' }
+  ];
+}
+
+function renderRadar() {
+  const container = document.getElementById('radarSvg');
+  const legend = document.getElementById('radarLegend');
+  if (!container) return;
+
+  const metrics = computeRadarMetrics(radarWindow);
+  const hasData = metrics.some(m => m.value !== null);
+
+  if (!hasData) {
+    container.innerHTML = '<div class="radar-empty">Start logging to see your performance radar.<br>Checklist, weight, food, and water data build this chart.</div>';
+    legend.innerHTML = '';
+    return;
+  }
+
+  const axes = metrics.filter(m => m.value !== null);
+  const n = axes.length;
+  if (n < 3) {
+    container.innerHTML = '<div class="radar-empty">Need at least 3 metrics with data.<br>Log more (checklist, weight, food, water) to unlock the radar.</div>';
+    legend.innerHTML = '';
+    return;
+  }
+
+  // SVG params
+  const size = 280;
+  const cx = size / 2;
+  const cy = size / 2;
+  const maxR = 110;
+  const rings = 4; // guide rings at 25%, 50%, 75%, 100%
+  const angleStep = (2 * Math.PI) / n;
+  const startAngle = -Math.PI / 2; // top
+
+  // Helper to get point on circle
+  const pt = (angle, r) => ({
+    x: cx + r * Math.cos(angle),
+    y: cy + r * Math.sin(angle)
+  });
+
+  let svg = `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">`;
+
+  // Guide rings
+  for (let r = 1; r <= rings; r++) {
+    const radius = (r / rings) * maxR;
+    const points = [];
+    for (let i = 0; i < n; i++) {
+      const angle = startAngle + i * angleStep;
+      const p = pt(angle, radius);
+      points.push(`${p.x},${p.y}`);
+    }
+    svg += `<polygon points="${points.join(' ')}" fill="none" stroke="#222" stroke-width="0.5" opacity="0.6"/>`;
+  }
+
+  // Axis lines
+  for (let i = 0; i < n; i++) {
+    const angle = startAngle + i * angleStep;
+    const p = pt(angle, maxR);
+    svg += `<line x1="${cx}" y1="${cy}" x2="${p.x}" y2="${p.y}" stroke="#222" stroke-width="0.5" opacity="0.4"/>`;
+  }
+
+  // Data polygon
+  const dataPoints = [];
+  for (let i = 0; i < n; i++) {
+    const angle = startAngle + i * angleStep;
+    const val = Math.max(0, Math.min(100, axes[i].value));
+    const r = (val / 100) * maxR;
+    const p = pt(angle, r);
+    dataPoints.push(p);
+  }
+  const polyStr = dataPoints.map(p => `${p.x},${p.y}`).join(' ');
+  svg += `<polygon points="${polyStr}" fill="rgba(200,245,66,0.12)" stroke="var(--accent)" stroke-width="1.5" stroke-linejoin="round"/>`;
+
+  // Data points (dots) and labels
+  for (let i = 0; i < n; i++) {
+    const angle = startAngle + i * angleStep;
+    const val = Math.max(0, Math.min(100, axes[i].value));
+    const r = (val / 100) * maxR;
+    const p = pt(angle, r);
+    const labelP = pt(angle, maxR + 16);
+
+    // Dot
+    svg += `<circle cx="${p.x}" cy="${p.y}" r="3" fill="${axes[i].color}" stroke="var(--bg)" stroke-width="1.5"/>`;
+
+    // Label
+    const anchor = Math.abs(labelP.x - cx) < 5 ? 'middle' : labelP.x < cx ? 'end' : 'start';
+    const dy = Math.abs(labelP.y - cy) < 5 ? '0.35em' : labelP.y < cy ? '0em' : '0.7em';
+    svg += `<text x="${labelP.x}" y="${labelP.y}" text-anchor="${anchor}" dy="${dy}" fill="#666" font-family="'DM Mono',monospace" font-size="7" letter-spacing="0.5">${axes[i].label}</text>`;
+  }
+
+  // Center % ring labels
+  for (let r = 1; r <= rings; r++) {
+    const radius = (r / rings) * maxR;
+    const pct = r * 25;
+    svg += `<text x="${cx + 3}" y="${cy - radius + 8}" fill="#333" font-family="'DM Mono',monospace" font-size="6">${pct}</text>`;
+  }
+
+  svg += '</svg>';
+  container.innerHTML = svg;
+
+  // Legend
+  legend.innerHTML = axes.map(a =>
+    `<div class="radar-leg-item"><div class="radar-leg-dot" style="background:${a.color}"></div>${a.label}<span class="radar-leg-val">${a.value}%</span></div>`
+  ).join('');
+}
+
 function buildWeekGrid() {
   const grid = document.getElementById('weekGrid');
   const today = new Date().getDay();
