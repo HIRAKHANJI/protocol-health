@@ -51,6 +51,9 @@ body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif
 /* PLAN BADGE */
 .plan-badge { padding:4px 10px; background:var(--surface2); border:1px solid var(--border); border-radius:20px; font-family:'DM Mono',monospace; font-size:0.55rem; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin:8px 18px; display:inline-block; }
 .plan-badge.agro { border-color:#ff6b35; color:#ff6b35; background:rgba(255,107,53,0.08); }
+.plan-badge.cut { border-color:#4ecdc4; color:#4ecdc4; background:rgba(78,205,196,0.08); }
+.plan-badge.bulk { border-color:#f7dc6f; color:#f7dc6f; background:rgba(247,220,111,0.08); }
+.plan-badge.maint { border-color:#82e0aa; color:#82e0aa; background:rgba(130,224,170,0.08); }
 
 /* TABS */
 .tabs { display:flex; border-bottom:1px solid var(--border); overflow-x:auto; scrollbar-width:none; }
@@ -297,6 +300,9 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
 .plan-select:focus { border-color:var(--accent); }
 .plan-description { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:12px; margin-bottom:12px; font-size:0.75rem; color:var(--muted); line-height:1.6; }
 .plan-description.agro-desc { border-color:rgba(255,107,53,0.3); background:rgba(255,107,53,0.05); color:#ffaa88; }
+.plan-description.cut-desc { border-color:rgba(78,205,196,0.3); background:rgba(78,205,196,0.05); color:#4ecdc4; }
+.plan-description.bulk-desc { border-color:rgba(247,220,111,0.3); background:rgba(247,220,111,0.05); color:#f7dc6f; }
+.plan-description.maint-desc { border-color:rgba(130,224,170,0.3); background:rgba(130,224,170,0.05); color:#82e0aa; }
 .confirm-plan-btn { width:100%; padding:12px; background:var(--surface2); border:1px solid var(--accent); border-radius:9px; color:var(--accent); font-family:'Bebas Neue',sans-serif; font-size:1rem; letter-spacing:2px; cursor:pointer; transition:all 0.2s; }
 .confirm-plan-btn:hover { background:var(--accent); color:#000; }
 .duration-inputs { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
@@ -585,49 +591,8 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
   </div>
   <div class="day-label"><span id="todayDayName">—</span> CHECKLIST</div>
 
-  <!-- MORNING -->
-  <div class="checklist-group">
-    <div class="group-header"><span class="group-tag tag-morning">MORNING</span><span class="group-time">6:45–7:15 AM</span></div>
-    <div class="check-item" onclick="toggle(this)" data-id="m1"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">Wake & 500ml water immediately</div><div class="item-sub">Before phone. Non-negotiable.</div></div></div>
-    <div class="check-item" onclick="toggle(this)" data-id="m2"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">10 min daily mobility (CARs + neck)</div><div class="item-sub">Hip CARs × 5 each · Cat-cow × 10 · Thoracic rotation × 8/side · Wrist CARs · Neck nods</div></div></div>
-    <div class="check-item" onclick="toggle(this)" data-id="m3"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">Morning workout (20 min)</div><div class="item-sub" id="todayMorningSub">See WORKOUTS tab → today's morning session</div></div></div>
-  </div>
-
-  <!-- FOOD (hidden on fast day) -->
-  <div class="checklist-group" id="foodGroup">
-    <div class="group-header"><span class="group-tag tag-food">EATING</span><span class="group-time" id="foodGroupTime">1000 cal ceiling</span></div>
-    <div class="check-item" onclick="toggle(this)" data-id="f1"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">Protein in first meal (60-70g target)</div><div class="item-sub">Eggs · chicken · tuna · lentils. Anchor the meal here first.</div></div></div>
-    <div class="check-item" onclick="toggle(this)" data-id="f2"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">Stayed under calorie ceiling</div><div class="item-sub" id="calCeilingNote">Hard ceiling. Never more.</div></div></div>
-    <div class="check-item" onclick="toggle(this)" data-id="f3"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">Last meal before 6PM</div><div class="item-sub">16+ hour overnight fast every day.</div></div></div>
-    <div class="check-item" onclick="toggle(this)" data-id="f4"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">3L+ water across the day</div><div class="item-sub">500ml wake · 500ml pre-meal · sip rest continuously</div></div></div>
-    <div class="check-item" onclick="toggle(this)" data-id="f5"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">No liquid calories</div><div class="item-sub">Water · black coffee · plain green tea only.</div></div></div>
-  </div>
-
-  <!-- FAST DAY (shown on fast day) -->
-  <div class="checklist-group" id="fastGroup" style="display:none">
-    <div class="group-header"><span class="group-tag tag-fast">WATER FAST</span><span class="group-time">Zero food protocol</span></div>
-    <div class="check-item" onclick="toggle(this)" data-id="wf1"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">500ml water + pinch salt on waking</div><div class="item-sub">Prevents headaches. Do this before anything else.</div></div></div>
-    <div class="check-item" onclick="toggle(this)" data-id="wf2"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">Electrolyte tablet mid-morning</div><div class="item-sub">Sodium + potassium. Non-negotiable on a fast.</div></div></div>
-    <div class="check-item" onclick="toggle(this)" data-id="wf3"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">Black coffee or green tea only</div><div class="item-sub">Appetite suppression. Zero calories. Allowed.</div></div></div>
-    <div class="check-item" onclick="toggle(this)" data-id="wf4"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">3.5L+ water total today</div><div class="item-sub">Sip constantly. Don't chug all at once.</div></div></div>
-    <div class="check-item" onclick="toggle(this)" data-id="wf5"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">No food consumed today</div><div class="item-sub">Fast is unbroken. If you break it — log it honestly.</div></div></div>
-    <div class="check-item" onclick="toggle(this)" data-id="wf6"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">Magnesium 400mg before sleep</div><div class="item-sub">Prevents cramps. Sleep quality tanks on fasts without this.</div></div></div>
-  </div>
-
-  <!-- EVENING -->
-  <div class="checklist-group">
-    <div class="group-header"><span class="group-tag tag-evening">EVENING</span><span class="group-time">6:15–7:15 PM · 45–60 min</span></div>
-    <div class="check-item" onclick="toggle(this)" data-id="e1"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">Change clothes immediately on arriving home</div><div class="item-sub">Trigger signal. Don't sit down first.</div></div></div>
-    <div class="check-item" onclick="toggle(this)" data-id="e2"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">Evening session (40–45 min)</div><div class="item-sub" id="todayEveningSub">See WORKOUTS tab → today's evening session</div></div></div>
-    <div class="check-item" onclick="toggle(this)" data-id="e3"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">Post-workout stretch protocol</div><div class="item-sub" id="todayStretchSub">See WORKOUTS tab → today's cooldown stretches</div></div></div>
-  </div>
-
-  <!-- NIGHT -->
-  <div class="checklist-group">
-    <div class="group-header"><span class="group-tag tag-rules">NIGHT</span><span class="group-time">Before sleep</span></div>
-    <div class="check-item" onclick="toggle(this)" data-id="n1"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">Log morning weight in TRACK tab</div><div class="item-sub">Weigh first thing after waking, before food.</div></div></div>
-    <div class="check-item" onclick="toggle(this)" data-id="n2"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">Sleep before midnight</div><div class="item-sub">Recovery is training. Don't skip it.</div></div></div>
-  </div>
+  <!-- Dynamic checklist — rendered by renderTodayChecklist() from active plan -->
+  <div id="todayChecklistContainer"></div>
 
   <button class="reset-btn" onclick="resetToday()">↺ RESET TODAY'S CHECKLIST</button>
 </div>
@@ -761,12 +726,18 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
         <div class="settings-section-title">Training Plan</div>
         <select class="plan-select" id="planSelect" onchange="onPlanSelectChange()">
           <option value="default">DEFAULT PROTOCOL</option>
+          <option value="cut">DEFAULT CUT</option>
+          <option value="bulk">DEFAULT BULK</option>
+          <option value="maintenance">DEFAULT MAINTENANCE</option>
           <option value="agro">AGRO CUT CALISTHENICS PLAN</option>
         </select>
         <div class="custom-select" id="planSelectCustom">
           <div class="custom-select-trigger" id="planSelectTrigger" onclick="toggleCustomSelect('planSelectCustom')">DEFAULT PROTOCOL</div>
           <div class="custom-select-dropdown">
             <div class="custom-select-option selected" data-value="default" onclick="selectCustomOption('planSelectCustom','planSelect',this)">DEFAULT PROTOCOL</div>
+            <div class="custom-select-option" data-value="cut" onclick="selectCustomOption('planSelectCustom','planSelect',this)">DEFAULT CUT</div>
+            <div class="custom-select-option" data-value="bulk" onclick="selectCustomOption('planSelectCustom','planSelect',this)">DEFAULT BULK</div>
+            <div class="custom-select-option" data-value="maintenance" onclick="selectCustomOption('planSelectCustom','planSelect',this)">DEFAULT MAINTENANCE</div>
             <div class="custom-select-option" data-value="agro" onclick="selectCustomOption('planSelectCustom','planSelect',this)">AGRO CUT CALISTHENICS PLAN</div>
           </div>
         </div>
@@ -1068,8 +1039,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '1.8.0';
-const APP_VERSION_MSG = 'Smart macro targets + food macro tracking + nutrition shortcut.';
+const APP_VERSION = '1.9.0';
+const APP_VERSION_MSG = 'New plans: Default Cut, Default Bulk, Default Maintenance.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -1188,9 +1159,13 @@ function computeMacros(dateStr) {
   tomorrow.setDate(tomorrow.getDate() + 1);
   const isTomorrowFast = isFastDay(dateToStr(tomorrow));
 
+  // Plan-specific macro splits and protein floor multiplier
+  const splits = plan.macroSplit || { base:[50,30,20], rest:[58,22,20], preFast:[46,34,20], stall:[56,24,20], satiety:[58,22,20] };
+  const pfm = plan.proteinFloorMultiplier || 1.3;
+
   // Biological floors
   const currentKg = getLatestWeight() || s.currentKg || 104;
-  const proteinFloor = Math.round(currentKg * 1.3);
+  const proteinFloor = Math.round(currentKg * pfm);
   const fatFloor = 20;
   const proteinFloorCal = proteinFloor * 4;
   const fatFloorCal = fatFloor * 9;
@@ -1199,11 +1174,11 @@ function computeMacros(dateStr) {
   // Determine signal and base split (priority order)
   let proteinPct, carbsPct, fatPct, signal;
   if(isRestDay) {
-    proteinPct = 58; carbsPct = 22; fatPct = 20; signal = 'rest';
+    [proteinPct, carbsPct, fatPct] = splits.rest; signal = 'rest';
   } else if(isTomorrowFast) {
-    proteinPct = 46; carbsPct = 34; fatPct = 20; signal = 'pre-fast';
+    [proteinPct, carbsPct, fatPct] = splits.preFast; signal = 'pre-fast';
   } else if(isWeightStalling()) {
-    proteinPct = 56; carbsPct = 24; fatPct = 20; signal = 'stall';
+    [proteinPct, carbsPct, fatPct] = splits.stall; signal = 'stall';
   } else {
     const avgActual = getAvgActualCalories(7);
     if(avgActual !== null && avgActual > cal) {
@@ -1217,12 +1192,12 @@ function computeMacros(dateStr) {
         if(!fd[ds]) { const dc = getDayCalories(ds); if(dc.hasData) dataDays++; }
       }
       if(dataDays >= 4) {
-        proteinPct = 58; carbsPct = 22; fatPct = 20; signal = 'satiety';
+        [proteinPct, carbsPct, fatPct] = splits.satiety; signal = 'satiety';
       } else {
-        proteinPct = 50; carbsPct = 30; fatPct = 20; signal = 'base';
+        [proteinPct, carbsPct, fatPct] = splits.base; signal = 'base';
       }
     } else {
-      proteinPct = 50; carbsPct = 30; fatPct = 20; signal = 'base';
+      [proteinPct, carbsPct, fatPct] = splits.base; signal = 'base';
     }
   }
 
@@ -1243,7 +1218,7 @@ function computeMacros(dateStr) {
       const shortfall = (proteinFloor - proteinG) * 4;
       proteinG = proteinFloor;
       carbsG   = Math.max(0, Math.round(carbsG - shortfall / 4));
-      warnings.push('Protein floor enforced — ' + proteinFloor + 'g minimum at your current weight (' + Math.round(currentKg) + 'kg × 1.3g/kg). Requires deliberate high-protein food choices.');
+      warnings.push('Protein floor enforced — ' + proteinFloor + 'g minimum at your current weight (' + Math.round(currentKg) + 'kg × ' + pfm + 'g/kg). Requires deliberate high-protein food choices.');
     }
     if(fatG < fatFloor) {
       fatG = fatFloor;
@@ -1818,6 +1793,7 @@ const PLANS = {
     fastDaysPerWeek: 3,
     badge: 'DEFAULT PROTOCOL',
     badgeClass: '',
+    descClass: '',
     subtitle: 'No gym. No excuses. No loop.',
     bannerColor: 'var(--text)',
     bannerBg: 'var(--surface)',
@@ -2005,6 +1981,7 @@ const PLANS = {
     fastDaysPerWeek: 3,
     badge: 'AGRO CUT CALISTHENICS',
     badgeClass: 'agro',
+    descClass: 'agro-desc',
     subtitle: 'Cut. Build. No equipment. No quit.',
     bannerColor: '#ff8855',
     bannerBg: 'rgba(255,107,53,0.07)',
@@ -2341,8 +2318,688 @@ const PLANS = {
 
 };
 
+// ─── DEFAULT CUT PLAN ────────────────────────────────────────────────────────
+// Fat loss with muscle preservation. Flexible deficit. No scheduled fast days.
+// Research: Morton et al. (2017), 80/20 adherence study, ISSN position stands.
+PLANS.cut = {
+  name: 'DEFAULT CUT',
+  tdee: 2400,
+  fastDaysPerWeek: 0,
+  badge: 'DEFAULT CUT',
+  badgeClass: 'cut',
+  descClass: 'cut-desc',
+  subtitle: 'Fat loss with muscle preservation. Flexible deficit. No fast days required.',
+  bannerColor: '#4ecdc4',
+  bannerBg: 'rgba(78,205,196,0.07)',
+  bannerBorder: 'rgba(78,205,196,0.35)',
+  fastDaysDow: [],
+  macroSplit: { base:[50,30,20], rest:[58,22,20], preFast:[46,34,20], stall:[56,24,20], satiety:[58,22,20] },
+  proteinFloorMultiplier: 1.6,
+
+  weekIcons: {0:'🚶',1:'💪',2:'🦵',3:'🚶',4:'💪',5:'🦵',6:'💪'},
+
+  morningSub: {
+    0:'SUNDAY — Full rest. Recovery, sleep, flexibility.',
+    1:'MONDAY — Push + Core A · Push progression · Dead bug · Plank · Mountain climbers',
+    2:'TUESDAY — Lower + Mobility · Squat progression · Hinge progression · Hip mobility',
+    3:'WEDNESDAY — Active rest. Walk, light stretch, mobility work.',
+    4:'THURSDAY — Pull + Core B · Pull progression · Hollow body · Bicycle crunch · Side plank',
+    5:'FRIDAY — Lower + Conditioning · Lower body strength + cardio circuit',
+    6:'SATURDAY — Full Body + Cardio · Compound movements + 15–20 min run or HIIT'
+  },
+  eveningSub: {
+    0:'SUNDAY — Rest day. No structured workout.',
+    1:'MONDAY — Push + Core A · 30–40 min',
+    2:'TUESDAY — Lower + Mobility · 30–40 min',
+    3:'WEDNESDAY — Active rest. 20–30 min walk.',
+    4:'THURSDAY — Pull + Core B · 30–40 min',
+    5:'FRIDAY — Lower + Conditioning · 35–45 min',
+    6:'SATURDAY — Full Body + Cardio · 35–45 min'
+  },
+  stretchSub: {
+    0:'Light mobility only — cat-cow, hip CARs.',
+    1:'Doorframe chest stretch 60s · Shoulder dislocates 10 reps · Wrist extension 60s',
+    2:'90/90 hip stretch 2 min/side · Pigeon pose 90s/side · Deep squat hold 90s',
+    3:'Gentle full-body stretch if desired.',
+    4:'Thread the needle 8/side · Child\'s pose 60s',
+    5:'Pigeon + hip flexor. 5 min.',
+    6:'Full body stretch after cardio. 5–10 min.'
+  },
+
+  checklistNormal: [
+    { id:'m1', group:'MORNING', label:'Wake & 500ml water immediately', sub:'Before phone. Non-negotiable.' },
+    { id:'m2', group:'MORNING', label:'10 min mobility (CARs + warm-up)', sub:'Hip CARs × 5 · Cat-cow × 10 · Thoracic rotation · Wrist CARs' },
+    { id:'m3', group:'MORNING', label:'Training session (if training day)', sub:'See WORKOUTS tab for today\'s session' },
+    { id:'f1', group:'EATING', label:'Hit protein target', sub:'1.6g/kg minimum. Protein anchors every meal.' },
+    { id:'f2', group:'EATING', label:'Stayed under calorie ceiling', sub:'400–600 cal below TDEE. Hard ceiling.' },
+    { id:'f3', group:'EATING', label:'No liquid calories', sub:'Water · black coffee · plain tea only.' },
+    { id:'f4', group:'EATING', label:'2.5L+ water across the day', sub:'500ml wake · 500ml pre-meal · sip continuously' },
+    { id:'e1', group:'EVENING', label:'Evening session (if training day)', sub:'See WORKOUTS tab for today\'s session' },
+    { id:'e2', group:'EVENING', label:'Post-workout cooldown stretches', sub:'5–10 min static stretching. See WORKOUTS tab.' },
+    { id:'n1', group:'NIGHT', label:'Log weight in TRACK tab', sub:'Weigh first thing after waking, before food.' },
+    { id:'n2', group:'NIGHT', label:'Sleep before midnight', sub:'Recovery is training. Don\'t skip it.' }
+  ],
+  checklistFast: [
+    { id:'wf1', group:'FAST', label:'500ml water + pinch salt on waking', sub:'Prevents headaches. Do this before anything else.' },
+    { id:'wf2', group:'FAST', label:'Electrolyte tablet mid-morning', sub:'Sodium + potassium. Non-negotiable on a fast.' },
+    { id:'wf3', group:'FAST', label:'Black coffee or green tea only', sub:'Appetite suppression. Zero calories. Allowed.' },
+    { id:'wf4', group:'FAST', label:'3.5L+ water total today', sub:'Sip constantly. Don\'t chug all at once.' },
+    { id:'wf5', group:'FAST', label:'No food consumed today', sub:'Fast is unbroken. If you break it — log it honestly.' },
+    { id:'wf6', group:'FAST', label:'Magnesium 400mg before sleep', sub:'Prevents cramps. Sleep quality tanks on fasts without this.' }
+  ],
+
+  foodGroupLabel: 'EATING',
+  foodGroupBg: '',
+  foodGroupColor: '',
+
+  workoutContent() {
+    return `
+    <div class="section-title">DEFAULT CUT <span>TRAINING</span></div>
+    <p class="section-note">4 training days + 1 active rest + 2 full rest. 30–45 min sessions. All bodyweight.</p>
+
+    ${workoutCard('PUSH + CORE A','MON · 30–40 MIN',
+      exRow('Hip CARs + Cat-cow + Jumping jacks','Warm-up','5 min')+
+      exRowWithLevel('push','Push-ups','Full range, chest to floor','3×12–15')+
+      exRowWithLevel('core','Dead bug','Lower back stays glued to floor','3×8/side')+
+      exRow('Plank','Elbows, stay tight','3×30–45 sec')+
+      exRow('Mountain climbers','Controlled pace','3×20'),
+      stretchRow('Doorframe chest stretch','Upper chest + anterior shoulder','60 sec')+
+      stretchRow('Shoulder dislocates','Towel/stick, full arc overhead','10 reps')+
+      stretchRow('Wrist extension stretch','Fingers pointing back','60 sec'),
+      'MON'
+    )}
+
+    ${workoutCard('LOWER + MOBILITY','TUE · 30–40 MIN',
+      exRow('Hip CARs + Leg swings + High knees','Warm-up','5 min')+
+      exRowWithLevel('squat','Bodyweight squat','Full depth, knees track toes','3×12–15')+
+      exRowWithLevel('hinge','Glute bridge','Pause at top, squeeze hard','3×15')+
+      exRow('Reverse lunge','Step back, knee hovers floor','3×10/leg'),
+      stretchRow('90/90 hip stretch','90 sec each side','3 min')+
+      stretchRow('Pigeon pose','60 sec each side','2 min')+
+      stretchRow('Deep squat hold','Heels flat, hold position','90 sec'),
+      'TUE'
+    )}
+
+    ${workoutCard('ACTIVE REST','WED · 20–30 MIN',
+      exRow('Walk','Light pace, outdoors if possible','20–30 min')+
+      exRow('Light stretching','Whatever feels tight','5–10 min'),
+      '',
+      'WED'
+    )}
+
+    ${workoutCard('PULL + CORE B','THU · 30–40 MIN',
+      exRow('Arm circles + Thoracic rotation','Warm-up','5 min')+
+      exRowWithLevel('pull','Inverted row / Superman','Back + biceps — use table edge or floor','3×8–10')+
+      exRowWithLevel('core','Hollow body hold','Arms overhead, back pressed down','3×20–30 sec')+
+      exRow('Bicycle crunches','Slow and deliberate','3×15/side')+
+      exRow('Side plank','Stacked feet or staggered','3×20 sec/side'),
+      stretchRow('Thread the needle','Thoracic rotation stretch','8/side')+
+      stretchRow('Child\'s pose','Lower back release','60 sec'),
+      'THU'
+    )}
+
+    ${workoutCard('LOWER + CONDITIONING','FRI · 35–45 MIN',
+      exRow('High knees + Hip CARs','Warm-up','5 min')+
+      exRowWithLevel('squat','Squat progression','Full depth','3×12–15')+
+      exRowWithLevel('hinge','Hinge progression','Hip hinge movement','3×12')+
+      exRow('Jump squat','Land soft, full depth','3×10')+
+      exRow('Wall sit','90° hold','3×45 sec')+
+      exRow('Cardio circuit','3 rounds: 10 burpees + 20 mountain climbers + 30 sec plank','10–15 min'),
+      stretchRow('Pigeon + hip flexor','60 sec each side','4 min'),
+      'FRI'
+    )}
+
+    ${workoutCard('FULL BODY + CARDIO','SAT · 35–45 MIN',
+      exRowWithLevel('push','Push-up variation','Compound upper push','3×10–12')+
+      exRowWithLevel('squat','Squat variation','Compound lower','3×12–15')+
+      exRowWithLevel('pull','Pull variation','Back + biceps','3×8–10')+
+      exRow('Steady-state cardio','Walk, jog, or cycling at conversational pace','15–20 min'),
+      stretchRow('Full body stretch','Chest, hips, hamstrings, shoulders','5–10 min'),
+      'SAT'
+    )}
+
+    ${workoutCard('FULL REST','SUN',
+      exRow('Recovery day','Sleep, flexibility, light walk if desired','—'),
+      stretchRow('Light mobility','Cat-cow, hip CARs — optional','5 min'),
+      'SUN'
+    )}`;
+  },
+
+  nutritionContent(s) {
+    const cal = s.calories || 1800;
+    const macros = computeMacros(todayStr());
+    const { proteinG, carbsG, fatG, warnings: macroWarnings, signal } = macros;
+
+    const signalLabels = { base:'BASE SPLIT', rest:'REST DAY SPLIT', 'pre-fast':'PRE-FAST SPLIT', stall:'STALL PROTOCOL', satiety:'SATIETY PROTOCOL', fast:'FAST DAY' };
+    const signalColor = signal === 'base' ? 'var(--muted)' : 'var(--accent2)';
+    const signalChip = `<div style="margin-top:8px;margin-bottom:8px"><span style="display:inline-block;font-family:'DM Mono',monospace;font-size:0.55rem;letter-spacing:1.5px;padding:4px 10px;border-radius:20px;border:1px solid ${signalColor};color:${signalColor};background:${signal === 'base' ? 'transparent' : 'rgba(245,166,35,0.08)'}">${signalLabels[signal] || 'BASE SPLIT'}</span></div>`;
+
+    const warningHtml = macroWarnings.length ? macroWarnings.map(w =>
+      `<div style="border-left:3px solid var(--accent2);padding:6px 10px;margin-bottom:6px;border-radius:4px;background:var(--surface);font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--accent2);line-height:1.6">${w}</div>`
+    ).join('') : '';
+
+    return `
+    <div class="section-title">DEFAULT CUT <span>NUTRITION</span></div>
+    <p class="section-note">Flexible deficit. 80/20 approach. Protein: 1.6g/kg floor. Adjust ceiling in Settings.</p>
+
+    <div class="macro-grid">
+      <div class="macro-box"><div class="macro-val" style="color:#4ecdc4">${cal}</div><div class="macro-lbl">Cal ceiling</div></div>
+      <div class="macro-box"><div class="macro-val" style="color:#ff9966">${proteinG}g</div><div class="macro-lbl">Protein</div></div>
+      <div class="macro-box"><div class="macro-val" style="color:var(--accent2)">${carbsG}g</div><div class="macro-lbl">Carbs</div></div>
+      <div class="macro-box"><div class="macro-val" style="color:#88ccff">${fatG}g</div><div class="macro-lbl">Fats</div></div>
+    </div>
+    ${signalChip}
+    ${warningHtml}
+
+    <div class="rule-card" style="border-left-color:#4ecdc4">
+      <div class="rule-num">FLEXIBLE EATING — 80/20 PRINCIPLE</div>
+      <div class="rule-text">80% whole foods · 20% flexible choices. Research: rigid dieting has 58.8% dropout rate vs 16.67% for flexible approaches.</div>
+      <div class="rule-sub">Adherence is the single most important variable in any diet's effectiveness.</div>
+    </div>
+
+    <div class="rule-card">
+      <div class="rule-num">WATER</div>
+      <div class="rule-text">2.5L minimum daily. 500ml on waking. 250ml before each meal.</div>
+    </div>
+
+    <div class="rule-card" style="border-left-color:var(--danger)">
+      <div class="rule-num">NEVER</div>
+      <div class="rule-text">Liquid calories. Juice, soda, sweetened coffee, energy drinks.</div>
+      <div class="rule-sub">These break your deficit invisibly every time.</div>
+    </div>
+
+    <div class="section-title" style="margin-top:8px">PRIORITISE <span>(80%)</span></div>
+    <div class="rule-card" style="border-left-color:var(--green)">
+      <div class="rule-num">WHOLE FOODS</div>
+      <div class="rule-text">Lean protein: chicken, eggs, tuna, Greek yogurt, lentils, tofu · Vegetables: eat freely — spinach, broccoli, cucumber, tomatoes · Whole grains: oats, brown rice, sweet potato, quinoa · Healthy fats: olive oil, avocado, nuts (measured), fatty fish</div>
+    </div>
+
+    <div class="section-title">LIMIT <span>(20%)</span></div>
+    <div class="rule-card" style="border-left-color:var(--accent2)">
+      <div class="rule-num">FLEXIBLE CHOICES</div>
+      <div class="rule-text">Processed foods, takeout, packaged snacks · Added sugars, desserts · High-calorie condiments</div>
+      <div class="rule-sub">One social meal or treat per week doesn't break progress. Two or three consecutive days of unconstrained eating does.</div>
+    </div>
+
+    <div class="section-title" style="margin-top:8px">SUPPLEMENTS <span>(OPTIONAL)</span></div>
+    <div class="rule-card">
+      <div class="rule-num">RECOMMENDED</div>
+      <div class="rule-text">Creatine 5g/day — preserves muscle during deficit · Multivitamin — micronutrient insurance · Vitamin D 2,000–4,000 IU if indoors heavily</div>
+      <div class="rule-sub">Whey protein only if food protein consistently below 1.4g/kg. BCAAs not needed. Fat burners — avoid.</div>
+    </div>`;
+  },
+
+  rulesContent(s) {
+    const cal = s.calories || 1800;
+    return `
+    <div class="section-title">EATING <span>RULES</span></div>
+    ${ruleCard('RULE 01','Stay under ' + cal + ' cal/day ceiling.','400–600 cal below TDEE. This is what drives fat loss while preserving muscle.')}
+    ${ruleCard('RULE 02','Protein anchors every meal.','1.6g/kg minimum (Morton et al. 2017). Eggs, chicken, tuna, lentils — protein first, then fill the rest.')}
+    ${ruleCard('RULE 03','No liquid calories.','Water, black coffee, plain tea only. Juice, soda, sweetened drinks break your deficit invisibly.')}
+    ${ruleCard('RULE 04','2.5 litres of water daily.','500ml on wake. 250ml before each meal. Half the time you think you\'re hungry, you\'re dehydrated.')}
+    ${ruleCard('RULE 05','80/20 flexible eating.','80% whole foods, 20% flexible choices. Sustainable long-term. No foods are banned — only budgeted.')}
+    ${ruleCard('RULE 06','One social meal per week is fine.','Pre-eat protein 30 min before. You arrive not hungry, eat less automatically. No willpower required.')}
+    <div class="section-title" style="margin-top:8px">TRAINING <span>RULES</span></div>
+    ${ruleCard('RULE 07','4 training days per week.','Push / Lower / Pull / Full Body. Active rest Wednesday. Full rest Sunday.','var(--accent2)')}
+    ${ruleCard('RULE 08','Progressive overload — advance levels when current feels easy.','Add reps to top of range, then move to next level. 2024 meta-analysis: rep progression = load progression for muscle growth.','var(--accent2)')}
+    ${ruleCard('RULE 09','Travel changes nothing.','20 min on a floor. Every workout is bodyweight. Zero equipment needed.','var(--accent2)')}
+    <div class="section-title" style="margin-top:8px">DISCIPLINE <span>RULES</span></div>
+    ${ruleCard('RULE 10','One miss = noise. Two = pattern. Three = decision.','Minimum viable action beats zero every time.','#70c8ff')}
+    ${ruleCard('RULE 11','Diet breaks every 6–8 weeks.','1–2 weeks at maintenance calories. Improves hormonal adaptation and long-term adherence.','#70c8ff')}`;
+  }
+};
+
+// ─── DEFAULT BULK PLAN ───────────────────────────────────────────────────────
+// Muscle growth with controlled fat gain. Clean surplus. No fast days.
+// Research: Sports Medicine Open (2023), PureGym bulk research, ISSN position stands.
+PLANS.bulk = {
+  name: 'DEFAULT BULK',
+  tdee: 2400,
+  fastDaysPerWeek: 0,
+  badge: 'DEFAULT BULK',
+  badgeClass: 'bulk',
+  descClass: 'bulk-desc',
+  subtitle: 'Muscle growth with controlled fat gain. Clean surplus. Anywhere training.',
+  bannerColor: '#f7dc6f',
+  bannerBg: 'rgba(247,220,111,0.07)',
+  bannerBorder: 'rgba(247,220,111,0.35)',
+  fastDaysDow: [],
+  macroSplit: { base:[30,50,20], rest:[35,45,20], preFast:[30,50,20], stall:[35,45,20], satiety:[35,45,20] },
+  proteinFloorMultiplier: 1.4,
+
+  weekIcons: {0:'🚶',1:'💪',2:'💪',3:'🚶',4:'🦵',5:'💪',6:'🤸'},
+
+  morningSub: {
+    0:'SUNDAY — Full rest. Complete recovery. Sleep, nutrition, stretching only.',
+    1:'MONDAY — Push A Volume · Chest, shoulders, triceps — high rep, high sets',
+    2:'TUESDAY — Pull A Volume · Back, biceps, rear delts — inverted rows, towel rows',
+    3:'WEDNESDAY — Rest / Light walk. 20 min walk, mobility.',
+    4:'THURSDAY — Lower A Volume · Quads, hamstrings, glutes — squat and hinge focus',
+    5:'FRIDAY — Push B Intensity · Chest definition, shoulder strength, skill work',
+    6:'SATURDAY — Full Body + Skill · Compound movements + crow stand, L-sit, handstand'
+  },
+  eveningSub: {
+    0:'SUNDAY — Rest. No structured workout.',
+    1:'MONDAY — Push A Volume · 40–50 min',
+    2:'TUESDAY — Pull A Volume · 40–50 min',
+    3:'WEDNESDAY — Rest / Light walk · 20–30 min',
+    4:'THURSDAY — Lower A Volume · 40–50 min',
+    5:'FRIDAY — Push B Intensity · 40–50 min',
+    6:'SATURDAY — Full Body + Skill · 45–55 min'
+  },
+  stretchSub: {
+    0:'Light mobility only. Stretch what\'s tight.',
+    1:'Chest + shoulder stretch. Doorframe. Wrist extension. 5 min.',
+    2:'Rear shoulder stretch. Thread the needle. Child\'s pose. 5 min.',
+    3:'Gentle full-body stretch if desired.',
+    4:'90/90 hip stretch. Pigeon. Deep squat hold. 5 min.',
+    5:'Chest + shoulder stretch. 5 min.',
+    6:'Full body stretch. Hips, shoulders, spine. 5–10 min.'
+  },
+
+  checklistNormal: [
+    { id:'m1', group:'MORNING', label:'Wake & 500ml water immediately', sub:'Before phone. Non-negotiable.' },
+    { id:'m2', group:'MORNING', label:'10 min mobility (CARs + warm-up)', sub:'Hip CARs × 5 · Cat-cow × 10 · Thoracic rotation · Wrist CARs' },
+    { id:'m3', group:'MORNING', label:'Training session (if training day)', sub:'See WORKOUTS tab for today\'s session' },
+    { id:'f1', group:'EATING', label:'Hit protein target', sub:'1.4–1.8g/kg. Protein density first in every meal.' },
+    { id:'f2', group:'EATING', label:'Hit calorie ceiling', sub:'250–400 cal above TDEE. Eat enough to grow.' },
+    { id:'f3', group:'EATING', label:'Carbs around training', sub:'30–60 min before + within 60 min after session.' },
+    { id:'f4', group:'EATING', label:'2.5–3L water across the day', sub:'Hydration supports muscle protein synthesis.' },
+    { id:'e1', group:'EVENING', label:'Evening session (most days)', sub:'See WORKOUTS tab for today\'s session' },
+    { id:'e2', group:'EVENING', label:'Post-workout cooldown stretches', sub:'5–10 min static stretching. See WORKOUTS tab.' },
+    { id:'n1', group:'NIGHT', label:'Log weight in TRACK tab', sub:'Track weekly trend. Aim 0.25–0.5% bodyweight/week gain.' },
+    { id:'n2', group:'NIGHT', label:'Sleep 8+ hours', sub:'Growth hormone peaks during deep sleep. Critical for muscle growth.' }
+  ],
+  checklistFast: [
+    { id:'wf1', group:'FAST', label:'500ml water + pinch salt on waking', sub:'Prevents headaches. Do this before anything else.' },
+    { id:'wf2', group:'FAST', label:'Electrolyte tablet mid-morning', sub:'Sodium + potassium. Non-negotiable on a fast.' },
+    { id:'wf3', group:'FAST', label:'Black coffee or green tea only', sub:'Appetite suppression. Zero calories. Allowed.' },
+    { id:'wf4', group:'FAST', label:'3.5L+ water total today', sub:'Sip constantly. Don\'t chug all at once.' },
+    { id:'wf5', group:'FAST', label:'No food consumed today', sub:'Fast is unbroken. If you break it — log it honestly.' },
+    { id:'wf6', group:'FAST', label:'Magnesium 400mg before sleep', sub:'Prevents cramps. Sleep quality tanks on fasts without this.' }
+  ],
+
+  foodGroupLabel: 'EATING',
+  foodGroupBg: '',
+  foodGroupColor: '',
+
+  workoutContent() {
+    return `
+    <div class="section-title">DEFAULT BULK <span>TRAINING</span></div>
+    <p class="section-note">5 training days + 1 active rest + 1 full rest. Higher volume — surplus fuels recovery.</p>
+
+    ${workoutCard('PUSH A — VOLUME','MON · 40–50 MIN',
+      exRow('Hip CARs + Cat-cow + Arm circles','Warm-up','5 min')+
+      exRowWithLevel('push','Push-up variation','High rep — chest, shoulders, triceps','4×12–15')+
+      exRowWithLevel('push','Decline push-up','Feet elevated — upper chest focus','4×10–12')+
+      exRowWithLevel('shoulder','Pike push-up','Hips high, head toward floor — shoulders','3×10')+
+      exRow('Tricep dips','Chair/bed edge','3×12')+
+      exRow('Plank to downdog','Flow, 2 sec each','3×10'),
+      stretchRow('Doorframe chest stretch','Upper chest + anterior shoulder','60 sec')+
+      stretchRow('Wrist extension stretch','Fingers pointing back','60 sec'),
+      'MON'
+    )}
+
+    ${workoutCard('PULL A — VOLUME','TUE · 40–50 MIN',
+      exRow('Arm circles + Thoracic rotation','Warm-up','5 min')+
+      exRowWithLevel('pull','Inverted row (under table)','Grip edge, pull chest to table — back + biceps','4×8–10')+
+      exRow('Towel row','Towel over door — unilateral back','3×10/side')+
+      exRowWithLevel('core','Hollow body hold','Arms overhead, back pressed down','3×30 sec')+
+      exRow('Superman hold','Posterior chain endurance','3×30 sec')+
+      exRow('Prone Y-T-W raises','Rear delts and upper back','3×10 each'),
+      stretchRow('Rear shoulder stretch','Arm across body','30 sec each')+
+      stretchRow('Thread the needle','Thoracic rotation','8/side')+
+      stretchRow('Child\'s pose','Lower back release','60 sec'),
+      'TUE'
+    )}
+
+    ${workoutCard('REST / LIGHT WALK','WED · 20–30 MIN',
+      exRow('Walk','Light pace, outdoors','20 min')+
+      exRow('Mobility work','Hip CARs, thoracic rotation, wrist circles','10 min'),
+      '',
+      'WED'
+    )}
+
+    ${workoutCard('LOWER A — VOLUME','THU · 40–50 MIN',
+      exRow('Hip CARs + Leg swings + High knees','Warm-up','5 min')+
+      exRowWithLevel('squat','Squat progression','Full depth — quads + glutes','4×10–12')+
+      exRowWithLevel('hinge','Hinge progression','Hip hinge — hamstrings + glutes','4×10–12')+
+      exRow('Bulgarian split squat','Rear foot elevated — quad + glute','3×10/leg')+
+      exRow('Glute bridge march','Alternate legs, lower back stability','3×15')+
+      exRow('Calf raise','Slow up, slow down','3×20'),
+      stretchRow('90/90 hip stretch','90 sec each side','3 min')+
+      stretchRow('Pigeon pose','60 sec each side','2 min')+
+      stretchRow('Hamstring stretch','One leg extended, reach forward','60 sec each'),
+      'THU'
+    )}
+
+    ${workoutCard('PUSH B — INTENSITY','FRI · 40–50 MIN',
+      exRow('Hip CARs + Cat-cow','Warm-up','5 min')+
+      exRowWithLevel('push','Push-up ladder','10 down to 1 — intensity focus','1 ladder')+
+      exRowWithLevel('push','Archer push-up','Unilateral chest strength','3×6/side')+
+      exRowWithLevel('shoulder','Pike push-up','Shoulder strength','3×10')+
+      exRowWithLevel('skill_handstand','Wall handstand hold','Wrist + shoulder base','3×20–30 sec')+
+      exRow('Diamond push-up','Tricep focus','3×10'),
+      stretchRow('Chest + shoulder stretch','Doorframe or behind-back clasp','5 min'),
+      'FRI'
+    )}
+
+    ${workoutCard('FULL BODY + SKILL','SAT · 45–55 MIN',
+      exRowWithLevel('push','Push-up variation','Compound upper','3×10–12')+
+      exRowWithLevel('squat','Squat variation','Compound lower','3×12')+
+      exRowWithLevel('pull','Pull variation','Back + biceps','3×8–10')+
+      exRowWithLevel('hinge','Hinge variation','Posterior chain','3×10')+
+      exRowWithLevel('skill_crow','Crow/frog stand','Balance + wrist strength','5 min')+
+      exRowWithLevel('skill_lsit','L-sit tuck','Hip flexor + straight arm strength','4×15 sec')+
+      exRowWithLevel('skill_handstand','Wall handstand hold','Overhead pressing strength','3×20–30 sec'),
+      stretchRow('Full body stretch','Hips, shoulders, spine, hamstrings','5–10 min'),
+      'SAT'
+    )}
+
+    ${workoutCard('FULL REST','SUN',
+      exRow('Complete recovery','Sleep, nutrition, stretching only','—'),
+      '',
+      'SUN'
+    )}`;
+  },
+
+  nutritionContent(s) {
+    const cal = s.calories || 2800;
+    const macros = computeMacros(todayStr());
+    const { proteinG, carbsG, fatG, warnings: macroWarnings, signal } = macros;
+
+    const signalLabels = { base:'BASE SPLIT', rest:'REST DAY SPLIT', 'pre-fast':'PRE-FAST SPLIT', stall:'STALL PROTOCOL', satiety:'SATIETY PROTOCOL', fast:'FAST DAY' };
+    const signalColor = signal === 'base' ? 'var(--muted)' : 'var(--accent2)';
+    const signalChip = `<div style="margin-top:8px;margin-bottom:8px"><span style="display:inline-block;font-family:'DM Mono',monospace;font-size:0.55rem;letter-spacing:1.5px;padding:4px 10px;border-radius:20px;border:1px solid ${signalColor};color:${signalColor};background:${signal === 'base' ? 'transparent' : 'rgba(245,166,35,0.08)'}">${signalLabels[signal] || 'BASE SPLIT'}</span></div>`;
+
+    const warningHtml = macroWarnings.length ? macroWarnings.map(w =>
+      `<div style="border-left:3px solid var(--accent2);padding:6px 10px;margin-bottom:6px;border-radius:4px;background:var(--surface);font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--accent2);line-height:1.6">${w}</div>`
+    ).join('') : '';
+
+    return `
+    <div class="section-title">DEFAULT BULK <span>NUTRITION</span></div>
+    <p class="section-note">Clean surplus. Carb-forward for muscle growth. Protein: 1.4g/kg floor.</p>
+
+    <div class="macro-grid">
+      <div class="macro-box"><div class="macro-val" style="color:#f7dc6f">${cal}</div><div class="macro-lbl">Cal ceiling</div></div>
+      <div class="macro-box"><div class="macro-val" style="color:#ff9966">${proteinG}g</div><div class="macro-lbl">Protein</div></div>
+      <div class="macro-box"><div class="macro-val" style="color:var(--accent2)">${carbsG}g</div><div class="macro-lbl">Carbs</div></div>
+      <div class="macro-box"><div class="macro-val" style="color:#88ccff">${fatG}g</div><div class="macro-lbl">Fats</div></div>
+    </div>
+    ${signalChip}
+    ${warningHtml}
+
+    <div class="rule-card" style="border-left-color:#f7dc6f">
+      <div class="rule-num">SURPLUS TARGET</div>
+      <div class="rule-text">250–400 cal/day above TDEE. Gain rate: 0.25–0.5% bodyweight/week.</div>
+      <div class="rule-sub">Research: 10% surplus produces muscle growth with minimal fat gain. 40% surplus = 60–70% of extra weight is fat.</div>
+    </div>
+
+    <div class="rule-card">
+      <div class="rule-num">PROTEIN DISTRIBUTION</div>
+      <div class="rule-text">30–40g protein per meal across 3–5 meals. Anchor every meal with a complete protein source.</div>
+      <div class="rule-sub">Higher frequency distributes protein for sustained MPS throughout the day.</div>
+    </div>
+
+    <div class="rule-card" style="border-left-color:var(--accent2)">
+      <div class="rule-num">CARBS AROUND TRAINING</div>
+      <div class="rule-text">Carbohydrates 30–60 min before session + within 60 min post-session.</div>
+      <div class="rule-sub">Maximises glycogen replenishment and MPS. Carbs drive insulin — a primary anabolic signal for muscle growth.</div>
+    </div>
+
+    <div class="section-title" style="margin-top:8px">MEAL <span>EXAMPLES</span></div>
+    <div class="snack-grid">
+      <div class="snack-item"><div class="snack-name">Breakfast</div><div class="snack-cal">650–700 cal</div><div class="snack-note">3 eggs + 80g oats + banana + nuts. 35g protein.</div></div>
+      <div class="snack-item"><div class="snack-name">Lunch</div><div class="snack-cal">700–750 cal</div><div class="snack-note">200g chicken + 200g rice + veg + olive oil. 50g protein.</div></div>
+      <div class="snack-item"><div class="snack-name">Snack</div><div class="snack-cal">300–350 cal</div><div class="snack-note">Greek yogurt + fruit + pumpkin seeds. 20g protein.</div></div>
+      <div class="snack-item"><div class="snack-name">Dinner</div><div class="snack-cal">550–600 cal</div><div class="snack-note">150g tuna + sweet potato + spinach + egg. 45g protein.</div></div>
+    </div>
+
+    <div class="section-title" style="margin-top:8px">WHEN TO <span>STOP BULKING</span></div>
+    <div class="rule-card" style="border-left-color:var(--danger)">
+      <div class="rule-num">TRANSITION SIGNALS</div>
+      <div class="rule-text">Waist circumference +4–5cm from start · Scale rising >0.5% BW/week for 3+ weeks · After 12–16 weeks · Strength gains plateau despite adequate sleep and nutrition</div>
+      <div class="rule-sub">Most individuals benefit from a 6–12 week maintenance or cut phase before the next bulk.</div>
+    </div>
+
+    <div class="section-title" style="margin-top:8px">SUPPLEMENTS <span>(OPTIONAL)</span></div>
+    <div class="rule-card">
+      <div class="rule-num">PRIORITY STACK</div>
+      <div class="rule-text">Creatine 5g/day — strongest evidence base, 5–15% strength increase · Whey protein if food intake consistently below 1.4g/kg · Multivitamin + Vitamin D3 2,000–4,000 IU</div>
+      <div class="rule-sub">ZMA before bed if sleep quality is poor. Mass gainers — generally avoid (sugar-heavy, poor nutrient density).</div>
+    </div>`;
+  },
+
+  rulesContent(s) {
+    const cal = s.calories || 2800;
+    return `
+    <div class="section-title">EATING <span>RULES</span></div>
+    ${ruleCard('RULE 01','Hit your ' + cal + ' cal/day ceiling.','Surplus is required for growth. Eating below TDEE during a bulk wastes training stimulus.')}
+    ${ruleCard('RULE 02','Protein density first — anchor every meal.','1.4–1.8g/kg. Complete protein source before adding carbs and fats.')}
+    ${ruleCard('RULE 03','Don\'t fear carbs around training.','Insulin is anabolic. Carbs before and after sessions maximise glycogen and MPS.')}
+    ${ruleCard('RULE 04','2.5–3L water daily.','Hydration supports muscle protein synthesis and performance.')}
+    ${ruleCard('RULE 05','Track scale weekly — aim 0.25–0.5% BW/week gain.','Faster than this means excess fat accumulation. Slower means insufficient surplus.')}
+    <div class="section-title" style="margin-top:8px">TRAINING <span>RULES</span></div>
+    ${ruleCard('RULE 06','5 training days per week.','Push / Pull / Rest / Lower / Push / Full Body. Volume is higher because surplus supports recovery.','var(--accent2)')}
+    ${ruleCard('RULE 07','Add reps before advancing levels.','When current level feels easy for all sets, add reps to top of range, then advance to next level.','var(--accent2)')}
+    ${ruleCard('RULE 08','Deload every 8–10 weeks.','Reduce volume by 40% for one week. Full recovery before the next progression block.','var(--accent2)')}
+    ${ruleCard('RULE 09','Sleep 8+ hours — non-negotiable.','Growth hormone peaks during deep sleep. This is when muscle protein synthesis happens.','var(--accent2)')}
+    <div class="section-title" style="margin-top:8px">DISCIPLINE <span>RULES</span></div>
+    ${ruleCard('RULE 10','One miss = noise. Two = pattern. Three = decision.','Minimum beats zero every time.','#70c8ff')}
+    ${ruleCard('RULE 11','Boredom = add progression, not novelty.','Every 2 weeks: +1 rep, -5 sec rest, or harder variation.','#70c8ff')}`;
+  }
+};
+
+// ─── DEFAULT MAINTENANCE PLAN ────────────────────────────────────────────────
+// Sustain body composition. Build health habits. Flexible for life.
+// Research: PMC (2019) long-term maintenance, progressive overload meta-analysis (2024).
+PLANS.maintenance = {
+  name: 'DEFAULT MAINTENANCE',
+  tdee: 2400,
+  fastDaysPerWeek: 0,
+  badge: 'DEFAULT MAINTENANCE',
+  badgeClass: 'maint',
+  descClass: 'maint-desc',
+  subtitle: 'Sustain body composition. Build habits. Flexible for life.',
+  bannerColor: '#82e0aa',
+  bannerBg: 'rgba(130,224,170,0.07)',
+  bannerBorder: 'rgba(130,224,170,0.35)',
+  fastDaysDow: [],
+  macroSplit: { base:[35,45,20], rest:[40,40,20], preFast:[35,45,20], stall:[40,40,20], satiety:[40,40,20] },
+  proteinFloorMultiplier: 1.2,
+
+  weekIcons: {0:'🚶',1:'💪',2:'🚶',3:'💪',4:'🚶',5:'💪',6:'🤸'},
+
+  morningSub: {
+    0:'SUNDAY — Full rest. Recovery, social, family.',
+    1:'MONDAY — Full Body A · Push + pull + lower compound movements',
+    2:'TUESDAY — Active rest. Walk, light stretching, mobility.',
+    3:'WEDNESDAY — Full Body B · Different exercises from Monday + core + skill',
+    4:'THURSDAY — Rest. Full recovery.',
+    5:'FRIDAY — Full Body A or 30 min cardio (run/walk/cycling)',
+    6:'SATURDAY — Skill work. Crow stand, L-sit, handstand holds.'
+  },
+  eveningSub: {
+    0:'SUNDAY — Rest. No structured workout.',
+    1:'MONDAY — Full Body A · 30–40 min',
+    2:'TUESDAY — Active rest · 20–30 min walk or swim',
+    3:'WEDNESDAY — Full Body B · 30–40 min',
+    4:'THURSDAY — Rest day.',
+    5:'FRIDAY — Full Body A or Cardio · 30–40 min',
+    6:'SATURDAY — Skill work · 30–40 min'
+  },
+  stretchSub: {
+    0:'Light mobility only if desired.',
+    1:'Chest + shoulder stretch. Wrist extension. 5 min.',
+    2:'Gentle full-body stretch if desired.',
+    3:'Hip mobility. Pigeon, 90/90. 5 min.',
+    4:'Rest day. Stretch what\'s tight.',
+    5:'Full body stretch. 5 min.',
+    6:'Full body stretch after skill work. 5–10 min.'
+  },
+
+  checklistNormal: [
+    { id:'m1', group:'MORNING', label:'Wake & 500ml water', sub:'Hydration first.' },
+    { id:'m2', group:'MORNING', label:'Mobility or morning movement (optional)', sub:'Hip CARs, light stretch, or short walk.' },
+    { id:'m3', group:'MORNING', label:'Training session (if training day)', sub:'See WORKOUTS tab for today\'s session' },
+    { id:'f1', group:'EATING', label:'Hit protein target', sub:'1.2–1.6g/kg. Protein in every meal.' },
+    { id:'f2', group:'EATING', label:'Stay near calorie ceiling (±200 cal)', sub:'At TDEE. Small daily variance is fine.' },
+    { id:'f3', group:'EATING', label:'2L+ water across the day', sub:'Sip continuously throughout the day.' },
+    { id:'e1', group:'EVENING', label:'Evening session or mobility work', sub:'See WORKOUTS tab. Mobility on rest days.' },
+    { id:'n1', group:'NIGHT', label:'Log weight (weekly minimum)', sub:'Track weekly trend. Weight should be stable ±1.5kg.' },
+    { id:'n2', group:'NIGHT', label:'Sleep before midnight', sub:'Consistency matters more than duration.' }
+  ],
+  checklistFast: [
+    { id:'wf1', group:'FAST', label:'500ml water + pinch salt on waking', sub:'Prevents headaches. Do this before anything else.' },
+    { id:'wf2', group:'FAST', label:'Electrolyte tablet mid-morning', sub:'Sodium + potassium. Non-negotiable on a fast.' },
+    { id:'wf3', group:'FAST', label:'Black coffee or green tea only', sub:'Appetite suppression. Zero calories. Allowed.' },
+    { id:'wf4', group:'FAST', label:'3.5L+ water total today', sub:'Sip constantly. Don\'t chug all at once.' },
+    { id:'wf5', group:'FAST', label:'No food consumed today', sub:'Fast is unbroken. If you break it — log it honestly.' },
+    { id:'wf6', group:'FAST', label:'Magnesium 400mg before sleep', sub:'Prevents cramps. Sleep quality tanks on fasts without this.' }
+  ],
+
+  foodGroupLabel: 'EATING',
+  foodGroupBg: '',
+  foodGroupColor: '',
+
+  workoutContent() {
+    return `
+    <div class="section-title">DEFAULT MAINTENANCE <span>TRAINING</span></div>
+    <p class="section-note">3–4 training days. Lower volume — preservation + progression. Sustainable indefinitely.</p>
+
+    ${workoutCard('FULL BODY A','MON / FRI · 30–40 MIN',
+      exRow('Hip CARs + Cat-cow','Warm-up','5 min')+
+      exRowWithLevel('push','Push progression','Maintains chest/shoulder stimulus','3×10–15')+
+      exRowWithLevel('pull','Pull progression','Maintains back and bicep activation','3×8–10')+
+      exRowWithLevel('squat','Squat progression','Maintains quad and glute strength','3×12–15')+
+      exRowWithLevel('core','Plank or dead bug','Core stability','3×30 sec'),
+      stretchRow('Chest + shoulder stretch','Doorframe or behind-back','3 min')+
+      stretchRow('Wrist extension','Fingers pointing back','60 sec'),
+      'MON,FRI'
+    )}
+
+    ${workoutCard('ACTIVE REST','TUE · 20–30 MIN',
+      exRow('Walk','Light pace, outdoors if possible','20 min')+
+      exRow('Light stretching','Mobility work, swim if available','10 min'),
+      '',
+      'TUE'
+    )}
+
+    ${workoutCard('FULL BODY B','WED · 30–40 MIN',
+      exRow('Hip CARs + Thoracic rotation','Warm-up','5 min')+
+      exRowWithLevel('push','Different push variation','If Mon was standard, use pike or archer','3×10–12')+
+      exRowWithLevel('pull','Towel row or scapular push-up','Back training — planche prerequisite pattern','3×8–10')+
+      exRowWithLevel('hinge','Hinge progression','Posterior chain maintenance','3×10–12')+
+      exRowWithLevel('skill_crow','Crow stand attempts','Balance + wrist strength','5 min')+
+      exRowWithLevel('skill_lsit','L-sit tuck','Hip flexor + straight arm strength','4×15 sec')+
+      exRowWithLevel('core','Hollow body rock + Leg raises','Deep core tension','3×10'),
+      stretchRow('Hip mobility','Pigeon, 90/90, deep squat hold','5 min'),
+      'WED'
+    )}
+
+    ${workoutCard('REST','THU',
+      exRow('Full recovery','No structured workout','—'),
+      '',
+      'THU'
+    )}
+
+    ${workoutCard('SKILL WORK','SAT · 30–40 MIN',
+      exRowWithLevel('skill_crow','Crow/frog stand','Balance — multiple attempts','5 min')+
+      exRowWithLevel('skill_lsit','L-sit tuck/hold','Hip flexor + core strength','4×15–20 sec')+
+      exRowWithLevel('skill_handstand','Wall handstand hold','Overhead pressing base','3×20–30 sec')+
+      exRowWithLevel('skill_planche','Scapular push-up','Protract/retract — planche prerequisite','3×12')+
+      exRowWithLevel('core','Hollow body hold','True core tension','3×20 sec'),
+      stretchRow('Full body stretch','Hips, shoulders, spine, wrists','5–10 min'),
+      'SAT'
+    )}
+
+    ${workoutCard('FULL REST','SUN',
+      exRow('Recovery day','Social, family, sleep — not a workout day','—'),
+      '',
+      'SUN'
+    )}`;
+  },
+
+  nutritionContent(s) {
+    const cal = s.calories || 2200;
+    const macros = computeMacros(todayStr());
+    const { proteinG, carbsG, fatG, warnings: macroWarnings, signal } = macros;
+
+    const signalLabels = { base:'BASE SPLIT', rest:'REST DAY SPLIT', 'pre-fast':'PRE-FAST SPLIT', stall:'STALL PROTOCOL', satiety:'SATIETY PROTOCOL', fast:'FAST DAY' };
+    const signalColor = signal === 'base' ? 'var(--muted)' : 'var(--accent2)';
+    const signalChip = `<div style="margin-top:8px;margin-bottom:8px"><span style="display:inline-block;font-family:'DM Mono',monospace;font-size:0.55rem;letter-spacing:1.5px;padding:4px 10px;border-radius:20px;border:1px solid ${signalColor};color:${signalColor};background:${signal === 'base' ? 'transparent' : 'rgba(245,166,35,0.08)'}">${signalLabels[signal] || 'BASE SPLIT'}</span></div>`;
+
+    const warningHtml = macroWarnings.length ? macroWarnings.map(w =>
+      `<div style="border-left:3px solid var(--accent2);padding:6px 10px;margin-bottom:6px;border-radius:4px;background:var(--surface);font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--accent2);line-height:1.6">${w}</div>`
+    ).join('') : '';
+
+    return `
+    <div class="section-title">DEFAULT MAINTENANCE <span>NUTRITION</span></div>
+    <p class="section-note">Eat at TDEE. Sustain composition. 80/20 flexible approach. Protein: 1.2g/kg floor.</p>
+
+    <div class="macro-grid">
+      <div class="macro-box"><div class="macro-val" style="color:#82e0aa">${cal}</div><div class="macro-lbl">Cal target</div></div>
+      <div class="macro-box"><div class="macro-val" style="color:#ff9966">${proteinG}g</div><div class="macro-lbl">Protein</div></div>
+      <div class="macro-box"><div class="macro-val" style="color:var(--accent2)">${carbsG}g</div><div class="macro-lbl">Carbs</div></div>
+      <div class="macro-box"><div class="macro-val" style="color:#88ccff">${fatG}g</div><div class="macro-lbl">Fats</div></div>
+    </div>
+    ${signalChip}
+    ${warningHtml}
+
+    <div class="rule-card" style="border-left-color:#82e0aa">
+      <div class="rule-num">EQUILIBRIUM TARGET</div>
+      <div class="rule-text">Eat at TDEE. ±200 cal daily variance is fine. The body self-regulates when not under extreme deficit or surplus.</div>
+      <div class="rule-sub">For most people, eating to satiety with whole foods at regular mealtimes naturally lands close to maintenance.</div>
+    </div>
+
+    <div class="rule-card">
+      <div class="rule-num">FLEXIBLE EATING — 80/20</div>
+      <div class="rule-text">80% whole foods, 20% flexible choices. No foods are banned — only budgeted.</div>
+      <div class="rule-sub">Sustainable indefinitely. If the plan feels like a diet, calories are too low.</div>
+    </div>
+
+    <div class="rule-card" style="border-left-color:var(--accent2)">
+      <div class="rule-num">WEIGHT DRIFT CHECK</div>
+      <div class="rule-text">Monthly check: if drifting up >1kg over 4 weeks, reduce 100–150 cal/day. If drifting down, add 100–150 cal/day.</div>
+      <div class="rule-sub">Scale weight stable ±1.5kg is normal. ±1–2kg long-term drift is acceptable.</div>
+    </div>
+
+    <div class="section-title" style="margin-top:8px">THE MAINTENANCE <span>MINDSET</span></div>
+    <div class="rule-card" style="border-left-color:#82e0aa">
+      <div class="rule-num">PROGRESS WITHOUT THE SCALE</div>
+      <div class="rule-text">Track progress through level selector advancement, not scale weight. Set skill goals: "Hold crow stand for 10 seconds."</div>
+      <div class="rule-sub">Maintenance is psychologically the hardest phase. Skill progression keeps training purposeful.</div>
+    </div>
+
+    <div class="section-title" style="margin-top:8px">SUPPLEMENTS <span>(OPTIONAL)</span></div>
+    <div class="rule-card">
+      <div class="rule-num">RECOMMENDED</div>
+      <div class="rule-text">Creatine 3–5g/day — maintains strength + cognitive benefits · Multivitamin · Vitamin D3 2,000–4,000 IU · Omega-3 fish oil 2–3g EPA+DHA</div>
+      <div class="rule-sub">Protein powder only if food intake consistently below 1.2g/kg — most people don't need it during maintenance.</div>
+    </div>`;
+  },
+
+  rulesContent(s) {
+    const cal = s.calories || 2200;
+    return `
+    <div class="section-title">EATING <span>RULES</span></div>
+    ${ruleCard('RULE 01','Eat near ' + cal + ' cal/day (±200 cal).','At TDEE — not a deficit, not a surplus. Small daily variance is completely fine.')}
+    ${ruleCard('RULE 02','Protein in every meal.','1.2–1.6g/kg. Preserves muscle without excess cost. Distribute across 2–4 meals.')}
+    ${ruleCard('RULE 03','80/20 whole foods principle.','Sustainable long-term. No rigid restrictions. Eat what works for your life.')}
+    ${ruleCard('RULE 04','2L+ water daily.','Sip continuously. Basic hydration supports everything.')}
+    ${ruleCard('RULE 05','Monthly weight check.','If drifting up >1kg over 4 weeks, reduce 100–150 cal. If drifting down, add 100–150 cal.')}
+    <div class="section-title" style="margin-top:8px">TRAINING <span>RULES</span></div>
+    ${ruleCard('RULE 06','3–4 training days per week.','Full Body A/B + optional cardio + skill work. Lower volume than cut/bulk — sustainable indefinitely.','var(--accent2)')}
+    ${ruleCard('RULE 07','Continue advancing level selectors.','Progressive overload doesn\'t stop during maintenance. The goal shifts from body change to capability.','var(--accent2)')}
+    ${ruleCard('RULE 08','Set skill goals, not body goals.','Crow stand for 10s. L-sit for 15s. Handstand hold. These keep training purposeful when scale is flat.','var(--accent2)')}
+    <div class="section-title" style="margin-top:8px">DISCIPLINE <span>RULES</span></div>
+    ${ruleCard('RULE 09','Maintenance is not passive.','The body\'s default without stimulus is gradual muscle loss and fat gain. Training prevents this.','#70c8ff')}
+    ${ruleCard('RULE 10','Travel changes nothing.','20 min on a floor. The body goes everywhere.','#70c8ff')}`;
+  }
+};
+
 // ─── EXERCISE PROGRESSIONS ───────────────────────────────────────────────────
-// Reference data for all calisthenics progressions. UI is gated to AGRO plan only.
+// Reference data for all calisthenics progressions. Used by all plans with level selectors.
 const EXERCISE_PROGRESSIONS = {
   push: {
     name: 'PUSH', levels: [
@@ -2506,12 +3163,55 @@ document.getElementById('todayDayName').textContent = FULL_DAYS[new Date().getDa
 // isFastDay: checks if a given dateStr is marked as a water fast in storage
 function isFastDay(dateStr) { return !!(gs(SK.fastDays)||{})[dateStr]; }
 
-// updateTodayTab: refreshes the banner, calorie ceiling text, and all day-specific
-// sub-text under the checklist groups to match the active plan and current day-of-week
+// renderTodayChecklist: dynamically builds the TODAY tab checklist from the active plan's
+// checklistNormal or checklistFast array. Called on init, plan change, and fast day toggle.
+function renderTodayChecklist() {
+  const plan = getActivePlan();
+  const s = getSettings();
+  const cal = s.calories || 1500;
+  const fast = isFastDay(todayStr());
+  const day = new Date().getDay();
+  const items = fast ? plan.checklistFast : plan.checklistNormal;
+  const container = document.getElementById('todayChecklistContainer');
+  if(!container) return;
+
+  let html = '';
+  let currentGroup = '';
+  items.forEach(item => {
+    if(item.group !== currentGroup) {
+      if(currentGroup) html += '</div>';
+      currentGroup = item.group;
+      const tagColor = item.group==='MORNING'?'tag-morning':item.group==='EATING'?'tag-food':item.group==='EVENING'?'tag-evening':item.group==='FAST'?'tag-fast':'tag-rules';
+      const groupId = item.group==='EATING'?' id="foodGroup"':item.group==='FAST'?' id="fastGroup"':'';
+      // Group time labels
+      let timeLabel = '';
+      if(item.group==='EATING') timeLabel = cal + ' cal ceiling';
+      else if(item.group==='FAST') timeLabel = 'Zero food protocol';
+      else if(item.group==='MORNING') timeLabel = 'Morning';
+      else if(item.group==='EVENING') timeLabel = 'Evening';
+      else if(item.group==='NIGHT') timeLabel = 'Before sleep';
+      const foodStyle = (item.group==='EATING' && plan.foodGroupBg) ? ` style="background:${plan.foodGroupBg};color:${plan.foodGroupColor}"` : '';
+      html += `<div class="checklist-group"${groupId}><div class="group-header"><span class="group-tag ${tagColor}"${foodStyle}>${item.group==='EATING' ? (plan.foodGroupLabel||'EATING') : item.group}</span><span class="group-time">${timeLabel}</span></div>`;
+    }
+    // Inject day-specific sub-text for morning/evening/stretch items
+    let sub = item.sub;
+    if(item.id === 'm3' && plan.morningSub && plan.morningSub[day]) sub = plan.morningSub[day];
+    if((item.id === 'e1' || item.id === 'e2') && plan.eveningSub && plan.eveningSub[day]) {
+      if(item.id === 'e2' || (item.id === 'e1' && !items.find(i=>i.id==='e2'))) sub = plan.eveningSub[day];
+    }
+    if(item.id === 'e3' && plan.stretchSub && plan.stretchSub[day]) sub = plan.stretchSub[day];
+    html += `<div class="check-item" onclick="toggle(this)" data-id="${item.id}"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">${item.label}</div><div class="item-sub">${sub}</div></div></div>`;
+  });
+  if(currentGroup) html += '</div>';
+  container.innerHTML = html;
+  loadChecklist();
+}
+
+// updateTodayTab: refreshes the banner, calorie ceiling text, and renders the checklist
+// from the active plan for the current day
 function updateTodayTab() {
   const s = getSettings();
   const plan = getActivePlan();
-  const day = new Date().getDay();
   const cal = s.calories || 1500;
 
   // Active plan banner
@@ -2526,24 +3226,7 @@ function updateTodayTab() {
     banner.style.borderColor = plan.bannerBorder;
   }
 
-  document.getElementById('calCeilingNote').textContent = `${cal} cal hard ceiling. Never more.`;
-  document.getElementById('foodGroupTime').textContent = `${cal} cal ceiling`;
-
-  const mSub = document.getElementById('todayMorningSub');
-  if(mSub) mSub.textContent = plan.morningSub[day] || '';
-
-  const eSub = document.getElementById('todayEveningSub');
-  if(eSub) eSub.textContent = plan.eveningSub[day] || '';
-
-  const stSub = document.getElementById('todayStretchSub');
-  if(stSub) stSub.textContent = plan.stretchSub[day] || 'See WORKOUTS tab → today\'s cooldown';
-
-  const planTag = document.querySelector('#foodGroup .group-tag');
-  if(planTag) {
-    planTag.textContent = plan.foodGroupLabel || 'EATING';
-    planTag.style.background = plan.foodGroupBg || '';
-    planTag.style.color = plan.foodGroupColor || '';
-  }
+  renderTodayChecklist();
 }
 
 // autoSetPlanFastDays: when a schedule is created, automatically marks the correct
@@ -2562,13 +3245,12 @@ function autoSetPlanFastDays(startDateStr, totalDays) {
   updateFastUI();
 }
 
-// updateFastUI: shows/hides the fast day banner and swaps the eating checklist
-// for the fast day checklist on the TODAY tab.
+// updateFastUI: shows/hides the fast day banner and re-renders the checklist
+// to swap between eating and fast day items.
 function updateFastUI() {
   const fast = isFastDay(todayStr());
   document.getElementById('fastBanner').classList.toggle('visible', fast);
-  document.getElementById('foodGroup').style.display = fast ? 'none' : '';
-  document.getElementById('fastGroup').style.display = fast ? '' : 'none';
+  renderTodayChecklist();
 }
 
 // ─── UNIFIED DAY LOG — single source of truth ────────────────────────────────
@@ -3607,7 +4289,7 @@ function onPlanSelectChange() {
   const plan = PLANS[val] || PLANS.default;
   const desc = document.getElementById('planDescription');
   desc.textContent = plan.subtitle || '';
-  desc.className = 'plan-description' + (plan.badgeClass ? ' agro-desc' : '');
+  desc.className = 'plan-description' + (plan.descClass ? ' ' + plan.descClass : '');
   calcDuration();
 }
 
