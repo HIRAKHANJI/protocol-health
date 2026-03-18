@@ -134,10 +134,10 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;lin
 
 <!-- HERO -->
 <section class="hero">
+  <img src="PH_ARROWS_LOGO.png" class="hero-arrows" alt="" style="display:block;margin:0 auto 12px;">
   <div class="hero-badge">PROGRESSIVE WEB APP — ZERO DEPENDENCIES</div>
   <div class="hero-logo-row">
     <h1>PROTOCOL <span>HEALTH</span></h1>
-    <img src="PH_ARROWS_LOGO.png" class="hero-arrows" alt="">
   </div>
   <p class="hero-sub">A precision fitness tracking PWA built for one protocol. Daily checklists. Weight projection. Food logging. Goal calculator. No accounts. No subscriptions. No cloud. Everything runs in your browser, offline-capable, installed like a native app.</p>
   <div class="hero-btns">
@@ -320,8 +320,58 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;lin
     </div>
   </div>
 
-  <!-- Feature 6: Workouts + Nutrition -->
+  <!-- Feature 6: Performance Radar -->
   <div class="feature-grid reverse">
+    <div class="feature-text">
+      <div class="feature-tag">TRACK TAB</div>
+      <div class="feature-title">PERFORMANCE RADAR</div>
+      <div class="feature-desc">A multi-axis radar chart that visualises your protocol compliance at a glance. Checklist completion, calorie adherence, fasting discipline, water intake, weight trend, goal progress, and logging consistency — all normalised to 0–100 and rendered as a spider chart. Toggle between 7-day and 30-day windows.</div>
+    </div>
+    <div class="phone-frame">
+      <div class="phone-screen">
+        <div class="phone-screen-content">
+        <div class="mock-header" style="font-size:0.85rem;">PERFORMANCE <span style="color:var(--text);">RADAR</span></div>
+        <svg viewBox="0 0 200 200" width="100%" style="max-width:180px;display:block;margin:4px auto;" xmlns="http://www.w3.org/2000/svg">
+          <!-- Guide rings -->
+          <polygon points="100,25 165,62.5 165,137.5 100,175 35,137.5 35,62.5" fill="none" stroke="#222" stroke-width="0.5" opacity="0.6"/>
+          <polygon points="100,44 149,69 149,131 100,156 51,131 51,69" fill="none" stroke="#222" stroke-width="0.5" opacity="0.6"/>
+          <polygon points="100,62.5 134,75 134,125 100,137.5 66,125 66,75" fill="none" stroke="#222" stroke-width="0.5" opacity="0.6"/>
+          <!-- Axis lines -->
+          <line x1="100" y1="100" x2="100" y2="25" stroke="#222" stroke-width="0.5" opacity="0.4"/>
+          <line x1="100" y1="100" x2="165" y2="62.5" stroke="#222" stroke-width="0.5" opacity="0.4"/>
+          <line x1="100" y1="100" x2="165" y2="137.5" stroke="#222" stroke-width="0.5" opacity="0.4"/>
+          <line x1="100" y1="100" x2="100" y2="175" stroke="#222" stroke-width="0.5" opacity="0.4"/>
+          <line x1="100" y1="100" x2="35" y2="137.5" stroke="#222" stroke-width="0.5" opacity="0.4"/>
+          <line x1="100" y1="100" x2="35" y2="62.5" stroke="#222" stroke-width="0.5" opacity="0.4"/>
+          <!-- Data polygon -->
+          <polygon points="100,33 158,68 155,145 100,162 52,118 42,65" fill="rgba(200,245,66,0.12)" stroke="var(--accent)" stroke-width="1.5" stroke-linejoin="round"/>
+          <!-- Data dots -->
+          <circle cx="100" cy="33" r="2.5" fill="var(--accent)"/>
+          <circle cx="158" cy="68" r="2.5" fill="var(--accent2)"/>
+          <circle cx="155" cy="145" r="2.5" fill="#4fc3f7"/>
+          <circle cx="100" cy="162" r="2.5" fill="#ce93d8"/>
+          <circle cx="52" cy="118" r="2.5" fill="#ff7043"/>
+          <circle cx="42" cy="65" r="2.5" fill="var(--green)"/>
+          <!-- Labels -->
+          <text x="100" y="18" text-anchor="middle" fill="#666" font-family="'DM Mono',monospace" font-size="5.5" letter-spacing="0.5">CHECKLIST</text>
+          <text x="172" y="62" text-anchor="start" fill="#666" font-family="'DM Mono',monospace" font-size="5.5" letter-spacing="0.5">CALORIES</text>
+          <text x="172" y="142" text-anchor="start" fill="#666" font-family="'DM Mono',monospace" font-size="5.5" letter-spacing="0.5">WATER</text>
+          <text x="100" y="190" text-anchor="middle" fill="#666" font-family="'DM Mono',monospace" font-size="5.5" letter-spacing="0.5">CONSISTENCY</text>
+          <text x="28" y="142" text-anchor="end" fill="#666" font-family="'DM Mono',monospace" font-size="5.5" letter-spacing="0.5">GOAL</text>
+          <text x="28" y="62" text-anchor="end" fill="#666" font-family="'DM Mono',monospace" font-size="5.5" letter-spacing="0.5">WEIGHT</text>
+        </svg>
+        <div style="display:flex;gap:6px;justify-content:center;margin-top:4px;">
+          <span style="font-family:'DM Mono',monospace;font-size:0.42rem;background:var(--accent);color:#000;padding:2px 7px;border-radius:3px;font-weight:500;">7D</span>
+          <span style="font-family:'DM Mono',monospace;font-size:0.42rem;background:var(--surface);color:var(--muted);padding:2px 7px;border-radius:3px;border:1px solid var(--border);">30D</span>
+        </div>
+        </div>
+        <div class="phone-notch"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feature 7: Workouts + Nutrition -->
+  <div class="feature-grid">
     <div class="feature-text">
       <div class="feature-tag">WORKOUTS + NUTRITION + RULES</div>
       <div class="feature-title">EVERYTHING IN ONE PLACE</div>
