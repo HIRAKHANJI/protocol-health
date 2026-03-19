@@ -5200,6 +5200,11 @@ function restoreData(event) {
           dispatch('PLAN_CHANGED');
           dispatch('WEIGHT_LOGGED');
           dispatch('SCHEDULE_SET');
+          dispatch('FOOD_LOGGED');
+          dispatch('FAST_DAY_TOGGLED');
+          if(typeof EXERCISE_PROGRESSIONS !== 'undefined') dispatch('EXERCISE_LEVEL_CHANGED');
+          renderCalendar();
+          renderRadar();
           showBackupStatus(`✓ Restored ${keys.length} data sets from backup (${exported}). All data reloaded.`, 'var(--green)');
         },
         { yesLabel: 'RESTORE', danger: true }
