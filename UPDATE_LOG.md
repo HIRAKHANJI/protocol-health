@@ -4,9 +4,9 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
-## Version 1.11.0 — 2026-03-19
+## Version 2.0.0 — 2026-03-19
 
-**Scope:** Minor (new feature)
+**Scope:** Major (version rollover from 1.10.0 — next minor bump after X.10.Z = X+1.0.0)
 **Banner:** "Light eating days for bulk & maintenance. Future days viewable. Schedule deletion simplified."
 
 - **Light eating day system** — new day type alongside water fast days. Stored in `SK.lightDays`. Plans can define `lightDaysPerWeek`, `lightDaysDow`, and `checklistLight` arrays. Mutually exclusive with fast days.
