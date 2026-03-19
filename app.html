@@ -331,6 +331,8 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
 .calc-result-lbl { font-family:'DM Mono',monospace; font-size:0.5rem; color:var(--muted); letter-spacing:1px; text-transform:uppercase; margin-top:2px; }
 .schedule-btn { width:100%; padding:12px; background:var(--accent); color:#000; border:none; border-radius:9px; font-family:'Bebas Neue',sans-serif; font-size:1rem; letter-spacing:2px; cursor:pointer; margin-top:10px; display:none; }
 .schedule-btn.visible { display:block; }
+.adj-mode-btn { border-color:var(--border)!important; color:var(--muted)!important; transition:all 0.15s; }
+.adj-mode-btn.active { border-color:var(--accent2)!important; color:var(--accent2)!important; background:rgba(245,166,35,0.08)!important; }
 
 /* CONFIRM POPUP */
 .popup-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.88); z-index:4000; align-items:center; justify-content:center; padding:20px; }
@@ -850,11 +852,6 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
           </div>
         </div>
         <div class="duration-single">
-          <label class="field-label">Exercise burn (cal/day average)</label>
-          <input class="field-input" type="number" id="settingExercise" placeholder="0 — enter avg daily cal burned from training" step="50" min="0" max="2000" oninput="calcDuration()">
-          <p class="section-note" style="margin-top:4px;margin-bottom:0">Enter your 7-day daily average across ALL days, not per-session burn. E.g. if you burn 450cal in 5 sessions/week: (450&times;5)/7 = 321 cal/day average.</p>
-        </div>
-        <div class="duration-single">
           <label class="field-label">Plan start date</label>
           <input class="field-input" type="date" id="settingStartDate">
         </div>
@@ -886,7 +883,6 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
             <div class="calc-result-item"><div class="calc-result-val" id="calcDeficit">—</div><div class="calc-result-lbl">kcal deficit/wk</div></div>
             <div class="calc-result-item"><div class="calc-result-val" id="calcEndDate">—</div><div class="calc-result-lbl">End date</div></div>
             <div class="calc-result-item"><div class="calc-result-val" id="calcDietBurn">—</div><div class="calc-result-lbl">Diet deficit</div></div>
-            <div class="calc-result-item"><div class="calc-result-val" id="calcExBurn">—</div><div class="calc-result-lbl">Exercise contribution</div></div>
           </div>
           <div id="calcRealisticSection" style="display:none;margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">
             <div class="calc-result-title">REALISTIC TIMELINE</div>
@@ -912,7 +908,8 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
             <button class="reset-btn" id="applyNutritionBtn" onclick="applyAndViewNutrition()" style="display:none;border-color:var(--accent);color:var(--accent);flex:1">&rarr; APPLY &amp; VIEW NUTRITION</button>
           </div>
         </div>
-        <button class="schedule-btn" id="scheduleBtn" onclick="promptSchedule()">ADD TO SCHEDULE</button>
+        <button class="schedule-btn" id="scheduleBtn" onclick="promptSchedule('exact')">ADD TO SCHEDULE</button>
+        <button class="schedule-btn" id="scheduleBtnReal" onclick="promptSchedule('realistic')" style="display:none;background:transparent;border:1px solid var(--accent2);color:var(--accent2)">ADD REALISTIC TO SCHEDULE</button>
       </div>
 
       <!-- DATA MANAGEMENT -->
@@ -1057,6 +1054,12 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
       <div class="settings-section">
         <div class="settings-section-title" style="color:#ff8855">ADJUST SCHEDULE</div>
         <p style="font-size:0.75rem;color:var(--muted);margin:0 0 10px">Recalculates remaining days from today based on your actual progress and new inputs.</p>
+        <div style="display:flex;gap:6px;margin-bottom:10px">
+          <button class="reset-btn adj-mode-btn active" id="adjModeBlended" onclick="setAdjustMode('blended')" style="flex:1;font-size:0.65rem;padding:6px 8px">BLENDED</button>
+          <button class="reset-btn adj-mode-btn" id="adjModeObserved" onclick="setAdjustMode('observed')" style="flex:1;font-size:0.65rem;padding:6px 8px">OBSERVED ONLY</button>
+          <button class="reset-btn adj-mode-btn" id="adjModeFormula" onclick="setAdjustMode('formula')" style="flex:1;font-size:0.65rem;padding:6px 8px">FORMULA ONLY</button>
+        </div>
+        <div id="adjModeNote" style="font-size:0.6rem;color:var(--muted);margin-bottom:10px;font-family:'DM Mono',monospace;line-height:1.5">Blends your actual observed rate with formula rate, weighted by how many days of data you have.</div>
         <div class="duration-inputs">
           <div>
             <label class="field-label">New target weight (kg)</label>
@@ -1068,13 +1071,14 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
           </div>
         </div>
         <div class="calc-result" id="adjustResult" style="display:none">
-          <div class="calc-result-title">ADJUSTED PROJECTION</div>
+          <div class="calc-result-title" id="adjResultTitle">ADJUSTED PROJECTION</div>
           <div class="calc-result-grid">
             <div class="calc-result-item"><div class="calc-result-val" id="adjWeeks">—</div><div class="calc-result-lbl">Weeks left</div></div>
             <div class="calc-result-item"><div class="calc-result-val" id="adjDays">—</div><div class="calc-result-lbl">Days left</div></div>
             <div class="calc-result-item"><div class="calc-result-val" id="adjRate">—</div><div class="calc-result-lbl">kg/week</div></div>
             <div class="calc-result-item"><div class="calc-result-val" id="adjEndDate">—</div><div class="calc-result-lbl">New end date</div></div>
           </div>
+          <div id="adjObservedInfo" style="font-size:0.62rem;color:var(--muted);margin-top:6px;font-family:'DM Mono',monospace;line-height:1.6;display:none"></div>
           <div id="adjWarning" style="font-size:0.72rem;color:var(--accent2);margin-top:6px;display:none"></div>
           <div id="adjActualNote" style="font-size:0.65rem;color:var(--accent2);margin-top:6px;font-family:'DM Mono',monospace;display:none"></div>
         </div>
@@ -1124,8 +1128,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '2.1.0';
-const APP_VERSION_MSG = 'Realistic timelines, auto TDEE, supplement tracker, calendar fixes.';
+const APP_VERSION = '2.2.0';
+const APP_VERSION_MSG = 'Removed exercise burn (covered by TDEE), dual schedule modes, enhanced ADJUST with observed/formula/blended rates.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -1149,7 +1153,7 @@ function strToDate(s) { const [y,m,d]=s.split('-').map(Number); return new Date(
 // getSettings: always returns a full settings object with defaults. Never returns null.
 // Add any new settings fields here with a default value.
 function getSettings() {
-  return gs(SK.settings) || { plan:'default', currentKg:104, targetKg:91, calories:1500, tdee:2600, risk:'aggressive', startDate:null, exerciseBurn:0, age:null, height:null, sex:'male', activityLevel:'1.55' };
+  return gs(SK.settings) || { plan:'default', currentKg:104, targetKg:91, calories:1500, tdee:2600, risk:'aggressive', startDate:null, age:null, height:null, sex:'male', activityLevel:'1.55' };
 }
 function saveSettings(s) { ss(SK.settings, s); }
 
@@ -1214,10 +1218,8 @@ function isWeightStalling() {
   const cal  = s.calories || 1500;
   const fastDaysPerWeek = plan.fastDaysPerWeek || 0;
   const eatDaysPerWeek  = 7 - fastDaysPerWeek;
-  const exerciseBurn    = s.exerciseBurn || 0;
   const weeklyDeficit   = (eatDaysPerWeek * Math.max(0, tdee - cal))
-                        + (fastDaysPerWeek * tdee)
-                        + (exerciseBurn * 7);
+                        + (fastDaysPerWeek * tdee);
   const formulaRate = weeklyDeficit / 7 / 7700;
   if(formulaRate <= 0) return false;
   return observedRate < (formulaRate * 0.5);
@@ -4516,7 +4518,6 @@ function openSettings() {
   document.getElementById('settingTargetKg').value = s.targetKg||'';
   document.getElementById('settingCalories').value = s.calories||'';
   document.getElementById('settingTdee').value = s.tdee||2600;
-  document.getElementById('settingExercise').value = s.exerciseBurn||'';
   document.getElementById('settingDays').value = '';
   document.getElementById('settingTargetDate').value = '';
   document.getElementById('settingStartDate').value = s.startDate||todayStr();
@@ -4568,8 +4569,6 @@ function confirmPlan() {
   if(!isNaN(calInput) && calInput >= 0) s.calories = calInput;
   const tdeeInput = parseFloat(document.getElementById('settingTdee').value);
   if(!isNaN(tdeeInput) && tdeeInput >= 1200) s.tdee = tdeeInput;
-  const exerciseInput = parseFloat(document.getElementById('settingExercise').value);
-  s.exerciseBurn = (!isNaN(exerciseInput) && exerciseInput >= 0) ? exerciseInput : 0;
   const curInput = parseFloat(document.getElementById('settingCurrentKg').value);
   const tgtInput = parseFloat(document.getElementById('settingTargetKg').value);
   if(!isNaN(curInput) && curInput > 0) s.currentKg = curInput;
@@ -4667,7 +4666,7 @@ function autoFillTDEE() {
 //   Unrestricted — shows math only, no blocks
 //
 // Outputs: ACHIEVABLE / AGGRESSIVE / UNREALISTIC flag, cal/day, kg/week,
-// projected end date, and split of diet vs exercise burn needed.
+// projected end date, and diet deficit needed.
 function calcDuration() {
   const curKg  = parseFloat(document.getElementById('settingCurrentKg').value);
   const tgtKg  = parseFloat(document.getElementById('settingTargetKg').value);
@@ -4689,17 +4688,12 @@ function calcDuration() {
   const calOverride = parseFloat(document.getElementById('settingCalories').value);
   const hasCalOverride = !isNaN(calOverride) && calOverride >= 0;
 
-  // Exercise burn: cal/day the user burns from training on top of TDEE.
-  // This is a REAL deficit contribution — it reduces how much diet restriction is needed.
-  // If 0 or blank, exercise contributes nothing to the math (conservative default).
-  const exerciseBurnPerDay = parseFloat(document.getElementById('settingExercise')?.value) || 0;
-  const totalTdeePerDay = tdee + exerciseBurnPerDay; // effective daily burn = rest TDEE + exercise
-
   const flagEl    = document.getElementById('calcFlag');
   const warnEl    = document.getElementById('calcWarning');
   const resultEl  = document.getElementById('calcResult');
   const useCalsBtn= document.getElementById('useCalsBtn');
   const schedBtn  = document.getElementById('scheduleBtn');
+  const schedBtnReal = document.getElementById('scheduleBtnReal');
 
   const applyNutrBtn = document.getElementById('applyNutritionBtn');
   const macroViabilityEl = document.getElementById('calcMacroViability');
@@ -4715,7 +4709,7 @@ function calcDuration() {
 
   // Need at minimum: current kg and target kg
   if(isNaN(curKg)||isNaN(tgtKg)){
-    resultEl.classList.remove('visible'); schedBtn.classList.remove('visible'); return;
+    resultEl.classList.remove('visible'); schedBtn.classList.remove('visible'); schedBtnReal.style.display='none'; return;
   }
 
   // Determine plan goal direction
@@ -4726,17 +4720,17 @@ function calcDuration() {
   if(planMode === 'cut' && tgtKg >= curKg) {
     flagEl.textContent = '✗ TARGET WEIGHT MUST BE LOWER THAN CURRENT FOR A CUT';
     flagEl.style.cssText='display:block;background:rgba(255,68,68,0.12);color:var(--danger);padding:7px 10px;border-radius:6px;font-size:0.75rem;font-weight:700;letter-spacing:1px';
-    resultEl.classList.add('visible'); schedBtn.classList.remove('visible'); return;
+    resultEl.classList.add('visible'); schedBtn.classList.remove('visible'); schedBtnReal.style.display='none'; return;
   }
   if(planMode === 'bulk' && tgtKg <= curKg) {
     flagEl.textContent = '✗ TARGET WEIGHT MUST BE HIGHER THAN CURRENT FOR A BULK';
     flagEl.style.cssText='display:block;background:rgba(255,68,68,0.12);color:var(--danger);padding:7px 10px;border-radius:6px;font-size:0.75rem;font-weight:700;letter-spacing:1px';
-    resultEl.classList.add('visible'); schedBtn.classList.remove('visible'); return;
+    resultEl.classList.add('visible'); schedBtn.classList.remove('visible'); schedBtnReal.style.display='none'; return;
   }
   if(!isNaN(totalDays) && totalDays <= 0) {
     flagEl.textContent = '✗ TARGET DATE HAS ALREADY PASSED';
     flagEl.style.cssText='display:block;background:rgba(255,68,68,0.12);color:var(--danger);padding:7px 10px;border-radius:6px;font-size:0.75rem;font-weight:700;letter-spacing:1px';
-    resultEl.classList.add('visible'); schedBtn.classList.remove('visible'); return;
+    resultEl.classList.add('visible'); schedBtn.classList.remove('visible'); schedBtnReal.style.display='none'; return;
   }
 
   // plan already defined above (planMode check)
@@ -4756,37 +4750,28 @@ function calcDuration() {
     impliedRate = '0.00';
   }
   // ── BULK MODE — surplus math (target > current) ──
-  // Exercise burn works AGAINST surplus: you need to eat more to compensate for exercise calories burned.
-  // Net daily surplus = (calories eaten - TDEE) - exercise burn
   else if(planMode === 'bulk') {
     if(!isNaN(totalDays) && totalDays > 0) {
-      // User gave a deadline — calculate required daily surplus
-      // Need net surplus of totalCalChange/totalDays AFTER exercise burn is subtracted
       const requiredNetSurplus = totalCalChange / totalDays;
       dailySurplusOrDeficit = requiredNetSurplus;
       weeklySurplusOrDeficit = dailySurplusOrDeficit * 7;
-      // calcCals = TDEE + required net surplus + exercise burn (must eat enough to offset training)
-      calcCals = Math.round(tdee + requiredNetSurplus + exerciseBurnPerDay);
+      calcCals = Math.round(tdee + requiredNetSurplus);
       calcDays = totalDays;
       impliedRate = (weeklySurplusOrDeficit / 7700).toFixed(2);
     } else if(hasCalOverride) {
-      // User gave calories — calculate how long to reach target
       calcCals = calOverride;
-      // Net surplus = what you eat above TDEE minus what exercise burns off
-      const netDailySurplus = calcCals - tdee - exerciseBurnPerDay;
+      const netDailySurplus = calcCals - tdee;
       if(netDailySurplus <= 0) {
-        flagEl.textContent = exerciseBurnPerDay > 0
-          ? '✗ CALORIES TOO LOW — EXERCISE BURN ELIMINATES YOUR SURPLUS'
-          : '✗ CALORIES MUST BE ABOVE TDEE FOR BULK';
+        flagEl.textContent = '✗ CALORIES MUST BE ABOVE TDEE FOR BULK';
         flagEl.style.cssText='display:block;background:rgba(255,68,68,0.12);color:var(--danger);padding:7px 10px;border-radius:6px;font-size:0.75rem;font-weight:700;letter-spacing:1px';
-        resultEl.classList.add('visible'); schedBtn.classList.remove('visible'); return;
+        resultEl.classList.add('visible'); schedBtn.classList.remove('visible'); schedBtnReal.style.display='none'; return;
       }
       weeklySurplusOrDeficit = netDailySurplus * 7;
       dailySurplusOrDeficit = netDailySurplus;
       calcDays = Math.ceil(totalCalChange / netDailySurplus);
       impliedRate = (weeklySurplusOrDeficit / 7700).toFixed(2);
     } else {
-      resultEl.classList.remove('visible'); schedBtn.classList.remove('visible'); return;
+      resultEl.classList.remove('visible'); schedBtn.classList.remove('visible'); schedBtnReal.style.display='none'; return;
     }
   }
   // ── CUT MODE — deficit math (default/agro/cut plans) ──
@@ -4794,10 +4779,8 @@ function calcDuration() {
     if(!isNaN(totalDays) && totalDays > 0) {
       dailySurplusOrDeficit = totalCalChange / totalDays;
       weeklySurplusOrDeficit = dailySurplusOrDeficit * 7;
-      const weeklyExerciseContribution = exerciseBurnPerDay * 7;
-      const weeklyDeficitAfterExercise = Math.max(0, weeklySurplusOrDeficit - weeklyExerciseContribution);
       const fastDayContribution = fastDaysPerWeek * tdee;
-      const dietWeeklyDeficit = weeklyDeficitAfterExercise - fastDayContribution;
+      const dietWeeklyDeficit = Math.max(0, weeklySurplusOrDeficit - fastDayContribution);
       if(eatDaysPerWeek > 0 && dietWeeklyDeficit > 0) {
         calcCals = Math.round(tdee - (dietWeeklyDeficit / eatDaysPerWeek));
       } else {
@@ -4807,31 +4790,23 @@ function calcDuration() {
       impliedRate = (weeklySurplusOrDeficit / 7700).toFixed(2);
     } else if(hasCalOverride) {
       calcCals = calOverride;
-      weeklySurplusOrDeficit = (eatDaysPerWeek * Math.max(0, tdee - calcCals)) + (fastDaysPerWeek * tdee) + (exerciseBurnPerDay * 7);
+      weeklySurplusOrDeficit = (eatDaysPerWeek * Math.max(0, tdee - calcCals)) + (fastDaysPerWeek * tdee);
       if(weeklySurplusOrDeficit <= 0) {
         flagEl.textContent = '✗ CALORIES TOO HIGH — NO DEFICIT';
         flagEl.style.cssText='display:block;background:rgba(255,68,68,0.12);color:var(--danger);padding:7px 10px;border-radius:6px;font-size:0.75rem;font-weight:700;letter-spacing:1px';
-        resultEl.classList.add('visible'); schedBtn.classList.remove('visible'); return;
+        resultEl.classList.add('visible'); schedBtn.classList.remove('visible'); schedBtnReal.style.display='none'; return;
       }
       dailySurplusOrDeficit = weeklySurplusOrDeficit / 7;
       calcDays = Math.ceil(totalCalChange / dailySurplusOrDeficit);
       impliedRate = (weeklySurplusOrDeficit / 7700).toFixed(2);
     } else {
-      resultEl.classList.remove('visible'); schedBtn.classList.remove('visible'); return;
+      resultEl.classList.remove('visible'); schedBtn.classList.remove('visible'); schedBtnReal.style.display='none'; return;
     }
   }
 
   const calcWeeks = Math.ceil(calcDays / 7);
   const kgPerWeek = parseFloat(impliedRate);
   const dietDeficit = planMode === 'bulk' ? Math.max(0, calcCals - tdee) : Math.max(0, tdee - calcCals);
-  // exerciseNeeded: how much daily burn exercise must contribute beyond diet alone.
-  // When calcCals === tdee (fast days cover the full deficit), diet contributes 0 deficit
-  // on eating days — but the fast days are doing the work, so exerciseNeeded is 0, not dailyDeficit.
-  // We use weeklyDeficit to account for fasting, then back out what diet covers per day.
-  // exerciseContribution: what the user's exercise actually adds to the daily deficit.
-  // Shown as a positive number — "your training covers X cal/day of this deficit."
-  // No longer calculated as a gap — it's a direct input the user provided.
-  const exerciseContribution = exerciseBurnPerDay;
 
   // Weekly average calories (accounts for fast days)
   const weeklyCalIntake = calcCals * eatDaysPerWeek;
@@ -4871,7 +4846,7 @@ function calcDuration() {
     if(risk === 'standard') {
       if(calcCals < 800) {
         flagLevel = 'unrealistic';
-        const safeKgPerWeek = ((eatDaysPerWeek*(tdee-800)) + (fastDaysPerWeek*tdee) + (exerciseBurnPerDay*7)) / 7700;
+        const safeKgPerWeek = ((eatDaysPerWeek*(tdee-800)) + (fastDaysPerWeek*tdee)) / 7700;
         const safeDays = Math.ceil(totalCalChange / (safeKgPerWeek * 7700 / 7));
         warnings.push(`Eating days require only ${calcCals} cal — below 800 cal safe minimum for standard protocol. At 800 cal/day: ~${Math.ceil(safeDays/7)} weeks.`);
       } else if(calcCals < 1200) {
@@ -4926,15 +4901,6 @@ function calcDuration() {
   document.getElementById('calcEndDate').textContent= endDateStr;
   document.getElementById('calcDietBurn').textContent = Math.round(dietDeficit)+'cal';
   document.getElementById('calcDietBurn').closest('.calc-result-item').querySelector('.calc-result-lbl').textContent = planMode === 'bulk' ? 'Diet surplus' : (planMode === 'maintenance' ? 'Diet balance' : 'Diet deficit');
-  if(planMode === 'maintenance') {
-    document.getElementById('calcExBurn').textContent = 'n/a';
-  } else if(exerciseContribution > 0) {
-    const exLabel = planMode === 'bulk' ? '-'+Math.round(exerciseContribution)+'cal/day surplus' : '+'+Math.round(exerciseContribution)+'cal/day deficit';
-    document.getElementById('calcExBurn').textContent = exLabel;
-  } else {
-    document.getElementById('calcExBurn').textContent = 'none entered';
-  }
-
   // Flag
   if(flagLevel === 'ok') {
     flagEl.textContent = '✓ ACHIEVABLE';
@@ -5050,10 +5016,25 @@ function calcDuration() {
   resultEl.classList.add('visible');
   schedBtn.classList.add('visible');
 
-  window._pendingSchedule = {
-    totalDays: calcDays, startDateStr, planVal,
-    curKg, tgtKg, cal: Math.max(0, calcCals)
-  };
+  // Show realistic schedule button when realistic section is visible
+  if(planMode !== 'maintenance' && complianceRate < 1.0) {
+    const realDaysForSched = Math.ceil(calcDays / complianceRate);
+    schedBtnReal.style.display = 'block';
+    window._pendingSchedule = {
+      totalDays: calcDays, startDateStr, planVal,
+      curKg, tgtKg, cal: Math.max(0, calcCals),
+      realisticDays: realDaysForSched,
+      complianceRate
+    };
+  } else {
+    schedBtnReal.style.display = 'none';
+    window._pendingSchedule = {
+      totalDays: calcDays, startDateStr, planVal,
+      curKg, tgtKg, cal: Math.max(0, calcCals),
+      realisticDays: null,
+      complianceRate: 1.0
+    };
+  }
 }
 
 // applyCalculatedCalories: takes the calculated cal/day from the result panel
@@ -5090,22 +5071,27 @@ function applyAndViewNutrition() {
 }
 
 // promptSchedule: shows a confirmation popup before creating a schedule.
-// The pending schedule data is stored in window._pendingSchedule by calcDuration().
-function promptSchedule() {
+// mode: 'exact' or 'realistic'. Realistic uses compliance-adjusted days.
+function promptSchedule(mode) {
   if(!window._pendingSchedule) return;
-  const {totalDays, startDateStr} = window._pendingSchedule;
-  document.getElementById('popupText').textContent = `This will highlight ${totalDays} days on your calendar starting ${startDateStr}. Day completion still works the same way.`;
+  window._pendingScheduleMode = mode || 'exact';
+  const p = window._pendingSchedule;
+  const days = mode === 'realistic' && p.realisticDays ? p.realisticDays : p.totalDays;
+  const label = mode === 'realistic' ? ' (realistic, ' + Math.round(p.complianceRate * 100) + '% compliance)' : '';
+  document.getElementById('popupText').textContent = `This will highlight ${days} days${label} on your calendar starting ${p.startDateStr}. Day completion still works the same way.`;
   document.getElementById('popupOverlay').classList.add('active');
 }
 
 // applySchedule: commits the pending schedule to storage.
 // Saves settings, builds the days[] array for calendar highlighting,
-// stores startWeight for Manage Schedule ADJUST to reference later,
-// auto-sets fast days, and navigates to the MONTHS tab.
+// stores startWeight and scheduleMode for Manage Schedule ADJUST.
 function applySchedule() {
   document.getElementById('popupOverlay').classList.remove('active');
   const p = window._pendingSchedule;
   if(!p) return;
+
+  const mode = window._pendingScheduleMode || 'exact';
+  const useDays = (mode === 'realistic' && p.realisticDays) ? p.realisticDays : p.totalDays;
 
   const s = getSettings();
   s.plan = p.planVal;
@@ -5117,18 +5103,20 @@ function applySchedule() {
 
   const days = [];
   const start = strToDate(p.startDateStr);
-  for(let i=0;i<p.totalDays;i++){
+  for(let i=0;i<useDays;i++){
     const d = new Date(start);
     d.setDate(d.getDate()+i);
     days.push(dateToStr(d));
   }
-  // Store startWeight so Manage Schedule ADJUST can reference it
   ss(SK.schedule, {
     days,
     startDate: p.startDateStr,
-    totalDays: p.totalDays,
+    totalDays: useDays,
     planName: PLANS[p.planVal].badge,
-    startWeight: p.curKg
+    startWeight: p.curKg,
+    scheduleMode: mode,
+    complianceRate: p.complianceRate || 1.0,
+    exactDays: p.totalDays
   });
 
   applyPlanUI(p.planVal);
@@ -5170,6 +5158,22 @@ function updateManageSchedBtn() {
   btn.style.display = sched ? 'block' : 'none';
 }
 
+let adjustMode = 'blended'; // 'blended' | 'observed' | 'formula'
+
+function setAdjustMode(mode) {
+  adjustMode = mode;
+  document.querySelectorAll('.adj-mode-btn').forEach(b => b.classList.remove('active'));
+  const id = mode === 'blended' ? 'adjModeBlended' : mode === 'observed' ? 'adjModeObserved' : 'adjModeFormula';
+  document.getElementById(id).classList.add('active');
+  const notes = {
+    blended: 'Blends your actual observed rate with formula rate, weighted by how many days of data you have.',
+    observed: 'Uses only your actual weight loss rate from logged data. Ignores calorie math entirely.',
+    formula: 'Uses only the deficit formula (TDEE - calories). Ignores actual weight data.'
+  };
+  document.getElementById('adjModeNote').textContent = notes[mode];
+  calcAdjust();
+}
+
 function openManageSchedule() {
   const sched = gs(SK.schedule);
   if(!sched) return;
@@ -5183,8 +5187,12 @@ function openManageSchedule() {
   const rate    = elapsed > 0 ? parseFloat((lost / elapsed * 7).toFixed(2)) : 0;
   const remain  = parseFloat((curW - (s.targetKg||91)).toFixed(1));
 
+  const modeLabel = sched.scheduleMode === 'realistic'
+    ? ` · <span style="color:var(--accent2)">REALISTIC (${Math.round((sched.complianceRate||1)*100)}%)</span>`
+    : ' · <span style="color:var(--accent)">EXACT</span>';
+
   document.getElementById('msStatusText').innerHTML =
-    `Started: <b>${sched.startDate}</b> · Day <b>${elapsed+1}</b> of <b>${sched.totalDays}</b><br>` +
+    `Started: <b>${sched.startDate}</b> · Day <b>${elapsed+1}</b> of <b>${sched.totalDays}</b>${modeLabel}<br>` +
     `Start weight: <b>${startW}kg</b> → Current: <b>${curW}kg</b><br>` +
     `Lost: <b>${Math.max(0,lost)}kg</b> · Rate: <b>${rate}kg/week actual</b><br>` +
     `Still to target: <b>${Math.max(0,remain)}kg</b>`;
@@ -5195,6 +5203,12 @@ function openManageSchedule() {
   document.getElementById('adjustResult').style.display = 'none';
   document.getElementById('adjConfirmBtn').style.display = 'none';
 
+  // Reset adjust mode to blended
+  adjustMode = 'blended';
+  document.querySelectorAll('.adj-mode-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('adjModeBlended').classList.add('active');
+  document.getElementById('adjModeNote').textContent = 'Blends your actual observed rate with formula rate, weighted by how many days of data you have.';
+
   document.getElementById('manageSchedOverlay').classList.add('active');
   calcAdjust();
 }
@@ -5203,9 +5217,10 @@ function closeManageSchedule() {
   document.getElementById('manageSchedOverlay').classList.remove('active');
 }
 
-// calcAdjust: recalculates the schedule end date using a blended rate.
-// observedWeight (0–0.7) — how much to trust actual rate vs formula rate.
-// Blends toward observed data as more days pass (capped at 0.7 to always keep some formula signal).
+// calcAdjust: recalculates the schedule end date using one of three modes:
+//   blended  — weighted mix of observed + formula (default, original behavior)
+//   observed — pure actual rate from weight logs (ignores calorie math)
+//   formula  — pure deficit math from TDEE and calories (ignores actual data)
 function calcAdjust() {
   const sched = gs(SK.schedule);
   if(!sched) return;
@@ -5225,40 +5240,63 @@ function calcAdjust() {
   const startW  = sched.startWeight || s.currentKg || curW;
   const elapsed = Math.max(1, Math.floor((new Date().getTime() - strToDate(sched.startDate).getTime()) / 86400000));
   const lost    = Math.max(0, startW - curW);
-  const actualRate = lost / elapsed; // kg/day actual
+  const actualRate = lost / elapsed; // kg/day observed
 
   const plan = PLANS[s.plan||'default'] || PLANS.default;
   const fastDaysPerWeek = plan.fastDaysPerWeek || 0;
-  const exerciseBurn = s.exerciseBurn || 0;
   const eatDaysPerWeek  = 7 - fastDaysPerWeek;
-  // Blend target calories with actual average intake — if actual data exists, weight it at 40%
   const avgActualForAdjust = getAvgActualCalories(7);
   const effectiveCal = avgActualForAdjust !== null
     ? Math.round(newCal * 0.6 + avgActualForAdjust * 0.4)
     : newCal;
-  const weeklyDeficit   = (eatDaysPerWeek * Math.max(0, tdee - effectiveCal)) + (fastDaysPerWeek * tdee) + (exerciseBurn * 7);
-  const formulaRate     = weeklyDeficit / 7 / 7700; // kg/day formula
+  const weeklyDeficit = (eatDaysPerWeek * Math.max(0, tdee - effectiveCal)) + (fastDaysPerWeek * tdee);
+  const formulaRate   = weeklyDeficit / 7 / 7700; // kg/day formula
 
-  // Blend actual rate with formula rate
-  const observedWeight = Math.min(0.7, elapsed / 60);
-  const blendedRate    = (actualRate * observedWeight) + (formulaRate * (1 - observedWeight));
+  // Select rate based on adjust mode
+  let useRate, modeLabel;
+  const observedBlendWeight = Math.min(0.7, elapsed / 60);
+  if(adjustMode === 'observed') {
+    useRate = actualRate;
+    modeLabel = 'OBSERVED';
+  } else if(adjustMode === 'formula') {
+    useRate = formulaRate;
+    modeLabel = 'FORMULA';
+  } else {
+    useRate = (actualRate * observedBlendWeight) + (formulaRate * (1 - observedBlendWeight));
+    modeLabel = 'BLENDED';
+  }
 
   const remainKg   = Math.max(0, curW - newTarget);
-  const remainDays = blendedRate > 0 ? Math.ceil(remainKg / blendedRate) : 999;
-  const kgPerWeek  = parseFloat((blendedRate * 7).toFixed(2));
+  const remainDays = useRate > 0 ? Math.ceil(remainKg / useRate) : 999;
+  const kgPerWeek  = parseFloat((useRate * 7).toFixed(2));
 
   const endD = new Date();
   endD.setDate(endD.getDate() + remainDays);
   const endDateStr = endD.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
 
+  document.getElementById('adjResultTitle').textContent = 'ADJUSTED PROJECTION (' + modeLabel + ')';
   document.getElementById('adjWeeks').textContent   = Math.ceil(remainDays/7);
   document.getElementById('adjDays').textContent    = remainDays;
   document.getElementById('adjRate').textContent    = '-'+kgPerWeek+'kg/wk';
   document.getElementById('adjEndDate').textContent = endDateStr;
 
+  // Observed vs formula info
+  const obsInfo = document.getElementById('adjObservedInfo');
+  if(obsInfo) {
+    const obsKgWk = (actualRate * 7).toFixed(2);
+    const frmKgWk = (formulaRate * 7).toFixed(2);
+    const blendPct = Math.round(observedBlendWeight * 100);
+    obsInfo.innerHTML = `Observed: <b>-${obsKgWk}kg/wk</b> (${elapsed} days data) · Formula: <b>-${frmKgWk}kg/wk</b>` +
+      (adjustMode === 'blended' ? ` · Blend: ${blendPct}% observed / ${100-blendPct}% formula` : '');
+    obsInfo.style.display = 'block';
+  }
+
   const warn = document.getElementById('adjWarning');
-  if(kgPerWeek > 2) {
-    warn.textContent = '⚡ Rate is aggressive — factoring in actual data, expect some variance.';
+  if(adjustMode === 'observed' && elapsed < 7) {
+    warn.textContent = '⚠ Less than 7 days of data — observed rate may be unreliable. Consider blended mode.';
+    warn.style.display='block';
+  } else if(kgPerWeek > 2) {
+    warn.textContent = '⚡ Rate is aggressive — expect some variance.';
     warn.style.display='block';
   } else { warn.style.display='none'; }
 
@@ -5277,7 +5315,7 @@ function calcAdjust() {
   document.getElementById('adjConfirmBtn').style.display='block';
 
   // Store for confirm
-  window._pendingAdjust = { remainDays, newTarget, newCal, endDate: dateToStr(endD) };
+  window._pendingAdjust = { remainDays, newTarget, newCal, endDate: dateToStr(endD), adjustMode };
 }
 
 // confirmAdjust: applies the adjusted schedule — rebuilds days[] from today forward
@@ -5297,6 +5335,7 @@ function confirmAdjust() {
   }
   sched.days     = newDays;
   sched.totalDays= newDays.length;
+  sched.lastAdjustMode = adj.adjustMode || 'blended';
   ss(SK.schedule, sched);
 
   const s = getSettings();
