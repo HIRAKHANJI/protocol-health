@@ -284,11 +284,11 @@ flowchart TD
 
     RENDER --> GROUPS["Checklist Groups"]
     subgraph GROUPS
-        G1["🌅 MORNING<br/>tag-morning"]
+        G1["🌅 MORNING<br/>tag-morning<br/>Includes: weight log"]
         G2["🍽️ EATING<br/>tag-food"]
         G3["🌙 EVENING<br/>tag-evening"]
         G4["💧 FAST<br/>tag-fast"]
-        G5["🛏️ NIGHT<br/>tag-rules"]
+        G5["🛏️ NIGHT<br/>tag-rules<br/>Sleep only"]
     end
 
     GROUPS --> LOAD["loadChecklist()<br/>Read SK.dayLogs[today].checks<br/>Apply done/undone CSS"]
@@ -419,54 +419,73 @@ flowchart TD
 
 ---
 
-## 9. Goal Calculator
+## 9. Goal Calculator (Plan-Aware)
 
 ```mermaid
 flowchart TD
     INPUTS["User Inputs<br/>currentKg, targetKg, calories, tdee,<br/>exerciseBurn, risk, deadline/days"]
 
-    INPUTS --> DEFICIT["Total Deficit Needed<br/>(currentKg - targetKg) × 7700 cal"]
+    INPUTS --> PLAN_MODE{"Plan Mode?<br/>(from selected plan)"}
 
-    DEFICIT --> MODE{"Which mode?"}
+    PLAN_MODE -->|"CUT<br/>(default/agro/cut)"| CUT_VALIDATE["Validate: target < current"]
+    PLAN_MODE -->|"BULK"| BULK_VALIDATE["Validate: target > current"]
+    PLAN_MODE -->|"MAINTENANCE"| MAINT_MODE["No weight change<br/>calcCals = TDEE<br/>Schedule for tracking only"]
 
-    MODE -->|"Deadline given"| MODE_A
-    MODE -->|"Calories given"| MODE_B
+    CUT_VALIDATE --> CUT_CALC["totalCalChange = abs(cur-tgt) × 7700"]
+    BULK_VALIDATE --> BULK_CALC["totalCalChange = abs(cur-tgt) × 7700"]
 
-    subgraph MODE_A["MODE A: Deadline → Calories"]
-        A1["weeklyDeficit = totalDeficit / days × 7"]
-        A2["Subtract exercise burn × 7"]
-        A3["Subtract fast day contribution<br/>fastDaysPerWeek × tdee"]
-        A4["dietWeeklyDeficit = remainder"]
-        A5["calcCals = tdee - (dietDeficit / eatDaysPerWeek)"]
-        A1 --> A2 --> A3 --> A4 --> A5
+    CUT_CALC --> CUT_MODE{"Which input?"}
+    BULK_CALC --> BULK_MODE{"Which input?"}
+
+    CUT_MODE -->|"Deadline given"| CUT_A
+    CUT_MODE -->|"Calories given"| CUT_B
+
+    subgraph CUT_A["CUT MODE A: Deadline → Calories"]
+        CA1["weeklyDeficit = totalChange / days × 7"]
+        CA2["Subtract exercise burn × 7"]
+        CA3["Subtract fast day contribution<br/>fastDaysPerWeek × tdee"]
+        CA4["calcCals = tdee - (dietDeficit / eatDaysPerWeek)"]
+        CA1 --> CA2 --> CA3 --> CA4
     end
 
-    subgraph MODE_B["MODE B: Calories → Days"]
-        B1["dailyDeficit from eating + fasting + exercise"]
-        B2["calcDays = ceil(totalDeficit / dailyDeficit)"]
-        B1 --> B2
+    subgraph CUT_B["CUT MODE B: Calories → Days"]
+        CB1["dailyDeficit from eating + fasting + exercise"]
+        CB2["calcDays = ceil(totalChange / dailyDeficit)"]
+        CB1 --> CB2
     end
 
-    MODE_A & MODE_B --> RISK_CHECK
+    BULK_MODE -->|"Deadline given"| BULK_A
+    BULK_MODE -->|"Calories given"| BULK_B
 
-    subgraph RISK_CHECK["Risk Assessment"]
-        R1{"Risk tolerance?"}
-        R1 -->|"Standard"| R2["🔴 <800cal OR >1.5kg/wk<br/>🟠 800-1200cal OR 1.0-1.5kg/wk<br/>🟢 >1200cal AND <1.0kg/wk"]
-        R1 -->|"Aggressive"| R3["🔴 Avg <300cal/day<br/>🟠 >2.5kg/wk<br/>🟢 Everything else"]
-        R1 -->|"Unrestricted"| R4["🔴 calcCals < 0<br/>🟠 >3kg/wk<br/>🟢 Everything else"]
+    subgraph BULK_A["BULK MODE A: Deadline → Calories"]
+        BA1["dailySurplus = totalChange / days"]
+        BA2["calcCals = TDEE + dailySurplus"]
+        BA1 --> BA2
     end
 
-    RISK_CHECK --> MACRO_CHECK
-
-    subgraph MACRO_CHECK["Macro Viability"]
-        M1["Protein floor = currentKg × pfm"]
-        M2["Fat floor = 20g"]
-        M3{"calcCals ≥ protein×4 + fat×9?"}
-        M3 -->|"No"| M4["⚠️ Warning: macros impossible"]
-        M3 -->|"Yes"| M5["✅ Viable"]
+    subgraph BULK_B["BULK MODE B: Calories → Days"]
+        BB1["dailySurplus = calories - TDEE"]
+        BB2["calcDays = ceil(totalChange / dailySurplus)"]
+        BB1 --> BB2
     end
 
-    MACRO_CHECK --> RESULT
+    CUT_A & CUT_B --> CUT_RISK
+    BULK_A & BULK_B --> BULK_RISK
+
+    subgraph CUT_RISK["Cut Risk Assessment"]
+        CR1{"Risk tolerance?"}
+        CR1 -->|"Standard"| CR2["🔴 <800cal OR >1.5kg/wk<br/>🟠 800-1200cal OR 1.0-1.5kg/wk<br/>🟢 >1200cal AND <1.0kg/wk"]
+        CR1 -->|"Aggressive"| CR3["🔴 Avg <300cal/day<br/>🟠 >2.5kg/wk<br/>🟢 Everything else"]
+        CR1 -->|"Unrestricted"| CR4["🔴 calcCals < 0<br/>🟠 >3kg/wk<br/>🟢 Everything else"]
+    end
+
+    subgraph BULK_RISK["Bulk Risk Assessment"]
+        BR1["🟠 >0.5 kg/wk gain (aggressive)"]
+        BR2["🔴 >1.0 kg/wk gain (unrealistic — mostly fat)"]
+        BR3["🟢 0.25–0.5 kg/wk (lean gains)"]
+    end
+
+    CUT_RISK & BULK_RISK & MAINT_MODE --> RESULT
 
     subgraph RESULT["Calculator Output"]
         RES1["calcWeeks, calcDays, calcCals"]
@@ -485,8 +504,11 @@ flowchart TD
     end
 
     style INPUTS fill:#c8f542,stroke:#000,color:#000
-    style RISK_CHECK fill:#f5a623,stroke:#000,color:#000
+    style PLAN_MODE fill:#f5a623,stroke:#000,color:#000
     style RESULT fill:#1a1a2e,stroke:#3ddc84,color:#e8e8e8
+    style CUT_RISK fill:#ff4444,stroke:#000,color:#fff
+    style BULK_RISK fill:#f7dc6f,stroke:#000,color:#000
+    style MAINT_MODE fill:#82e0aa,stroke:#000,color:#000
 ```
 
 ---
@@ -651,10 +673,10 @@ flowchart TD
     COMPUTE --> SVG["renderRadar()<br/>SVG spider chart"]
 
     subgraph SVG["Radar Visualization"]
-        R1["4 concentric guide rings<br/>25% / 50% / 75% / 100%"]
-        R2["7 axes radiating from center"]
-        R3["Filled polygon = performance shape"]
-        R4["Point labels + values around perimeter"]
+        R1["4 concentric guide rings<br/>25% / 50% / 75% / 100%<br/>stroke:#444, width:0.8"]
+        R2["7 axes radiating from center<br/>stroke:#444, width:0.7"]
+        R3["Filled polygon = performance shape<br/>stroke-width:2"]
+        R4["Labels font-size:10<br/>Values font-size:9.5"]
     end
 
     style WINDOW fill:#c8f542,stroke:#000,color:#000
