@@ -380,7 +380,7 @@ This app is in active development. Updates are made through Claude Code connecte
 
 ### Completed Improvement Areas (for reference)
 - ~~Bodyweight progression system~~ — implemented via EXERCISE_PROGRESSIONS with per-exercise level tracking (v1.1.0)
-- ~~Water fast day flexibility~~ — fast/light days can be toggled on any date including future days (v1.11.0)
+- ~~Water fast day flexibility~~ — fast/light days can be toggled on any date including future days (v2.0.0)
 - ~~Multi-plan support~~ — 5 plans: default, agro, cut, bulk, maintenance (v1.9.0)
 - ~~Performance analytics~~ — 7-axis radar chart on TRACK tab (v1.7.0)
 - ~~Food/calorie tracking~~ — food logger with macro tracking and library (v1.1.0, v1.8.0)
@@ -494,7 +494,7 @@ The app has two independent version numbers that serve different purposes:
 | **+0.1.0** (minor) | A new feature, a meaningful UI change, or 4+ bug fixes bundled together | Yes | Added streak counter, redesigned settings panel, new checklist group |
 | **+1.0.0** (major) | New plan added, major rework of a core system, or something that changes how you use the app | Yes | New combat training plan, schedule system rewrite, new tab added |
 
-**Current version:** `1.11.0`
+**Current version:** `2.0.0`
 
 ### How It Works
 
@@ -509,7 +509,7 @@ The app has two independent version numbers that serve different purposes:
 When making changes, update these two lines near the top of the script in `app.html`:
 
 ```javascript
-const APP_VERSION = '1.11.0';                         // ← bump according to rules above
+const APP_VERSION = '2.0.0';                         // ← bump according to rules above
 const APP_VERSION_MSG = 'Description of changes.';    // ← short description of what changed
 ```
 
@@ -519,7 +519,7 @@ const APP_VERSION_MSG = 'Description of changes.';    // ← short description o
 
 ### Version Rollover Rule
 
-> **When the minor version reaches 10 (e.g. `X.10.Z`), the next minor bump rolls over to the next major version.** Example: after `1.10.0`, the next minor bump becomes `2.0.0` (not `1.11.0`). Patch bumps within `.10.Z` are fine (e.g. `1.10.1` is valid). Only the next *minor* bump triggers the rollover.
+> **When the minor version reaches 10 (e.g. `X.10.Z`), the next minor bump rolls over to the next major version.** Example: after `1.10.0`, the next minor bump becomes `2.0.0` (not `1.11.0` — that is invalid). Patch bumps within `.10.Z` are fine (e.g. `1.10.1` is valid). Only the next *minor* bump triggers the rollover. Nothing above `.10.Z` should ever exist.
 
 ### Update Log Rule
 
@@ -555,7 +555,7 @@ Data writes:  always end with dispatch("EVENT_NAME")
 Dialogs:      showConfirm(), showAlert() — never native confirm/alert
 Dates:        dateToStr(d), strToDate(s), todayStr() — never toISOString()
 Cache:        sw.js CACHE_NAME = "protocol-health-v7" — bump on every significant push
-App version:  APP_VERSION = "1.11.0" — bump on notable updates (see Section 12)
+App version:  APP_VERSION = "2.0.0" — bump on notable updates (see Section 12)
 Update log:   UPDATE_LOG.md — every version bump must be documented here
 ```
 
