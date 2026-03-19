@@ -23,6 +23,8 @@
   --accent2: #f5a623;
   --fast: #7b68ee;
   --fast-dim: rgba(123,104,238,0.15);
+  --light: #f0b27a;
+  --light-dim: rgba(240,178,122,0.15);
   --text: #e8e8e8;
   --muted: #555;
   --danger: #ff4444;
@@ -108,6 +110,7 @@ body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif
 .tag-food { background:#1a0a0a; color:#ff7070; }
 .tag-rules { background:#0a1a1a; color:#70c8ff; }
 .tag-fast { background:var(--fast-dim); color:var(--fast); border:1px solid var(--fast); }
+.tag-light { background:var(--light-dim); color:var(--light); border:1px solid var(--light); }
 .tag-stretch { background:#1a0a1a; color:#dd88ff; }
 .group-time { font-family:'DM Mono',monospace; font-size:0.58rem; color:var(--muted); }
 
@@ -127,6 +130,10 @@ body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif
 .fast-day-banner.visible { display:block; }
 .fast-banner-title { font-family:'Bebas Neue',sans-serif; font-size:0.95rem; letter-spacing:2px; color:var(--fast); margin-bottom:3px; }
 .fast-banner-sub { font-family:'DM Mono',monospace; font-size:0.62rem; color:#9988cc; line-height:1.6; }
+.light-day-banner { background:var(--light-dim); border:1px solid var(--light); border-radius:8px; padding:11px 13px; margin-bottom:14px; display:none; }
+.light-day-banner.visible { display:block; }
+.light-banner-title { font-family:'Bebas Neue',sans-serif; font-size:0.95rem; letter-spacing:2px; color:var(--light); margin-bottom:3px; }
+.light-banner-sub { font-family:'DM Mono',monospace; font-size:0.62rem; color:#cc9966; line-height:1.6; }
 
 /* SECTION TITLE */
 .section-title { font-family:'Bebas Neue',sans-serif; font-size:1.1rem; letter-spacing:3px; color:var(--muted); margin-bottom:11px; margin-top:4px; }
@@ -178,10 +185,12 @@ body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif
 .cal-cell.cal-done { background:var(--green-dim); border-color:var(--green); }
 .cal-cell.cal-missed { background:rgba(255,68,68,0.07); border-color:rgba(255,68,68,0.2); }
 .cal-cell.cal-fast { background:var(--fast-dim); border-color:var(--fast); }
+.cal-cell.cal-light { background:var(--light-dim); border-color:var(--light); }
 .cal-cell.cal-partial { background:rgba(245,166,35,0.1); border-color:var(--accent2); }
 .cal-cell.plan-day { border-color:#ffffff !important; box-shadow:inset 0 0 0 1px #ffffff; }
 .cal-cell.plan-day.cal-done .cal-num { color:var(--green); }
 .cal-cell.plan-day.cal-fast .cal-num { color:var(--fast); }
+.cal-cell.plan-day.cal-light .cal-num { color:var(--light); }
 .cal-cell.plan-day.cal-partial .cal-num { color:var(--accent2); }
 .cal-cell.plan-day.cal-missed .cal-num { color:#ff7070; }
 .cal-num { font-weight:700; font-size:0.82rem; color:var(--text); line-height:1; }
@@ -262,11 +271,16 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
 .check-row-modal label { font-size:0.8rem; color:var(--text); cursor:pointer; }
 .fast-toggle { width:100%; padding:9px; background:var(--fast-dim); border:1px solid var(--fast); border-radius:8px; color:var(--fast); font-family:'DM Mono',monospace; font-size:0.68rem; letter-spacing:1.5px; cursor:pointer; text-transform:uppercase; transition:all 0.15s; margin-bottom:13px; }
 .fast-toggle.active { background:var(--fast); color:#000; font-weight:bold; }
+.light-toggle { width:100%; padding:9px; background:var(--light-dim); border:1px solid var(--light); border-radius:8px; color:var(--light); font-family:'DM Mono',monospace; font-size:0.68rem; letter-spacing:1.5px; cursor:pointer; text-transform:uppercase; transition:all 0.15s; margin-bottom:13px; }
+.light-toggle.active { background:var(--light); color:#000; font-weight:bold; }
 .save-btn { width:100%; padding:12px; background:var(--accent); color:#000; border:none; border-radius:9px; font-family:'Bebas Neue',sans-serif; font-size:0.95rem; letter-spacing:2px; cursor:pointer; transition:opacity 0.15s; }
 .save-btn:active { opacity:0.85; }
 .fast-protocol-box { background:var(--fast-dim); border:1px solid var(--fast); border-radius:8px; padding:11px; margin-bottom:13px; }
 .fast-protocol-title { font-family:'DM Mono',monospace; font-size:0.58rem; letter-spacing:2px; text-transform:uppercase; color:var(--fast); margin-bottom:7px; }
 .fast-protocol-body { font-size:0.75rem; color:#aa99dd; line-height:1.7; }
+.light-protocol-box { background:var(--light-dim); border:1px solid var(--light); border-radius:8px; padding:11px; margin-bottom:13px; }
+.light-protocol-title { font-family:'DM Mono',monospace; font-size:0.58rem; letter-spacing:2px; text-transform:uppercase; color:var(--light); margin-bottom:7px; }
+.light-protocol-body { font-size:0.75rem; color:#cc9966; line-height:1.7; }
 
 /* EXPORT */
 .export-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:2000; padding:20px; overflow-y:auto; }
@@ -577,6 +591,10 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
     <div class="fast-banner-title">⚡ WATER FAST DAY</div>
     <div class="fast-banner-sub">Zero food today. Water + electrolytes only.<br>500ml on wake · salt water mid-morning · black coffee/green tea allowed · electrolyte tablet pre-training</div>
   </div>
+  <div class="light-day-banner" id="lightBanner">
+    <div class="light-banner-title">🍽 LIGHT EATING DAY</div>
+    <div class="light-banner-sub">Low-cal, easy digestion. Gut rest + recovery.<br>Protein-focused · small portions · no heavy carbs · no junk · hydrate well</div>
+  </div>
   <div class="weight-input-wrap" style="margin-bottom:10px">
     <input class="weight-input" type="number" id="todayWeightInput" placeholder="Weight (kg)" step="0.1" min="40" max="250" style="font-size:0.8rem;padding:9px 12px">
     <button class="log-btn" onclick="logWeightFromToday()" style="font-size:0.8rem;padding:9px 14px">LOG</button>
@@ -609,6 +627,7 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
   <div class="cal-legend">
     <div class="leg-item"><div class="leg-dot" style="background:var(--green-dim);border-color:var(--green)"></div>Done</div>
     <div class="leg-item"><div class="leg-dot" style="background:var(--fast-dim);border-color:var(--fast)"></div>Fast</div>
+    <div class="leg-item"><div class="leg-dot" style="background:var(--light-dim);border-color:var(--light)"></div>Light</div>
     <div class="leg-item"><div class="leg-dot" style="background:rgba(245,166,35,0.1);border-color:var(--accent2)"></div>Partial</div>
     <div class="leg-item"><div class="leg-dot" style="background:rgba(255,68,68,0.07);border-color:rgba(255,68,68,0.2)"></div>Missed</div>
     <div class="leg-item"><div class="leg-dot" style="background:#ffffff;border-color:#ffffff"></div>Plan day</div>
@@ -1030,7 +1049,8 @@ const SK = {
   seenVer:   'ph_sv_v1',   // string — last APP_VERSION the user dismissed the update banner for
   foodLog:   'ph_fl_v1',   // object keyed by dateStr — each value: array of { id, name, calories, notes, ts }
   foodLib:   'ph_fb_v1',   // array of { name, lastCalories, useCount } — sorted by useCount desc
-  exLevels:  'ph_ex_v1'    // object keyed by dateStr — each value: { groupId: levelIndex, ... }
+  exLevels:  'ph_ex_v1',   // object keyed by dateStr — each value: { groupId: levelIndex, ... }
+  lightDays: 'ph_ld_v1'    // object keyed by dateStr — value: true if that day is a light eating day
 };
 
 // ─── APP VERSION ─────────────────────────────────────────────────────────────
@@ -1039,8 +1059,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '1.10.0';
-const APP_VERSION_MSG = 'Goal calculator now supports bulk & maintenance. Radar chart improved. Weight log moved to morning.';
+const APP_VERSION = '1.11.0';
+const APP_VERSION_MSG = 'Light eating days for bulk & maintenance. Future days viewable. Schedule deletion simplified.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -2556,6 +2576,7 @@ PLANS.bulk = {
   name: 'DEFAULT BULK',
   tdee: 2400,
   fastDaysPerWeek: 0,
+  lightDaysPerWeek: 2,
   badge: 'DEFAULT BULK',
   badgeClass: 'bulk',
   descClass: 'bulk-desc',
@@ -2564,6 +2585,7 @@ PLANS.bulk = {
   bannerBg: 'rgba(247,220,111,0.07)',
   bannerBorder: 'rgba(247,220,111,0.35)',
   fastDaysDow: [],
+  lightDaysDow: [0, 3],  // Sun/Wed — rest days = light eating days for gut recovery
   macroSplit: { base:[30,50,20], rest:[35,45,20], preFast:[30,50,20], stall:[35,45,20], satiety:[35,45,20] },
   proteinFloorMultiplier: 1.4,
 
@@ -2617,6 +2639,15 @@ PLANS.bulk = {
     { id:'wf4', group:'FAST', label:'3.5L+ water total today', sub:'Sip constantly. Don\'t chug all at once.' },
     { id:'wf5', group:'FAST', label:'No food consumed today', sub:'Fast is unbroken. If you break it — log it honestly.' },
     { id:'wf6', group:'FAST', label:'Magnesium 400mg before sleep', sub:'Prevents cramps. Sleep quality tanks on fasts without this.' }
+  ],
+  checklistLight: [
+    { id:'l1', group:'LIGHT', label:'Wake & 500ml water', sub:'Hydration first. Light day, not skip day.' },
+    { id:'l2', group:'LIGHT', label:'Light mobility or walk', sub:'20–30 min walk or gentle stretching. No heavy training.' },
+    { id:'l3', group:'LIGHT', label:'Eat at or below TDEE', sub:'Small, clean meals. No surplus today — give digestion a break.' },
+    { id:'l4', group:'LIGHT', label:'Protein-focused meals only', sub:'Lean protein + vegetables. No heavy carbs, no junk, no processed food.' },
+    { id:'l5', group:'LIGHT', label:'No snacking between meals', sub:'2–3 structured meals. Let the gut rest between them.' },
+    { id:'l6', group:'LIGHT', label:'2.5L+ water', sub:'Stay hydrated. Water, herbal tea, black coffee only.' },
+    { id:'l7', group:'NIGHT', label:'Sleep 8+ hours', sub:'Recovery is amplified on light days. Don\'t waste it.' }
   ],
 
   foodGroupLabel: 'EATING',
@@ -2797,6 +2828,7 @@ PLANS.maintenance = {
   name: 'DEFAULT MAINTENANCE',
   tdee: 2400,
   fastDaysPerWeek: 0,
+  lightDaysPerWeek: 1,
   badge: 'DEFAULT MAINTENANCE',
   badgeClass: 'maint',
   descClass: 'maint-desc',
@@ -2805,6 +2837,7 @@ PLANS.maintenance = {
   bannerBg: 'rgba(130,224,170,0.07)',
   bannerBorder: 'rgba(130,224,170,0.35)',
   fastDaysDow: [],
+  lightDaysDow: [0],  // Sunday — weekly light eating day for digestive reset
   macroSplit: { base:[35,45,20], rest:[40,40,20], preFast:[35,45,20], stall:[40,40,20], satiety:[40,40,20] },
   proteinFloorMultiplier: 1.2,
 
@@ -2856,6 +2889,14 @@ PLANS.maintenance = {
     { id:'wf4', group:'FAST', label:'3.5L+ water total today', sub:'Sip constantly. Don\'t chug all at once.' },
     { id:'wf5', group:'FAST', label:'No food consumed today', sub:'Fast is unbroken. If you break it — log it honestly.' },
     { id:'wf6', group:'FAST', label:'Magnesium 400mg before sleep', sub:'Prevents cramps. Sleep quality tanks on fasts without this.' }
+  ],
+  checklistLight: [
+    { id:'l1', group:'LIGHT', label:'Wake & 500ml water', sub:'Hydration first. Gentle start.' },
+    { id:'l2', group:'LIGHT', label:'Light movement only', sub:'Walk, gentle stretch, or complete rest. No structured training.' },
+    { id:'l3', group:'LIGHT', label:'Eat 300–500 cal below TDEE', sub:'Smaller portions. Clean, simple meals. Give the gut a break.' },
+    { id:'l4', group:'LIGHT', label:'Protein in every meal', sub:'Lean protein + vegetables. Avoid heavy, processed, or fried food.' },
+    { id:'l5', group:'LIGHT', label:'2L+ water', sub:'Stay hydrated. Herbal tea, black coffee allowed.' },
+    { id:'l6', group:'NIGHT', label:'Sleep before midnight', sub:'Recovery day. Let the body reset.' }
   ],
 
   foodGroupLabel: 'EATING',
@@ -3163,15 +3204,25 @@ document.getElementById('todayDayName').textContent = FULL_DAYS[new Date().getDa
 // isFastDay: checks if a given dateStr is marked as a water fast in storage
 function isFastDay(dateStr) { return !!(gs(SK.fastDays)||{})[dateStr]; }
 
+// isLightDay: checks if a given dateStr is marked as a light eating day in storage
+function isLightDay(dateStr) { return !!(gs(SK.lightDays)||{})[dateStr]; }
+
+// getDayType: returns 'fast', 'light', or 'normal' for a given date
+function getDayType(dateStr) {
+  if(isFastDay(dateStr)) return 'fast';
+  if(isLightDay(dateStr)) return 'light';
+  return 'normal';
+}
+
 // renderTodayChecklist: dynamically builds the TODAY tab checklist from the active plan's
 // checklistNormal or checklistFast array. Called on init, plan change, and fast day toggle.
 function renderTodayChecklist() {
   const plan = getActivePlan();
   const s = getSettings();
   const cal = s.calories || 1500;
-  const fast = isFastDay(todayStr());
+  const dayType = getDayType(todayStr());
   const day = new Date().getDay();
-  const items = fast ? plan.checklistFast : plan.checklistNormal;
+  const items = dayType === 'fast' ? plan.checklistFast : (dayType === 'light' && plan.checklistLight ? plan.checklistLight : plan.checklistNormal);
   const container = document.getElementById('todayChecklistContainer');
   if(!container) return;
 
@@ -3181,12 +3232,13 @@ function renderTodayChecklist() {
     if(item.group !== currentGroup) {
       if(currentGroup) html += '</div>';
       currentGroup = item.group;
-      const tagColor = item.group==='MORNING'?'tag-morning':item.group==='EATING'?'tag-food':item.group==='EVENING'?'tag-evening':item.group==='FAST'?'tag-fast':'tag-rules';
-      const groupId = item.group==='EATING'?' id="foodGroup"':item.group==='FAST'?' id="fastGroup"':'';
+      const tagColor = item.group==='MORNING'?'tag-morning':item.group==='EATING'?'tag-food':item.group==='EVENING'?'tag-evening':item.group==='FAST'?'tag-fast':item.group==='LIGHT'?'tag-light':'tag-rules';
+      const groupId = item.group==='EATING'?' id="foodGroup"':item.group==='FAST'?' id="fastGroup"':item.group==='LIGHT'?' id="lightGroup"':'';
       // Group time labels
       let timeLabel = '';
       if(item.group==='EATING') timeLabel = cal + ' cal ceiling';
       else if(item.group==='FAST') timeLabel = 'Zero food protocol';
+      else if(item.group==='LIGHT') timeLabel = 'Light eating protocol';
       else if(item.group==='MORNING') timeLabel = 'Morning';
       else if(item.group==='EVENING') timeLabel = 'Evening';
       else if(item.group==='NIGHT') timeLabel = 'Before sleep';
@@ -3245,11 +3297,29 @@ function autoSetPlanFastDays(startDateStr, totalDays) {
   updateFastUI();
 }
 
-// updateFastUI: shows/hides the fast day banner and re-renders the checklist
-// to swap between eating and fast day items.
+// autoSetPlanLightDays: when a schedule is created for a bulk/maintenance plan,
+// automatically marks the correct days as light eating days based on the plan's lightDaysDow array.
+function autoSetPlanLightDays(startDateStr, totalDays) {
+  const plan = getActivePlan();
+  const lightDow = plan.lightDaysDow || [];
+  if(!lightDow.length) return;
+  const ld = gs(SK.lightDays) || {};
+  const start = strToDate(startDateStr);
+  for(let i = 0; i < totalDays; i++) {
+    const d = new Date(start); d.setDate(d.getDate() + i);
+    if(lightDow.includes(d.getDay())) ld[dateToStr(d)] = true;
+  }
+  ss(SK.lightDays, ld);
+  updateFastUI();
+}
+
+// updateFastUI: shows/hides the fast/light day banners and re-renders the checklist
+// to swap between eating, fast, and light day items.
 function updateFastUI() {
-  const fast = isFastDay(todayStr());
-  document.getElementById('fastBanner').classList.toggle('visible', fast);
+  const today = todayStr();
+  const dayType = getDayType(today);
+  document.getElementById('fastBanner').classList.toggle('visible', dayType === 'fast');
+  document.getElementById('lightBanner').classList.toggle('visible', dayType === 'light');
   renderTodayChecklist();
 }
 
@@ -3411,14 +3481,18 @@ function updateProjection() {
   const daySpan = Math.max(1, (strToDate(latest.date) - strToDate(oldest.date)) / 86400000);
   const rawDailyLoss = (oldest.weight - latest.weight) / daySpan; // kg/day (positive = losing)
 
-  // Count fast days in next 7 days from today
+  // Count fast/light days in next 7 days from today
+  const lightDays = gs(SK.lightDays)||{};
   const now = new Date(); now.setHours(0,0,0,0);
   let fastDaysAhead = 0;
+  let lightDaysAhead = 0;
   let eatingDaysAhead = 0;
   for(let i=0;i<7;i++){
     const d=new Date(now); d.setDate(d.getDate()+i);
     const ds=dateToStr(d);
-    if(fastDays[ds]) fastDaysAhead++; else eatingDaysAhead++;
+    if(fastDays[ds]) fastDaysAhead++;
+    else if(lightDays[ds]) lightDaysAhead++;
+    else eatingDaysAhead++;
   }
 
   // Compliance modifier: use last 7 calendar days, not weight entry window
@@ -3438,7 +3512,7 @@ function updateProjection() {
       let dayScore = checks.length ? checks.filter(Boolean).length/checks.length : 0.5;
       // Calorie compliance: if food log exceeds ceiling, penalise proportionally
       const dc = getDayCalories(entry.dateStr);
-      if(dc.hasData && dc.total > settingsCal && !isFastDay(entry.dateStr)) {
+      if(dc.hasData && dc.total > settingsCal && !isFastDay(entry.dateStr) && !isLightDay(entry.dateStr)) {
         dayScore *= Math.min(1, settingsCal / dc.total);
       }
       return sum + dayScore;
@@ -3450,11 +3524,12 @@ function updateProjection() {
   const todayDow = now.getDay(); // 0=Sun
   const daysToSunday = todayDow === 0 ? 7 : 7 - todayDow;
 
-  // Projection: base rate adjusted for upcoming fast days
+  // Projection: base rate adjusted for upcoming fast/light days
   // Uses actual food log data for past days where available, falls back to s.calories
   const tdee = s.tdee || 2600;
   const cal = s.calories || 1500;
   const fastDayDeficit = tdee / 7700; // kg lost on a full fast day
+  const lightDayCal = Math.round(tdee * 0.6); // light days ~60% of TDEE
 
   // Calculate formula rate using actual intake data where available
   // For days ahead, use actual logged data if available (today), else use s.calories
@@ -3470,6 +3545,11 @@ function updateProjection() {
       } else {
         totalFormulaDeficit += fastDayDeficit;
       }
+    } else if(lightDays[ds]) {
+      // Light eating day: reduced intake
+      const dc = getDayCalories(ds);
+      const dayCal = dc.hasData ? dc.total : lightDayCal;
+      totalFormulaDeficit += (tdee - dayCal) / 7700;
     } else {
       // Eating day: use actual logged data if available, else s.calories
       const dc = getDayCalories(ds);
@@ -3508,7 +3588,8 @@ function updateProjection() {
   const basisParts = [];
   basisParts.push(`Based on ${recent.length} day${recent.length>1?'s':''} of data`);
   basisParts.push(`${observedRate>0?'-':'+'} ${Math.abs(observedRate).toFixed(2)}kg/day observed`);
-  basisParts.push(`${fastDaysAhead} fast day${fastDaysAhead!==1?'s':''} ahead`);
+  if(fastDaysAhead > 0) basisParts.push(`${fastDaysAhead} fast day${fastDaysAhead!==1?'s':''} ahead`);
+  if(lightDaysAhead > 0) basisParts.push(`${lightDaysAhead} light day${lightDaysAhead!==1?'s':''} ahead`);
   basisParts.push(`${Math.round(complianceScore*100)}% compliance`);
   document.getElementById('projBasis').textContent = basisParts.join(' · ');
 }
@@ -3561,7 +3642,7 @@ function computeRadarMetrics(days) {
   // 2. CALORIE DISCIPLINE — % of eating days at or under ceiling
   let calUnder = 0, calTotal = 0;
   windowDates.forEach(ds => {
-    if (fastDays[ds]) return; // skip fast days
+    if (fastDays[ds] || (gs(SK.lightDays)||{})[ds]) return; // skip fast/light days
     const dc = getDayCalories(ds);
     if (dc.hasData) {
       calTotal++;
@@ -3570,19 +3651,27 @@ function computeRadarMetrics(days) {
   });
   const calories = calTotal > 0 ? Math.round((calUnder / calTotal) * 100) : null;
 
-  // 3. FASTING ADHERENCE — % of scheduled fast days that were actually observed
-  // A fast day is "observed" if it's marked in fastDays AND (no food logged OR checklist has fast items done)
+  // 3. FASTING / LIGHT DAY ADHERENCE — % of scheduled fast or light days actually observed
+  const lightDaysMap = gs(SK.lightDays)||{};
+  const lightDow = plan.lightDaysDow || [];
   let fastScheduled = 0, fastCompleted = 0;
   windowDates.forEach(ds => {
     const dow = strToDate(ds).getDay();
-    if (plan.fastDaysDow.includes(dow)) {
-      // Only count days that aren't in the future
-      if (strToDate(ds) <= now) {
+    if (strToDate(ds) <= now) {
+      if (plan.fastDaysDow.includes(dow)) {
         fastScheduled++;
         if (fastDays[ds]) {
           const dc = getDayCalories(ds);
           if (!dc.hasData || dc.total === 0) fastCompleted++;
-          else fastCompleted += 0.3; // partial credit if fast day but ate something
+          else fastCompleted += 0.3;
+        }
+      } else if (lightDow.includes(dow)) {
+        fastScheduled++;
+        if (lightDaysMap[ds]) {
+          const dc = getDayCalories(ds);
+          const lightCeil = Math.round(tdee * 0.6);
+          if (!dc.hasData || dc.total <= lightCeil) fastCompleted++;
+          else fastCompleted += 0.5; // partial credit if over light ceiling
         }
       }
     }
@@ -3648,7 +3737,7 @@ function computeRadarMetrics(days) {
   return [
     { key: 'checklist', label: 'CHECKLIST', value: checklist, color: 'var(--accent)' },
     { key: 'calories', label: 'CALORIES', value: calories, color: 'var(--accent2)' },
-    { key: 'fasting', label: 'FASTING', value: fasting, color: 'var(--fast)' },
+    { key: 'fasting', label: lightDow.length > 0 && plan.fastDaysDow.length === 0 ? 'LIGHT DAYS' : 'FASTING', value: fasting, color: lightDow.length > 0 && plan.fastDaysDow.length === 0 ? 'var(--light)' : 'var(--fast)' },
     { key: 'water', label: 'WATER', value: water, color: '#4fc3f7' },
     { key: 'weight', label: 'WEIGHT TREND', value: weightTrend, color: 'var(--green)' },
     { key: 'goal', label: 'GOAL', value: goalProgress, color: '#ff7043' },
@@ -3897,13 +3986,14 @@ function renderCalendar() {
   const daysInMonth = new Date(calYear,calMonth+1,0).getDate();
   const dayLogs = gs(SK.dayLogs)||{};
   const fastDays = gs(SK.fastDays)||{};
+  const lightDays = gs(SK.lightDays)||{};
   const weights = gs(SK.weights)||[];
   const sched = gs(SK.schedule)||{};
   const planDaySet = new Set(sched.days||[]);
   const weightMap = {};
   weights.forEach(w=>{ weightMap[w.date]=w.weight; });
 
-  let done=0,fasts=0,missed=0,partial=0;
+  let done=0,fasts=0,lights=0,missed=0,partial=0;
   const grid = document.getElementById('calGridMain');
   grid.innerHTML = '';
 
@@ -3915,6 +4005,7 @@ function renderCalendar() {
     const isFuture = dt>now;
     const isToday = dt.getTime()===now.getTime();
     const isFast = !!fastDays[dateStr];
+    const isLight = !!lightDays[dateStr];
     const log = dayLogs[dateStr];
     const wt = weightMap[dateStr];
     const isPlanDay = planDaySet.has(dateStr);
@@ -3924,7 +4015,12 @@ function renderCalendar() {
     if(isFuture) cls+=' future-cal';
     if(isPlanDay) cls+=' plan-day';
 
-    if(!isFuture){
+    if(isFuture){
+      // Future days — show day type color as preview
+      if(isFast){cls+=' cal-fast';}
+      else if(isLight){cls+=' cal-light';}
+    }
+    else {
       if(isFast){
         // Fast days still need checklist completion to count
         if(log){
@@ -3932,8 +4028,18 @@ function renderCalendar() {
           const total = Object.keys(log.checks||{}).length;
           if(checks===total&&total>0){cls+=' cal-fast'; fasts++;}
           else if(checks>0){cls+=' cal-partial';partial++;}
-          else{cls+=' cal-fast'; fasts++;}  // no checklist logged yet — show as fast day
-        } else {cls+=' cal-fast'; fasts++;}  // no log at all — show as fast day
+          else{cls+=' cal-fast'; fasts++;}
+        } else {cls+=' cal-fast'; fasts++;}
+      }
+      else if(isLight){
+        // Light eating days
+        if(log){
+          const checks = Object.values(log.checks||{}).filter(Boolean).length;
+          const total = Object.keys(log.checks||{}).length;
+          if(checks===total&&total>0){cls+=' cal-light'; lights++;}
+          else if(checks>0){cls+=' cal-partial';partial++;}
+          else{cls+=' cal-light'; lights++;}
+        } else {cls+=' cal-light'; lights++;}
       }
       else if(log){
         const checks = Object.values(log.checks||{}).filter(Boolean).length;
@@ -3947,13 +4053,14 @@ function renderCalendar() {
     const cell = document.createElement('div');
     cell.className = cls;
     cell.innerHTML = `<span class="cal-num">${d}</span>${wt?`<span class="cal-wt">${wt}kg</span>`:''}`;
-    if(!isFuture) cell.onclick = ()=>openDayModal(dateStr,dt);
+    cell.onclick = ()=>openDayModal(dateStr,dt);
     grid.appendChild(cell);
   }
 
   document.getElementById('monthStats').innerHTML = `
     <div class="mstat"><div class="mstat-val green">${done}</div><div class="mstat-lbl">Done</div></div>
     <div class="mstat"><div class="mstat-val purple">${fasts}</div><div class="mstat-lbl">Fasts</div></div>
+    ${lights>0?`<div class="mstat"><div class="mstat-val" style="color:var(--light)">${lights}</div><div class="mstat-lbl">Light</div></div>`:''}
     <div class="mstat"><div class="mstat-val orange">${partial}</div><div class="mstat-lbl">Partial</div></div>
     <div class="mstat"><div class="mstat-val" style="color:var(--danger)">${missed}</div><div class="mstat-lbl">Missed</div></div>`;
 }
@@ -3980,14 +4087,33 @@ function openDayModal(dateStr, dt) {
   document.getElementById('mTitle').textContent = dt.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
   document.getElementById('mDate').textContent = dt.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
 
+  const isLight = isLightDay(dateStr);
+  const plan = getActivePlan();
+
+  // Day type toggle buttons — fast and light are mutually exclusive
   let html = `<button class="fast-toggle ${isFast?'active':''}" onclick="toggleFastDay('${dateStr}')">
     ${isFast?'⚡ WATER FAST DAY — TAP TO UNSET':'+ SET AS WATER FAST DAY'}
+  </button>`;
+  html += `<button class="light-toggle ${isLight?'active':''}" onclick="toggleLightDay('${dateStr}')">
+    ${isLight?'🍽 LIGHT EATING DAY — TAP TO UNSET':'+ SET AS LIGHT EATING DAY'}
   </button>`;
 
   if(isFast) html+=`<div class="fast-protocol-box"><div class="fast-protocol-title">⚡ FAST PROTOCOL</div>
     <div class="fast-protocol-body">Wake: 500ml water + salt · Mid-morning: electrolyte tablet · Allowed: water/black coffee/green tea · Pre-training: electrolyte 20 min before · Sleep: 400mg magnesium<br><strong style="color:#cc4444">Stop if:</strong> palpitations · chest tightness · vision goes dark</div></div>`;
 
-  if(!isFuture) {
+  if(isLight) html+=`<div class="light-protocol-box"><div class="light-protocol-title">🍽 LIGHT EATING PROTOCOL</div>
+    <div class="light-protocol-body">Low-cal, easy digestion day. Protein-focused · small portions · no heavy carbs or junk · hydrate well · give the gut a rest<br><strong style="color:var(--light)">Goal:</strong> recovery and digestive reset while maintaining nutrition</div></div>`;
+
+  if(isFuture) {
+    // Future day — show schedule info if available
+    const sched = gs(SK.schedule);
+    if(sched && sched.days && sched.days.includes(dateStr)) {
+      const dayNum = sched.days.indexOf(dateStr) + 1;
+      html += `<div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:10px;font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--muted);line-height:1.8">
+        📅 Schedule day ${dayNum} of ${sched.totalDays} · ${sched.planName}</div>`;
+    }
+    html += `<div style="text-align:center;padding:16px 0;font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--muted)">Future day — use the toggles above to pre-set day type</div>`;
+  } else {
     // Weight and water fields
     html += `
     <div class="field-group"><label class="field-label">Weight (kg) — morning, before food</label>
@@ -3996,17 +4122,18 @@ function openDayModal(dateStr, dt) {
     <input type="number" step="0.25" class="field-input" id="mWater" value="${log.water||''}" placeholder="e.g. 3.0"></div>`;
 
     // Unified checklist — full items, same as TODAY tab
+    const dayType = getDayType(dateStr);
     if(isToday) {
       html += `<div class="field-group"><label class="field-label">Today's Checklist — tap items on TODAY tab to check off</label>
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--muted);line-height:1.8">`;
-      const items = isFast ? getActivePlan().checklistFast : getActivePlan().checklistNormal;
+      const items = dayType === 'fast' ? plan.checklistFast : (dayType === 'light' && plan.checklistLight ? plan.checklistLight : plan.checklistNormal);
       const checks = log.checks || {};
       let doneCount = 0;
       items.forEach(item => { if(checks[item.id]) doneCount++; });
       html += `${doneCount}/${items.length} complete. Use the TODAY tab to check off items — this syncs automatically.</div></div>`;
     } else {
       // Past day — show full interactive checklist
-      const items = isFast ? getActivePlan().checklistFast : getActivePlan().checklistNormal;
+      const items = dayType === 'fast' ? plan.checklistFast : (dayType === 'light' && plan.checklistLight ? plan.checklistLight : plan.checklistNormal);
       const checks = log.checks || {};
       let currentGroup = '';
       html += `<div class="field-group"><label class="field-label">Day Checklist</label>`;
@@ -4014,7 +4141,7 @@ function openDayModal(dateStr, dt) {
         if(item.group !== currentGroup) {
           if(currentGroup) html += `</div>`;
           currentGroup = item.group;
-          const tagColor = item.group==='MORNING'?'tag-morning':item.group==='EATING'?'tag-food':item.group==='EVENING'?'tag-evening':item.group==='FAST'?'tag-fast':'tag-rules';
+          const tagColor = item.group==='MORNING'?'tag-morning':item.group==='EATING'?'tag-food':item.group==='EVENING'?'tag-evening':item.group==='FAST'?'tag-fast':item.group==='LIGHT'?'tag-light':'tag-rules';
           html += `<div class="modal-check-group"><div class="modal-group-label ${tagColor}" style="margin-bottom:6px">${item.group}</div>`;
         }
         const done = !!checks[item.id];
@@ -4111,10 +4238,33 @@ function toggleModalCheck(el, dateStr, itemId) {
 
 // toggleFastDay: marks or unmarks a date as a water fast day, then re-opens the modal
 // so the UI immediately reflects the change (fast protocol box appears/disappears).
+// Also clears light day if setting fast (mutually exclusive).
 function toggleFastDay(dateStr) {
   const fd = gs(SK.fastDays)||{};
-  if(fd[dateStr]) delete fd[dateStr]; else fd[dateStr]=true;
+  if(fd[dateStr]) { delete fd[dateStr]; }
+  else {
+    fd[dateStr]=true;
+    // Clear light day if exists (mutually exclusive)
+    const ld = gs(SK.lightDays)||{};
+    if(ld[dateStr]) { delete ld[dateStr]; ss(SK.lightDays, ld); }
+  }
   ss(SK.fastDays, fd);
+  dispatch('FAST_DAY_TOGGLED');
+  openDayModal(dateStr,strToDate(dateStr));
+}
+
+// toggleLightDay: marks or unmarks a date as a light eating day, then re-opens the modal.
+// Also clears fast day if setting light (mutually exclusive).
+function toggleLightDay(dateStr) {
+  const ld = gs(SK.lightDays)||{};
+  if(ld[dateStr]) { delete ld[dateStr]; }
+  else {
+    ld[dateStr]=true;
+    // Clear fast day if exists (mutually exclusive)
+    const fd = gs(SK.fastDays)||{};
+    if(fd[dateStr]) { delete fd[dateStr]; ss(SK.fastDays, fd); }
+  }
+  ss(SK.lightDays, ld);
   dispatch('FAST_DAY_TOGGLED');
   openDayModal(dateStr,strToDate(dateStr));
 }
@@ -4584,13 +4734,16 @@ function calcDuration() {
   }
 
   // Write results
+  const defSurpLabel = planMode === 'bulk' ? 'surplus' : (planMode === 'maintenance' ? 'balance' : 'deficit');
   document.getElementById('calcWeeks').textContent = calcWeeks;
   document.getElementById('calcDays').textContent   = calcDays;
   document.getElementById('calcCals').textContent   = calcCals >= 0 ? calcCals : 0;
   document.getElementById('calcRate').textContent   = kgPerWeek + 'kg/wk';
   document.getElementById('calcDeficit').textContent= Math.round(weeklySurplusOrDeficit/1000)+'k/wk';
+  document.getElementById('calcDeficit').closest('.calc-result-item').querySelector('.calc-result-lbl').textContent = 'kcal ' + defSurpLabel + '/wk';
   document.getElementById('calcEndDate').textContent= endDateStr;
-  document.getElementById('calcDietBurn').textContent = Math.round(dietDeficit)+'cal' + (planMode === 'bulk' ? ' surplus' : '');
+  document.getElementById('calcDietBurn').textContent = Math.round(dietDeficit)+'cal';
+  document.getElementById('calcDietBurn').closest('.calc-result-item').querySelector('.calc-result-lbl').textContent = planMode === 'bulk' ? 'Diet surplus' : (planMode === 'maintenance' ? 'Diet balance' : 'Diet deficit');
   document.getElementById('calcExBurn').textContent   = planMode === 'maintenance' ? 'n/a' : (exerciseContribution > 0 ? '+'+Math.round(exerciseContribution)+'cal/day' : 'none entered');
 
   // Flag
@@ -4734,6 +4887,9 @@ function applySchedule() {
   applyPlanUI(p.planVal);
   if((PLANS[p.planVal]||{}).fastDaysPerWeek > 0) {
     autoSetPlanFastDays(p.startDateStr, p.totalDays);
+  }
+  if((PLANS[p.planVal]||{}).lightDaysPerWeek > 0) {
+    autoSetPlanLightDays(p.startDateStr, p.totalDays);
   }
   dispatch('SCHEDULE_SET');
   dispatch('PLAN_CHANGED');
@@ -4926,20 +5082,21 @@ function endScheduleToday() {
 function removeSchedule() {
   showConfirm(
     'REMOVE SCHEDULE',
-    'Wipe schedule structure completely? All logged weights, notes, and day logs are kept.',
-    (clearFastDays) => {
-      if(clearFastDays) {
-        const today = todayStr();
-        const fd = gs(SK.fastDays)||{};
-        Object.keys(fd).forEach(d=>{ if(d > today) delete fd[d]; });
-        ss(SK.fastDays, fd);
-      }
+    'Wipe schedule structure completely? Future auto-set fast and light eating days will be cleared. All logged weights, notes, and day logs are kept.',
+    () => {
+      const today = todayStr();
+      const fd = gs(SK.fastDays)||{};
+      Object.keys(fd).forEach(d=>{ if(d > today) delete fd[d]; });
+      ss(SK.fastDays, fd);
+      const ld = gs(SK.lightDays)||{};
+      Object.keys(ld).forEach(d=>{ if(d > today) delete ld[d]; });
+      ss(SK.lightDays, ld);
       ss(SK.schedule, null);
       dispatch('SCHEDULE_REMOVED');
       closeManageSchedule();
       setTimeout(()=>renderCalendar(),50);
     },
-    { yesLabel:'REMOVE', danger:true, checkLabel:'Also clear future auto-set fast days' }
+    { yesLabel:'REMOVE', danger:true }
   );
 }
 
@@ -5115,6 +5272,9 @@ function generateExport() {
 
   const fastList = Object.keys(fastDays).filter(d=>d>=fromStr&&d<=toStr).sort();
   if(fastList.length){text+=`WATER FAST DAYS\n`;fastList.forEach(d=>{text+=`  ${d}\n`;});text+='\n';}
+  const lightDaysData = gs(SK.lightDays)||{};
+  const lightList = Object.keys(lightDaysData).filter(d=>d>=fromStr&&d<=toStr).sort();
+  if(lightList.length){text+=`LIGHT EATING DAYS\n`;lightList.forEach(d=>{text+=`  ${d}\n`;});text+='\n';}
 
   // Day logs
   const logDates = Object.keys(dayLogs).filter(d=>d>=fromStr&&d<=toStr).sort().reverse();
