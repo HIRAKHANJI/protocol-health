@@ -773,7 +773,10 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
         <div class="duration-inputs">
           <div>
             <label class="field-label">Current weight (kg)</label>
-            <input class="field-input" type="number" id="settingCurrentKg" placeholder="104" step="0.1" min="50" max="250" oninput="calcDuration()">
+            <div style="display:flex;gap:6px">
+              <input class="field-input" type="number" id="settingCurrentKg" placeholder="104" step="0.1" min="50" max="250" oninput="calcDuration()" style="flex:1">
+              <button class="log-btn" style="font-size:0.7rem;padding:8px 12px;white-space:nowrap" onclick="setCurrentWeight()">SET</button>
+            </div>
           </div>
           <div>
             <label class="field-label">Target weight (kg)</label>
@@ -1059,7 +1062,7 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '2.0.0';
+const APP_VERSION = '2.0.1';
 const APP_VERSION_MSG = 'Light eating days for bulk & maintenance. Future days viewable. Schedule deletion simplified.';
 
 // Static lookup arrays used throughout rendering
@@ -4480,6 +4483,19 @@ function applyPlanUI(plan) {
   document.getElementById('planSubtitle').textContent = p.subtitle;
 }
 
+// setCurrentWeight: saves the value from the current weight input as the official
+// current weight in settings and updates all dependent UI (goal bar, projection, etc).
+function setCurrentWeight() {
+  const val = parseFloat(document.getElementById('settingCurrentKg').value);
+  if(isNaN(val) || val < 20 || val > 300) { showAlert('Enter a valid weight between 20–300 kg.'); return; }
+  const s = getSettings();
+  s.currentKg = val;
+  saveSettings(s);
+  updateGoalBar(val);
+  dispatch('WEIGHT_LOGGED');
+  showAlert('Current weight set to ' + val + ' kg.');
+}
+
 // ─── UNIFIED GOAL CALCULATOR ─────────────────────────────────────────────────
 // Runs in real time as the user fills in settings. Two calculation modes:
 //
@@ -4582,27 +4598,34 @@ function calcDuration() {
     impliedRate = '0.00';
   }
   // ── BULK MODE — surplus math (target > current) ──
+  // Exercise burn works AGAINST surplus: you need to eat more to compensate for exercise calories burned.
+  // Net daily surplus = (calories eaten - TDEE) - exercise burn
   else if(planMode === 'bulk') {
     if(!isNaN(totalDays) && totalDays > 0) {
       // User gave a deadline — calculate required daily surplus
-      dailySurplusOrDeficit = totalCalChange / totalDays;
+      // Need net surplus of totalCalChange/totalDays AFTER exercise burn is subtracted
+      const requiredNetSurplus = totalCalChange / totalDays;
+      dailySurplusOrDeficit = requiredNetSurplus;
       weeklySurplusOrDeficit = dailySurplusOrDeficit * 7;
-      // For bulk: calcCals = TDEE + required daily surplus (eat MORE than TDEE)
-      calcCals = Math.round(tdee + dailySurplusOrDeficit);
+      // calcCals = TDEE + required net surplus + exercise burn (must eat enough to offset training)
+      calcCals = Math.round(tdee + requiredNetSurplus + exerciseBurnPerDay);
       calcDays = totalDays;
       impliedRate = (weeklySurplusOrDeficit / 7700).toFixed(2);
     } else if(hasCalOverride) {
       // User gave calories — calculate how long to reach target
       calcCals = calOverride;
-      const dailySurplus = calcCals - tdee;
-      if(dailySurplus <= 0) {
-        flagEl.textContent = '✗ CALORIES MUST BE ABOVE TDEE FOR BULK';
+      // Net surplus = what you eat above TDEE minus what exercise burns off
+      const netDailySurplus = calcCals - tdee - exerciseBurnPerDay;
+      if(netDailySurplus <= 0) {
+        flagEl.textContent = exerciseBurnPerDay > 0
+          ? '✗ CALORIES TOO LOW — EXERCISE BURN ELIMINATES YOUR SURPLUS'
+          : '✗ CALORIES MUST BE ABOVE TDEE FOR BULK';
         flagEl.style.cssText='display:block;background:rgba(255,68,68,0.12);color:var(--danger);padding:7px 10px;border-radius:6px;font-size:0.75rem;font-weight:700;letter-spacing:1px';
         resultEl.classList.add('visible'); schedBtn.classList.remove('visible'); return;
       }
-      weeklySurplusOrDeficit = dailySurplus * 7;
-      dailySurplusOrDeficit = dailySurplus;
-      calcDays = Math.ceil(totalCalChange / dailySurplus);
+      weeklySurplusOrDeficit = netDailySurplus * 7;
+      dailySurplusOrDeficit = netDailySurplus;
+      calcDays = Math.ceil(totalCalChange / netDailySurplus);
       impliedRate = (weeklySurplusOrDeficit / 7700).toFixed(2);
     } else {
       resultEl.classList.remove('visible'); schedBtn.classList.remove('visible'); return;
@@ -4738,13 +4761,21 @@ function calcDuration() {
   document.getElementById('calcWeeks').textContent = calcWeeks;
   document.getElementById('calcDays').textContent   = calcDays;
   document.getElementById('calcCals').textContent   = calcCals >= 0 ? calcCals : 0;
-  document.getElementById('calcRate').textContent   = kgPerWeek + 'kg/wk';
+  const rateSign = planMode === 'bulk' ? '+' : (planMode === 'maintenance' ? '' : '-');
+  document.getElementById('calcRate').textContent   = rateSign + kgPerWeek + 'kg/wk';
   document.getElementById('calcDeficit').textContent= Math.round(weeklySurplusOrDeficit/1000)+'k/wk';
   document.getElementById('calcDeficit').closest('.calc-result-item').querySelector('.calc-result-lbl').textContent = 'kcal ' + defSurpLabel + '/wk';
   document.getElementById('calcEndDate').textContent= endDateStr;
   document.getElementById('calcDietBurn').textContent = Math.round(dietDeficit)+'cal';
   document.getElementById('calcDietBurn').closest('.calc-result-item').querySelector('.calc-result-lbl').textContent = planMode === 'bulk' ? 'Diet surplus' : (planMode === 'maintenance' ? 'Diet balance' : 'Diet deficit');
-  document.getElementById('calcExBurn').textContent   = planMode === 'maintenance' ? 'n/a' : (exerciseContribution > 0 ? '+'+Math.round(exerciseContribution)+'cal/day' : 'none entered');
+  if(planMode === 'maintenance') {
+    document.getElementById('calcExBurn').textContent = 'n/a';
+  } else if(exerciseContribution > 0) {
+    const exLabel = planMode === 'bulk' ? '-'+Math.round(exerciseContribution)+'cal/day surplus' : '+'+Math.round(exerciseContribution)+'cal/day deficit';
+    document.getElementById('calcExBurn').textContent = exLabel;
+  } else {
+    document.getElementById('calcExBurn').textContent = 'none entered';
+  }
 
   // Flag
   if(flagLevel === 'ok') {
@@ -5006,7 +5037,7 @@ function calcAdjust() {
 
   document.getElementById('adjWeeks').textContent   = Math.ceil(remainDays/7);
   document.getElementById('adjDays').textContent    = remainDays;
-  document.getElementById('adjRate').textContent    = kgPerWeek+'kg/wk';
+  document.getElementById('adjRate').textContent    = '-'+kgPerWeek+'kg/wk';
   document.getElementById('adjEndDate').textContent = endDateStr;
 
   const warn = document.getElementById('adjWarning');
