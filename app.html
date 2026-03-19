@@ -112,6 +112,7 @@ body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif
 .tag-fast { background:var(--fast-dim); color:var(--fast); border:1px solid var(--fast); }
 .tag-light { background:var(--light-dim); color:var(--light); border:1px solid var(--light); }
 .tag-stretch { background:#1a0a1a; color:#dd88ff; }
+.tag-supplements { background:rgba(130,224,170,0.12); color:#82e0aa; border:1px solid rgba(130,224,170,0.3); }
 .group-time { font-family:'DM Mono',monospace; font-size:0.58rem; color:var(--muted); }
 
 .check-item { display:flex; align-items:flex-start; gap:11px; padding:10px 11px; background:var(--surface); border:1px solid var(--border); border-radius:8px; margin-bottom:6px; cursor:pointer; transition:all 0.15s; user-select:none; }
@@ -774,7 +775,7 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
           <div>
             <label class="field-label">Current weight (kg)</label>
             <div style="display:flex;gap:6px">
-              <input class="field-input" type="number" id="settingCurrentKg" placeholder="104" step="0.1" min="50" max="250" oninput="calcDuration()" style="flex:1">
+              <input class="field-input" type="number" id="settingCurrentKg" placeholder="104" step="0.1" min="50" max="250" oninput="autoFillTDEE();calcDuration()" style="flex:1">
               <button class="log-btn" style="font-size:0.7rem;padding:8px 12px;white-space:nowrap" onclick="setCurrentWeight()">SET</button>
             </div>
           </div>
@@ -793,6 +794,50 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
             <input class="field-input" type="date" id="settingTargetDate" oninput="calcDuration()">
           </div>
         </div>
+        <div class="duration-inputs" style="grid-template-columns:1fr 1fr 1fr">
+          <div>
+            <label class="field-label">Age (years)</label>
+            <input class="field-input" type="number" id="settingAge" min="16" max="99" placeholder="e.g. 23" oninput="autoFillTDEE()">
+          </div>
+          <div>
+            <label class="field-label">Height (cm)</label>
+            <input class="field-input" type="number" id="settingHeight" min="140" max="220" placeholder="e.g. 177" oninput="autoFillTDEE()">
+          </div>
+          <div>
+            <label class="field-label">Sex</label>
+            <select class="plan-select" id="settingSex" onchange="autoFillTDEE()">
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+            <div class="custom-select" id="sexSelectCustom">
+              <div class="custom-select-trigger" id="sexSelectTrigger" onclick="toggleCustomSelect('sexSelectCustom')">Male</div>
+              <div class="custom-select-dropdown">
+                <div class="custom-select-option selected" data-value="male" onclick="selectCustomOption('sexSelectCustom','settingSex',this)">Male</div>
+                <div class="custom-select-option" data-value="female" onclick="selectCustomOption('sexSelectCustom','settingSex',this)">Female</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="duration-single">
+          <label class="field-label">Activity level</label>
+          <select class="plan-select" id="settingActivityLevel" onchange="autoFillTDEE()">
+            <option value="1.2">Sedentary (desk job, little exercise)</option>
+            <option value="1.375">Lightly active (light exercise 1-3x/week)</option>
+            <option value="1.55" selected>Moderately active (exercise 3-5x/week)</option>
+            <option value="1.725">Very active (hard exercise 6-7x/week)</option>
+            <option value="1.9">Extremely active (physical job + training)</option>
+          </select>
+          <div class="custom-select" id="activitySelectCustom">
+            <div class="custom-select-trigger" id="activitySelectTrigger" onclick="toggleCustomSelect('activitySelectCustom')">Moderately active (exercise 3-5x/week)</div>
+            <div class="custom-select-dropdown">
+              <div class="custom-select-option" data-value="1.2" onclick="selectCustomOption('activitySelectCustom','settingActivityLevel',this)">Sedentary (desk job, little exercise)</div>
+              <div class="custom-select-option" data-value="1.375" onclick="selectCustomOption('activitySelectCustom','settingActivityLevel',this)">Lightly active (light exercise 1-3x/week)</div>
+              <div class="custom-select-option selected" data-value="1.55" onclick="selectCustomOption('activitySelectCustom','settingActivityLevel',this)">Moderately active (exercise 3-5x/week)</div>
+              <div class="custom-select-option" data-value="1.725" onclick="selectCustomOption('activitySelectCustom','settingActivityLevel',this)">Very active (hard exercise 6-7x/week)</div>
+              <div class="custom-select-option" data-value="1.9" onclick="selectCustomOption('activitySelectCustom','settingActivityLevel',this)">Extremely active (physical job + training)</div>
+            </div>
+          </div>
+        </div>
         <div class="duration-inputs">
           <div>
             <label class="field-label">Daily calories (override)</label>
@@ -801,11 +846,13 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
           <div>
             <label class="field-label">TDEE (cal burned/day at rest)</label>
             <input class="field-input" type="number" id="settingTdee" placeholder="2600" step="50" min="1200" max="5000" oninput="calcDuration()">
+            <p class="section-note" style="margin-top:4px;margin-bottom:0" id="tdeeAutoNote">Auto-calculated from Mifflin-St Jeor equation. Override manually if you know your actual TDEE.</p>
           </div>
         </div>
         <div class="duration-single">
           <label class="field-label">Exercise burn (cal/day average)</label>
           <input class="field-input" type="number" id="settingExercise" placeholder="0 — enter avg daily cal burned from training" step="50" min="0" max="2000" oninput="calcDuration()">
+          <p class="section-note" style="margin-top:4px;margin-bottom:0">Enter your 7-day daily average across ALL days, not per-session burn. E.g. if you burn 450cal in 5 sessions/week: (450&times;5)/7 = 321 cal/day average.</p>
         </div>
         <div class="duration-single">
           <label class="field-label">Plan start date</label>
@@ -841,9 +888,24 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
             <div class="calc-result-item"><div class="calc-result-val" id="calcDietBurn">—</div><div class="calc-result-lbl">Diet deficit</div></div>
             <div class="calc-result-item"><div class="calc-result-val" id="calcExBurn">—</div><div class="calc-result-lbl">Exercise contribution</div></div>
           </div>
+          <div id="calcRealisticSection" style="display:none;margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">
+            <div class="calc-result-title">REALISTIC TIMELINE</div>
+            <div class="calc-result-grid">
+              <div class="calc-result-item"><div class="calc-result-val" id="calcRealDays" style="color:var(--accent2)">—</div><div class="calc-result-lbl">Realistic days</div></div>
+              <div class="calc-result-item"><div class="calc-result-val" id="calcRealWeeks" style="color:var(--accent2)">—</div><div class="calc-result-lbl">Realistic weeks</div></div>
+              <div class="calc-result-item"><div class="calc-result-val" id="calcRealRate" style="color:var(--accent2)">—</div><div class="calc-result-lbl">~kg/wk actual</div></div>
+              <div class="calc-result-item"><div class="calc-result-val" id="calcRealEndDate" style="color:var(--accent2)">—</div><div class="calc-result-lbl">Realistic end date</div></div>
+            </div>
+            <div id="calcRealisticNote" style="font-size:0.6rem;color:var(--muted);margin-top:6px;font-family:'DM Mono',monospace;line-height:1.6"></div>
+            <div id="calcWeekByWeekWrap" style="margin-top:8px;display:none">
+              <button onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.textContent=this.nextElementSibling.style.display==='none'?'\u25bc SHOW WEEK-BY-WEEK':'\u25b2 HIDE WEEK-BY-WEEK'" style="background:none;border:1px solid var(--border);border-radius:6px;padding:5px 10px;color:var(--muted);font-family:'DM Mono',monospace;font-size:0.55rem;letter-spacing:1px;cursor:pointer;width:100%;transition:all 0.15s">\u25bc SHOW WEEK-BY-WEEK</button>
+              <div id="calcWeekByWeek" style="display:none;margin-top:6px;padding:8px 10px;background:var(--surface);border:1px solid var(--border);border-radius:6px;font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--muted);line-height:2"></div>
+            </div>
+          </div>
           <div id="calcFlag" style="margin-top:8px;padding:7px 10px;border-radius:6px;font-size:0.75rem;font-weight:700;letter-spacing:1px;display:none"></div>
           <div id="calcWarning" style="font-size:0.72rem;color:var(--muted);margin-top:6px;line-height:1.6;display:none"></div>
           <div id="calcActualNote" style="font-size:0.65rem;color:var(--accent2);margin-top:6px;font-family:'DM Mono',monospace;display:none"></div>
+          <div id="calcComplianceNote" style="font-size:0.6rem;color:var(--muted);margin-top:6px;font-family:'DM Mono',monospace;line-height:1.6;display:none"></div>
           <div id="calcMacroViability" style="font-size:0.68rem;color:var(--muted);margin-top:6px;line-height:1.6;font-family:'DM Mono',monospace;display:none;padding:8px 10px;border-radius:6px;background:var(--surface2);border:1px solid var(--border)"></div>
           <div style="display:flex;gap:8px;margin-top:10px">
             <button class="reset-btn" id="useCalsBtn" onclick="applyCalculatedCalories()" style="display:none;border-color:var(--accent2);color:var(--accent2);flex:1">USE THESE CALORIES</button>
@@ -1062,8 +1124,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '2.0.1';
-const APP_VERSION_MSG = 'Light eating days for bulk & maintenance. Future days viewable. Schedule deletion simplified.';
+const APP_VERSION = '2.1.0';
+const APP_VERSION_MSG = 'Realistic timelines, auto TDEE, supplement tracker, calendar fixes.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -1087,7 +1149,7 @@ function strToDate(s) { const [y,m,d]=s.split('-').map(Number); return new Date(
 // getSettings: always returns a full settings object with defaults. Never returns null.
 // Add any new settings fields here with a default value.
 function getSettings() {
-  return gs(SK.settings) || { plan:'default', currentKg:104, targetKg:91, calories:1500, tdee:2600, risk:'aggressive', startDate:null, exerciseBurn:0 };
+  return gs(SK.settings) || { plan:'default', currentKg:104, targetKg:91, calories:1500, tdee:2600, risk:'aggressive', startDate:null, exerciseBurn:0, age:null, height:null, sex:'male', activityLevel:'1.55' };
 }
 function saveSettings(s) { ss(SK.settings, s); }
 
@@ -2054,6 +2116,9 @@ const PLANS = {
       { id:'e1', group:'EVENING', label:'Change clothes on arriving home', sub:'Trigger signal. Don\'t sit down first.' },
       { id:'e2', group:'EVENING', label:'Evening session (40–45 min)', sub:'AGRO Evening A/B/C — see WORKOUTS tab for today\'s session' },
       { id:'e3', group:'EVENING', label:'Post-workout stretch protocol', sub:'AGRO cooldown — post-session stretch per day, see WORKOUTS tab' },
+      { id:'s1', group:'SUPPLEMENTS', label:'Morning supplements', sub:'Osteocare 2 tabs \u00b7 D3+K2 1 \u00b7 Zinc (EOD only \u2014 Sun/Tue/Thu/Sat) \u00b7 MCT gel 1' },
+      { id:'s2', group:'SUPPLEMENTS', label:'Omega-3 taken', sub:'3 caps with largest meal. Total D3 ~5000 IU/day \u2014 do not add more.' },
+      { id:'s3', group:'SUPPLEMENTS', label:'Evening magnesium', sub:'2 servings before bed (~135mg elemental).' },
       { id:'n2', group:'NIGHT', label:'Sleep before midnight', sub:'Recovery is training. Don\'t skip it.' }
     ],
     checklistFast: [
@@ -2061,7 +2126,10 @@ const PLANS = {
       { id:'wf2', group:'FAST', label:'Electrolyte tablet mid-morning', sub:'Sodium + potassium. Non-negotiable on a fast.' },
       { id:'wf3', group:'FAST', label:'Black coffee or green tea only', sub:'Appetite suppression. Zero calories. Allowed.' },
       { id:'wf4', group:'FAST', label:'3.5L+ water total today', sub:'Sip constantly. Don\'t chug all at once.' },
-      { id:'wf5', group:'FAST', label:'No food consumed today', sub:'Fast is unbroken. If you break it — log it honestly.' },
+      { id:'wf5', group:'FAST', label:'No food consumed today', sub:'Fast is unbroken. If you break it \u2014 log it honestly.' },
+      { id:'sf1', group:'SUPPLEMENTS', label:'Morning supplements', sub:'Osteocare 2 tabs \u00b7 D3+K2 1 \u00b7 Zinc (EOD only) \u00b7 2 MCT gels before training' },
+      { id:'sf2', group:'SUPPLEMENTS', label:'Electrolytes taken', sub:'1 tablet mid-morning \u00b7 1 tablet 20 min before evening training' },
+      { id:'sf3', group:'SUPPLEMENTS', label:'Evening magnesium', sub:'4 servings before bed (~270mg elemental). Higher on fast days.' },
       { id:'wf6', group:'FAST', label:'Magnesium 400mg before sleep', sub:'Prevents cramps. Sleep quality tanks on fasts without this.' }
     ],
 
@@ -2314,7 +2382,15 @@ const PLANS = {
         <div class="rule-num">THE ONE THING THAT BREAKS YOUR DEFICIT</div>
         <div class="rule-text">Unplanned social eating</div>
         <div class="rule-sub">Fix: eat a protein snack 30 min before any social meal. You arrive not hungry. You eat less automatically. No willpower required.</div>
-      </div>`;
+      </div>
+
+      <div class="section-title" style="margin-top:8px">SUPPLEMENT <span>PROTOCOL</span></div>
+      ${ruleCard('MORNING STACK','Osteocare 2 tabs \u00b7 D3+K2 1 pill \u00b7 MCT gel (1 eating / 2 fast)','Total D3 ~5000 IU/day \u2014 do not add more D3 from any source.','#82e0aa')}
+      ${ruleCard('ZINC 50mg \u2014 EVERY OTHER DAY ONLY','Sun \u00b7 Tue \u00b7 Thu \u00b7 Sat. Never daily.','Daily 50mg exceeds the safe upper limit and depletes copper over weeks.','#82e0aa')}
+      ${ruleCard('MAGNESIUM COMPLEX','Eating days: 2 servings before bed. Fast days: 4 servings before bed.','Higher dose on fast days replaces what fasting depletes. Most critical supplement to keep stocked.','#82e0aa')}
+      ${ruleCard('OMEGA-3 FISH OIL','3 capsules with largest meal (eating days). Skip on full fasts.','Min 600mg EPA+DHA per capsule. Anti-inflammatory, cortisol buffer, joint recovery.','#82e0aa')}
+      ${ruleCard('ELECTROLYTES \u2014 FAST DAYS ONLY','2 tablets on Sun/Wed/Sat: 1 mid-morning + 1 pre-evening training.','Prevents palpitations and headaches during fasted training.','#82e0aa')}
+      ${ruleCard('STOCK CHECK','Before leaving Dubai: Magnesium \u00d72 packs \u00b7 Osteocare \u00d71 pack (90 tabs) \u00b7 Omega-3 if budget allows.','Magnesium runs out first (~3 weeks). Osteocare ~5 weeks. Omega-3: 30\u201350 AED at Life Pharmacy.','#82e0aa')}`;
     },
 
     rulesContent(s) {
@@ -3235,7 +3311,7 @@ function renderTodayChecklist() {
     if(item.group !== currentGroup) {
       if(currentGroup) html += '</div>';
       currentGroup = item.group;
-      const tagColor = item.group==='MORNING'?'tag-morning':item.group==='EATING'?'tag-food':item.group==='EVENING'?'tag-evening':item.group==='FAST'?'tag-fast':item.group==='LIGHT'?'tag-light':'tag-rules';
+      const tagColor = item.group==='MORNING'?'tag-morning':item.group==='EATING'?'tag-food':item.group==='EVENING'?'tag-evening':item.group==='FAST'?'tag-fast':item.group==='LIGHT'?'tag-light':item.group==='SUPPLEMENTS'?'tag-supplements':'tag-rules';
       const groupId = item.group==='EATING'?' id="foodGroup"':item.group==='FAST'?' id="fastGroup"':item.group==='LIGHT'?' id="lightGroup"':'';
       // Group time labels
       let timeLabel = '';
@@ -3245,6 +3321,7 @@ function renderTodayChecklist() {
       else if(item.group==='MORNING') timeLabel = 'Morning';
       else if(item.group==='EVENING') timeLabel = 'Evening';
       else if(item.group==='NIGHT') timeLabel = 'Before sleep';
+      else if(item.group==='SUPPLEMENTS') timeLabel = 'Daily stack';
       const foodStyle = (item.group==='EATING' && plan.foodGroupBg) ? ` style="background:${plan.foodGroupBg};color:${plan.foodGroupColor}"` : '';
       html += `<div class="checklist-group"${groupId}><div class="group-header"><span class="group-tag ${tagColor}"${foodStyle}>${item.group==='EATING' ? (plan.foodGroupLabel||'EATING') : item.group}</span><span class="group-time">${timeLabel}</span></div>`;
     }
@@ -3985,6 +4062,7 @@ function changeMonth(dir) {
 function renderCalendar() {
   document.getElementById('monthTitle').innerHTML = `${MONTHS_LIST[calMonth]} <span>${calYear}</span>`;
   const now = new Date(); now.setHours(0,0,0,0);
+  const todayDateStr = todayStr();
   const firstDay = new Date(calYear,calMonth,1).getDay();
   const daysInMonth = new Date(calYear,calMonth+1,0).getDate();
   const dayLogs = gs(SK.dayLogs)||{};
@@ -4006,7 +4084,7 @@ function renderCalendar() {
     const dt = new Date(calYear,calMonth,d); dt.setHours(0,0,0,0);
     const dateStr = dateToStr(dt);
     const isFuture = dt>now;
-    const isToday = dt.getTime()===now.getTime();
+    const isToday = dateStr === todayDateStr;
     const isFast = !!fastDays[dateStr];
     const isLight = !!lightDays[dateStr];
     const log = dayLogs[dateStr];
@@ -4015,17 +4093,34 @@ function renderCalendar() {
 
     let cls = 'cal-cell';
     if(isToday) cls+=' today-cal';
-    if(isFuture) cls+=' future-cal';
+    if(isFuture && !isToday) cls+=' future-cal';
     if(isPlanDay) cls+=' plan-day';
 
-    if(isFuture){
+    if(isFuture && !isToday){
       // Future days — show day type color as preview
       if(isFast){cls+=' cal-fast';}
       else if(isLight){cls+=' cal-light';}
     }
+    else if(isToday) {
+      // Current day is ALWAYS in-progress — never classify as missed or partial.
+      // Only show done (green) if all items are checked, to give positive feedback.
+      // Otherwise show no compliance color — the day is still ongoing.
+      if(log) {
+        const checks = Object.values(log.checks||{}).filter(Boolean).length;
+        const total  = Object.keys(log.checks||{}).length;
+        if(isFast)  { cls+=' cal-fast'; }
+        else if(isLight){ cls+=' cal-light'; }
+        else if(checks > 0 && checks === total && total > 0){ cls+=' cal-done'; done++; }
+        // Partial or zero checks on today: no color — day is in progress
+      } else {
+        // No log at all yet today — no color
+        if(isFast) cls+=' cal-fast';
+        else if(isLight) cls+=' cal-light';
+      }
+    }
     else {
+      // Past days — judge retroactively
       if(isFast){
-        // Fast days still need checklist completion to count
         if(log){
           const checks = Object.values(log.checks||{}).filter(Boolean).length;
           const total = Object.keys(log.checks||{}).length;
@@ -4035,7 +4130,6 @@ function renderCalendar() {
         } else {cls+=' cal-fast'; fasts++;}
       }
       else if(isLight){
-        // Light eating days
         if(log){
           const checks = Object.values(log.checks||{}).filter(Boolean).length;
           const total = Object.keys(log.checks||{}).length;
@@ -4050,7 +4144,7 @@ function renderCalendar() {
         if(checks>0&&checks<total){cls+=' cal-partial';partial++;}
         else if(checks===total&&total>0){cls+=' cal-done';done++;}
         else{cls+=' cal-missed';missed++;}
-      } else if(!isToday){cls+=' cal-missed';missed++;}
+      } else {cls+=' cal-missed';missed++;}
     }
 
     const cell = document.createElement('div');
@@ -4144,7 +4238,7 @@ function openDayModal(dateStr, dt) {
         if(item.group !== currentGroup) {
           if(currentGroup) html += `</div>`;
           currentGroup = item.group;
-          const tagColor = item.group==='MORNING'?'tag-morning':item.group==='EATING'?'tag-food':item.group==='EVENING'?'tag-evening':item.group==='FAST'?'tag-fast':item.group==='LIGHT'?'tag-light':'tag-rules';
+          const tagColor = item.group==='MORNING'?'tag-morning':item.group==='EATING'?'tag-food':item.group==='EVENING'?'tag-evening':item.group==='FAST'?'tag-fast':item.group==='LIGHT'?'tag-light':item.group==='SUPPLEMENTS'?'tag-supplements':'tag-rules';
           html += `<div class="modal-check-group"><div class="modal-group-label ${tagColor}" style="margin-bottom:6px">${item.group}</div>`;
         }
         const done = !!checks[item.id];
@@ -4427,9 +4521,16 @@ function openSettings() {
   document.getElementById('settingTargetDate').value = '';
   document.getElementById('settingStartDate').value = s.startDate||todayStr();
   document.getElementById('settingRisk').value = s.risk||'aggressive';
+  // TDEE auto-calc fields
+  document.getElementById('settingAge').value = s.age||'';
+  document.getElementById('settingHeight').value = s.height||'';
+  document.getElementById('settingSex').value = s.sex||'male';
+  document.getElementById('settingActivityLevel').value = s.activityLevel||'1.55';
   onPlanSelectChange();
   syncCustomSelect('planSelectCustom', 'planSelect');
   syncCustomSelect('riskSelectCustom', 'settingRisk');
+  syncCustomSelect('sexSelectCustom', 'settingSex');
+  syncCustomSelect('activitySelectCustom', 'settingActivityLevel');
   document.getElementById('settingsOverlay').classList.add('active');
 }
 
@@ -4443,7 +4544,18 @@ function onPlanSelectChange() {
   const desc = document.getElementById('planDescription');
   desc.textContent = plan.subtitle || '';
   desc.className = 'plan-description' + (plan.descClass ? ' ' + plan.descClass : '');
-  calcDuration();
+  // Auto-select activity level default for this plan
+  const actDefault = PLAN_ACTIVITY_DEFAULTS[val] || '1.55';
+  document.getElementById('settingActivityLevel').value = actDefault;
+  syncCustomSelect('activitySelectCustom', 'settingActivityLevel');
+  // Update TDEE note for AGRO
+  const noteEl = document.getElementById('tdeeAutoNote');
+  if(noteEl) {
+    noteEl.textContent = val === 'agro'
+      ? 'AGRO plan uses 1.725\u00d7 multiplier (very active: double sessions + active job). Adjust if your job is sedentary.'
+      : 'Auto-calculated from Mifflin-St Jeor equation. Override manually if you know your actual TDEE.';
+  }
+  autoFillTDEE();
 }
 
 // confirmPlan: saves all settings inputs to storage, updates the header badge,
@@ -4463,6 +4575,13 @@ function confirmPlan() {
   if(!isNaN(curInput) && curInput > 0) s.currentKg = curInput;
   if(!isNaN(tgtInput) && tgtInput > 0) s.targetKg = tgtInput;
   s.risk = document.getElementById('settingRisk').value || 'aggressive';
+  // TDEE auto-calc fields
+  const ageInput = parseFloat(document.getElementById('settingAge').value);
+  s.age = (!isNaN(ageInput) && ageInput >= 16) ? ageInput : null;
+  const heightInput = parseFloat(document.getElementById('settingHeight').value);
+  s.height = (!isNaN(heightInput) && heightInput >= 140) ? heightInput : null;
+  s.sex = document.getElementById('settingSex').value || 'male';
+  s.activityLevel = document.getElementById('settingActivityLevel').value || '1.55';
   saveSettings(s);
   applyPlanUI(val);
   dispatch('PLAN_CHANGED');
@@ -4494,6 +4613,41 @@ function setCurrentWeight() {
   updateGoalBar(val);
   dispatch('WEIGHT_LOGGED');
   showAlert('Current weight set to ' + val + ' kg.');
+}
+
+// ─── TDEE AUTO-CALCULATION (Mifflin-St Jeor) ────────────────────────────────
+// Computes TDEE from age, height, sex, weight, and activity level.
+// Returns null if any required field is missing.
+const PLAN_ACTIVITY_DEFAULTS = {
+  default:     '1.375',
+  agro:        '1.725',
+  cut:         '1.55',
+  bulk:        '1.55',
+  maintenance: '1.375'
+};
+
+function computeAutoTDEE() {
+  const weight = parseFloat(document.getElementById('settingCurrentKg').value) || getLatestWeight();
+  const height = parseFloat(document.getElementById('settingHeight').value);
+  const age    = parseFloat(document.getElementById('settingAge').value);
+  const sex    = document.getElementById('settingSex').value;
+  const actMult = parseFloat(document.getElementById('settingActivityLevel').value) || 1.55;
+  if(!weight || !height || !age || !sex) return null;
+  const bmr = sex === 'male'
+    ? (10 * weight) + (6.25 * height) - (5 * age) + 5
+    : (10 * weight) + (6.25 * height) - (5 * age) - 161;
+  return Math.round(bmr * actMult);
+}
+
+function autoFillTDEE() {
+  const tdee = computeAutoTDEE();
+  if(tdee && tdee > 0) {
+    const field = document.getElementById('settingTdee');
+    field.value = tdee;
+    field.style.borderColor = 'var(--accent2)';
+    setTimeout(() => field.style.borderColor = '', 2000);
+    calcDuration();
+  }
 }
 
 // ─── UNIFIED GOAL CALCULATOR ─────────────────────────────────────────────────
@@ -4554,6 +4708,10 @@ function calcDuration() {
   useCalsBtn.style.display='none';
   applyNutrBtn.style.display='none';
   if(macroViabilityEl) macroViabilityEl.style.display='none';
+  const realSectionClear = document.getElementById('calcRealisticSection');
+  if(realSectionClear) realSectionClear.style.display='none';
+  const compNoteClear = document.getElementById('calcComplianceNote');
+  if(compNoteClear) compNoteClear.style.display='none';
 
   // Need at minimum: current kg and target kg
   if(isNaN(curKg)||isNaN(tgtKg)){
@@ -4826,6 +4984,64 @@ function calcDuration() {
       } else {
         macroViabilityEl.style.display = 'none';
       }
+    }
+  }
+
+  // ── REALISTIC TIMELINE (compliance-adjusted) ──
+  const complianceRates = { standard: 0.70, aggressive: 0.82, unrestricted: 1.00 };
+  const complianceRate = complianceRates[risk] || 0.82;
+  const realSection = document.getElementById('calcRealisticSection');
+  const compNote = document.getElementById('calcComplianceNote');
+
+  if(planMode !== 'maintenance' && complianceRate < 1.0) {
+    const realDays = Math.ceil(calcDays / complianceRate);
+    const realWeeks = Math.ceil(realDays / 7);
+    const realKgPerWeek = kgPerWeek * complianceRate;
+    let realEndDateStr = '—';
+    if(startDateStr) {
+      const sd2 = strToDate(startDateStr);
+      sd2.setDate(sd2.getDate() + realDays);
+      realEndDateStr = sd2.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    }
+    const realRateSign = planMode === 'bulk' ? '+' : '-';
+    document.getElementById('calcRealDays').textContent = realDays;
+    document.getElementById('calcRealWeeks').textContent = realWeeks;
+    document.getElementById('calcRealRate').textContent = realRateSign + realKgPerWeek.toFixed(2) + 'kg/wk';
+    document.getElementById('calcRealEndDate').textContent = realEndDateStr;
+    document.getElementById('calcRealisticNote').textContent =
+      '\u26a1 App timeline = theoretical max at 100% compliance. Realistic = adjusted for real-world adherence at ' +
+      Math.round(complianceRate * 100) + '% (' + risk + ' mode).';
+    realSection.style.display = 'block';
+
+    // Week-by-week breakdown (max 8 rows or until target reached)
+    const wbwWrap = document.getElementById('calcWeekByWeekWrap');
+    const wbwEl = document.getElementById('calcWeekByWeek');
+    let wbwHtml = '';
+    const absRealRate = Math.abs(realKgPerWeek);
+    for(let n = 1; n <= 8; n++) {
+      const projW = planMode === 'bulk'
+        ? curKg + (realKgPerWeek * n)
+        : curKg - (absRealRate * n);
+      wbwHtml += 'Week ' + n + ' \u2192 ~' + projW.toFixed(1) + 'kg<br>';
+      if(planMode === 'bulk' && projW >= tgtKg) break;
+      if(planMode !== 'bulk' && projW <= tgtKg) break;
+    }
+    wbwEl.innerHTML = wbwHtml;
+    wbwWrap.style.display = 'block';
+    // Reset toggle state
+    wbwEl.style.display = 'none';
+    wbwWrap.querySelector('button').textContent = '\u25bc SHOW WEEK-BY-WEEK';
+  } else {
+    realSection.style.display = 'none';
+  }
+
+  if(compNote) {
+    if(complianceRate < 1.0) {
+      compNote.textContent = '\u26a1 App timeline = theoretical max at 100% compliance. Realistic = adjusted for real-world adherence at ' +
+        Math.round(complianceRate * 100) + '% (' + risk + ' mode).';
+      compNote.style.display = 'block';
+    } else {
+      compNote.style.display = 'none';
     }
   }
 
@@ -5386,6 +5602,19 @@ document.getElementById('settingsOverlay').addEventListener('click',e=>{if(e.tar
   updateManageSchedBtn();
   checkVersionUpdate();
 })();
+
+// ─── VISIBILITY CHANGE — CALENDAR REFRESH ON APP FOREGROUND ─────────────────
+// When the PWA returns from background (or user switches back to the tab),
+// re-render the calendar to catch date changes across midnight and update
+// today's day label and checklist.
+document.addEventListener('visibilitychange', () => {
+  if(document.visibilityState === 'visible') {
+    if(document.getElementById('tab-months').classList.contains('active')) {
+      renderCalendar();
+    }
+    document.getElementById('todayDayName').textContent = FULL_DAYS[new Date().getDay()];
+  }
+});
 </script>
 <script>
 // ─── SERVICE WORKER REGISTRATION & AUTO-UPDATE ───────────────────────────────
