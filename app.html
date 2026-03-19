@@ -4584,13 +4584,16 @@ function calcDuration() {
   }
 
   // Write results
+  const defSurpLabel = planMode === 'bulk' ? 'surplus' : (planMode === 'maintenance' ? 'balance' : 'deficit');
   document.getElementById('calcWeeks').textContent = calcWeeks;
   document.getElementById('calcDays').textContent   = calcDays;
   document.getElementById('calcCals').textContent   = calcCals >= 0 ? calcCals : 0;
   document.getElementById('calcRate').textContent   = kgPerWeek + 'kg/wk';
   document.getElementById('calcDeficit').textContent= Math.round(weeklySurplusOrDeficit/1000)+'k/wk';
+  document.getElementById('calcDeficit').closest('.calc-result-item').querySelector('.calc-result-lbl').textContent = 'kcal ' + defSurpLabel + '/wk';
   document.getElementById('calcEndDate').textContent= endDateStr;
-  document.getElementById('calcDietBurn').textContent = Math.round(dietDeficit)+'cal' + (planMode === 'bulk' ? ' surplus' : '');
+  document.getElementById('calcDietBurn').textContent = Math.round(dietDeficit)+'cal';
+  document.getElementById('calcDietBurn').closest('.calc-result-item').querySelector('.calc-result-lbl').textContent = planMode === 'bulk' ? 'Diet surplus' : (planMode === 'maintenance' ? 'Diet balance' : 'Diet deficit');
   document.getElementById('calcExBurn').textContent   = planMode === 'maintenance' ? 'n/a' : (exerciseContribution > 0 ? '+'+Math.round(exerciseContribution)+'cal/day' : 'none entered');
 
   // Flag
