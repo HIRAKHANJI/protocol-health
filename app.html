@@ -1039,8 +1039,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '1.9.0';
-const APP_VERSION_MSG = 'New plans: Default Cut, Default Bulk, Default Maintenance.';
+const APP_VERSION = '1.10.0';
+const APP_VERSION_MSG = 'Goal calculator now supports bulk & maintenance. Radar chart improved. Weight log moved to morning.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -1838,6 +1838,7 @@ const PLANS = {
       { id:'m1', group:'MORNING', label:'Wake & 500ml water immediately', sub:'Before phone. Non-negotiable.' },
       { id:'m2', group:'MORNING', label:'10 min daily mobility (CARs + neck)', sub:'Hip CARs × 5 · Cat-cow × 10 · Thoracic rotation · Wrist CARs · Neck nods' },
       { id:'m3', group:'MORNING', label:'Morning workout (20 min)', sub:'Morning A/B — see WORKOUTS tab' },
+      { id:'m4', group:'MORNING', label:'Log morning weight in TRACK tab', sub:'Weigh first thing after waking, before food.' },
       { id:'f1', group:'EATING', label:'Protein in first meal (60-70g)', sub:'Eggs · chicken · tuna · lentils. Anchor here first.' },
       { id:'f2', group:'EATING', label:'Stayed under calorie ceiling', sub:'Hard ceiling. Never more.' },
       { id:'f3', group:'EATING', label:'Last meal before 6PM', sub:'12+ hour overnight fast every day.' },
@@ -1846,7 +1847,6 @@ const PLANS = {
       { id:'e1', group:'EVENING', label:'Change clothes on arriving home', sub:'Trigger signal. Don\'t sit down first.' },
       { id:'e2', group:'EVENING', label:'Evening session (40–45 min)', sub:'Evening A/B/C — see WORKOUTS tab' },
       { id:'e3', group:'EVENING', label:'Post-workout stretch protocol', sub:'See WORKOUTS tab → today\'s cooldown' },
-      { id:'n1', group:'NIGHT', label:'Log morning weight in TRACK tab', sub:'Weigh first thing after waking, before food.' },
       { id:'n2', group:'NIGHT', label:'Sleep before midnight', sub:'Recovery is training. Don\'t skip it.' }
     ],
     checklistFast: [
@@ -2022,6 +2022,7 @@ const PLANS = {
       { id:'m1', group:'MORNING', label:'Wake & 500ml water immediately', sub:'Before phone. Non-negotiable.' },
       { id:'m2', group:'MORNING', label:'10 min daily mobility (CARs + neck)', sub:'Hip CARs × 5 · Cat-cow × 10 · Thoracic rotation · Wrist CARs · Neck nods — AGRO morning A/B' },
       { id:'m3', group:'MORNING', label:'Morning workout (20 min)', sub:'AGRO Morning A/B — see WORKOUTS tab for today\'s split' },
+      { id:'m4', group:'MORNING', label:'Log morning weight in TRACK tab', sub:'Weigh first thing after waking, before food.' },
       { id:'f1', group:'EATING', label:'Protein in first meal (60-70g)', sub:'Eggs · chicken · tuna · lentils. Anchor here first.' },
       { id:'f2', group:'EATING', label:'Stayed under calorie ceiling', sub:'Hard ceiling. Never more.' },
       { id:'f3', group:'EATING', label:'Last meal before 6PM', sub:'16+ hour overnight fast every day.' },
@@ -2030,7 +2031,6 @@ const PLANS = {
       { id:'e1', group:'EVENING', label:'Change clothes on arriving home', sub:'Trigger signal. Don\'t sit down first.' },
       { id:'e2', group:'EVENING', label:'Evening session (40–45 min)', sub:'AGRO Evening A/B/C — see WORKOUTS tab for today\'s session' },
       { id:'e3', group:'EVENING', label:'Post-workout stretch protocol', sub:'AGRO cooldown — post-session stretch per day, see WORKOUTS tab' },
-      { id:'n1', group:'NIGHT', label:'Log morning weight in TRACK tab', sub:'Weigh first thing after waking, before food.' },
       { id:'n2', group:'NIGHT', label:'Sleep before midnight', sub:'Recovery is training. Don\'t skip it.' }
     ],
     checklistFast: [
@@ -2370,13 +2370,13 @@ PLANS.cut = {
     { id:'m1', group:'MORNING', label:'Wake & 500ml water immediately', sub:'Before phone. Non-negotiable.' },
     { id:'m2', group:'MORNING', label:'10 min mobility (CARs + warm-up)', sub:'Hip CARs × 5 · Cat-cow × 10 · Thoracic rotation · Wrist CARs' },
     { id:'m3', group:'MORNING', label:'Training session (if training day)', sub:'See WORKOUTS tab for today\'s session' },
+    { id:'m4', group:'MORNING', label:'Log morning weight in TRACK tab', sub:'Weigh first thing after waking, before food.' },
     { id:'f1', group:'EATING', label:'Hit protein target', sub:'1.6g/kg minimum. Protein anchors every meal.' },
     { id:'f2', group:'EATING', label:'Stayed under calorie ceiling', sub:'400–600 cal below TDEE. Hard ceiling.' },
     { id:'f3', group:'EATING', label:'No liquid calories', sub:'Water · black coffee · plain tea only.' },
     { id:'f4', group:'EATING', label:'2.5L+ water across the day', sub:'500ml wake · 500ml pre-meal · sip continuously' },
     { id:'e1', group:'EVENING', label:'Evening session (if training day)', sub:'See WORKOUTS tab for today\'s session' },
     { id:'e2', group:'EVENING', label:'Post-workout cooldown stretches', sub:'5–10 min static stretching. See WORKOUTS tab.' },
-    { id:'n1', group:'NIGHT', label:'Log weight in TRACK tab', sub:'Weigh first thing after waking, before food.' },
     { id:'n2', group:'NIGHT', label:'Sleep before midnight', sub:'Recovery is training. Don\'t skip it.' }
   ],
   checklistFast: [
@@ -2601,13 +2601,13 @@ PLANS.bulk = {
     { id:'m1', group:'MORNING', label:'Wake & 500ml water immediately', sub:'Before phone. Non-negotiable.' },
     { id:'m2', group:'MORNING', label:'10 min mobility (CARs + warm-up)', sub:'Hip CARs × 5 · Cat-cow × 10 · Thoracic rotation · Wrist CARs' },
     { id:'m3', group:'MORNING', label:'Training session (if training day)', sub:'See WORKOUTS tab for today\'s session' },
+    { id:'m4', group:'MORNING', label:'Log morning weight in TRACK tab', sub:'Track weekly trend. Aim 0.25–0.5% bodyweight/week gain.' },
     { id:'f1', group:'EATING', label:'Hit protein target', sub:'1.4–1.8g/kg. Protein density first in every meal.' },
     { id:'f2', group:'EATING', label:'Hit calorie ceiling', sub:'250–400 cal above TDEE. Eat enough to grow.' },
     { id:'f3', group:'EATING', label:'Carbs around training', sub:'30–60 min before + within 60 min after session.' },
     { id:'f4', group:'EATING', label:'2.5–3L water across the day', sub:'Hydration supports muscle protein synthesis.' },
     { id:'e1', group:'EVENING', label:'Evening session (most days)', sub:'See WORKOUTS tab for today\'s session' },
     { id:'e2', group:'EVENING', label:'Post-workout cooldown stretches', sub:'5–10 min static stretching. See WORKOUTS tab.' },
-    { id:'n1', group:'NIGHT', label:'Log weight in TRACK tab', sub:'Track weekly trend. Aim 0.25–0.5% bodyweight/week gain.' },
     { id:'n2', group:'NIGHT', label:'Sleep 8+ hours', sub:'Growth hormone peaks during deep sleep. Critical for muscle growth.' }
   ],
   checklistFast: [
@@ -2842,11 +2842,11 @@ PLANS.maintenance = {
     { id:'m1', group:'MORNING', label:'Wake & 500ml water', sub:'Hydration first.' },
     { id:'m2', group:'MORNING', label:'Mobility or morning movement (optional)', sub:'Hip CARs, light stretch, or short walk.' },
     { id:'m3', group:'MORNING', label:'Training session (if training day)', sub:'See WORKOUTS tab for today\'s session' },
+    { id:'m4', group:'MORNING', label:'Log weight (weekly minimum)', sub:'Track weekly trend. Weight should be stable ±1.5kg.' },
     { id:'f1', group:'EATING', label:'Hit protein target', sub:'1.2–1.6g/kg. Protein in every meal.' },
     { id:'f2', group:'EATING', label:'Stay near calorie ceiling (±200 cal)', sub:'At TDEE. Small daily variance is fine.' },
     { id:'f3', group:'EATING', label:'2L+ water across the day', sub:'Sip continuously throughout the day.' },
     { id:'e1', group:'EVENING', label:'Evening session or mobility work', sub:'See WORKOUTS tab. Mobility on rest days.' },
-    { id:'n1', group:'NIGHT', label:'Log weight (weekly minimum)', sub:'Track weekly trend. Weight should be stable ±1.5kg.' },
     { id:'n2', group:'NIGHT', label:'Sleep before midnight', sub:'Consistency matters more than duration.' }
   ],
   checklistFast: [
@@ -3700,14 +3700,14 @@ function renderRadar() {
       const p = pt(angle, radius);
       points.push(`${p.x},${p.y}`);
     }
-    svg += `<polygon points="${points.join(' ')}" fill="none" stroke="#222" stroke-width="0.5" opacity="0.6"/>`;
+    svg += `<polygon points="${points.join(' ')}" fill="none" stroke="#444" stroke-width="0.8" opacity="0.7"/>`;
   }
 
   // Axis lines
   for (let i = 0; i < n; i++) {
     const angle = startAngle + i * angleStep;
     const p = pt(angle, maxR);
-    svg += `<line x1="${cx}" y1="${cy}" x2="${p.x}" y2="${p.y}" stroke="#222" stroke-width="0.5" opacity="0.4"/>`;
+    svg += `<line x1="${cx}" y1="${cy}" x2="${p.x}" y2="${p.y}" stroke="#444" stroke-width="0.7" opacity="0.5"/>`;
   }
 
   // Data polygon
@@ -3720,7 +3720,7 @@ function renderRadar() {
     dataPoints.push(p);
   }
   const polyStr = dataPoints.map(p => `${p.x},${p.y}`).join(' ');
-  svg += `<polygon points="${polyStr}" fill="rgba(200,245,66,0.12)" stroke="var(--accent)" stroke-width="1.5" stroke-linejoin="round"/>`;
+  svg += `<polygon points="${polyStr}" fill="rgba(200,245,66,0.12)" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/>`;
 
   // Data points (dots) and labels
   // Short labels so they fit on mobile
@@ -3734,7 +3734,7 @@ function renderRadar() {
     // Push labels out with enough gap — further for top/bottom to avoid overlap
     const isTop = (angle > -Math.PI * 0.75 && angle < -Math.PI * 0.25);
     const isBottom = (angle > Math.PI * 0.25 && angle < Math.PI * 0.75);
-    const labelDist = (isTop || isBottom) ? maxR + 22 : maxR + 18;
+    const labelDist = (isTop || isBottom) ? maxR + 26 : maxR + 22;
     const labelP = pt(angle, labelDist);
 
     // Dot — dimmed if no data
@@ -3746,19 +3746,19 @@ function renderRadar() {
     const dy = labelP.y < cy ? '-0.2em' : '1em';
     const displayLabel = shortLabels[axes[i].label] || axes[i].label;
     const labelFill = axes[i].noData ? '#444' : '#666';
-    svg += `<text x="${labelP.x}" y="${labelP.y}" text-anchor="${anchor}" dy="${dy}" fill="${labelFill}" font-family="'DM Mono',monospace" font-size="7.5" letter-spacing="0.5">${displayLabel}</text>`;
+    svg += `<text x="${labelP.x}" y="${labelP.y}" text-anchor="${anchor}" dy="${dy}" fill="${labelFill}" font-family="'DM Mono',monospace" font-size="10" letter-spacing="0.5">${displayLabel}</text>`;
     // Value beneath label — show "—" for no-data
     const valDy = labelP.y < cy ? '0.8em' : '2em';
     const valText = axes[i].noData ? '—' : `${axes[i].value}%`;
     const valColor = axes[i].noData ? '#444' : axes[i].color;
-    svg += `<text x="${labelP.x}" y="${labelP.y}" text-anchor="${anchor}" dy="${valDy}" fill="${valColor}" font-family="'DM Mono',monospace" font-size="7" font-weight="600">${valText}</text>`;
+    svg += `<text x="${labelP.x}" y="${labelP.y}" text-anchor="${anchor}" dy="${valDy}" fill="${valColor}" font-family="'DM Mono',monospace" font-size="9.5" font-weight="600">${valText}</text>`;
   }
 
   // Center % ring labels (only 50 and 100 to reduce clutter)
   [2,4].forEach(r => {
     const radius = (r / rings) * maxR;
     const pct = r * 25;
-    svg += `<text x="${cx + 3}" y="${cy - radius + 8}" fill="#333" font-family="'DM Mono',monospace" font-size="6">${pct}</text>`;
+    svg += `<text x="${cx + 3}" y="${cy - radius + 8}" fill="#333" font-family="'DM Mono',monospace" font-size="8">${pct}</text>`;
   });
 
   svg += '</svg>';
@@ -4394,9 +4394,18 @@ function calcDuration() {
     resultEl.classList.remove('visible'); schedBtn.classList.remove('visible'); return;
   }
 
-  // Hard rejects
-  if(tgtKg >= curKg) {
-    flagEl.textContent = '✗ TARGET WEIGHT IS HIGHER THAN CURRENT';
+  // Determine plan goal direction
+  const plan = PLANS[planVal] || PLANS.default;
+  const planMode = planVal === 'bulk' ? 'bulk' : (planVal === 'maintenance' ? 'maintenance' : 'cut');
+
+  // Hard rejects — plan-aware
+  if(planMode === 'cut' && tgtKg >= curKg) {
+    flagEl.textContent = '✗ TARGET WEIGHT MUST BE LOWER THAN CURRENT FOR A CUT';
+    flagEl.style.cssText='display:block;background:rgba(255,68,68,0.12);color:var(--danger);padding:7px 10px;border-radius:6px;font-size:0.75rem;font-weight:700;letter-spacing:1px';
+    resultEl.classList.add('visible'); schedBtn.classList.remove('visible'); return;
+  }
+  if(planMode === 'bulk' && tgtKg <= curKg) {
+    flagEl.textContent = '✗ TARGET WEIGHT MUST BE HIGHER THAN CURRENT FOR A BULK';
     flagEl.style.cssText='display:block;background:rgba(255,68,68,0.12);color:var(--danger);padding:7px 10px;border-radius:6px;font-size:0.75rem;font-weight:700;letter-spacing:1px';
     resultEl.classList.add('visible'); schedBtn.classList.remove('visible'); return;
   }
@@ -4406,55 +4415,84 @@ function calcDuration() {
     resultEl.classList.add('visible'); schedBtn.classList.remove('visible'); return;
   }
 
-  const plan = PLANS[planVal] || PLANS.default;
+  // plan already defined above (planMode check)
   const fastDaysPerWeek = plan.fastDaysPerWeek || 0;
   const eatDaysPerWeek  = 7 - fastDaysPerWeek;
-  const totalKg         = curKg - tgtKg;
-  const totalCalDeficit = totalKg * 7700;
+  const totalKg         = Math.abs(curKg - tgtKg);  // always positive — weight to change
+  const totalCalChange  = totalKg * 7700;            // total calories to gain or lose
 
-  let calcDays, calcCals, weeklyDeficit, dailyDeficit, impliedRate;
+  let calcDays, calcCals, weeklySurplusOrDeficit, dailySurplusOrDeficit, impliedRate;
 
-  if(!isNaN(totalDays) && totalDays > 0) {
-    // User gave a deadline — calculate required calories
-    dailyDeficit = totalCalDeficit / totalDays;
-    weeklyDeficit = dailyDeficit * 7;
-    // Exercise burns on BOTH eating days and fast days — subtract from required diet deficit.
-    // weeklyDeficit = total caloric deficit needed from all sources.
-    // Exercise covers some of it, so diet (eating + fasting) only needs to cover the rest.
-    const weeklyExerciseContribution = exerciseBurnPerDay * 7;
-    const weeklyDeficitAfterExercise = Math.max(0, weeklyDeficit - weeklyExerciseContribution);
-
-    // Fast days contribute fastDaysPerWeek * tdee (base TDEE, not including exercise which is already subtracted)
-    const fastDayContribution = fastDaysPerWeek * tdee;
-    const dietWeeklyDeficit = weeklyDeficitAfterExercise - fastDayContribution;
-    if(eatDaysPerWeek > 0 && dietWeeklyDeficit > 0) {
-      calcCals = Math.round(tdee - (dietWeeklyDeficit / eatDaysPerWeek));
+  // ── MAINTENANCE MODE — no weight change, just a schedule ──
+  if(planMode === 'maintenance') {
+    calcCals = hasCalOverride ? calOverride : tdee;
+    calcDays = (!isNaN(totalDays) && totalDays > 0) ? totalDays : 90; // default 90-day schedule
+    weeklySurplusOrDeficit = 0;
+    dailySurplusOrDeficit = 0;
+    impliedRate = '0.00';
+  }
+  // ── BULK MODE — surplus math (target > current) ──
+  else if(planMode === 'bulk') {
+    if(!isNaN(totalDays) && totalDays > 0) {
+      // User gave a deadline — calculate required daily surplus
+      dailySurplusOrDeficit = totalCalChange / totalDays;
+      weeklySurplusOrDeficit = dailySurplusOrDeficit * 7;
+      // For bulk: calcCals = TDEE + required daily surplus (eat MORE than TDEE)
+      calcCals = Math.round(tdee + dailySurplusOrDeficit);
+      calcDays = totalDays;
+      impliedRate = (weeklySurplusOrDeficit / 7700).toFixed(2);
+    } else if(hasCalOverride) {
+      // User gave calories — calculate how long to reach target
+      calcCals = calOverride;
+      const dailySurplus = calcCals - tdee;
+      if(dailySurplus <= 0) {
+        flagEl.textContent = '✗ CALORIES MUST BE ABOVE TDEE FOR BULK';
+        flagEl.style.cssText='display:block;background:rgba(255,68,68,0.12);color:var(--danger);padding:7px 10px;border-radius:6px;font-size:0.75rem;font-weight:700;letter-spacing:1px';
+        resultEl.classList.add('visible'); schedBtn.classList.remove('visible'); return;
+      }
+      weeklySurplusOrDeficit = dailySurplus * 7;
+      dailySurplusOrDeficit = dailySurplus;
+      calcDays = Math.ceil(totalCalChange / dailySurplus);
+      impliedRate = (weeklySurplusOrDeficit / 7700).toFixed(2);
     } else {
-      calcCals = tdee; // fasting + exercise already cover the full deficit — eating days at maintenance
+      resultEl.classList.remove('visible'); schedBtn.classList.remove('visible'); return;
     }
-    calcDays = totalDays;
-    impliedRate = (weeklyDeficit / 7700).toFixed(2);
-  } else if(hasCalOverride) {
-    // User gave calories — calculate how long it takes
-    // Exercise contribution reduces how much diet needs to do — adds to effective deficit
-    calcCals = calOverride;
-    weeklyDeficit = (eatDaysPerWeek * Math.max(0, tdee - calcCals)) + (fastDaysPerWeek * tdee) + (exerciseBurnPerDay * 7);
-    if(weeklyDeficit <= 0) {
-      flagEl.textContent = '✗ CALORIES TOO HIGH — NO DEFICIT';
-      flagEl.style.cssText='display:block;background:rgba(255,68,68,0.12);color:var(--danger);padding:7px 10px;border-radius:6px;font-size:0.75rem;font-weight:700;letter-spacing:1px';
-      resultEl.classList.add('visible'); schedBtn.classList.remove('visible'); return;
+  }
+  // ── CUT MODE — deficit math (default/agro/cut plans) ──
+  else {
+    if(!isNaN(totalDays) && totalDays > 0) {
+      dailySurplusOrDeficit = totalCalChange / totalDays;
+      weeklySurplusOrDeficit = dailySurplusOrDeficit * 7;
+      const weeklyExerciseContribution = exerciseBurnPerDay * 7;
+      const weeklyDeficitAfterExercise = Math.max(0, weeklySurplusOrDeficit - weeklyExerciseContribution);
+      const fastDayContribution = fastDaysPerWeek * tdee;
+      const dietWeeklyDeficit = weeklyDeficitAfterExercise - fastDayContribution;
+      if(eatDaysPerWeek > 0 && dietWeeklyDeficit > 0) {
+        calcCals = Math.round(tdee - (dietWeeklyDeficit / eatDaysPerWeek));
+      } else {
+        calcCals = tdee;
+      }
+      calcDays = totalDays;
+      impliedRate = (weeklySurplusOrDeficit / 7700).toFixed(2);
+    } else if(hasCalOverride) {
+      calcCals = calOverride;
+      weeklySurplusOrDeficit = (eatDaysPerWeek * Math.max(0, tdee - calcCals)) + (fastDaysPerWeek * tdee) + (exerciseBurnPerDay * 7);
+      if(weeklySurplusOrDeficit <= 0) {
+        flagEl.textContent = '✗ CALORIES TOO HIGH — NO DEFICIT';
+        flagEl.style.cssText='display:block;background:rgba(255,68,68,0.12);color:var(--danger);padding:7px 10px;border-radius:6px;font-size:0.75rem;font-weight:700;letter-spacing:1px';
+        resultEl.classList.add('visible'); schedBtn.classList.remove('visible'); return;
+      }
+      dailySurplusOrDeficit = weeklySurplusOrDeficit / 7;
+      calcDays = Math.ceil(totalCalChange / dailySurplusOrDeficit);
+      impliedRate = (weeklySurplusOrDeficit / 7700).toFixed(2);
+    } else {
+      resultEl.classList.remove('visible'); schedBtn.classList.remove('visible'); return;
     }
-    dailyDeficit = weeklyDeficit / 7;
-    calcDays = Math.ceil(totalCalDeficit / dailyDeficit);
-    impliedRate = (weeklyDeficit / 7700).toFixed(2);
-  } else {
-    // Not enough info yet
-    resultEl.classList.remove('visible'); schedBtn.classList.remove('visible'); return;
   }
 
   const calcWeeks = Math.ceil(calcDays / 7);
   const kgPerWeek = parseFloat(impliedRate);
-  const dietDeficit = Math.max(0, tdee - calcCals);
+  const dietDeficit = planMode === 'bulk' ? Math.max(0, calcCals - tdee) : Math.max(0, tdee - calcCals);
   // exerciseNeeded: how much daily burn exercise must contribute beyond diet alone.
   // When calcCals === tdee (fast days cover the full deficit), diet contributes 0 deficit
   // on eating days — but the fast days are doing the work, so exerciseNeeded is 0, not dailyDeficit.
@@ -4483,44 +4521,58 @@ function calcDuration() {
   const warnings = [];
   let flagLevel = 'ok'; // ok / aggressive / unrealistic
 
-  if(risk === 'standard') {
-    if(calcCals < 800) {
-      flagLevel = 'unrealistic';
-      const safeKgPerWeek = ((eatDaysPerWeek*(tdee-800)) + (fastDaysPerWeek*tdee) + (exerciseBurnPerDay*7)) / 7700;
-      const safeDays = Math.ceil(totalCalDeficit / (safeKgPerWeek * 7700 / 7));
-      warnings.push(`Eating days require only ${calcCals} cal — below 800 cal safe minimum for standard protocol. At 800 cal/day: ~${Math.ceil(safeDays/7)} weeks.`);
-    } else if(calcCals < 1200) {
-      if(flagLevel === 'ok') flagLevel = 'aggressive';
-      warnings.push(`${calcCals} cal/day on eating days is very low for a standard protocol. Manageable short-term but monitor energy and muscle retention.`);
-    }
-    if(kgPerWeek > 1.5) {
-      flagLevel = 'unrealistic';
-      const realisticDays = Math.ceil(totalCalDeficit / (1.5 * 7700 / 7));
-      warnings.push(`${kgPerWeek}kg/week exceeds the sustainable standard maximum of 1.5kg/week. Realistic timeline at 1.5kg/wk: ~${Math.ceil(realisticDays/7)} weeks.`);
-    } else if(kgPerWeek > 1.0) {
-      if(flagLevel === 'ok') flagLevel = 'aggressive';
-      warnings.push(`${kgPerWeek}kg/week is on the high end for a standard protocol — manageable with good nutrition compliance.`);
-    }
-  } else if(risk === 'aggressive') {
-    // weeklyAvgCals: average daily intake across all 7 days (fast days = 0 food)
-    // This is the real floor check — not single-day calories
-    if(weeklyAvgCals < 300) {
-      flagLevel = 'unrealistic';
-      warnings.push(`Weekly average intake is ${Math.round(weeklyAvgCals)} cal/day — extreme even for an aggressive fasting protocol. Risk of muscle catabolism and metabolic crash.`);
-    } else if(kgPerWeek > 2.5) {
+  if(planMode === 'maintenance') {
+    // Maintenance — always achievable, just a tracking schedule
+    flagLevel = 'ok';
+    warnings.push('Maintenance mode — eat at TDEE, weight stays stable. Schedule created for tracking only.');
+  } else if(planMode === 'bulk') {
+    // Bulk sanity gates
+    if(kgPerWeek > 0.5) {
       flagLevel = 'aggressive';
-      warnings.push(`${kgPerWeek}kg/week is a high rate. Survivable on a short protocol — monitor strength and energy closely.`);
+      warnings.push(`${kgPerWeek}kg/week gain is aggressive — risk of excess fat. Aim for 0.25–0.5kg/week for lean gains.`);
     }
-    // 2 kg/week at aggressive risk = achievable. No flag needed.
-  }
+    if(kgPerWeek > 1.0) {
+      flagLevel = 'unrealistic';
+      warnings.push(`${kgPerWeek}kg/week gain will be mostly fat. Slow down the timeline or reduce surplus.`);
+    }
+  } else {
+    // Cut sanity gates (default/agro/cut)
+    if(risk === 'standard') {
+      if(calcCals < 800) {
+        flagLevel = 'unrealistic';
+        const safeKgPerWeek = ((eatDaysPerWeek*(tdee-800)) + (fastDaysPerWeek*tdee) + (exerciseBurnPerDay*7)) / 7700;
+        const safeDays = Math.ceil(totalCalChange / (safeKgPerWeek * 7700 / 7));
+        warnings.push(`Eating days require only ${calcCals} cal — below 800 cal safe minimum for standard protocol. At 800 cal/day: ~${Math.ceil(safeDays/7)} weeks.`);
+      } else if(calcCals < 1200) {
+        if(flagLevel === 'ok') flagLevel = 'aggressive';
+        warnings.push(`${calcCals} cal/day on eating days is very low for a standard protocol. Manageable short-term but monitor energy and muscle retention.`);
+      }
+      if(kgPerWeek > 1.5) {
+        flagLevel = 'unrealistic';
+        const realisticDays = Math.ceil(totalCalChange / (1.5 * 7700 / 7));
+        warnings.push(`${kgPerWeek}kg/week exceeds the sustainable standard maximum of 1.5kg/week. Realistic timeline at 1.5kg/wk: ~${Math.ceil(realisticDays/7)} weeks.`);
+      } else if(kgPerWeek > 1.0) {
+        if(flagLevel === 'ok') flagLevel = 'aggressive';
+        warnings.push(`${kgPerWeek}kg/week is on the high end for a standard protocol — manageable with good nutrition compliance.`);
+      }
+    } else if(risk === 'aggressive') {
+      if(weeklyAvgCals < 300) {
+        flagLevel = 'unrealistic';
+        warnings.push(`Weekly average intake is ${Math.round(weeklyAvgCals)} cal/day — extreme even for an aggressive fasting protocol. Risk of muscle catabolism and metabolic crash.`);
+      } else if(kgPerWeek > 2.5) {
+        flagLevel = 'aggressive';
+        warnings.push(`${kgPerWeek}kg/week is a high rate. Survivable on a short protocol — monitor strength and energy closely.`);
+      }
+    }
 
-  // Unrestricted: only flag if the math broke (calcCals went negative)
-  if(risk === 'unrestricted' && calcCals < 0) {
-    flagLevel = 'unrealistic';
-    warnings.push(`Required eating-day calories went negative — physically impossible. Extend the timeline or increase exercise.`);
-  } else if(risk === 'unrestricted' && kgPerWeek > 3) {
-    flagLevel = 'aggressive';
-    warnings.push(`${kgPerWeek}kg/week — operating outside any standard range. Math shown as-is.`);
+    // Unrestricted: only flag if the math broke (calcCals went negative)
+    if(risk === 'unrestricted' && calcCals < 0) {
+      flagLevel = 'unrealistic';
+      warnings.push(`Required eating-day calories went negative — physically impossible. Extend the timeline or increase exercise.`);
+    } else if(risk === 'unrestricted' && kgPerWeek > 3) {
+      flagLevel = 'aggressive';
+      warnings.push(`${kgPerWeek}kg/week — operating outside any standard range. Math shown as-is.`);
+    }
   }
 
   // End date
@@ -4536,10 +4588,10 @@ function calcDuration() {
   document.getElementById('calcDays').textContent   = calcDays;
   document.getElementById('calcCals').textContent   = calcCals >= 0 ? calcCals : 0;
   document.getElementById('calcRate').textContent   = kgPerWeek + 'kg/wk';
-  document.getElementById('calcDeficit').textContent= Math.round(weeklyDeficit/1000)+'k/wk';
+  document.getElementById('calcDeficit').textContent= Math.round(weeklySurplusOrDeficit/1000)+'k/wk';
   document.getElementById('calcEndDate').textContent= endDateStr;
-  document.getElementById('calcDietBurn').textContent = Math.round(dietDeficit)+'cal';
-  document.getElementById('calcExBurn').textContent   = exerciseContribution > 0 ? '+'+Math.round(exerciseContribution)+'cal/day' : 'none entered';
+  document.getElementById('calcDietBurn').textContent = Math.round(dietDeficit)+'cal' + (planMode === 'bulk' ? ' surplus' : '');
+  document.getElementById('calcExBurn').textContent   = planMode === 'maintenance' ? 'n/a' : (exerciseContribution > 0 ? '+'+Math.round(exerciseContribution)+'cal/day' : 'none entered');
 
   // Flag
   if(flagLevel === 'ok') {
