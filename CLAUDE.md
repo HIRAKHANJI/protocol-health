@@ -569,3 +569,64 @@ Update log:   UPDATE_LOG.md — every version bump must be documented here
 | `UPDATE_LOG.md` | Version history. Every version from 1.0.0 onward with dates, scope, and change descriptions. Must be updated on every version bump. |
 | `ARCHITECTURE.md` | Full system architecture with Mermaid diagrams. Covers dispatcher, plan system, tabs, weight tracking, projection algorithm, goal calculator, schedule, macros, food logging, radar chart, calendar, backup/restore, service worker, and data flow. |
 | `PLAN.md` | Implementation plan for the cut/bulk/maintenance plan addition (v1.9.0). Historical reference — the work is complete. |
+
+---
+
+## 15. Science Reference Directive
+
+The following URLs and rules must be consulted before modifying supplement doses, nutrition targets, workout programming, or plan logic in app.html.
+
+### Tier 1 URLs (Check First)
+
+**Nutrition baselines:**
+- All nutrient fact sheets: https://ods.od.nih.gov/factsheets/list-VitaminsMinerals/
+- DRI tables: https://ods.od.nih.gov/HealthInformation/nutrientrecommendations.aspx
+
+**Per-nutrient ODS fact sheets (for all dosing/UL checks):**
+- Magnesium: https://ods.od.nih.gov/factsheets/Magnesium-HealthProfessional/
+- Zinc: https://ods.od.nih.gov/factsheets/Zinc-HealthProfessional/
+- Vitamin D: https://ods.od.nih.gov/factsheets/VitaminD-HealthProfessional/
+- Omega-3: https://ods.od.nih.gov/factsheets/Omega3FattyAcids-HealthProfessional/
+- Calcium: https://ods.od.nih.gov/factsheets/Calcium-HealthProfessional/
+- Potassium: https://ods.od.nih.gov/factsheets/Potassium-HealthProfessional/
+
+**Sports nutrition consensus:**
+- ISSN Diets & Body Composition: https://pmc.ncbi.nlm.nih.gov/articles/PMC5470183/
+- ISSN Protein & Exercise: https://pubmed.ncbi.nlm.nih.gov/28642676/
+- ISSN Master Review 2018: https://pmc.ncbi.nlm.nih.gov/articles/PMC6090881/
+
+**Calisthenics evidence:**
+- Push-up = bench press (Kotarsky 2018): https://pubmed.ncbi.nlm.nih.gov/29466268/
+- Rep vs load progression (Plotkin 2022): https://pmc.ncbi.nlm.nih.gov/articles/PMC9528903/
+- Repetition continuum (Schoenfeld 2021): https://pmc.ncbi.nlm.nih.gov/articles/PMC7927075/
+
+**Push:Pull balance:**
+- Scapular stabilizers (Cools 2016): https://pmc.ncbi.nlm.nih.gov/articles/PMC4886800/
+- Pull-up kinematics (Prinold 2016): https://pmc.ncbi.nlm.nih.gov/articles/PMC4916995/
+
+### Safety Rules
+
+Before writing ANY supplement dose into app content:
+1. Open ODS fact sheet for that nutrient
+2. Confirm proposed dose ≤ Tolerable Upper Intake Level (UL)
+3. If dose > UL: ADD explicit safety warning to app display
+4. Cross-reference with ISSN 2018 master review
+
+### Hard-Coded Safety Limits
+
+| Supplement | Max dose/day | Risk if exceeded |
+|---|---|---|
+| Vitamin D3 | 4,000 IU (NIH UL) | Hypercalcemia at sustained >10,000 IU |
+| Zinc (supplemental) | 40mg/day average | Copper deficiency anemia |
+| Magnesium (supplemental) | 350mg/day | Osmotic diarrhea |
+| Potassium (OTC) | 99mg per serving | Hyperkalemia |
+| MCT Oil | 30g max acute | GI distress |
+
+### ZINC COPPER INTERACTION (CRITICAL)
+Chronic zinc >40mg/day blocks copper absorption → copper deficiency. Current protocol: 50mg × 4 alternate days/week = 28.6mg/day average. DO NOT change zinc to daily dosing without flagging this risk.
+
+### Push:Pull Ratio (HARD RULE)
+Protocol Health must NEVER generate a training plan with push:pull ratio > 1:1. Default for AGRO CUT: pull-dominant (5:7). Source: Cools 2016 + Prinold 2016
+
+### Prohibited Sources
+Never cite: supplement brand websites, influencer stacks, sites requiring purchase, single case reports, commercial programs, news articles about research (use original DOI).
