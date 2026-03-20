@@ -1128,8 +1128,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '2.2.1';
-const APP_VERSION_MSG = 'Fixed start date off-by-one bug, settings now persist properly.';
+const APP_VERSION = '2.2.2';
+const APP_VERSION_MSG = 'Schedule start date now always defaults to today.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -4523,7 +4523,7 @@ function openSettings() {
   document.getElementById('settingTdee').value = s.tdee||2600;
   document.getElementById('settingDays').value = '';
   document.getElementById('settingTargetDate').value = '';
-  document.getElementById('settingStartDate').value = s.startDate||todayStr();
+  document.getElementById('settingStartDate').value = todayStr();
   document.getElementById('settingRisk').value = s.risk||'aggressive';
   // TDEE auto-calc fields
   document.getElementById('settingAge').value = s.age||'';

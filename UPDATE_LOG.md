@@ -4,6 +4,14 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 2.2.2 — 2026-03-20
+
+**Scope:** Patch (bug fix)
+
+- **Schedule start date always defaults to today** — When opening the settings panel, the start date field now always defaults to today's date instead of loading the previously saved start date from settings. This fixes the bug where adding a new schedule would start from a past date (e.g. the 19th instead of the 20th) because `s.startDate` was persisted from a prior schedule creation and reloaded on next settings open.
+
+---
+
 ## Version 2.2.1 — 2026-03-20
 
 **Scope:** Patch (bug fixes)
