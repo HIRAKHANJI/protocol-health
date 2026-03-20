@@ -4,6 +4,27 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 2.2.3 — 2026-03-20
+
+**Scope:** Patch (4 bug fixes)
+
+- **Calendar missed-day fix** — Past days with no log are now only marked
+  red (missed) if they were part of an active schedule. Days before any
+  schedule was set up show no colour — no expectation, no failure.
+- **Radar consistency anchor** — CONSISTENCY metric now anchors to the
+  earliest tracked date (schedule start or first logged entry). Pre-setup
+  days are excluded from the denominator. Fresh installs show '—' instead
+  of 0%. Empty resets and unticked-then-reticked boxes no longer count as
+  a logged day — at least one genuinely checked item (or weight/food log)
+  is now required.
+- **Realistic schedule fast-day fix** — 'ADD REALISTIC TO SCHEDULE' button
+  now correctly sets fast and light days across the full realistic window.
+  Previously, auto-set fast/light days only covered the shorter theoretical
+  window, leaving gap days as unhighlighted plan-day cells.
+- **CACHE_NAME bumped** to `protocol-health-v9`.
+
+---
+
 ## Version 2.2.2 — 2026-03-20
 
 **Scope:** Patch (bug fix)
