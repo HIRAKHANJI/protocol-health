@@ -4,6 +4,41 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 2.3.0 — 2026-03-20
+
+**Scope:** Minor (AGRO plan content overhaul)
+**Banner:** "AGRO plan rebalanced: pull-dominant workouts, full supplement protocol, updated nutrition."
+
+- **Workout rebalance** — Push:pull ratio fixed from 5:2 to 5:7
+  (pull-dominant). Every push session now includes antagonist pull
+  pairing. Inverted rows, superman holds, prone Y-T-W, towel rows,
+  and scapular push-ups integrated throughout the week. Tricep dips
+  removed from Evening A (redundant with push-up ladder volume).
+  Side plank added to Evening B and C (lateral core was 1x/week,
+  now 3x).
+- **Updated morningSub/eveningSub/stretchSub** — Day descriptions
+  now reflect the rebalanced sessions with pull work noted.
+- **Updated checklistNormal** — Supplement items rewritten with
+  accurate dosing: Osteocare 2 tabs, D3+K2 1 tab, Zinc EOD,
+  MCT 1 gel (eating) / 2 gels (fast), Omega-3 3 caps with meal,
+  Magnesium 1 serving nightly.
+- **Updated checklistFast** — Two separate electrolyte items
+  (mid-morning + pre-training). Fast day intensity reminder added.
+  MCT dosing clarified (2 gels). Magnesium 1 serving nightly.
+- **Nutrition tab overhaul** — Full supplement protocol section with
+  6 detailed cards (morning stack eating/fast, zinc EOD rule, omega-3,
+  magnesium, electrolytes). High-protein food sources grid added with
+  cal:protein ratios. All existing sections retained.
+- **Rules updated** — 15 rules (was 13). New: "Push + Pull in every
+  upper session" training rule. "Fast days = 51% of deficit" discipline
+  rule. Rules renumbered.
+- **CLAUDE.md** — Science reference directive appended with tier-1
+  URLs, safety rules, hard-coded supplement limits, push:pull ratio
+  rule, and prohibited sources list.
+- **CACHE_NAME bumped** to `protocol-health-v10`.
+
+---
+
 ## Version 2.2.3 — 2026-03-20
 
 **Scope:** Patch (4 bug fixes)

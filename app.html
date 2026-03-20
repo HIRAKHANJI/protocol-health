@@ -1128,8 +1128,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '2.2.3';
-const APP_VERSION_MSG = 'Calendar, radar, and schedule accuracy fixes.';
+const APP_VERSION = '2.3.0';
+const APP_VERSION_MSG = 'AGRO plan rebalanced: pull-dominant workouts, full supplement protocol, updated nutrition.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -2081,61 +2081,61 @@ const PLANS = {
     weekIcons: {0:'🚶',1:'💪',2:'🦵',3:'🏃',4:'🤸',5:'🦵',6:'🏃'},
 
     morningSub: {
-      0:'SUNDAY — Active rest. Walk 30 min + full hip sequence (20 min)',
-      1:'MONDAY — Morning A: Push + Core · Hip CARs → Push-ups · Plank · Mountain climbers',
-      2:'TUESDAY — Morning B: Lower + Mobility · Hip CARs → Squats · Glute bridge · Reverse lunge',
-      3:'WEDNESDAY — Morning A: Push + Core · Hip CARs → Dead bug · Push-ups · Mountain climbers',
-      4:'THURSDAY — Morning B: Lower + Mobility · Hip CARs → Jump squats · Bulgarian split squat · Calf raise',
-      5:'FRIDAY — Morning A: Push + Core · Hip CARs → Archer push-up · Plank to downdog · Hollow body',
-      6:'SATURDAY — Morning B: Lower + Mobility · Hip CARs → Cossack squat · Good morning · Single-leg RDL'
+      0:'SUNDAY — Active rest. Walk 30 min + full hip session (20 min)',
+      1:'MONDAY — Morning A: Push + Pull Superset · Hip CARs → Push-ups + Superman · Plank · Mountain climbers',
+      2:'TUESDAY — Morning B: Lower + Hinge · Hip CARs → Squats · Good morning · Reverse lunge',
+      3:'WEDNESDAY — Morning A: Push + Pull Superset · Hip CARs → Push-ups + Superman · Dead bug · Mountain climbers',
+      4:'THURSDAY — Morning B: Lower + Hinge · Hip CARs → Squats · Good morning · Reverse lunge',
+      5:'FRIDAY — Morning A: Push + Pull Superset · Hip CARs → Push-ups + Superman · Plank · Mountain climbers',
+      6:'SATURDAY — Morning B: Lower + Hinge · Hip CARs → Squats · Good morning · Single-leg RDL'
     },
     eveningSub: {
       0:'SUNDAY — Rest. Walk + full hip session. No structured workout.',
-      1:'MONDAY — Evening A: Push + Chest Definition · Decline push-up · Archer push-up · Planche lean · Handstand hold',
-      2:'TUESDAY — Evening B: Legs + Posterior Chain · Nordic curl · Inverted row · Bulgarian split squat · Good morning',
+      1:'MONDAY — Evening A: Push/Pull Balance · Push-up ladder + Inverted row · Decline + Y-T-W · Archer + Scapular · Pike · Planche lean · Handstand',
+      2:'TUESDAY — Evening B: Legs + Posterior Chain · Nordic curl + Inverted row · Bulgarian · Single-leg RDL · Glute bridge march · Good morning · Side plank',
       3:'WEDNESDAY — Midweek Run · 5 min walk → 20 min run → 5 min walk → jump squats/burpees/mountain climbers',
-      4:'THURSDAY — Evening C: Skill + Core + Calisthenics Foundation · Crow stand · L-sit · Scapular push-up · Dragon flag',
-      5:'FRIDAY — Evening B: Legs + Posterior Chain · Nordic curl · Inverted row · Bulgarian split squat · Good morning',
-      6:'SATURDAY — Run + Conditioning · 5 min walk → 30 min run → circuit: push-ups/jump squats/sprawls/plank'
+      4:'THURSDAY — Evening C: Skill + Core + Pull Focus · Towel row · Scapular push-up · Crow/L-sit · Dead bug · Hollow rock · Dragon flag · Side plank',
+      5:'FRIDAY — Evening B: Legs + Posterior Chain · Nordic curl + Inverted row · Bulgarian · Single-leg RDL · Glute bridge march · Good morning · Side plank',
+      6:'SATURDAY — Run + Conditioning · 5 min walk → 30 min run → circuit: push-ups/jump squats/sprawls/plank × 3 rounds'
     },
     stretchSub: {
-      0:'Sunday full hip session: 90/90 · frog · pigeon (extra right side) · cossack · deep squat (20 min)',
-      1:'Monday cooldown: Doorframe chest stretch · Shoulder dislocates with towel · Wrist extension (10 min)',
-      2:'Tuesday cooldown: 90/90 hip × 2 · Frog · Pigeon (right side +30 sec) · Figure-4 · Child\'s pose (15 min)',
-      3:'Wednesday post-run: Pigeon 60 sec/side · Hamstring stretch · Calf stretch (10 min)',
-      4:'Thursday cooldown: Full shoulder sequence · Thread needle · Hip flexor lunge stretch · Neck isometrics (14 min)',
-      5:'Friday cooldown: Rear shoulder · Doorframe chest · Wrist extension stretch (10 min)',
-      6:'Saturday post-run: Lower body flush — whatever feels tightest. Pigeon · hamstring · quad (10 min)'
+      0:'Sunday full hip session: 90/90 · frog · pigeon (extra right side) · cossack · deep squat · neck isometrics · shoulder dislocates · thread needle (20 min)',
+      1:'Monday cooldown: Doorframe chest stretch · Shoulder dislocates · Wrist extension · Rear shoulder stretch (10 min)',
+      2:'Tuesday cooldown: Pigeon 90s each (right +30s) · Figure-4 · Hamstring · Child\'s pose · Calf stretch (12 min)',
+      3:'Wednesday post-run: Pigeon 60s/side · Hamstring · Calf stretch (8 min)',
+      4:'Thursday cooldown: Full shoulder sequence · Thread needle · Hip flexor lunge · Neck isometrics (12 min)',
+      5:'Friday cooldown: Pigeon 90s each (right +30s) · Figure-4 · Hamstring · Child\'s pose · Calf stretch (12 min)',
+      6:'Saturday post-run: Lower body flush — pigeon · hamstring · quad · calf (10 min)'
     },
 
     checklistNormal: [
       { id:'m1', group:'MORNING', label:'Wake & 500ml water immediately', sub:'Before phone. Non-negotiable.' },
-      { id:'m2', group:'MORNING', label:'10 min daily mobility (CARs + neck)', sub:'Hip CARs × 5 · Cat-cow × 10 · Thoracic rotation · Wrist CARs · Neck nods — AGRO morning A/B' },
-      { id:'m3', group:'MORNING', label:'Morning workout (20 min)', sub:'AGRO Morning A/B — see WORKOUTS tab for today\'s split' },
+      { id:'m2', group:'MORNING', label:'10 min daily mobility (CARs + neck)', sub:'Hip CARs \u00d7 5 \u00b7 Cat-cow \u00d7 10 \u00b7 Thoracic rotation \u00b7 Wrist CARs \u00b7 Neck nods' },
+      { id:'m3', group:'MORNING', label:'Morning workout (20 min)', sub:'Morning A (Push+Pull) or B (Lower+Hinge) \u2014 see WORKOUTS tab' },
       { id:'m4', group:'MORNING', label:'Log morning weight in TRACK tab', sub:'Weigh first thing after waking, before food.' },
-      { id:'f1', group:'EATING', label:'Protein in first meal (60-70g)', sub:'Eggs · chicken · tuna · lentils. Anchor here first.' },
-      { id:'f2', group:'EATING', label:'Stayed under calorie ceiling', sub:'Hard ceiling. Never more.' },
+      { id:'f1', group:'EATING', label:'Protein in first meal (60-70g)', sub:'Eggs \u00b7 chicken \u00b7 tuna \u00b7 lentils \u00b7 Greek yogurt. Anchor protein first.' },
+      { id:'f2', group:'EATING', label:'Stayed under calorie ceiling', sub:'Hard ceiling. Never more. Log in FOOD LOG.' },
       { id:'f3', group:'EATING', label:'Last meal before 6PM', sub:'16+ hour overnight fast every day.' },
-      { id:'f4', group:'EATING', label:'3L+ water across the day', sub:'500ml wake · 500ml pre-meal · sip continuously' },
-      { id:'f5', group:'EATING', label:'No liquid calories', sub:'Water · black coffee · plain green tea only.' },
+      { id:'f4', group:'EATING', label:'3L+ water across the day', sub:'500ml wake \u00b7 500ml pre-meal \u00b7 sip continuously' },
+      { id:'f5', group:'EATING', label:'No liquid calories', sub:'Water \u00b7 black coffee \u00b7 plain green tea only.' },
       { id:'e1', group:'EVENING', label:'Change clothes on arriving home', sub:'Trigger signal. Don\'t sit down first.' },
-      { id:'e2', group:'EVENING', label:'Evening session (40–45 min)', sub:'AGRO Evening A/B/C — see WORKOUTS tab for today\'s session' },
-      { id:'e3', group:'EVENING', label:'Post-workout stretch protocol', sub:'AGRO cooldown — post-session stretch per day, see WORKOUTS tab' },
-      { id:'s1', group:'SUPPLEMENTS', label:'Morning supplements', sub:'Osteocare 2 tabs \u00b7 D3+K2 1 \u00b7 Zinc (EOD only \u2014 Sun/Tue/Thu/Sat) \u00b7 MCT gel 1' },
-      { id:'s2', group:'SUPPLEMENTS', label:'Omega-3 taken', sub:'3 caps with largest meal. Total D3 ~5000 IU/day \u2014 do not add more.' },
-      { id:'s3', group:'SUPPLEMENTS', label:'Evening magnesium', sub:'2 servings before bed (~135mg elemental).' },
+      { id:'e2', group:'EVENING', label:'Evening session (40-45 min)', sub:'Evening A/B/C or Run \u2014 see WORKOUTS tab' },
+      { id:'e3', group:'EVENING', label:'Post-workout stretch protocol', sub:'Cooldown per day \u2014 see WORKOUTS tab' },
+      { id:'s1', group:'SUPPLEMENTS', label:'Morning supplements taken', sub:'Osteocare 2 tabs \u00b7 D3+K2 1 tab \u00b7 Zinc 50mg (EOD only: Sun/Tue/Thu/Sat) \u00b7 MCT 1 gel' },
+      { id:'s2', group:'SUPPLEMENTS', label:'Omega-3 with largest meal', sub:'3 caps with lunch or dinner. 2,475mg EPA+DHA total.' },
+      { id:'s3', group:'SUPPLEMENTS', label:'Magnesium before bed', sub:'1 serving (~67.6mg elemental). Every night, 7 days.' },
       { id:'n2', group:'NIGHT', label:'Sleep before midnight', sub:'Recovery is training. Don\'t skip it.' }
     ],
     checklistFast: [
       { id:'wf1', group:'FAST', label:'500ml water + pinch salt on waking', sub:'Prevents headaches. Do this before anything else.' },
-      { id:'wf2', group:'FAST', label:'Electrolyte tablet mid-morning', sub:'Sodium + potassium. Non-negotiable on a fast.' },
-      { id:'wf3', group:'FAST', label:'Black coffee or green tea only', sub:'Appetite suppression. Zero calories. Allowed.' },
-      { id:'wf4', group:'FAST', label:'3.5L+ water total today', sub:'Sip constantly. Don\'t chug all at once.' },
-      { id:'wf5', group:'FAST', label:'No food consumed today', sub:'Fast is unbroken. If you break it \u2014 log it honestly.' },
-      { id:'sf1', group:'SUPPLEMENTS', label:'Morning supplements', sub:'Osteocare 2 tabs \u00b7 D3+K2 1 \u00b7 Zinc (EOD only) \u00b7 2 MCT gels before training' },
-      { id:'sf2', group:'SUPPLEMENTS', label:'Electrolytes taken', sub:'1 tablet mid-morning \u00b7 1 tablet 20 min before evening training' },
-      { id:'sf3', group:'SUPPLEMENTS', label:'Evening magnesium', sub:'4 servings before bed (~270mg elemental). Higher on fast days.' },
-      { id:'wf6', group:'FAST', label:'Magnesium 400mg before sleep', sub:'Prevents cramps. Sleep quality tanks on fasts without this.' }
+      { id:'wf2', group:'FAST', label:'Electrolyte tablet mid-morning (9-10am)', sub:'99mg potassium. First of 2 daily doses.' },
+      { id:'wf3', group:'FAST', label:'Electrolyte tablet pre-evening (20 min before training)', sub:'99mg potassium. Second dose. Prevents palpitations during fasted work.' },
+      { id:'wf4', group:'FAST', label:'Black coffee or green tea only', sub:'Appetite suppression. Zero calories. Allowed.' },
+      { id:'wf5', group:'FAST', label:'3.5L+ water total today', sub:'Sip constantly. Don\'t chug all at once.' },
+      { id:'wf6', group:'FAST', label:'No food consumed today', sub:'Fast is unbroken. If you break it \u2014 log it honestly.' },
+      { id:'sf1', group:'SUPPLEMENTS', label:'Morning supplements taken', sub:'D3+K2 1 tab (with MCT gel for absorption) \u00b7 Zinc (Sun/Sat only) \u00b7 2 MCT gels pre-training' },
+      { id:'sf2', group:'SUPPLEMENTS', label:'Magnesium before bed', sub:'1 serving (~67.6mg elemental). Every night including fast days.' },
+      { id:'wf7', group:'FAST', label:'Fast day intensity: 70-80% only', sub:'Training fasted is fine. Don\'t push 100% on zero calories.' }
     ],
 
     foodGroupLabel: 'AGRO EATING',
@@ -2145,157 +2145,176 @@ const PLANS = {
     workoutContent() {
       return `
       <div class="section-title">MORNING <span>ACTIVATION</span> — 20 MIN</div>
-      <p class="section-note">Every morning before work. Alternate A/B. Includes 10 min daily mobility first.</p>
+      <p class="section-note">Every morning. Alternate A/B. Includes 10 min daily mobility.</p>
 
-      ${workoutCard('MON · MORNING A — PUSH + CORE','20 MIN',
-        exRow('Hip CARs + Cat-cow + Wrist CARs','Daily mobility first — non-negotiable','10 min')+
-        exRow('Jumping jacks','Warm-up','2 min')+
-        exRowWithLevel('push','Push-ups','Full range, chest to floor','3×10–15')+
-        exRowWithLevel('core','Plank','Elbows, stay tight','3×30 sec')+
-        exRow('Mountain climbers','Controlled pace','3×20'),
+      ${workoutCard('MON \u00b7 MORNING A — PUSH + PULL SUPERSET','20 MIN',
+        exRow('Hip CARs + Cat-cow + Wrist CARs','Daily mobility \u2014 non-negotiable','10 min')+
+        exRow('Jumping jacks / high knees','Warm-up','2 min')+
+        exRowWithLevel('push','Push-ups','Full range, chest to floor','3\u00d710\u201315')+
+        exRowWithLevel('pull','Superman hold','Face down, lift arms + chest. Immediately after push-ups.','3\u00d720\u201330 sec')+
+        exRowWithLevel('core','Plank OR Dead bug','Alternate between sessions','2\u00d730 sec')+
+        exRow('Mountain climbers','Controlled pace','2\u00d720'),
         stretchRow('Chest opener','Doorframe or arms wide','60 sec')+
-        stretchRow('Shoulder dislocates','Towel/stick, full arc overhead','10 reps'),
+        stretchRow('Shoulder dislocates','Towel/stick, full arc','10 reps'),
         'MON'
       )}
 
-      ${workoutCard('TUE · MORNING B — LOWER + MOBILITY','20 MIN',
-        exRow('Hip CARs + Cat-cow + Wrist CARs','Daily mobility first','10 min')+
+      ${workoutCard('TUE \u00b7 MORNING B — LOWER + HINGE','20 MIN',
+        exRow('Hip CARs + Cat-cow + Wrist CARs','Daily mobility','10 min')+
         exRow('High knees','Warm-up, 60% pace','2 min')+
-        exRowWithLevel('squat','Bodyweight squat','Full depth, knees track toes','3×15')+
-        exRowWithLevel('hinge','Glute bridge','Pause at top, squeeze hard','3×15')+
-        exRow('Reverse lunge','Step back, knee hovers floor','3×10/leg'),
-        stretchRow('Deep squat hold','Heels flat, doorframe if needed','90 sec')+
+        exRowWithLevel('squat','Bodyweight squat','Full depth','3\u00d715')+
+        exRowWithLevel('hinge','Hip hinge / Good morning','Slow eccentric (4 sec down)','3\u00d712')+
+        exRow('Reverse lunge','Step back, knee hovers floor','2\u00d710/leg'),
+        stretchRow('Deep squat hold','Heels flat','60 sec')+
         stretchRow('Hip CARs extra','Right hip gets 2 extra circles','1 min'),
         'TUE'
       )}
 
-      ${workoutCard('WED · MORNING A — PUSH + CORE','20 MIN',
+      ${workoutCard('WED \u00b7 MORNING A — PUSH + PULL SUPERSET','20 MIN',
         exRow('Hip CARs + Cat-cow + Wrist CARs','Daily mobility','10 min')+
-        exRowWithLevel('core','Dead bug','Lower back glued to floor','2×8/side')+
-        exRowWithLevel('push','Push-ups','Focus on upper chest squeeze','3×12')+
-        exRow('Mountain climbers','Steady pace','3×20')+
-        exRowWithLevel('core','Plank','','3×30 sec'),
-        stretchRow('Wrist extension stretch','Fingers back toward knees','60 sec'),
+        exRow('Jumping jacks / high knees','Warm-up','2 min')+
+        exRowWithLevel('push','Push-ups','Full range, chest to floor','3\u00d710\u201315')+
+        exRowWithLevel('pull','Superman hold','Face down, lift arms + chest. Immediately after push-ups.','3\u00d720\u201330 sec')+
+        exRowWithLevel('core','Plank OR Dead bug','Alternate between sessions','2\u00d730 sec')+
+        exRow('Mountain climbers','Controlled pace','2\u00d720'),
+        stretchRow('Chest opener','Doorframe or arms wide','60 sec')+
+        stretchRow('Shoulder dislocates','Towel/stick, full arc','10 reps'),
         'WED'
       )}
 
-      ${workoutCard('THU · MORNING B — LOWER + MOBILITY','20 MIN',
+      ${workoutCard('THU \u00b7 MORNING B — LOWER + HINGE','20 MIN',
         exRow('Hip CARs + Cat-cow + Wrist CARs','Daily mobility','10 min')+
-        exRowWithLevel('squat','Jump squats','Land soft','3×10')+
-        exRowWithLevel('squat','Bulgarian split squat','Rear foot elevated','3×8/leg')+
-        exRow('Calf raise','Slow up, slow down','3×15'),
-        stretchRow('90/90 hip stretch','90 sec each side — right hip priority','3 min')+
-        stretchRow('Pigeon pose','Extra 30 sec on right side','3 min'),
+        exRow('High knees','Warm-up, 60% pace','2 min')+
+        exRowWithLevel('squat','Bodyweight squat','Full depth','3\u00d715')+
+        exRowWithLevel('hinge','Hip hinge / Good morning','Slow eccentric (4 sec down)','3\u00d712')+
+        exRow('Reverse lunge','Step back, knee hovers floor','2\u00d710/leg'),
+        stretchRow('Deep squat hold','Heels flat','60 sec')+
+        stretchRow('Hip CARs extra','Right hip gets 2 extra circles','1 min'),
         'THU'
       )}
 
-      ${workoutCard('FRI · MORNING A — PUSH + CORE','20 MIN',
+      ${workoutCard('FRI \u00b7 MORNING A — PUSH + PULL SUPERSET','20 MIN',
         exRow('Hip CARs + Cat-cow + Wrist CARs','Daily mobility','10 min')+
-        exRowWithLevel('push','Archer push-up','Unilateral — upper chest focus','3×6/side')+
-        exRow('Plank to downdog','Flow, 2 sec each','3×8')+
-        exRowWithLevel('core','Hollow body hold','Arms overhead, back pressed down','3×20 sec'),
-        stretchRow('Rear shoulder stretch','Arm across body','30 sec each')+
-        stretchRow('Doorframe chest stretch','Upper chest + anterior shoulder','60 sec'),
+        exRow('Jumping jacks / high knees','Warm-up','2 min')+
+        exRowWithLevel('push','Push-ups','Full range, chest to floor','3\u00d710\u201315')+
+        exRowWithLevel('pull','Superman hold','Face down, lift arms + chest. Immediately after push-ups.','3\u00d720\u201330 sec')+
+        exRowWithLevel('core','Plank OR Dead bug','Alternate between sessions','2\u00d730 sec')+
+        exRow('Mountain climbers','Controlled pace','2\u00d720'),
+        stretchRow('Chest opener','Doorframe or arms wide','60 sec')+
+        stretchRow('Shoulder dislocates','Towel/stick, full arc','10 reps'),
         'FRI'
       )}
 
-      ${workoutCard('SAT · MORNING B — LOWER + MOBILITY','20 MIN',
+      ${workoutCard('SAT \u00b7 MORNING B — LOWER + HINGE','20 MIN',
         exRow('Hip CARs + Cat-cow + Wrist CARs','Daily mobility','10 min')+
-        exRowWithLevel('squat','Cossack squat','Wide feet, lateral lunge — hip opener','3×8/side')+
-        exRowWithLevel('hinge','Good morning (BW)','Hinge at hip, back straight','3×12')+
-        exRow('Single-leg RDL','Balance + hamstring stretch','3×8/leg'),
-        stretchRow('Frog stretch','Knees wide, push hips back','2 min')+
-        stretchRow('Hamstring stretch','One leg extended, reach forward','60 sec each'),
+        exRow('High knees','Warm-up, 60% pace','2 min')+
+        exRowWithLevel('squat','Bodyweight squat','Full depth','3\u00d715')+
+        exRowWithLevel('hinge','Hip hinge / Good morning','Slow eccentric (4 sec down)','3\u00d712')+
+        exRow('Reverse lunge','Step back, knee hovers floor','2\u00d710/leg'),
+        stretchRow('Deep squat hold','Heels flat','60 sec')+
+        stretchRow('Hip CARs extra','Right hip gets 2 extra circles','1 min'),
         'SAT'
       )}
 
-      ${workoutCard('SUN · ACTIVE REST','WALK 30 MIN + FULL HIP SESSION',
+      ${workoutCard('SUN \u00b7 ACTIVE REST','WALK 30 MIN + FULL HIP SESSION 20 MIN',
         exRow('Walk','Minimum 30 min outdoors. Not optional.','30 min'),
-        stretchRow('Full hip sequence','90/90 · frog · pigeon · cossack · deep squat','20 min')+
-        stretchRow('Neck isometrics','4 directions × 30 sec resist','2 min')+
+        stretchRow('90/90 hip stretch','2 min each side','4 min')+
+        stretchRow('Frog stretch','Knees wide, push hips back','2 min')+
+        stretchRow('Pigeon pose','90 sec each (right side +30 sec)','3+ min')+
+        stretchRow('Cossack squat stretch','60 sec each side','2 min')+
+        stretchRow('Deep squat hold','Full depth','2 min')+
+        stretchRow('Neck isometrics','4 directions \u00d7 30 sec','2 min')+
         stretchRow('Shoulder dislocates','Towel/stick','10 slow reps')+
         stretchRow('Thread the needle','8/side, thoracic rotation','2 min'),
         'SUN'
       )}
 
       <div style="height:10px"></div>
-      <div class="section-title">EVENING <span>SESSIONS</span> — 40–45 MIN</div>
-      <p class="section-note">Rotate Mon=A · Tue=B · Wed=run · Thu=C · Fri=B · Sat=run+conditioning. Sun = rest.</p>
+      <div class="section-title">EVENING <span>SESSIONS</span> — 40\u201345 MIN</div>
+      <p class="section-note">Mon=A \u00b7 Tue=B \u00b7 Wed=Run \u00b7 Thu=C \u00b7 Fri=B \u00b7 Sat=Run. Sun=rest.</p>
 
-      ${workoutCard('EVENING A — PUSH + CHEST DEFINITION','MON · 40 MIN',
+      ${workoutCard('EVENING A — UPPER BODY PUSH/PULL BALANCE','MON \u00b7 40\u201345 MIN',
         exRowWithLevel('push','Push-up ladder','10 down to 1. Rest = time for next set.','1 ladder')+
-        exRowWithLevel('push','Decline push-up','Feet on chair/bed — upper chest focus','4×12')+
-        exRowWithLevel('push','Archer push-up','Unilateral chest strength','4×6/side')+
-        exRowWithLevel('shoulder','Pike push-up','Hips high, head toward floor — shoulders','3×10')+
-        exRowWithLevel('skill_planche','Pseudo planche lean','Lean forward on straight arms, protract scapula','4×20 sec')+
-        exRow('Tricep dips','Chair edge or floor','3×12')+
-        exRowWithLevel('skill_handstand','Wall handstand hold','Every session — wrist + shoulder base','3×20-30 sec'),
+        exRowWithLevel('pull','Inverted row (under table)','Grip edge, pull chest to table. Immediately after ladder.','3\u00d78\u201310')+
+        exRowWithLevel('push','Decline push-up','Feet on chair/bed \u2014 upper chest focus','4\u00d712')+
+        exRow('Prone Y-T-W raises','Face down, 3 positions. Rear delt + mid-trap. After decline.','3\u00d710 each')+
+        exRowWithLevel('push','Archer push-up','Unilateral chest strength','3\u00d76/side')+
+        exRowWithLevel('pull','Scapular push-up','Protract/retract. Planche prereq. After archer.','3\u00d712')+
+        exRowWithLevel('shoulder','Pike push-up','Hips high, head toward floor','3\u00d710')+
+        exRowWithLevel('skill_planche','Pseudo planche lean','Lean forward on straight arms, protract scapula','4\u00d720 sec')+
+        exRowWithLevel('skill_handstand','Wall handstand hold','Every session \u2014 wrist + shoulder base','3\u00d720\u201330 sec'),
         stretchRow('Doorframe chest stretch','Upper chest + anterior shoulder','60 sec')+
-        stretchRow('Shoulder dislocates','Towel/stick — full arc','10 reps')+
-        stretchRow('Wrist extension stretch','Fingers pointing back','60 sec'),
+        stretchRow('Shoulder dislocates','Towel/stick \u2014 full arc','10 reps')+
+        stretchRow('Wrist extension stretch','Fingers pointing back','60 sec')+
+        stretchRow('Rear shoulder stretch','Arm across body','30 sec each'),
         'MON'
       )}
 
-      ${workoutCard('EVENING B — LEGS + POSTERIOR CHAIN','TUE / FRI · 45 MIN',
-        exRowWithLevel('hinge','Nordic hamstring curl','Feet under sofa/bed — hardest hamstring move','4×5')+
-        exRowWithLevel('pull','Inverted row (under table)','Grip edge, pull chest to table — back + biceps','3×8–10')+
-        exRowWithLevel('squat','Bulgarian split squat','Rear foot elevated — quad + glute','4×10/leg')+
-        exRow('Single-leg RDL (BW)','Lower back + hamstring — control the descent','3×10/leg')+
-        exRow('Glute bridge march','Alternate legs, lower back stability','3×15')+
-        exRowWithLevel('hinge','Good morning (BW)','Hip hinge, erector strengthening','3×12')+
-        exRow('Wall sit','90° hold, no sliding','3×45 sec')+
-        exRowWithLevel('core','Hollow body hold','Lower back protection through anterior core','3×30 sec'),
-        stretchRow('Pigeon pose','90 sec each — right side extra 30 sec','3+ min')+
+      ${workoutCard('EVENING B — LEGS + POSTERIOR CHAIN','TUE / FRI \u00b7 45 MIN',
+        exRowWithLevel('hinge','Nordic hamstring curl','Feet under sofa/bed \u2014 hardest hamstring move','4\u00d73\u20135')+
+        exRowWithLevel('pull','Inverted row (under table)','Superset immediately after Nordic','3\u00d78\u201310')+
+        exRowWithLevel('squat','Bulgarian split squat','Rear foot elevated \u2014 quad + glute','4\u00d710/leg')+
+        exRow('Single-leg RDL (BW)','Control the descent \u2014 lower back + hamstring','3\u00d710/leg')+
+        exRow('Glute bridge march','Alternate legs in bridge \u2014 stability','3\u00d715')+
+        exRowWithLevel('hinge','Good morning (BW)','Hip hinge, erector strengthening','3\u00d712')+
+        exRow('Wall sit','90\u00b0 hold','2\u00d745 sec')+
+        exRow('Side plank + hip dip','Lateral core \u2014 was missing from this session','3\u00d712/side')+
+        exRowWithLevel('core','Hollow body hold','Lower back protection','2\u00d730 sec'),
+        stretchRow('Pigeon pose','90 sec each (right side +30 sec)','3+ min')+
         stretchRow('Figure-4 stretch','Lying on back, ankle over knee','60 sec each')+
         stretchRow('Hamstring stretch','One leg extended reach','60 sec each')+
-        stretchRow('Child\'s pose','Lower back release','60 sec'),
+        stretchRow('Child\'s pose','Lower back release','60 sec')+
+        stretchRow('Calf stretch','Wall lean','45 sec each'),
         'TUE,FRI'
       )}
 
-      ${workoutCard('EVENING C — SKILL + CORE + CALISTHENICS FOUNDATION','THU · 40 MIN',
-        exRowWithLevel('skill_crow','Crow/frog stand attempts','Every session — multiple attempts','5 min')+
-        exRowWithLevel('skill_crow','Tuck hold (crow position)','Build the balance — 4×15-20 sec holds','4×15-20 sec')+
-        exRowWithLevel('skill_lsit','L-sit tuck (floor)','Hands pressing down, tuck knees — hip flexor + straight arm strength','4×15 sec')+
-        exRowWithLevel('skill_planche','Scapular push-up','Protract/retract — planche prerequisite','3×12')+
-        exRowWithLevel('pull','Inverted row (under table)','Back training without pull-up bar','4×10')+
-        exRowWithLevel('core','Dead bug','Deep core, back pressed to floor','3×10/side')+
-        exRowWithLevel('core','Hollow body rock','True core tension — rock gently','3×10')+
-        exRow('Dragon flag negative','Bed edge — you\'ll barely do it. Do it anyway.','3×3')+
-        exRow('Side plank + hip dip','Lateral core','3×12/side')+
-        exRow('Superman hold','Posterior chain endurance','3×30 sec'),
-        stretchRow('Full shoulder sequence','Thread needle · rear shoulder · chest open','10 min')+
+      ${workoutCard('EVENING C — SKILL + CORE + PULL FOCUS','THU \u00b7 40 MIN',
+        exRowWithLevel('pull','Towel row','Loop towel around door handle. Pull chest to door.','4\u00d78\u201310')+
+        exRowWithLevel('pull','Scapular push-up','Protract/retract \u2014 planche prereq','3\u00d712')+
+        exRowWithLevel('skill_crow','Crow/frog stand attempts','Multiple attempts \u2014 build the balance','5 min')+
+        exRowWithLevel('skill_crow','Tuck hold (crow position)','Build balance','4\u00d715\u201320 sec')+
+        exRowWithLevel('skill_lsit','L-sit tuck (floor)','Hands pressing, tuck knees','4\u00d715 sec')+
+        exRowWithLevel('core','Dead bug','Deep core, back pressed to floor','3\u00d710/side')+
+        exRowWithLevel('core','Hollow body rock','True core tension \u2014 rock gently','3\u00d710')+
+        exRow('Dragon flag negative','Bed edge \u2014 lower slowly','3\u00d73')+
+        exRow('Side plank + hip dip','Lateral core','2\u00d710/side')+
+        exRow('Superman hold','Posterior chain endurance','3\u00d730 sec'),
+        stretchRow('Full shoulder sequence','Thread needle \u00b7 rear shoulder \u00b7 chest open','8 min')+
         stretchRow('Hip flexor lunge stretch','60 sec each side','2 min')+
-        stretchRow('Neck isometrics','4 directions × 30 sec','2 min'),
+        stretchRow('Neck isometrics','4 directions \u00d7 30 sec','2 min'),
         'THU'
       )}
 
-      ${workoutCard('SAT — RUN + CONDITIONING','40–45 MIN TOTAL',
+      ${workoutCard('WED — MIDWEEK RUN (FASTED)','35 MIN TOTAL',
         exRow('Walk warm-up','Easy pace','5 min')+
-        exRow('Run','Conversational pace. Don\'t gasp. Build weekly: add 5 min every 2 weeks.','30 min')+
+        exRow('Run','Conversational pace. Don\'t gasp.','20 min')+
         exRow('Walk cooldown','Easy pace','5 min')+
-        exRow('Conditioning circuit','3 rounds: 10 push-ups + 10 jump squats + 10 sprawls + 30 sec plank','15 min'),
-        stretchRow('Lower body flush','Pigeon · hamstring · calf · quick quad','10 min'),
-        'SAT'
+        exRow('Circuit','3 \u00d7 10 each: jump squats + burpees + mountain climbers','10 min'),
+        stretchRow('Pigeon','60 sec/side','2 min')+
+        stretchRow('Hamstring stretch','One leg extended','60 sec each')+
+        stretchRow('Calf stretch','Wall lean','60 sec each'),
+        'WED'
       )}
 
-      ${workoutCard('WED — RUN (MIDWEEK)','35 MIN TOTAL',
-        exRow('Walk warm-up','','5 min')+
-        exRow('Run','Conversational pace','20 min')+
-        exRow('Walk cooldown','','5 min')+
-        exRow('Jump squats + burpees + mountain climbers','3×10 each','10 min'),
-        stretchRow('Lower body flush','Pigeon · hamstring · calf','8 min'),
-        'WED'
+      ${workoutCard('SAT — RUN + CONDITIONING (FASTED)','40\u201345 MIN TOTAL',
+        exRow('Walk warm-up','Easy pace','5 min')+
+        exRow('Run','Conversational pace. Build weekly: +5 min every 2 weeks.','30 min')+
+        exRow('Walk cooldown','Easy pace','5 min')+
+        exRow('Conditioning circuit','3 rounds: 10 push-ups + 10 jump squats + 10 sprawls + 30 sec plank','15 min'),
+        stretchRow('Lower body flush','Pigeon \u00b7 hamstring \u00b7 quad \u00b7 calf','10 min'),
+        'SAT'
       )}
 
       <div style="height:8px"></div>
       <div class="section-title">NECK <span>STRENGTHENING</span></div>
-      <p class="section-note">Add to any session or do standalone. Takes 5 min. Don't skip — neck takes 6-8 weeks to feel stronger.</p>
+      <p class="section-note">Add to any session. 5 min. Don\u2019t skip.</p>
 
       ${workoutCard('NECK PROTOCOL — DAILY 5 MIN','ADD TO ANY SESSION',
-        exRow('Isometric resist — forward','Hand on forehead, resist with neck','30 sec')+
-        exRow('Isometric resist — back','Hand on back of head, resist','30 sec')+
-        exRow('Isometric resist — each side','Hand on temple, resist laterally','30 sec each')+
-        exRow('Chin tuck (neck nod)','Tuck chin straight back, like double chin — deep cervical flexors','15 reps')+
+        exRow('Isometric resist \u2014 forward','Hand on forehead, resist with neck','30 sec')+
+        exRow('Isometric resist \u2014 back','Hand on back of head, resist','30 sec')+
+        exRow('Isometric resist \u2014 left','Hand on left temple, resist','30 sec')+
+        exRow('Isometric resist \u2014 right','Hand on right temple, resist','30 sec')+
+        exRow('Chin tuck (neck nod)','Tuck chin straight back \u2014 deep cervical flexors','15 reps')+
         exRow('Prone neck extension','Face down, lift chin slowly from floor','10 reps')
       )}`;
     },
@@ -2329,20 +2348,35 @@ const PLANS = {
 
       <div class="rule-card" style="border-left-color:#ff8855">
         <div class="rule-num">EATING WINDOW</div>
-        <div class="rule-text">11AM–5:30PM. Two meals only. Protein anchors every meal.</div>
-        <div class="rule-sub">Meal 1 (~${Math.round(cal*0.55)}cal): Protein-heavy, 60-70g protein · Meal 2 (~${Math.round(cal*0.45)}cal): Lighter, more vegetables</div>
+        <div class="rule-text">11AM\u20135:30PM. Two meals only. Protein anchors every meal.</div>
+        <div class="rule-sub">Meal 1 (~${Math.round(cal*0.55)}cal): Protein-heavy, 60-70g protein \u00b7 Meal 2 (~${Math.round(cal*0.45)}cal): Lighter, more vegetables</div>
       </div>
 
       <div class="rule-card">
-        <div class="rule-num">FAST DAY PROTOCOL — WED/SAT/SUN</div>
-        <div class="rule-text">Wake: 500ml water + salt · Mid-morning: electrolyte tablet · Throughout: 3.5L water · Pre-training: electrolyte 20 min before (70-80% intensity only) · Sleep: 400mg magnesium</div>
-        <div class="rule-sub" style="color:#cc4444">Stop if: palpitations · chest tightness · vision goes dark. Salt water + 50-100g carbs immediately.</div>
+        <div class="rule-num">FAST DAY PROTOCOL \u2014 SUN/WED/SAT</div>
+        <div class="rule-text">Wake: 500ml water + salt \u00b7 9-10am: electrolyte tab #1 (99mg K) \u00b7 Pre-training: 2\u00d7 MCT gels (2,000mg) \u00b7 During/post: 500ml water \u00b7 Mid-afternoon: electrolyte tab #2 \u00b7 Throughout: 3.5L total water \u00b7 Before bed: Magnesium Complex</div>
+        <div class="rule-sub" style="color:#cc4444">STOP IF: palpitations \u00b7 chest tightness \u00b7 vision narrowing. Salt water + 50-100g carbs immediately.</div>
       </div>
 
-      <div class="rule-card">
-        <div class="rule-num">MICRONUTRIENTS — PRIORITY ORDER</div>
-        <div class="rule-text">Magnesium 400mg · Potassium 3000-3500mg · Sodium (don't restrict) · Vitamin C · Iron · Zinc · Vitamin D</div>
-        <div class="rule-sub">Mg before bed — muscle recovery + sleep. Potassium: lentils, sweet potato. Sodium: pinch in water daily. Vitamin D: supplement if indoors most of day.</div>
+      <div class="section-title" style="margin-top:8px">SUPPLEMENT <span>PROTOCOL</span></div>
+
+      ${ruleCard('MORNING STACK (EATING DAYS)','Osteocare 2 tabs \u00b7 D3+K2 1 tab \u00b7 MCT 1 gel \u00b7 Zinc 50mg (EOD only: Sun/Tue/Thu/Sat)','Take with breakfast at 11am. D3+K2 needs fat for absorption \u2014 meal provides it.','#82e0aa')}
+      ${ruleCard('MORNING STACK (FAST DAYS)','D3+K2 1 tab (with MCT gel \u2014 fat carrier present) \u00b7 Zinc (Sun/Sat only) \u00b7 2 MCT gels pre-training','No Osteocare on fast days \u2014 calcium needs food for full absorption.','#82e0aa')}
+      ${ruleCard('ZINC \u2014 EVERY OTHER DAY ONLY','Sun \u00b7 Tue \u00b7 Thu \u00b7 Sat. Never daily. 50mg/day exceeds NIH upper limit (40mg). Alternate-day = 28.6mg avg.','Daily dosing depletes copper \u2192 anemia risk.','#82e0aa')}
+      ${ruleCard('OMEGA-3 FISH OIL \u2014 EATING DAYS ONLY','3 caps with largest meal. Total: 1,485mg EPA + 990mg DHA = 2,475mg.','Meets anti-inflammatory threshold (\u22652,400mg). Skip on fast days \u2014 effects are chronic not acute.','#82e0aa')}
+      ${ruleCard('MAGNESIUM COMPLEX \u2014 EVERY NIGHT','1 serving before bed, all 7 days. ~67.6mg elemental Mg.','Glycinate targets sleep/NMDA pathway. Malate supports Krebs cycle. Most critical supplement \u2014 runs out first.','#82e0aa')}
+      ${ruleCard('ELECTROLYTES \u2014 FAST DAYS ONLY','2 tabs on Sun/Wed/Sat: 1 mid-morning (9-10am) + 1 pre-evening training (20 min before).','99mg potassium each. Prevents palpitations, cramps, and headaches during fasted sessions.','#82e0aa')}
+
+      <div class="section-title" style="margin-top:8px">HIGH PROTEIN <span>SOURCES</span></div>
+      <div class="snack-grid">
+        <div class="snack-item"><div class="snack-name">Chicken breast (150g)</div><div class="snack-cal">250 cal</div><div class="snack-note">46g protein \u00b7 King of protein density</div></div>
+        <div class="snack-item"><div class="snack-name">Eggs (3 large)</div><div class="snack-cal">215 cal</div><div class="snack-note">18g protein \u00b7 Batch cook 12 at a time</div></div>
+        <div class="snack-item"><div class="snack-name">Greek yogurt (200g)</div><div class="snack-cal">130 cal</div><div class="snack-note">20g protein \u00b7 Buy plain, not flavoured</div></div>
+        <div class="snack-item"><div class="snack-name">Canned tuna (100g)</div><div class="snack-cal">100 cal</div><div class="snack-note">25g protein \u00b7 Best cal:protein ratio</div></div>
+        <div class="snack-item"><div class="snack-name">Lentils/dal (200g cooked)</div><div class="snack-cal">230 cal</div><div class="snack-note">18g protein \u00b7 Plant protein + fibre</div></div>
+        <div class="snack-item"><div class="snack-name">Cottage cheese (100g)</div><div class="snack-cal">100 cal</div><div class="snack-note">12g protein \u00b7 Casein \u2014 slow digestion</div></div>
+        <div class="snack-item"><div class="snack-name">Turkey mince (100g)</div><div class="snack-cal">150 cal</div><div class="snack-note">30g protein \u00b7 Lean ground meat</div></div>
+        <div class="snack-item"><div class="snack-name">Whey protein (1 scoop)</div><div class="snack-cal">120 cal</div><div class="snack-note">25g protein \u00b7 Only if food protein falls short</div></div>
       </div>
 
       <div class="section-title" style="margin-top:8px">CHEAP SNACKS</div>
@@ -2359,64 +2393,58 @@ const PLANS = {
 
       <div class="section-title">DRINKS</div>
       <div class="rule-card" style="border-left-color:var(--green)">
-        <div class="rule-num">ALLOWED — ALWAYS</div>
-        <div class="rule-text">Water · Black coffee · Plain green tea · Sparkling water · Salt water</div>
+        <div class="rule-num">ALLOWED \u2014 ALWAYS</div>
+        <div class="rule-text">Water \u00b7 Black coffee \u00b7 Plain green tea \u00b7 Sparkling water \u00b7 Salt water</div>
         <div class="rule-sub">Cold water marginally boosts metabolism. Black coffee before training increases fat oxidation. Green tea EGCG is studied and genuine.</div>
       </div>
       <div class="rule-card" style="border-left-color:var(--danger)">
         <div class="rule-num">NEVER</div>
-        <div class="rule-text">Juice · soda · sweetened chai · energy drinks · milk with sugar · flavoured water</div>
+        <div class="rule-text">Juice \u00b7 soda \u00b7 sweetened chai \u00b7 energy drinks \u00b7 milk with sugar \u00b7 flavoured water</div>
         <div class="rule-sub">All spike insulin, add hidden calories, or both. These break your deficit every time.</div>
       </div>
 
       <div class="section-title" style="margin-top:8px">MEAL SOURCES</div>
       <div class="rule-card">
-        <div class="rule-num">PROTEIN — KEEP STOCKED</div>
-        <div class="rule-text">Eggs · canned tuna · grilled chicken breast · lentils/dal · Greek yogurt · boiled chickpeas</div>
+        <div class="rule-num">PROTEIN \u2014 KEEP STOCKED</div>
+        <div class="rule-text">Eggs \u00b7 canned tuna \u00b7 grilled chicken breast \u00b7 lentils/dal \u00b7 Greek yogurt \u00b7 boiled chickpeas</div>
       </div>
       <div class="rule-card">
-        <div class="rule-num">CARBS — TRAINING DAYS ONLY</div>
-        <div class="rule-text">Oats · white rice (small portion) · sweet potato · banana pre-workout</div>
+        <div class="rule-num">CARBS \u2014 TRAINING DAYS ONLY</div>
+        <div class="rule-text">Oats \u00b7 white rice (small portion) \u00b7 sweet potato \u00b7 banana pre-workout</div>
       </div>
       <div class="rule-card">
-        <div class="rule-num">VEGETABLES — EAT FREELY</div>
-        <div class="rule-text">Spinach · cucumber · tomato · broccoli · zucchini · green beans</div>
+        <div class="rule-num">VEGETABLES \u2014 EAT FREELY</div>
+        <div class="rule-text">Spinach \u00b7 cucumber \u00b7 tomato \u00b7 broccoli \u00b7 zucchini \u00b7 green beans</div>
         <div class="rule-sub">Fill your plate with these. Near-zero calories, huge volume. This is what makes ${cal} cal feel like more food than it is.</div>
       </div>
       <div class="rule-card" style="border-left-color:var(--danger)">
         <div class="rule-num">THE ONE THING THAT BREAKS YOUR DEFICIT</div>
         <div class="rule-text">Unplanned social eating</div>
         <div class="rule-sub">Fix: eat a protein snack 30 min before any social meal. You arrive not hungry. You eat less automatically. No willpower required.</div>
-      </div>
-
-      <div class="section-title" style="margin-top:8px">SUPPLEMENT <span>PROTOCOL</span></div>
-      ${ruleCard('MORNING STACK','Osteocare 2 tabs \u00b7 D3+K2 1 pill \u00b7 MCT gel (1 eating / 2 fast)','Total D3 ~5000 IU/day \u2014 do not add more D3 from any source.','#82e0aa')}
-      ${ruleCard('ZINC 50mg \u2014 EVERY OTHER DAY ONLY','Sun \u00b7 Tue \u00b7 Thu \u00b7 Sat. Never daily.','Daily 50mg exceeds the safe upper limit and depletes copper over weeks.','#82e0aa')}
-      ${ruleCard('MAGNESIUM COMPLEX','Eating days: 2 servings before bed. Fast days: 4 servings before bed.','Higher dose on fast days replaces what fasting depletes. Most critical supplement to keep stocked.','#82e0aa')}
-      ${ruleCard('OMEGA-3 FISH OIL','3 capsules with largest meal (eating days). Skip on full fasts.','Min 600mg EPA+DHA per capsule. Anti-inflammatory, cortisol buffer, joint recovery.','#82e0aa')}
-      ${ruleCard('ELECTROLYTES \u2014 FAST DAYS ONLY','2 tablets on Sun/Wed/Sat: 1 mid-morning + 1 pre-evening training.','Prevents palpitations and headaches during fasted training.','#82e0aa')}
-      ${ruleCard('STOCK CHECK','Before leaving Dubai: Magnesium \u00d72 packs \u00b7 Osteocare \u00d71 pack (90 tabs) \u00b7 Omega-3 if budget allows.','Magnesium runs out first (~3 weeks). Osteocare ~5 weeks. Omega-3: 30\u201350 AED at Life Pharmacy.','#82e0aa')}`;
+      </div>`;
     },
 
     rulesContent(s) {
       const cal = s.calories || 1500;
       return `
       <div class="section-title">EATING <span>RULES</span></div>
-      ${ruleCard('RULE 01',cal+' cal/day. Never more.','Hard ceiling. Protein anchors every meal. Hit protein before filling anything else. This is what protects muscle during the cut.')}
-      ${ruleCard('RULE 02','Last meal before 6PM. No exceptions.','Creates 16+ hour overnight fast automatically. Already your default — lock it permanently.')}
-      ${ruleCard('RULE 03','No liquid calories. Ever.','Water · black coffee · plain tea only. Juice, sweetened chai, soda — these break your deficit invisibly.')}
-      ${ruleCard('RULE 04','3 litres of water daily. Minimum.','500ml on wake. 250ml before each meal. Half the time you think you\'re hungry, you\'re dehydrated.')}
-      ${ruleCard('RULE 05','High volume, low calorie foods fill the gap.','Cucumber, tomato, spinach, lentils. These are near-zero calories but huge volume. Eat them freely. When social eating: take protein, skip bread and rice silently.')}
+      ${ruleCard('RULE 01',cal+' cal/day. Never more.','Hard ceiling. Protein anchors every meal. Hit protein before filling anything else.')}
+      ${ruleCard('RULE 02','Last meal before 6PM. No exceptions.','Creates 16+ hour overnight fast. Lock it permanently.')}
+      ${ruleCard('RULE 03','No liquid calories. Ever.','Water \u00b7 black coffee \u00b7 plain tea only.')}
+      ${ruleCard('RULE 04','3 litres of water daily. Minimum.','500ml on wake. 250ml before each meal.')}
+      ${ruleCard('RULE 05','High volume, low calorie foods fill the gap.','Cucumber, tomato, spinach, lentils. When social eating: take protein, skip bread/rice silently.')}
       <div class="section-title" style="margin-top:8px">TRAINING <span>RULES</span></div>
-      ${ruleCard('RULE 06','Change clothes the moment you get home.','Behaviour trigger. Sitting down first = workout is done. You know this.','var(--accent2)')}
-      ${ruleCard('RULE 07','Daily mobility 10 min every morning. Non-negotiable.','Tight hips block L-sit. Tight shoulders block handstand. Stiff thoracic spine blocks planche lean. This is not optional.','var(--accent2)')}
-      ${ruleCard('RULE 08','Calisthenics skills require daily practice of foundations.','Crow, handstand, L-sit — progress is invisible for weeks then it clicks. Don\'t skip the foundations because they feel pointless. That\'s exactly when they\'re working.','var(--accent2)')}
-      ${ruleCard('RULE 09','Fast days: 70-80% intensity only.','Training fasted is fine — you\'ve done it for weeks. But don\'t push 100% on zero calories. You\'ll compromise the session and risk the symptoms.','var(--accent2)')}
+      ${ruleCard('RULE 06','Change clothes the moment you get home.','Sit down first = workout done.','var(--accent2)')}
+      ${ruleCard('RULE 07','Daily mobility 10 min every morning. Non-negotiable.','Tight hips block L-sit. Tight shoulders block handstand.','var(--accent2)')}
+      ${ruleCard('RULE 08','Push + Pull in every upper session.','Push:pull ratio is 5:7. Every push exercise has a pull partner. Don\'t skip the pull work.','var(--accent2)')}
+      ${ruleCard('RULE 09','Fast days: 70-80% intensity only.','Training fasted is fine. Don\'t push 100% on zero calories.','var(--accent2)')}
+      ${ruleCard('RULE 10','Calisthenics skills require daily practice of foundations.','Crow, handstand, L-sit \u2014 progress is invisible for weeks then it clicks.','var(--accent2)')}
       <div class="section-title" style="margin-top:8px">DISCIPLINE <span>RULES</span></div>
-      ${ruleCard('RULE 10','One miss = noise. Two = pattern. Three = decision.','At day two: lower the bar. 10 push-ups + stretch = not breaking the streak. Minimum beats zero every time.','#70c8ff')}
-      ${ruleCard('RULE 11','Boredom = add progression, not novelty.','Every 2 weeks: +1 rep, -5 sec rest, or harder variation. Progress kills boredom. Novelty is avoidance.','#70c8ff')}
-      ${ruleCard('RULE 12','Friends not on a mission are not your benchmark.','They\'re comfortable. You have a reason they don\'t. No explanation required.','#70c8ff')}
-      ${ruleCard('RULE 13','Travel changes nothing.','20 min on a floor. The body goes everywhere. The mission doesn\'t pause.','#70c8ff')}`;
+      ${ruleCard('RULE 11','One miss = noise. Two = pattern. Three = decision.','At day two: lower the bar. 10 push-ups + stretch = keeping the streak.','#70c8ff')}
+      ${ruleCard('RULE 12','Boredom = add progression, not novelty.','Every 2 weeks: +1 rep, -5 sec rest, or harder variation.','#70c8ff')}
+      ${ruleCard('RULE 13','Friends not on a mission are not your benchmark.','They\'re comfortable. You have a reason they don\'t.','#70c8ff')}
+      ${ruleCard('RULE 14','Travel changes nothing.','20 min on a floor. The body goes everywhere. The mission doesn\'t pause.','#70c8ff')}
+      ${ruleCard('RULE 15','The fast days are 51% of the weekly deficit.','Miss them consistently and the timeline doubles.','#70c8ff')}`;
     }
   }
 
