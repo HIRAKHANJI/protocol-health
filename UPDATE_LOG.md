@@ -4,6 +4,33 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 2.4.0 — 2026-03-20
+
+**Scope:** Minor (workout balance audit + UX improvements)
+**Banner:** "All plans now push:pull balanced. CARs explained. Core progression fixed (no equipment needed)."
+
+- **DEFAULT plan push:pull fix** — Was 9:0 (zero pull exercises). Added
+  Superman hold to Morning A, inverted row + Y-T-W raises + scapular push-up
+  to Evening A, Superman hold to Evening C (replacing Sprawl + Push-up).
+  Evening A renamed "UPPER PUSH/PULL". Now 1:1 balanced.
+- **BULK plan push:pull fix** — Was ~2.5:1 (2 push days, 1 pull day). Friday
+  "Push B" converted to "Push/Pull B" with inverted rows and Y-T-W raises
+  added. Saturday full body reordered to pair push+pull. Rule 06 updated.
+  Now ≤1:1 across the week.
+- **AGRO Evening A minor rebalance** — Removed pseudo-planche lean (moved to
+  skill-only work). Added Superman hold. Reordered scapular push-up before
+  archer for better superset flow. Push:pull now balanced within the session.
+  Rule 08 updated to say "pull-dominant across the week" instead of "5:7".
+- **Core level 7 replaced** — "Hanging leg raises" (bar required) replaced
+  with "Lying leg raises + hip lift" (floor only). Entire progression chain
+  is now zero-equipment.
+- **CARs explanations added** — All "Hip CARs" warm-up rows across all 5
+  plans now include full descriptions: what CARs stands for (Controlled
+  Articular Rotations), how to perform hip CARs, wrist CARs, and cat-cow.
+  Checklist sub-text also updated. No more unexplained acronyms.
+
+---
+
 ## Version 2.3.0 — 2026-03-20
 
 **Scope:** Minor (AGRO plan content overhaul)
