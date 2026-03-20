@@ -853,7 +853,7 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
         </div>
         <div class="duration-single">
           <label class="field-label">Plan start date</label>
-          <input class="field-input" type="date" id="settingStartDate">
+          <input class="field-input" type="date" id="settingStartDate" oninput="calcDuration()">
         </div>
         <div class="duration-single">
           <label class="field-label">Risk tolerance</label>
@@ -1128,8 +1128,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '2.2.0';
-const APP_VERSION_MSG = 'Removed exercise burn (covered by TDEE), dual schedule modes, enhanced ADJUST with observed/formula/blended rates.';
+const APP_VERSION = '2.2.1';
+const APP_VERSION_MSG = 'Fixed start date off-by-one bug, settings now persist properly.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -1153,7 +1153,10 @@ function strToDate(s) { const [y,m,d]=s.split('-').map(Number); return new Date(
 // getSettings: always returns a full settings object with defaults. Never returns null.
 // Add any new settings fields here with a default value.
 function getSettings() {
-  return gs(SK.settings) || { plan:'default', currentKg:104, targetKg:91, calories:1500, tdee:2600, risk:'aggressive', startDate:null, age:null, height:null, sex:'male', activityLevel:'1.55' };
+  const defaults = { plan:'default', currentKg:null, targetKg:null, calories:null, tdee:2600, risk:'aggressive', startDate:null, age:null, height:null, sex:'male', activityLevel:'1.55' };
+  const saved = gs(SK.settings);
+  if(!saved) return defaults;
+  return Object.assign({}, defaults, saved);
 }
 function saveSettings(s) { ss(SK.settings, s); }
 
@@ -3479,7 +3482,7 @@ function updateProgress() {
 // This is the primary source of "current weight" used everywhere in the app.
 function getLatestWeight() {
   const w = gs(SK.weights)||[];
-  return w.length ? w[0].weight : (getSettings().currentKg||104);
+  return w.length ? w[0].weight : (getSettings().currentKg||null);
 }
 
 // updateGoalBar: calculates % progress from start weight to target and fills the bar.
@@ -4514,7 +4517,7 @@ function openSettings() {
   const s = getSettings();
   document.getElementById('planSelect').value = s.plan||'default';
   // Pre-fill current weight from latest logged entry, not stale settings value
-  document.getElementById('settingCurrentKg').value = getLatestWeight();
+  document.getElementById('settingCurrentKg').value = getLatestWeight()||'';
   document.getElementById('settingTargetKg').value = s.targetKg||'';
   document.getElementById('settingCalories').value = s.calories||'';
   document.getElementById('settingTdee').value = s.tdee||2600;
@@ -4574,6 +4577,7 @@ function confirmPlan() {
   if(!isNaN(curInput) && curInput > 0) s.currentKg = curInput;
   if(!isNaN(tgtInput) && tgtInput > 0) s.targetKg = tgtInput;
   s.risk = document.getElementById('settingRisk').value || 'aggressive';
+  s.startDate = document.getElementById('settingStartDate').value || todayStr();
   // TDEE auto-calc fields
   const ageInput = parseFloat(document.getElementById('settingAge').value);
   s.age = (!isNaN(ageInput) && ageInput >= 16) ? ageInput : null;
@@ -4680,7 +4684,7 @@ function calcDuration() {
   const tgtDateStr = document.getElementById('settingTargetDate').value;
   if(isNaN(totalDays) && tgtDateStr) {
     const today0 = new Date(); today0.setHours(0,0,0,0);
-    const tgtD   = new Date(tgtDateStr); tgtD.setHours(0,0,0,0);
+    const tgtD   = strToDate(tgtDateStr);
     totalDays = Math.round((tgtD - today0) / 86400000);
   }
 
