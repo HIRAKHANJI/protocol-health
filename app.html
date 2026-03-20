@@ -11,6 +11,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Protocol Health">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="apple-touch-icon" href="PH_LOGO_192.png">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -1128,8 +1130,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '2.4.0';
-const APP_VERSION_MSG = 'All plans now push:pull balanced. CARs explained. Core progression fixed (no equipment needed).';
+const APP_VERSION = '2.5.0';
+const APP_VERSION_MSG = '15 bug fixes: goal calculator math, bulk goal bar, projection accuracy, light day handling, midnight refresh.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -1174,12 +1176,13 @@ function getDayCalories(dateStr) {
 // Returns null if no food log data exists in the window.
 function getAvgActualCalories(days) {
   const fd = gs(SK.fastDays) || {};
+  const ld = gs(SK.lightDays) || {};
   let sum = 0, count = 0;
   const now = new Date(); now.setHours(0,0,0,0);
   for(let i = 0; i < days; i++) {
     const d = new Date(now); d.setDate(d.getDate() - i);
     const ds = dateToStr(d);
-    if(fd[ds]) continue; // skip fast days
+    if(fd[ds] || ld[ds]) continue; // skip fast and light days
     const dc = getDayCalories(ds);
     if(dc.hasData) { sum += dc.total; count++; }
   }
@@ -1221,7 +1224,7 @@ function isWeightStalling() {
   const cal  = s.calories || 1500;
   const fastDaysPerWeek = plan.fastDaysPerWeek || 0;
   const eatDaysPerWeek  = 7 - fastDaysPerWeek;
-  const weeklyDeficit   = (eatDaysPerWeek * Math.max(0, tdee - cal))
+  const weeklyDeficit   = (eatDaysPerWeek * (tdee - cal))
                         + (fastDaysPerWeek * tdee);
   const formulaRate = weeklyDeficit / 7 / 7700;
   if(formulaRate <= 0) return false;
@@ -1232,14 +1235,18 @@ function isWeightStalling() {
 // Returns { cal, proteinG, carbsG, fatG, proteinPct, carbsPct, fatPct, warnings, signal, isFastDay, isFeasible }
 function computeMacros(dateStr) {
   const s    = getSettings();
-  const cal  = s.calories || 1500;
   const plan = getActivePlan();
   const fastDay = isFastDay(dateStr);
+  const lightDay = isLightDay(dateStr);
 
   if(fastDay) {
+    const cal = s.calories || 1500;
     return { cal, proteinG:0, carbsG:0, fatG:0, proteinPct:0, carbsPct:0, fatPct:0,
       warnings:['Water fast day — no macros to track'], signal:'fast', isFastDay:true, isFeasible:true };
   }
+
+  // Light days use ~60% of TDEE as calorie ceiling
+  const cal = lightDay ? Math.round((s.tdee || 2600) * 0.6) : (s.calories || 1500);
 
   const dow = strToDate(dateStr).getDay();
   const eveningText = (plan.eveningSub && plan.eveningSub[dow]) || '';
@@ -1317,6 +1324,11 @@ function computeMacros(dateStr) {
   }
   if(carbsG < 30 && !isRestDay) {
     warnings.push('Carbs very low (' + carbsG + 'g) — ensure electrolytes and 3.5L+ water.');
+  }
+
+  if(lightDay) {
+    signal = 'light';
+    warnings.unshift('Light eating day — macros calculated at ' + cal + ' cal (~60% of TDEE).');
   }
 
   return { cal, proteinG, carbsG, fatG, proteinPct, carbsPct, fatPct, warnings, signal, isFastDay:false, isFeasible };
@@ -3524,10 +3536,12 @@ function updateGoalBar(current) {
   // Start = oldest logged weight entry, fall back to settings.currentKg
   const weights = gs(SK.weights)||[];
   const start = weights.length ? weights[weights.length-1].weight : (s.currentKg || current);
-  const totalDrop = start - target;
-  const dropped = start - current;
-  const pct = totalDrop > 0 ? Math.min(100, Math.max(0, Math.round((dropped / totalDrop) * 100))) : 0;
-  const remain = Math.max(0, (current - target)).toFixed(1);
+  // Detect plan direction: bulk (gaining) vs cut (losing)
+  const isBulk = target > start;
+  const totalChange = isBulk ? (target - start) : (start - target);
+  const progress = isBulk ? (current - start) : (start - current);
+  const pct = totalChange > 0 ? Math.min(100, Math.max(0, Math.round((progress / totalChange) * 100))) : 0;
+  const remain = isBulk ? Math.max(0, (target - current)).toFixed(1) : Math.max(0, (current - target)).toFixed(1);
   document.getElementById('currentWeightDisplay').textContent = current;
   document.getElementById('gs-current').textContent = current;
   document.getElementById('gs-target').textContent = target;
@@ -3547,9 +3561,10 @@ function updateDurationBar() {
   const start = strToDate(sched.startDate);
   const now = new Date(); now.setHours(0,0,0,0);
   const elapsed = Math.max(0, Math.floor((now - start)/86400000));
+  const dayNum = Math.min(elapsed + 1, sched.totalDays); // cap at total — don't show DAY N+1/N
   const pct = Math.min(100, Math.round((elapsed/sched.totalDays)*100));
   document.getElementById('durationStrip').classList.add('visible');
-  document.getElementById('durationLabel').textContent = `${sched.planName||'PLAN'} — DAY ${elapsed+1} / ${sched.totalDays}`;
+  document.getElementById('durationLabel').textContent = `${sched.planName||'PLAN'} — DAY ${dayNum} / ${sched.totalDays}`;
   document.getElementById('durationPct').textContent = pct+'%';
   document.getElementById('durationFill').style.width = pct+'%';
 }
@@ -3667,9 +3682,10 @@ function updateProjection() {
       totalFormulaDeficit += (tdee - dayCal) / 7700;
     } else {
       // Eating day: use actual logged data if available, else s.calories
+      // Allow negative deficit (surplus) — don't clamp, so projection reflects reality
       const dc = getDayCalories(ds);
       const dayCal = dc.hasData ? dc.total : cal;
-      totalFormulaDeficit += Math.max(0, (tdee - dayCal)) / 7700;
+      totalFormulaDeficit += (tdee - dayCal) / 7700;
     }
   }
   const formulaRate = totalFormulaDeficit / 7;
@@ -3784,7 +3800,7 @@ function computeRadarMetrics(days) {
         fastScheduled++;
         if (lightDaysMap[ds]) {
           const dc = getDayCalories(ds);
-          const lightCeil = Math.round(tdee * 0.6);
+          const lightCeil = Math.round((s.tdee || 2600) * 0.6);
           if (!dc.hasData || dc.total <= lightCeil) fastCompleted++;
           else fastCompleted += 0.5; // partial credit if over light ceiling
         }
@@ -4164,14 +4180,14 @@ function renderCalendar() {
       if(log) {
         const checks = Object.values(log.checks||{}).filter(Boolean).length;
         const total  = Object.keys(log.checks||{}).length;
-        if(isFast)  { cls+=' cal-fast'; }
-        else if(isLight){ cls+=' cal-light'; }
+        if(isFast)  { cls+=' cal-fast'; fasts++; }
+        else if(isLight){ cls+=' cal-light'; lights++; }
         else if(checks > 0 && checks === total && total > 0){ cls+=' cal-done'; done++; }
         // Partial or zero checks on today: no color — day is in progress
       } else {
         // No log at all yet today — no color
-        if(isFast) cls+=' cal-fast';
-        else if(isLight) cls+=' cal-light';
+        if(isFast) { cls+=' cal-fast'; fasts++; }
+        else if(isLight) { cls+=' cal-light'; lights++; }
       }
     }
     else {
@@ -4735,9 +4751,11 @@ function calcDuration() {
   let totalDays = parseInt(document.getElementById('settingDays').value);
   const tgtDateStr = document.getElementById('settingTargetDate').value;
   if(isNaN(totalDays) && tgtDateStr) {
-    const today0 = new Date(); today0.setHours(0,0,0,0);
-    const tgtD   = strToDate(tgtDateStr);
-    totalDays = Math.round((tgtD - today0) / 86400000);
+    // Calculate days from start date (not today) so end date = startDate + totalDays is correct
+    const fromDate = startDateStr ? strToDate(startDateStr) : new Date();
+    fromDate.setHours(0,0,0,0);
+    const tgtD = strToDate(tgtDateStr);
+    totalDays = Math.round((tgtD - fromDate) / 86400000);
   }
 
   // User-overridden calorie ceiling (optional — if blank we calculate it)
@@ -4846,7 +4864,7 @@ function calcDuration() {
       impliedRate = (weeklySurplusOrDeficit / 7700).toFixed(2);
     } else if(hasCalOverride) {
       calcCals = calOverride;
-      weeklySurplusOrDeficit = (eatDaysPerWeek * Math.max(0, tdee - calcCals)) + (fastDaysPerWeek * tdee);
+      weeklySurplusOrDeficit = (eatDaysPerWeek * (tdee - calcCals)) + (fastDaysPerWeek * tdee);
       if(weeklySurplusOrDeficit <= 0) {
         flagEl.textContent = '✗ CALORIES TOO HIGH — NO DEFICIT';
         flagEl.style.cssText='display:block;background:rgba(255,68,68,0.12);color:var(--danger);padding:7px 10px;border-radius:6px;font-size:0.75rem;font-weight:700;letter-spacing:1px';
@@ -5236,8 +5254,8 @@ function openManageSchedule() {
   const s = getSettings();
 
   // Current status text
-  const startW  = sched.startWeight || s.currentKg || '?';
-  const curW    = getLatestWeight();
+  const startW  = sched.startWeight || s.currentKg || 0;
+  const curW    = getLatestWeight() || startW;
   const elapsed = Math.max(0, Math.floor((new Date().getTime() - strToDate(sched.startDate).getTime()) / 86400000));
   const lost    = parseFloat((startW - curW).toFixed(1));
   const rate    = elapsed > 0 ? parseFloat((lost / elapsed * 7).toFixed(2)) : 0;
@@ -5292,8 +5310,8 @@ function calcAdjust() {
     return;
   }
 
-  const curW    = getLatestWeight();
-  const startW  = sched.startWeight || s.currentKg || curW;
+  const startW  = sched.startWeight || s.currentKg || 0;
+  const curW    = getLatestWeight() || startW;
   const elapsed = Math.max(1, Math.floor((new Date().getTime() - strToDate(sched.startDate).getTime()) / 86400000));
   const lost    = Math.max(0, startW - curW);
   const actualRate = lost / elapsed; // kg/day observed
@@ -5305,7 +5323,7 @@ function calcAdjust() {
   const effectiveCal = avgActualForAdjust !== null
     ? Math.round(newCal * 0.6 + avgActualForAdjust * 0.4)
     : newCal;
-  const weeklyDeficit = (eatDaysPerWeek * Math.max(0, tdee - effectiveCal)) + (fastDaysPerWeek * tdee);
+  const weeklyDeficit = (eatDaysPerWeek * (tdee - effectiveCal)) + (fastDaysPerWeek * tdee);
   const formulaRate   = weeklyDeficit / 7 / 7700; // kg/day formula
 
   // Select rate based on adjust mode
@@ -5398,6 +5416,15 @@ function confirmAdjust() {
   s.calories  = adj.newCal;
   s.targetKg  = adj.newTarget;
   saveSettings(s);
+
+  // Auto-set fast/light days for newly added schedule days
+  const plan = PLANS[s.plan||'default'] || PLANS.default;
+  if((plan.fastDaysPerWeek || 0) > 0) {
+    autoSetPlanFastDays(dateToStr(today0), adj.remainDays);
+  }
+  if((plan.lightDaysPerWeek || 0) > 0) {
+    autoSetPlanLightDays(dateToStr(today0), adj.remainDays);
+  }
 
   dispatch('SCHEDULE_ADJUSTED');
   dispatch('CALORIES_CHANGED');
@@ -5536,6 +5563,8 @@ function restoreData(event) {
           });
           // Full UI refresh via dispatcher
           const s = getSettings();
+          document.getElementById('planSelect').value = s.plan || 'default';
+          document.getElementById('settingRisk').value = s.risk || 'aggressive';
           applyPlanUI(s.plan||'default');
           syncCustomSelect('planSelectCustom','planSelect');
           syncCustomSelect('riskSelectCustom','settingRisk');
@@ -5640,7 +5669,7 @@ function generateExport() {
         text+=`  Compliance: ${p}/${t}\n`;
         // List what was done — search ALL plans' checklists since we don't store which plan was active
         const allItems = [];
-        Object.values(PLANS).forEach(pl => { allItems.push(...pl.checklistNormal, ...pl.checklistFast); });
+        Object.values(PLANS).forEach(pl => { allItems.push(...pl.checklistNormal, ...pl.checklistFast, ...(pl.checklistLight||[])); });
         const seen = new Set();
         const doneItems = allItems.filter(i => log.checks[i.id] && !seen.has(i.id) && seen.add(i.id)).map(i=>i.label);
         if(doneItems.length) text+=`    ✓ ${doneItems.join('\n    ✓ ')}\n`;
@@ -5704,10 +5733,15 @@ document.getElementById('settingsOverlay').addEventListener('click',e=>{if(e.tar
 // today's day label and checklist.
 document.addEventListener('visibilitychange', () => {
   if(document.visibilityState === 'visible') {
+    // Refresh today label
+    document.getElementById('todayDayName').textContent = FULL_DAYS[new Date().getDay()];
+    // Refresh TODAY tab checklist and fast UI in case date changed (midnight crossover)
+    renderTodayChecklist();
+    updateFastUI();
+    updateDurationBar();
     if(document.getElementById('tab-months').classList.contains('active')) {
       renderCalendar();
     }
-    document.getElementById('todayDayName').textContent = FULL_DAYS[new Date().getDay()];
   }
 });
 </script>
