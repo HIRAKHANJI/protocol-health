@@ -1128,8 +1128,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '2.3.0';
-const APP_VERSION_MSG = 'AGRO plan rebalanced: pull-dominant workouts, full supplement protocol, updated nutrition.';
+const APP_VERSION = '2.4.0';
+const APP_VERSION_MSG = 'All plans now push:pull balanced. CARs explained. Core progression fixed (no equipment needed).';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -1913,7 +1913,7 @@ const PLANS = {
       6:'SATURDAY — Evening C: Core + Conditioning · Same as Wednesday'
     },
     stretchSub: {
-      0:'Light mobility only — cat-cow, hip CARs.',
+      0:'Light mobility only — cat-cow (arch/round spine on all fours), hip CARs (slow full-circle knee raises, 5 each way per hip).',
       1:'Chest + shoulder stretch (doorframe). 5 min.',
       2:'Pigeon + hip flexor. 5 min.',
       3:'Full body stretch. Spine, hips, shoulders.',
@@ -1926,7 +1926,7 @@ const PLANS = {
     // These are used by both TODAY tab and day modal
     checklistNormal: [
       { id:'m1', group:'MORNING', label:'Wake & 500ml water immediately', sub:'Before phone. Non-negotiable.' },
-      { id:'m2', group:'MORNING', label:'10 min daily mobility (CARs + neck)', sub:'Hip CARs × 5 · Cat-cow × 10 · Thoracic rotation · Wrist CARs · Neck nods' },
+      { id:'m2', group:'MORNING', label:'10 min daily mobility (CARs + neck)', sub:'CARs = Controlled Articular Rotations (slow full-circle joint movements). Hip CARs × 5 each way per hip · Cat-cow × 10 · Thoracic rotation · Wrist CARs × 10 each way · Neck nods' },
       { id:'m3', group:'MORNING', label:'Morning workout (20 min)', sub:'Morning A/B — see WORKOUTS tab' },
       { id:'m4', group:'MORNING', label:'Log morning weight in TRACK tab', sub:'Weigh first thing after waking, before food.' },
       { id:'f1', group:'EATING', label:'Protein in first meal (60-70g)', sub:'Eggs · chicken · tuna · lentils. Anchor here first.' },
@@ -1959,11 +1959,11 @@ const PLANS = {
       <div class="section-title">MORNING <span>ACTIVATION</span></div>
       <p class="section-note">20 min. No equipment. Alternate A/B daily.</p>
 
-      ${workoutCard('MORNING A — PUSH + CORE','20 MIN · MON/WED/FRI',
+      ${workoutCard('MORNING A — PUSH + PULL','20 MIN · MON/WED/FRI',
         exRow('Jumping Jacks','Warm-up','2 min')+
         exRow('Push-ups','Full range, chest to floor','3×10–15')+
+        exRow('Superman Hold','Face down, lift arms + chest — back activation','3×20 sec')+
         exRow('Plank','Elbows, stay tight','3×30 sec')+
-        exRow('Mountain Climbers','Controlled pace','3×20')+
         exRow('Dead Bug','Lower back stays glued to floor','2×8/side'),
         stretchRow('Hip Flexor Stretch','30 sec each side','Cooldown'),
         'MON,WED,FRI'
@@ -1983,12 +1983,13 @@ const PLANS = {
       <div class="section-title">EVENING <span>SESSIONS</span></div>
       <p class="section-note">40–45 min. Rotate A→B→C. Sunday = rest or walk only.</p>
 
-      ${workoutCard('EVENING A — UPPER BODY','40 MIN · MON/THU',
+      ${workoutCard('EVENING A — UPPER PUSH/PULL','40 MIN · MON/THU',
         exRow('Push-up Ladder','10 down to 1','1 ladder')+
+        exRow('Inverted Row / Superman','Pull chest to table edge, or superman hold on floor','3×8–10')+
         exRow('Pike Push-up','Shoulders','4×10')+
+        exRow('Prone Y-T-W Raises','Face down, 3 positions — rear delt + mid-trap','3×10 each')+
         exRow('Diamond Push-up','Triceps','3×8')+
-        exRow('Tricep Dips','Chair/bed edge','3×12')+
-        exRow('Plank to Downdog','Flow, 2 sec each','3×10'),
+        exRow('Scapular Push-up','Protract/retract shoulder blades — back health','3×12'),
         stretchRow('Chest + Shoulder Stretch','Doorframe or behind-back clasp','5 min'),
         'MON,THU'
       )}
@@ -2008,7 +2009,7 @@ const PLANS = {
         exRow('Hollow Body Hold','Arms overhead, back pressed down','4×25 sec')+
         exRow('Bicycle Crunch','Slow and deliberate','3×20/side')+
         exRow('V-Sit Hold','Legs up 45°, back straight','3×20 sec')+
-        exRow('Sprawl + Push-up','Drop to floor + push-up + stand','3×8'),
+        exRow('Superman Hold','Posterior chain endurance — pairs with burpees','3×30 sec'),
         stretchRow('Full Body Stretch','Spine, hips, shoulders, hamstrings','5 min'),
         'WED,SAT'
       )}`;
@@ -2148,7 +2149,7 @@ const PLANS = {
       <p class="section-note">Every morning. Alternate A/B. Includes 10 min daily mobility.</p>
 
       ${workoutCard('MON \u00b7 MORNING A — PUSH + PULL SUPERSET','20 MIN',
-        exRow('Hip CARs + Cat-cow + Wrist CARs','Daily mobility \u2014 non-negotiable','10 min')+
+        exRow('Hip CARs + Cat-cow + Wrist CARs','CARs = Controlled Articular Rotations. Slow, full-circle joint movements. Hip CARs: stand on one leg, draw largest circle with raised knee (5 each way per hip). Cat-cow: arch/round spine ×10. Wrist CARs: interlace fingers, slow circles ×10.','10 min')+
         exRow('Jumping jacks / high knees','Warm-up','2 min')+
         exRowWithLevel('push','Push-ups','Full range, chest to floor','3\u00d710\u201315')+
         exRowWithLevel('pull','Superman hold','Face down, lift arms + chest. Immediately after push-ups.','3\u00d720\u201330 sec')+
@@ -2160,7 +2161,7 @@ const PLANS = {
       )}
 
       ${workoutCard('TUE \u00b7 MORNING B — LOWER + HINGE','20 MIN',
-        exRow('Hip CARs + Cat-cow + Wrist CARs','Daily mobility','10 min')+
+        exRow('Hip CARs + Cat-cow + Wrist CARs','CARs = Controlled Articular Rotations. Hip CARs: stand on one leg, draw largest circle with raised knee (5 each way per hip). Cat-cow: arch/round spine ×10. Wrist CARs: interlace fingers, slow circles ×10.','10 min')+
         exRow('High knees','Warm-up, 60% pace','2 min')+
         exRowWithLevel('squat','Bodyweight squat','Full depth','3\u00d715')+
         exRowWithLevel('hinge','Hip hinge / Good morning','Slow eccentric (4 sec down)','3\u00d712')+
@@ -2171,7 +2172,7 @@ const PLANS = {
       )}
 
       ${workoutCard('WED \u00b7 MORNING A — PUSH + PULL SUPERSET','20 MIN',
-        exRow('Hip CARs + Cat-cow + Wrist CARs','Daily mobility','10 min')+
+        exRow('Hip CARs + Cat-cow + Wrist CARs','CARs = Controlled Articular Rotations. Hip CARs: stand on one leg, draw largest circle with raised knee (5 each way per hip). Cat-cow: arch/round spine ×10. Wrist CARs: interlace fingers, slow circles ×10.','10 min')+
         exRow('Jumping jacks / high knees','Warm-up','2 min')+
         exRowWithLevel('push','Push-ups','Full range, chest to floor','3\u00d710\u201315')+
         exRowWithLevel('pull','Superman hold','Face down, lift arms + chest. Immediately after push-ups.','3\u00d720\u201330 sec')+
@@ -2183,7 +2184,7 @@ const PLANS = {
       )}
 
       ${workoutCard('THU \u00b7 MORNING B — LOWER + HINGE','20 MIN',
-        exRow('Hip CARs + Cat-cow + Wrist CARs','Daily mobility','10 min')+
+        exRow('Hip CARs + Cat-cow + Wrist CARs','CARs = Controlled Articular Rotations. Hip CARs: stand on one leg, draw largest circle with raised knee (5 each way per hip). Cat-cow: arch/round spine ×10. Wrist CARs: interlace fingers, slow circles ×10.','10 min')+
         exRow('High knees','Warm-up, 60% pace','2 min')+
         exRowWithLevel('squat','Bodyweight squat','Full depth','3\u00d715')+
         exRowWithLevel('hinge','Hip hinge / Good morning','Slow eccentric (4 sec down)','3\u00d712')+
@@ -2194,7 +2195,7 @@ const PLANS = {
       )}
 
       ${workoutCard('FRI \u00b7 MORNING A — PUSH + PULL SUPERSET','20 MIN',
-        exRow('Hip CARs + Cat-cow + Wrist CARs','Daily mobility','10 min')+
+        exRow('Hip CARs + Cat-cow + Wrist CARs','CARs = Controlled Articular Rotations. Hip CARs: stand on one leg, draw largest circle with raised knee (5 each way per hip). Cat-cow: arch/round spine ×10. Wrist CARs: interlace fingers, slow circles ×10.','10 min')+
         exRow('Jumping jacks / high knees','Warm-up','2 min')+
         exRowWithLevel('push','Push-ups','Full range, chest to floor','3\u00d710\u201315')+
         exRowWithLevel('pull','Superman hold','Face down, lift arms + chest. Immediately after push-ups.','3\u00d720\u201330 sec')+
@@ -2206,7 +2207,7 @@ const PLANS = {
       )}
 
       ${workoutCard('SAT \u00b7 MORNING B — LOWER + HINGE','20 MIN',
-        exRow('Hip CARs + Cat-cow + Wrist CARs','Daily mobility','10 min')+
+        exRow('Hip CARs + Cat-cow + Wrist CARs','CARs = Controlled Articular Rotations. Hip CARs: stand on one leg, draw largest circle with raised knee (5 each way per hip). Cat-cow: arch/round spine ×10. Wrist CARs: interlace fingers, slow circles ×10.','10 min')+
         exRow('High knees','Warm-up, 60% pace','2 min')+
         exRowWithLevel('squat','Bodyweight squat','Full depth','3\u00d715')+
         exRowWithLevel('hinge','Hip hinge / Good morning','Slow eccentric (4 sec down)','3\u00d712')+
@@ -2238,11 +2239,11 @@ const PLANS = {
         exRowWithLevel('pull','Inverted row (under table)','Grip edge, pull chest to table. Immediately after ladder.','3\u00d78\u201310')+
         exRowWithLevel('push','Decline push-up','Feet on chair/bed \u2014 upper chest focus','4\u00d712')+
         exRow('Prone Y-T-W raises','Face down, 3 positions. Rear delt + mid-trap. After decline.','3\u00d710 each')+
-        exRowWithLevel('push','Archer push-up','Unilateral chest strength','3\u00d76/side')+
-        exRowWithLevel('pull','Scapular push-up','Protract/retract. Planche prereq. After archer.','3\u00d712')+
-        exRowWithLevel('shoulder','Pike push-up','Hips high, head toward floor','3\u00d710')+
-        exRowWithLevel('skill_planche','Pseudo planche lean','Lean forward on straight arms, protract scapula','4\u00d720 sec')+
-        exRowWithLevel('skill_handstand','Wall handstand hold','Every session \u2014 wrist + shoulder base','3\u00d720\u201330 sec'),
+        exRowWithLevel('pull','Scapular push-up','Protract/retract. Planche prereq.','3×12')+
+        exRowWithLevel('push','Archer push-up','Unilateral chest strength','3×6/side')+
+        exRow('Superman hold','Posterior chain endurance — pairs with archer','3×30 sec')+
+        exRowWithLevel('shoulder','Pike push-up','Hips high, head toward floor','3×10')+
+        exRowWithLevel('skill_handstand','Wall handstand hold','Every session — wrist + shoulder base','3×20–30 sec'),
         stretchRow('Doorframe chest stretch','Upper chest + anterior shoulder','60 sec')+
         stretchRow('Shoulder dislocates','Towel/stick \u2014 full arc','10 reps')+
         stretchRow('Wrist extension stretch','Fingers pointing back','60 sec')+
@@ -2436,7 +2437,7 @@ const PLANS = {
       <div class="section-title" style="margin-top:8px">TRAINING <span>RULES</span></div>
       ${ruleCard('RULE 06','Change clothes the moment you get home.','Sit down first = workout done.','var(--accent2)')}
       ${ruleCard('RULE 07','Daily mobility 10 min every morning. Non-negotiable.','Tight hips block L-sit. Tight shoulders block handstand.','var(--accent2)')}
-      ${ruleCard('RULE 08','Push + Pull in every upper session.','Push:pull ratio is 5:7. Every push exercise has a pull partner. Don\'t skip the pull work.','var(--accent2)')}
+      ${ruleCard('RULE 08','Push + Pull in every upper session.','Pull-dominant across the week. Every push exercise has a pull partner. Don\'t skip the pull work.','var(--accent2)')}
       ${ruleCard('RULE 09','Fast days: 70-80% intensity only.','Training fasted is fine. Don\'t push 100% on zero calories.','var(--accent2)')}
       ${ruleCard('RULE 10','Calisthenics skills require daily practice of foundations.','Crow, handstand, L-sit \u2014 progress is invisible for weeks then it clicks.','var(--accent2)')}
       <div class="section-title" style="margin-top:8px">DISCIPLINE <span>RULES</span></div>
@@ -2489,7 +2490,7 @@ PLANS.cut = {
     6:'SATURDAY — Full Body + Cardio · 35–45 min'
   },
   stretchSub: {
-    0:'Light mobility only — cat-cow, hip CARs.',
+    0:'Light mobility only — cat-cow (arch/round spine on all fours), hip CARs (slow full-circle knee raises, 5 each way per hip).',
     1:'Doorframe chest stretch 60s · Shoulder dislocates 10 reps · Wrist extension 60s',
     2:'90/90 hip stretch 2 min/side · Pigeon pose 90s/side · Deep squat hold 90s',
     3:'Gentle full-body stretch if desired.',
@@ -2500,7 +2501,7 @@ PLANS.cut = {
 
   checklistNormal: [
     { id:'m1', group:'MORNING', label:'Wake & 500ml water immediately', sub:'Before phone. Non-negotiable.' },
-    { id:'m2', group:'MORNING', label:'10 min mobility (CARs + warm-up)', sub:'Hip CARs × 5 · Cat-cow × 10 · Thoracic rotation · Wrist CARs' },
+    { id:'m2', group:'MORNING', label:'10 min mobility (CARs + warm-up)', sub:'CARs = Controlled Articular Rotations (slow full-circle joint movements). Hip CARs × 5 each way per hip · Cat-cow × 10 · Thoracic rotation · Wrist CARs × 10' },
     { id:'m3', group:'MORNING', label:'Training session (if training day)', sub:'See WORKOUTS tab for today\'s session' },
     { id:'m4', group:'MORNING', label:'Log morning weight in TRACK tab', sub:'Weigh first thing after waking, before food.' },
     { id:'f1', group:'EATING', label:'Hit protein target', sub:'1.6g/kg minimum. Protein anchors every meal.' },
@@ -2530,7 +2531,7 @@ PLANS.cut = {
     <p class="section-note">4 training days + 1 active rest + 2 full rest. 30–45 min sessions. All bodyweight.</p>
 
     ${workoutCard('PUSH + CORE A','MON · 30–40 MIN',
-      exRow('Hip CARs + Cat-cow + Jumping jacks','Warm-up','5 min')+
+      exRow('Hip CARs + Cat-cow + Jumping jacks','Hip CARs: slow full circles with raised knee, 5 each way per hip. Cat-cow: arch/round spine ×10. Then jumping jacks.','5 min')+
       exRowWithLevel('push','Push-ups','Full range, chest to floor','3×12–15')+
       exRowWithLevel('core','Dead bug','Lower back stays glued to floor','3×8/side')+
       exRow('Plank','Elbows, stay tight','3×30–45 sec')+
@@ -2542,7 +2543,7 @@ PLANS.cut = {
     )}
 
     ${workoutCard('LOWER + MOBILITY','TUE · 30–40 MIN',
-      exRow('Hip CARs + Leg swings + High knees','Warm-up','5 min')+
+      exRow('Hip CARs + Leg swings + High knees','Hip CARs: slow full circles with raised knee, 5 each way per hip. Leg swings: forward/back + side-to-side, 10 each. Then high knees.','5 min')+
       exRowWithLevel('squat','Bodyweight squat','Full depth, knees track toes','3×12–15')+
       exRowWithLevel('hinge','Glute bridge','Pause at top, squeeze hard','3×15')+
       exRow('Reverse lunge','Step back, knee hovers floor','3×10/leg'),
@@ -2571,7 +2572,7 @@ PLANS.cut = {
     )}
 
     ${workoutCard('LOWER + CONDITIONING','FRI · 35–45 MIN',
-      exRow('High knees + Hip CARs','Warm-up','5 min')+
+      exRow('High knees + Hip CARs','High knees 1 min, then Hip CARs: slow full circles with raised knee, 5 each way per hip.','5 min')+
       exRowWithLevel('squat','Squat progression','Full depth','3×12–15')+
       exRowWithLevel('hinge','Hinge progression','Hip hinge movement','3×12')+
       exRow('Jump squat','Land soft, full depth','3×10')+
@@ -2709,7 +2710,7 @@ PLANS.bulk = {
     2:'TUESDAY — Pull A Volume · Back, biceps, rear delts — inverted rows, towel rows',
     3:'WEDNESDAY — Rest / Light walk. 20 min walk, mobility.',
     4:'THURSDAY — Lower A Volume · Quads, hamstrings, glutes — squat and hinge focus',
-    5:'FRIDAY — Push B Intensity · Chest definition, shoulder strength, skill work',
+    5:'FRIDAY — Push/Pull B Intensity · Push-up ladder + inverted row, archer, Y-T-W, pike, handstand',
     6:'SATURDAY — Full Body + Skill · Compound movements + crow stand, L-sit, handstand'
   },
   eveningSub: {
@@ -2718,7 +2719,7 @@ PLANS.bulk = {
     2:'TUESDAY — Pull A Volume · 40–50 min',
     3:'WEDNESDAY — Rest / Light walk · 20–30 min',
     4:'THURSDAY — Lower A Volume · 40–50 min',
-    5:'FRIDAY — Push B Intensity · 40–50 min',
+    5:'FRIDAY — Push/Pull B Intensity · 40–50 min',
     6:'SATURDAY — Full Body + Skill · 45–55 min'
   },
   stretchSub: {
@@ -2733,7 +2734,7 @@ PLANS.bulk = {
 
   checklistNormal: [
     { id:'m1', group:'MORNING', label:'Wake & 500ml water immediately', sub:'Before phone. Non-negotiable.' },
-    { id:'m2', group:'MORNING', label:'10 min mobility (CARs + warm-up)', sub:'Hip CARs × 5 · Cat-cow × 10 · Thoracic rotation · Wrist CARs' },
+    { id:'m2', group:'MORNING', label:'10 min mobility (CARs + warm-up)', sub:'CARs = Controlled Articular Rotations (slow full-circle joint movements). Hip CARs × 5 each way per hip · Cat-cow × 10 · Thoracic rotation · Wrist CARs × 10' },
     { id:'m3', group:'MORNING', label:'Training session (if training day)', sub:'See WORKOUTS tab for today\'s session' },
     { id:'m4', group:'MORNING', label:'Log morning weight in TRACK tab', sub:'Track weekly trend. Aim 0.25–0.5% bodyweight/week gain.' },
     { id:'f1', group:'EATING', label:'Hit protein target', sub:'1.4–1.8g/kg. Protein density first in every meal.' },
@@ -2772,7 +2773,7 @@ PLANS.bulk = {
     <p class="section-note">5 training days + 1 active rest + 1 full rest. Higher volume — surplus fuels recovery.</p>
 
     ${workoutCard('PUSH A — VOLUME','MON · 40–50 MIN',
-      exRow('Hip CARs + Cat-cow + Arm circles','Warm-up','5 min')+
+      exRow('Hip CARs + Cat-cow + Arm circles','Hip CARs: slow full circles with raised knee, 5 each way per hip. Cat-cow: arch/round spine ×10. Arm circles: small to large, both directions.','5 min')+
       exRowWithLevel('push','Push-up variation','High rep — chest, shoulders, triceps','4×12–15')+
       exRowWithLevel('push','Decline push-up','Feet elevated — upper chest focus','4×10–12')+
       exRowWithLevel('shoulder','Pike push-up','Hips high, head toward floor — shoulders','3×10')+
@@ -2798,13 +2799,13 @@ PLANS.bulk = {
 
     ${workoutCard('REST / LIGHT WALK','WED · 20–30 MIN',
       exRow('Walk','Light pace, outdoors','20 min')+
-      exRow('Mobility work','Hip CARs, thoracic rotation, wrist circles','10 min'),
+      exRow('Mobility work','Hip CARs: slow full circles with raised knee, 5 each way per hip. Thoracic rotation: seated twist, hold 5 sec each side. Wrist circles: both directions ×10.','10 min'),
       '',
       'WED'
     )}
 
     ${workoutCard('LOWER A — VOLUME','THU · 40–50 MIN',
-      exRow('Hip CARs + Leg swings + High knees','Warm-up','5 min')+
+      exRow('Hip CARs + Leg swings + High knees','Hip CARs: slow full circles with raised knee, 5 each way per hip. Leg swings: forward/back + side-to-side, 10 each. Then high knees.','5 min')+
       exRowWithLevel('squat','Squat progression','Full depth — quads + glutes','4×10–12')+
       exRowWithLevel('hinge','Hinge progression','Hip hinge — hamstrings + glutes','4×10–12')+
       exRow('Bulgarian split squat','Rear foot elevated — quad + glute','3×10/leg')+
@@ -2816,21 +2817,22 @@ PLANS.bulk = {
       'THU'
     )}
 
-    ${workoutCard('PUSH B — INTENSITY','FRI · 40–50 MIN',
-      exRow('Hip CARs + Cat-cow','Warm-up','5 min')+
+    ${workoutCard('PUSH/PULL B — INTENSITY','FRI · 40–50 MIN',
+      exRow('Hip CARs + Cat-cow','Hip CARs: slow full circles with raised knee, 5 each way per hip. Cat-cow: all fours, arch then round spine ×10.','5 min')+
       exRowWithLevel('push','Push-up ladder','10 down to 1 — intensity focus','1 ladder')+
+      exRowWithLevel('pull','Inverted row (under table)','Superset after ladder — back + biceps','3×8–10')+
       exRowWithLevel('push','Archer push-up','Unilateral chest strength','3×6/side')+
+      exRow('Prone Y-T-W raises','Face down — rear delt + mid-trap balance','3×10 each')+
       exRowWithLevel('shoulder','Pike push-up','Shoulder strength','3×10')+
-      exRowWithLevel('skill_handstand','Wall handstand hold','Wrist + shoulder base','3×20–30 sec')+
-      exRow('Diamond push-up','Tricep focus','3×10'),
+      exRowWithLevel('skill_handstand','Wall handstand hold','Wrist + shoulder base','3×20–30 sec'),
       stretchRow('Chest + shoulder stretch','Doorframe or behind-back clasp','5 min'),
       'FRI'
     )}
 
     ${workoutCard('FULL BODY + SKILL','SAT · 45–55 MIN',
-      exRowWithLevel('push','Push-up variation','Compound upper','3×10–12')+
+      exRowWithLevel('push','Push-up variation','Compound upper push','3×10–12')+
+      exRowWithLevel('pull','Pull variation','Back + biceps — match push volume','3×8–10')+
       exRowWithLevel('squat','Squat variation','Compound lower','3×12')+
-      exRowWithLevel('pull','Pull variation','Back + biceps','3×8–10')+
       exRowWithLevel('hinge','Hinge variation','Posterior chain','3×10')+
       exRowWithLevel('skill_crow','Crow/frog stand','Balance + wrist strength','5 min')+
       exRowWithLevel('skill_lsit','L-sit tuck','Hip flexor + straight arm strength','4×15 sec')+
@@ -2923,7 +2925,7 @@ PLANS.bulk = {
     ${ruleCard('RULE 04','2.5–3L water daily.','Hydration supports muscle protein synthesis and performance.')}
     ${ruleCard('RULE 05','Track scale weekly — aim 0.25–0.5% BW/week gain.','Faster than this means excess fat accumulation. Slower means insufficient surplus.')}
     <div class="section-title" style="margin-top:8px">TRAINING <span>RULES</span></div>
-    ${ruleCard('RULE 06','5 training days per week.','Push / Pull / Rest / Lower / Push / Full Body. Volume is higher because surplus supports recovery.','var(--accent2)')}
+    ${ruleCard('RULE 06','5 training days per week.','Push / Pull / Rest / Lower / Push+Pull / Full Body. Push:pull balanced across the week. Volume is higher because surplus supports recovery.','var(--accent2)')}
     ${ruleCard('RULE 07','Add reps before advancing levels.','When current level feels easy for all sets, add reps to top of range, then advance to next level.','var(--accent2)')}
     ${ruleCard('RULE 08','Deload every 8–10 weeks.','Reduce volume by 40% for one week. Full recovery before the next progression block.','var(--accent2)')}
     ${ruleCard('RULE 09','Sleep 8+ hours — non-negotiable.','Growth hormone peaks during deep sleep. This is when muscle protein synthesis happens.','var(--accent2)')}
@@ -2985,7 +2987,7 @@ PLANS.maintenance = {
 
   checklistNormal: [
     { id:'m1', group:'MORNING', label:'Wake & 500ml water', sub:'Hydration first.' },
-    { id:'m2', group:'MORNING', label:'Mobility or morning movement (optional)', sub:'Hip CARs, light stretch, or short walk.' },
+    { id:'m2', group:'MORNING', label:'Mobility or morning movement (optional)', sub:'CARs = slow full-circle joint movements. Hip CARs, light stretch, or short walk.' },
     { id:'m3', group:'MORNING', label:'Training session (if training day)', sub:'See WORKOUTS tab for today\'s session' },
     { id:'m4', group:'MORNING', label:'Log weight (weekly minimum)', sub:'Track weekly trend. Weight should be stable ±1.5kg.' },
     { id:'f1', group:'EATING', label:'Hit protein target', sub:'1.2–1.6g/kg. Protein in every meal.' },
@@ -3021,7 +3023,7 @@ PLANS.maintenance = {
     <p class="section-note">3–4 training days. Lower volume — preservation + progression. Sustainable indefinitely.</p>
 
     ${workoutCard('FULL BODY A','MON / FRI · 30–40 MIN',
-      exRow('Hip CARs + Cat-cow','Warm-up','5 min')+
+      exRow('Hip CARs + Cat-cow','Hip CARs: slow full circles with raised knee, 5 each way per hip. Cat-cow: all fours, arch then round spine ×10.','5 min')+
       exRowWithLevel('push','Push progression','Maintains chest/shoulder stimulus','3×10–15')+
       exRowWithLevel('pull','Pull progression','Maintains back and bicep activation','3×8–10')+
       exRowWithLevel('squat','Squat progression','Maintains quad and glute strength','3×12–15')+
@@ -3039,7 +3041,7 @@ PLANS.maintenance = {
     )}
 
     ${workoutCard('FULL BODY B','WED · 30–40 MIN',
-      exRow('Hip CARs + Thoracic rotation','Warm-up','5 min')+
+      exRow('Hip CARs + Thoracic rotation','Hip CARs: slow full circles with raised knee, 5 each way per hip. Thoracic rotation: seated or all-fours twist, hold 5 sec each side.','5 min')+
       exRowWithLevel('push','Different push variation','If Mon was standard, use pike or archer','3×10–12')+
       exRowWithLevel('pull','Towel row or scapular push-up','Back training — planche prerequisite pattern','3×8–10')+
       exRowWithLevel('hinge','Hinge progression','Posterior chain maintenance','3×10–12')+
@@ -3223,7 +3225,7 @@ const EXERCISE_PROGRESSIONS = {
       { level:4, exercise:'Hollow body hold', sets:'3 × 20–30 sec', notes:'Arms overhead. Back pressed down.' },
       { level:5, exercise:'Hollow body rock', sets:'3 × 10', notes:'Rock gently. Maintain tension.' },
       { level:6, exercise:'Leg raises (lying)', sets:'3 × 10–12', notes:'Legs straight. 1 inch off floor.' },
-      { level:7, exercise:'Hanging leg raises', sets:'3 × 10–12', notes:'Bar required. Legs straight.' },
+      { level:7, exercise:'Lying leg raises + hip lift', sets:'3 × 10–12', notes:'Legs straight up, lift hips off floor at top. No equipment.' },
       { level:8, exercise:'L-sit tuck (floor)', sets:'3 × 15 sec', notes:'Hands pressing, tuck knees.' },
       { level:9, exercise:'Dragon flag negative', sets:'3 × 3–5', notes:'Bed edge. Lower slowly.' },
       { level:10, exercise:'Full L-sit', sets:'3 × 10–15 sec', notes:'Legs extended. Straight arm strength.' }
