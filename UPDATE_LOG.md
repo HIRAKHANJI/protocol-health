@@ -4,6 +4,20 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 3.0.0 — 2026-03-21
+
+**Scope:** Major (version rollover from 2.10.0 — export report restructure with schedule-aware sections)
+**Banner:** "Export reports now split by scheduled vs non-scheduled days with day-type breakdowns, per-date macro targets, and full checkbox control over every report section."
+
+- **Schedule-split export reports** — When the "Schedule Split" checkbox is enabled and the selected date range contains both scheduled and non-scheduled days, the report renders two separate segments: "Scheduled Days (PLAN)" and "Non-Scheduled Days". Each segment gets its own day count breakdown (eating/fast/light), compliance stats, nutrition overview, daily log, and food log. If the range only contains one type, no split occurs and the report renders as a single flat section.
+- **Day-type nutrition breakdown** — Nutrition sections now break down averages separately for eating days, light eating days, and fast days (if food was logged on them). Each sub-block shows its own actual vs target comparison. Light eating days use the correct ~60% TDEE ceiling instead of the normal calorie ceiling.
+- **Per-date macro targets** — Macro targets in the report are now computed by averaging `computeMacros()` across the actual dates in each section, instead of using today's single snapshot. This means targets correctly reflect rest days, pre-fast days, and signal variations across the date range.
+- **New export checkboxes** — Added Profile, Protocol, Nutrition, Food Log, and Schedule Split checkboxes alongside the existing Weights, Compliance, Notes, Water, and Energy controls. Each checkbox independently controls whether its section appears in the generated report.
+- **Food Log checkbox control** — The food log section (per-day itemized entries with macros) is now gated behind its own "Food Log" checkbox, separate from the "Nutrition" checkbox which controls the aggregated nutrition overview with averages and weekly breakdowns.
+- **Day type labels in food log** — Each date in the food log now shows its type suffix: (Fast), (Light), or nothing for normal eating days.
+
+---
+
 ## Version 2.10.0 — 2026-03-21
 
 **Scope:** Minor (enhanced nutrition reporting in exports)

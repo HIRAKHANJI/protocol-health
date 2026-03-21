@@ -740,11 +740,16 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
       <input type="date" id="exportTo" title="To date">
     </div>
     <div class="export-checkboxes">
+      <div class="export-check-item"><input type="checkbox" id="exProfile" checked><label for="exProfile">Profile</label></div>
+      <div class="export-check-item"><input type="checkbox" id="exProtocol" checked><label for="exProtocol">Protocol</label></div>
       <div class="export-check-item"><input type="checkbox" id="exWeights" checked><label for="exWeights">Weights</label></div>
       <div class="export-check-item"><input type="checkbox" id="exCompliance" checked><label for="exCompliance">Compliance</label></div>
+      <div class="export-check-item"><input type="checkbox" id="exNutrition" checked><label for="exNutrition">Nutrition</label></div>
+      <div class="export-check-item"><input type="checkbox" id="exFoodLog" checked><label for="exFoodLog">Food Log</label></div>
       <div class="export-check-item"><input type="checkbox" id="exNotes" checked><label for="exNotes">Notes</label></div>
       <div class="export-check-item"><input type="checkbox" id="exWater" checked><label for="exWater">Water</label></div>
       <div class="export-check-item"><input type="checkbox" id="exEnergy" checked><label for="exEnergy">Energy</label></div>
+      <div class="export-check-item"><input type="checkbox" id="exSchedule" checked><label for="exSchedule">Schedule Split</label></div>
     </div>
     <button class="export-range-btn" onclick="generateExport()" style="width:100%;margin-bottom:10px">GENERATE REPORT</button>
     <div class="export-text" id="exportText" style="display:none"></div>
@@ -1158,8 +1163,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '2.10.0';
-const APP_VERSION_MSG = 'Nutrition reports — weekly macro averages, actual vs target comparison, and calorie compliance breakdown in exports.';
+const APP_VERSION = '3.0.0';
+const APP_VERSION_MSG = 'Export reports now split by scheduled vs non-scheduled days with day-type breakdowns, per-date macro targets, and full checkbox control over every report section.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -5676,11 +5681,16 @@ function openExport() {
 function generateExport() {
   const fromStr = document.getElementById('exportFrom').value;
   const toStr = document.getElementById('exportTo').value;
+  const incProfile = document.getElementById('exProfile').checked;
+  const incProtocol = document.getElementById('exProtocol').checked;
   const incWeights = document.getElementById('exWeights').checked;
   const incCompliance = document.getElementById('exCompliance').checked;
+  const incNutrition = document.getElementById('exNutrition').checked;
+  const incFoodLog = document.getElementById('exFoodLog').checked;
   const incNotes = document.getElementById('exNotes').checked;
   const incWater = document.getElementById('exWater').checked;
   const incEnergy = document.getElementById('exEnergy').checked;
+  const incScheduleSplit = document.getElementById('exSchedule').checked;
 
   if(!fromStr||!toStr){showAlert('Select a date range first.');return;}
   if(fromStr>toStr){showAlert('From date must be before To date.');return;}
@@ -5690,10 +5700,14 @@ function generateExport() {
   const lightDaysData = gs(SK.lightDays)||{};
   const weights = gs(SK.weights)||[];
   const foodLog = gs(SK.foodLog)||{};
+  const schedule = gs(SK.schedule);
   const s = getSettings();
   const plan = PLANS[s.plan||'default'] || PLANS.default;
   const exportDate = new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+  // ─── Build set of scheduled dates for fast lookup ───
+  const schedDaysSet = new Set((schedule && schedule.days) ? schedule.days : []);
 
   // ─── Shared computations ───
   const filteredW = weights.filter(w=>w.date>=fromStr&&w.date<=toStr);
@@ -5707,78 +5721,54 @@ function generateExport() {
   const fastInRange = Object.keys(fastDays).filter(d=>d>=fromStr&&d<=toStr);
   const lightInRange = Object.keys(lightDaysData).filter(d=>d>=fromStr&&d<=toStr);
   const scheduledFasts = plan.fastDaysPerWeek > 0 ? Math.round(plan.fastDaysPerWeek * weeks) : 0;
+  const foodDates = Object.keys(foodLog).filter(d=>d>=fromStr&&d<=toStr).sort().reverse();
+
+  // ─── Split dates by schedule status ───
+  const allDatesInRange = [];
+  const cur = strToDate(fromStr);
+  const end = strToDate(toStr);
+  while(cur <= end) { allDatesInRange.push(dateToStr(cur)); cur.setDate(cur.getDate()+1); }
+
+  const scheduledDates = allDatesInRange.filter(d => schedDaysSet.has(d));
+  const nonScheduledDates = allDatesInRange.filter(d => !schedDaysSet.has(d));
+  const hasScheduled = scheduledDates.length > 0;
+  const hasNonScheduled = nonScheduledDates.length > 0;
+  const hasBothSegments = hasScheduled && hasNonScheduled;
 
   // BMI helper
   const calcBMI = (kg) => (s.height && kg) ? (kg / Math.pow(s.height/100, 2)).toFixed(1) : null;
 
-  let md = '';
-
-  // ═══ 1. HEADER ═══
-  md += `# Protocol Health — Progress Report\n\n`;
-  md += `**Period:** ${fromStr} to ${toStr}  \n`;
-  md += `**Exported:** ${exportDate}\n\n`;
-  md += `---\n\n`;
-
-  // ═══ 2. PATIENT PROFILE ═══
-  md += `## Patient Profile\n\n`;
-  if(s.name) md += `**Name:** ${s.name}  \n`;
-  if(s.age) md += `**Age:** ${s.age}  \n`;
-  if(s.sex) md += `**Sex:** ${s.sex.charAt(0).toUpperCase() + s.sex.slice(1)}  \n`;
-  if(s.height) md += `**Height:** ${s.height} cm  \n`;
-  if(endW) md += `**Current Weight:** ${endW} kg  \n`;
-  const currentBMI = calcBMI(endW);
-  if(currentBMI) md += `**BMI:** ${currentBMI}  \n`;
-  md += `\n---\n\n`;
-
-  // ═══ 3. ACTIVE PROTOCOL ═══
-  md += `## Active Protocol\n\n`;
-  md += `| Parameter | Value |\n`;
-  md += `|-----------|-------|\n`;
-  md += `| Plan | ${plan.name} |\n`;
-  md += `| Description | ${plan.subtitle} |\n`;
-  md += `| TDEE | ${s.tdee || plan.tdee} cal/day |\n`;
-  if(s.calories) md += `| Calorie Ceiling | ${s.calories} cal/day |\n`;
-  if(plan.fastDaysPerWeek > 0) {
-    const fastDayNames = plan.fastDaysDow.map(d => dayNames[d]).join(', ');
-    md += `| Fasting Schedule | ${plan.fastDaysPerWeek} days/week (${fastDayNames}) |\n`;
+  // ─── Helper: compute macro targets averaged across a set of eating dates ───
+  function avgMacroTargets(dates) {
+    let tP=0, tC=0, tF=0, tCal=0, n=0;
+    dates.forEach(d => {
+      if(fastDays[d]) return;
+      const m = computeMacros(d);
+      tP += m.proteinG; tC += m.carbsG; tF += m.fatG; tCal += m.cal; n++;
+    });
+    if(n === 0) return { cal:s.calories||1500, proteinG:0, carbsG:0, fatG:0 };
+    return { cal:Math.round(tCal/n), proteinG:Math.round(tP/n), carbsG:Math.round(tC/n), fatG:Math.round(tF/n) };
   }
-  if(plan.lightDaysPerWeek > 0) {
-    const lightDayNames = plan.lightDaysDow.map(d => dayNames[d]).join(', ');
-    md += `| Light Eating Days | ${plan.lightDaysPerWeek} days/week (${lightDayNames}) |\n`;
-  }
-  md += `\n---\n\n`;
 
-  // ═══ 4. SUMMARY ═══
-  md += `## Summary\n\n`;
-  md += `| Metric | Value |\n`;
-  md += `|--------|-------|\n`;
-  if(startW) md += `| Start Weight | ${startW} kg |\n`;
-  if(endW) md += `| End Weight | ${endW} kg |\n`;
-  if(totalChange !== null) md += `| Total Change | ${totalChange >= 0 ? '+' : ''}${totalChange.toFixed(1)} kg |\n`;
-  if(avgRate !== null) md += `| Avg Rate | ${avgRate >= 0 ? '+' : ''}${avgRate.toFixed(2)} kg/week |\n`;
-  md += `| Days in Range | ${dayCount} |\n`;
-  const startBMI = calcBMI(startW);
-  const endBMI = calcBMI(endW);
-  if(startBMI && endBMI && startW !== endW) md += `| BMI Change | ${startBMI} → ${endBMI} |\n`;
-  if(fastInRange.length > 0) md += `| Fast Days Completed | ${fastInRange.length}${scheduledFasts > 0 ? ' / '+scheduledFasts+' scheduled' : ''} |\n`;
-  if(lightInRange.length > 0) md += `| Light Days | ${lightInRange.length} |\n`;
-  md += `\n---\n\n`;
+  // ─── Helper: generate compliance section for a set of dates ───
+  // lvl: markdown heading level ('##' or '###')
+  function buildCompliance(dates, heading, lvl) {
+    lvl = lvl || '###';
+    let out = '';
+    const datesSet = new Set(dates);
+    const filteredLogs = logDates.filter(d => datesSet.has(d));
+    if(!filteredLogs.length) return out;
 
-  // ═══ 5. PROTOCOL COMPLIANCE (group-level) ═══
-  if(incCompliance && logDates.length) {
-    // Build all checklist items from active plan
     const allItems = [...plan.checklistNormal, ...plan.checklistFast, ...(plan.checklistLight||[])];
-    // Track per-group and per-item stats
-    const groupStats = {};  // { GROUP: { done, total } }
-    const itemStats = {};   // { id: { done, total, label, group } }
+    const groupStats = {};
+    const itemStats = {};
     allItems.forEach(item => {
       if(!itemStats[item.id]) itemStats[item.id] = { done:0, total:0, label:item.label, group:item.group };
     });
 
-    logDates.forEach(dateStr => {
+    filteredLogs.forEach(dateStr => {
       const log = dayLogs[dateStr];
       if(!log || !log.checks) return;
-      // Determine which checklist was active this day
       const isFast = !!fastDays[dateStr];
       const isLight = !!lightDaysData[dateStr];
       const dayChecklist = isFast ? plan.checklistFast : (isLight ? (plan.checklistLight||plan.checklistNormal) : plan.checklistNormal);
@@ -5797,121 +5787,341 @@ function generateExport() {
 
     const groupEntries = Object.entries(groupStats).filter(([,v]) => v.total > 0);
     if(groupEntries.length) {
-      md += `## Protocol Compliance\n\n`;
-      md += `| Category | Completed | Rate |\n`;
-      md += `|----------|-----------|------|\n`;
+      out += `${lvl} ${heading}\n\n`;
+      out += `| Category | Completed | Rate |\n`;
+      out += `|----------|-----------|------|\n`;
       groupEntries.forEach(([grp, v]) => {
-        md += `| ${grp} | ${v.done} / ${v.total} | ${Math.round(v.done/v.total*100)}% |\n`;
+        out += `| ${grp} | ${v.done} / ${v.total} | ${Math.round(v.done/v.total*100)}% |\n`;
       });
-      // Overall
       const totalDone = groupEntries.reduce((s,e) => s+e[1].done, 0);
       const totalAll = groupEntries.reduce((s,e) => s+e[1].total, 0);
-      if(totalAll > 0) md += `| **OVERALL** | **${totalDone} / ${totalAll}** | **${Math.round(totalDone/totalAll*100)}%** |\n`;
-      md += `\n`;
+      if(totalAll > 0) out += `| **OVERALL** | **${totalDone} / ${totalAll}** | **${Math.round(totalDone/totalAll*100)}%** |\n`;
+      out += `\n`;
 
-      // Weak spots — 3 items with lowest completion rate (min 5 data points)
       const weakItems = Object.values(itemStats)
         .filter(it => it.total >= 5)
         .map(it => ({ ...it, rate: it.done / it.total }))
         .sort((a,b) => a.rate - b.rate)
         .slice(0, 3);
       if(weakItems.length) {
-        md += `### Weak Spots\n\n`;
+        out += `**Weak spots:**\n\n`;
         weakItems.forEach(it => {
-          md += `- "${it.label}" — ${it.done}/${it.total} days (${Math.round(it.rate*100)}%)\n`;
+          out += `- "${it.label}" — ${it.done}/${it.total} days (${Math.round(it.rate*100)}%)\n`;
         });
-        md += `\n`;
+        out += `\n`;
       }
+    }
+    return out;
+  }
+
+  // ─── Helper: generate nutrition overview for a set of dates ───
+  // lvl: markdown heading level ('##' or '###')
+  function buildNutrition(dates, heading, lvl) {
+    lvl = lvl || '###';
+    let out = '';
+    const datesSet = new Set(dates);
+    const segFoodDates = foodDates.filter(d => datesSet.has(d));
+    const eatingDates = segFoodDates.filter(d => !fastDays[d] && !lightDaysData[d]);
+    const lightEatingDates = segFoodDates.filter(d => !!lightDaysData[d]);
+    const fastEatingDates = segFoodDates.filter(d => !!fastDays[d]);
+
+    // Compute per-date-type nutrition stats
+    function nutritionBlock(label, dayList, ceiling) {
+      let blk = '';
+      if(!dayList.length) return blk;
+      let totalCal=0, totalP=0, totalC=0, totalF=0, pDays=0, cDays=0, fDays=0, overCount=0, underCount=0;
+      dayList.forEach(d => {
+        const entries = foodLog[d] || [];
+        const dayCal = entries.reduce((sum,e)=>sum+(e.calories||0),0);
+        totalCal += dayCal;
+        if(ceiling) { if(dayCal > ceiling) overCount++; else underCount++; }
+        const dayP = entries.reduce((sum,e)=>sum+(e.protein||0),0);
+        const dayC = entries.reduce((sum,e)=>sum+(e.carbs||0),0);
+        const dayF = entries.reduce((sum,e)=>sum+(e.fat||0),0);
+        if(dayP>0){totalP+=dayP;pDays++;}
+        if(dayC>0){totalC+=dayC;cDays++;}
+        if(dayF>0){totalF+=dayF;fDays++;}
+      });
+      const avgCal = Math.round(totalCal/dayList.length);
+      const avgP = pDays>0 ? Math.round(totalP/pDays) : null;
+      const avgC = cDays>0 ? Math.round(totalC/cDays) : null;
+      const avgF = fDays>0 ? Math.round(totalF/fDays) : null;
+
+      // Average macro targets across these specific dates
+      const targets = avgMacroTargets(dayList);
+
+      blk += `**${label}** (${dayList.length} days)\n\n`;
+      blk += `| Metric | Actual | Target | Status |\n`;
+      blk += `|--------|--------|--------|--------|\n`;
+      blk += `| Calories | ${avgCal} cal | ${ceiling || targets.cal} cal | ${ceiling ? (avgCal<=ceiling?'Within ceiling':'Over ceiling') : '—'} |\n`;
+      if(avgP!==null) blk += `| Protein | ${avgP}g | ${targets.proteinG}g | ${avgP>=targets.proteinG?'On track':'Below target'} |\n`;
+      if(avgC!==null) blk += `| Carbs | ${avgC}g | ${targets.carbsG}g | ${avgC<=targets.carbsG+20?'On track':'Over target'} |\n`;
+      if(avgF!==null) blk += `| Fat | ${avgF}g | ${targets.fatG}g | ${avgF<=targets.fatG+10?'On track':'Over target'} |\n`;
+      blk += `\n`;
+      if(ceiling) {
+        blk += `| Compliance | Value |\n`;
+        blk += `|------------|-------|\n`;
+        blk += `| Days Under Ceiling | ${underCount} / ${dayList.length} |\n`;
+        blk += `| Days Over Ceiling | ${overCount} / ${dayList.length} |\n`;
+        blk += `\n`;
+      }
+      return blk;
+    }
+
+    const hasAnyFood = eatingDates.length || lightEatingDates.length || fastEatingDates.length;
+    if(!hasAnyFood) return out;
+
+    out += `${lvl} ${heading}\n\n`;
+    if(eatingDates.length) out += nutritionBlock('Eating Days', eatingDates, s.calories);
+    if(lightEatingDates.length) {
+      const lightCeiling = Math.round((s.tdee||2600)*0.6);
+      out += nutritionBlock('Light Eating Days', lightEatingDates, lightCeiling);
+    }
+    if(fastEatingDates.length) out += nutritionBlock('Fast Days (food logged)', fastEatingDates, null);
+
+    // Weekly macro breakdown (eating days only, if enough data)
+    if(eatingDates.length) {
+      const weekMacroBuckets = {};
+      eatingDates.forEach(d => {
+        const dt = strToDate(d);
+        const day = dt.getDay();
+        const mon = new Date(dt); mon.setDate(dt.getDate()-((day+6)%7));
+        const sun = new Date(mon); sun.setDate(mon.getDate()+6);
+        const key = dateToStr(mon);
+        if(!weekMacroBuckets[key]) weekMacroBuckets[key] = { monStr:dateToStr(mon), sunStr:dateToStr(sun), days:0, cal:0, protein:0, carbs:0, fat:0, pDays:0, cDays:0, fDays:0 };
+        const b = weekMacroBuckets[key];
+        const entries = foodLog[d]||[];
+        const dayCal = entries.reduce((sum,e)=>sum+(e.calories||0),0);
+        const dayP = entries.reduce((sum,e)=>sum+(e.protein||0),0);
+        const dayC = entries.reduce((sum,e)=>sum+(e.carbs||0),0);
+        const dayF = entries.reduce((sum,e)=>sum+(e.fat||0),0);
+        b.days++; b.cal+=dayCal;
+        if(dayP>0){b.protein+=dayP;b.pDays++;}
+        if(dayC>0){b.carbs+=dayC;b.cDays++;}
+        if(dayF>0){b.fat+=dayF;b.fDays++;}
+      });
+      const weekMacroKeys = Object.keys(weekMacroBuckets).sort();
+      if(weekMacroKeys.length >= 2) {
+        const targets = avgMacroTargets(eatingDates);
+        out += `**Weekly Macro Averages (eating days)**\n\n`;
+        out += `| Week | Avg Cal | Avg Protein | Avg Carbs | Avg Fat |\n`;
+        out += `|------|---------|-------------|-----------|----------|\n`;
+        weekMacroKeys.forEach(k => {
+          const b = weekMacroBuckets[k];
+          const wCal = Math.round(b.cal/b.days);
+          const wP = b.pDays>0 ? Math.round(b.protein/b.pDays)+'g' : '—';
+          const wC = b.cDays>0 ? Math.round(b.carbs/b.cDays)+'g' : '—';
+          const wF = b.fDays>0 ? Math.round(b.fat/b.fDays)+'g' : '—';
+          out += `| ${b.monStr.slice(5)} to ${b.sunStr.slice(5)} | ${wCal} cal | ${wP} | ${wC} | ${wF} |\n`;
+        });
+        out += `\n`;
+        out += `*Targets: ${targets.proteinG}g protein, ${targets.carbsG}g carbs, ${targets.fatG}g fat per eating day.*\n\n`;
+      }
+    }
+    return out;
+  }
+
+  // ─── Helper: generate daily log table for a set of dates ───
+  // lvl: markdown heading level ('##' or '###')
+  function buildDailyLog(dates, heading, lvl) {
+    lvl = lvl || '###';
+    let out = '';
+    const datesSet = new Set(dates);
+    const filteredLogs = logDates.filter(d => datesSet.has(d));
+    if(!filteredLogs.length) return out;
+
+    out += `${lvl} ${heading}\n\n`;
+    out += `| Date | Type | Score | Status |`;
+    if(incWater) out += ` Water |`;
+    if(incEnergy) out += ` Energy |`;
+    out += `\n`;
+    out += `|------|------|-------|--------|`;
+    if(incWater) out += `-------|`;
+    if(incEnergy) out += `--------|`;
+    out += `\n`;
+    filteredLogs.forEach(dateStr => {
+      const log = dayLogs[dateStr];
+      const type = fastDays[dateStr] ? 'Fast' : (lightDaysData[dateStr] ? 'Light' : 'Normal');
+      let score = '—', status = '—';
+      if(log.checks) {
+        const done = Object.values(log.checks).filter(Boolean).length;
+        const total = Object.keys(log.checks).length;
+        if(total > 0) {
+          const pct = Math.round(done/total*100);
+          score = `${done}/${total} (${pct}%)`;
+          status = pct === 100 ? 'Full' : pct >= 75 ? 'Good' : pct >= 50 ? 'Partial' : 'Low';
+        }
+      }
+      out += `| ${dateStr} | ${type} | ${score} | ${status} |`;
+      if(incWater) out += ` ${log.water ? log.water+'L' : '—'} |`;
+      if(incEnergy) out += ` ${log.energy || '—'} |`;
+      out += `\n`;
+    });
+    out += `\n`;
+    return out;
+  }
+
+  // ─── Helper: generate food log for a set of dates ───
+  // lvl: markdown heading level ('##' or '###')
+  function buildFoodLog(dates, heading, lvl) {
+    lvl = lvl || '###';
+    let out = '';
+    const datesSet = new Set(dates);
+    const segFoodDates = foodDates.filter(d => datesSet.has(d));
+    if(!segFoodDates.length) return out;
+
+    out += `${lvl} ${heading}\n\n`;
+    segFoodDates.forEach(dateStr => {
+      const entries = foodLog[dateStr];
+      if(!entries || !entries.length) return;
+      const type = fastDays[dateStr] ? ' (Fast)' : (lightDaysData[dateStr] ? ' (Light)' : '');
+      out += `**${dateStr}${type}**\n\n`;
+      let dayCalTotal = 0;
+      entries.forEach(e => {
+        const parts = [];
+        if(e.protein) parts.push(`P: ${e.protein}g`);
+        if(e.carbs) parts.push(`C: ${e.carbs}g`);
+        if(e.fat) parts.push(`F: ${e.fat}g`);
+        const macros = parts.length ? ` (${parts.join(', ')})` : '';
+        out += `- ${e.name} — ${e.calories} cal${macros}\n`;
+        dayCalTotal += e.calories || 0;
+      });
+      const cal = s.calories || 1500;
+      out += `- **Total: ${dayCalTotal} / ${cal} cal**\n\n`;
+    });
+    return out;
+  }
+
+  // ─── Helper: render a full segment (scheduled or non-scheduled) ───
+  function buildSegment(dates, segmentTitle) {
+    let out = '';
+    if(!dates.length) return out;
+
+    const datesSet = new Set(dates);
+    const segLogDates = logDates.filter(d => datesSet.has(d));
+    const segFastDates = dates.filter(d => !!fastDays[d]);
+    const segLightDates = dates.filter(d => !!lightDaysData[d]);
+    const segEatingDates = dates.filter(d => !fastDays[d] && !lightDaysData[d]);
+
+    out += `## ${segmentTitle}\n\n`;
+    out += `| Metric | Value |\n`;
+    out += `|--------|-------|\n`;
+    out += `| Days | ${dates.length} |\n`;
+    if(segEatingDates.length) out += `| Eating Days | ${segEatingDates.length} |\n`;
+    if(segFastDates.length) out += `| Fast Days | ${segFastDates.length} |\n`;
+    if(segLightDates.length) out += `| Light Days | ${segLightDates.length} |\n`;
+    out += `\n`;
+
+    if(incCompliance && segLogDates.length) {
+      out += buildCompliance(dates, 'Compliance');
+    }
+
+    if(incNutrition) {
+      out += buildNutrition(dates, 'Nutrition');
+    }
+
+    if(incCompliance && segLogDates.length) {
+      out += buildDailyLog(dates, 'Daily Log');
+    }
+
+    if(incFoodLog) {
+      out += buildFoodLog(dates, 'Food Log');
+    }
+
+    out += `---\n\n`;
+    return out;
+  }
+
+  let md = '';
+
+  // ═══ 1. HEADER ═══
+  md += `# Protocol Health — Progress Report\n\n`;
+  md += `**Period:** ${fromStr} to ${toStr}  \n`;
+  md += `**Exported:** ${exportDate}\n\n`;
+  md += `---\n\n`;
+
+  // ═══ 2. PATIENT PROFILE ═══
+  if(incProfile) {
+    md += `## Patient Profile\n\n`;
+    if(s.name) md += `**Name:** ${s.name}  \n`;
+    if(s.age) md += `**Age:** ${s.age}  \n`;
+    if(s.sex) md += `**Sex:** ${s.sex.charAt(0).toUpperCase() + s.sex.slice(1)}  \n`;
+    if(s.height) md += `**Height:** ${s.height} cm  \n`;
+    if(endW) md += `**Current Weight:** ${endW} kg  \n`;
+    const currentBMI = calcBMI(endW);
+    if(currentBMI) md += `**BMI:** ${currentBMI}  \n`;
+    md += `\n---\n\n`;
+  }
+
+  // ═══ 3. ACTIVE PROTOCOL ═══
+  if(incProtocol) {
+    md += `## Active Protocol\n\n`;
+    md += `| Parameter | Value |\n`;
+    md += `|-----------|-------|\n`;
+    md += `| Plan | ${plan.name} |\n`;
+    md += `| Description | ${plan.subtitle} |\n`;
+    md += `| TDEE | ${s.tdee || plan.tdee} cal/day |\n`;
+    if(s.calories) md += `| Calorie Ceiling | ${s.calories} cal/day |\n`;
+    if(plan.fastDaysPerWeek > 0) {
+      const fastDayNamesList = plan.fastDaysDow.map(d => dayNames[d]).join(', ');
+      md += `| Fasting Schedule | ${plan.fastDaysPerWeek} days/week (${fastDayNamesList}) |\n`;
+    }
+    if(plan.lightDaysPerWeek > 0) {
+      const lightDayNamesList = plan.lightDaysDow.map(d => dayNames[d]).join(', ');
+      md += `| Light Eating Days | ${plan.lightDaysPerWeek} days/week (${lightDayNamesList}) |\n`;
+    }
+    md += `\n---\n\n`;
+  }
+
+  // ═══ 4. SUMMARY ═══
+  md += `## Summary\n\n`;
+  md += `| Metric | Value |\n`;
+  md += `|--------|-------|\n`;
+  if(startW) md += `| Start Weight | ${startW} kg |\n`;
+  if(endW) md += `| End Weight | ${endW} kg |\n`;
+  if(totalChange !== null) md += `| Total Change | ${totalChange >= 0 ? '+' : ''}${totalChange.toFixed(1)} kg |\n`;
+  if(avgRate !== null) md += `| Avg Rate | ${avgRate >= 0 ? '+' : ''}${avgRate.toFixed(2)} kg/week |\n`;
+  md += `| Days in Range | ${dayCount} |\n`;
+  if(hasScheduled) md += `| Scheduled Days | ${scheduledDates.length} |\n`;
+  if(hasNonScheduled && hasScheduled) md += `| Non-Scheduled Days | ${nonScheduledDates.length} |\n`;
+  const startBMI = calcBMI(startW);
+  const endBMI = calcBMI(endW);
+  if(startBMI && endBMI && startW !== endW) md += `| BMI Change | ${startBMI} → ${endBMI} |\n`;
+  if(fastInRange.length > 0) md += `| Fast Days Completed | ${fastInRange.length}${scheduledFasts > 0 ? ' / '+scheduledFasts+' scheduled' : ''} |\n`;
+  if(lightInRange.length > 0) md += `| Light Days | ${lightInRange.length} |\n`;
+  md += `\n---\n\n`;
+
+  // ═══ 5–9. SCHEDULE-SPLIT SECTIONS ═══
+  if(incScheduleSplit && hasBothSegments) {
+    // Both scheduled and non-scheduled days exist — render as separate segments
+    md += buildSegment(scheduledDates, 'Scheduled Days (' + (schedule ? schedule.planName : plan.badge) + ')');
+    md += buildSegment(nonScheduledDates, 'Non-Scheduled Days');
+  } else {
+    // Single segment — no split needed (all scheduled, all non-scheduled, or split disabled)
+    const allDates = allDatesInRange;
+
+    if(incCompliance && logDates.length) {
+      md += buildCompliance(allDates, 'Protocol Compliance', '##');
       md += `---\n\n`;
     }
-  }
 
-  // ═══ 6. NUTRITION OVERVIEW ═══
-  const foodDates = Object.keys(foodLog).filter(d=>d>=fromStr&&d<=toStr).sort().reverse();
-  const eatingFoodDates = foodDates.filter(d => !fastDays[d] && !lightDaysData[d]);
-  if(eatingFoodDates.length) {
-    let totalCal = 0, totalProtein = 0, totalCarbs = 0, totalFat = 0;
-    let proteinDays = 0, carbsDays = 0, fatDays = 0, overCount = 0, underCount = 0;
-    eatingFoodDates.forEach(d => {
-      const entries = foodLog[d] || [];
-      const dayCal = entries.reduce((sum, e) => sum + (e.calories || 0), 0);
-      totalCal += dayCal;
-      if(s.calories) { if(dayCal > s.calories) overCount++; else underCount++; }
-      const dayP = entries.reduce((sum, e) => sum + (e.protein || 0), 0);
-      const dayC = entries.reduce((sum, e) => sum + (e.carbs || 0), 0);
-      const dayF = entries.reduce((sum, e) => sum + (e.fat || 0), 0);
-      if(dayP > 0) { totalProtein += dayP; proteinDays++; }
-      if(dayC > 0) { totalCarbs += dayC; carbsDays++; }
-      if(dayF > 0) { totalFat += dayF; fatDays++; }
-    });
-    const avgCal = Math.round(totalCal / eatingFoodDates.length);
-    const avgP = proteinDays > 0 ? Math.round(totalProtein / proteinDays) : null;
-    const avgC = carbsDays > 0 ? Math.round(totalCarbs / carbsDays) : null;
-    const avgF = fatDays > 0 ? Math.round(totalFat / fatDays) : null;
-
-    // Get target macros from current plan for comparison
-    const macroTarget = computeMacros(todayStr());
-    const targetP = macroTarget.proteinG;
-    const targetC = macroTarget.carbsG;
-    const targetF = macroTarget.fatG;
-
-    md += `## Nutrition Overview\n\n`;
-    md += `### Daily Averages (eating days only)\n\n`;
-    md += `| Metric | Actual | Target | Status |\n`;
-    md += `|--------|--------|--------|--------|\n`;
-    md += `| Calories | ${avgCal} cal | ${s.calories || '—'} cal | ${s.calories ? (avgCal <= s.calories ? 'Within ceiling' : 'Over ceiling') : '—'} |\n`;
-    if(avgP !== null) md += `| Protein | ${avgP}g | ${targetP}g | ${avgP >= targetP ? 'On track' : 'Below target'} |\n`;
-    if(avgC !== null) md += `| Carbs | ${avgC}g | ${targetC}g | ${avgC <= targetC + 20 ? 'On track' : 'Over target'} |\n`;
-    if(avgF !== null) md += `| Fat | ${avgF}g | ${targetF}g | ${avgF <= targetF + 10 ? 'On track' : 'Over target'} |\n`;
-    md += `\n`;
-    if(s.calories) {
-      md += `| Compliance | Value |\n`;
-      md += `|------------|-------|\n`;
-      md += `| Days Under Ceiling | ${underCount} / ${eatingFoodDates.length} |\n`;
-      md += `| Days Over Ceiling | ${overCount} / ${eatingFoodDates.length} |\n`;
-      md += `\n`;
+    if(incNutrition) {
+      const nutr = buildNutrition(allDates, 'Nutrition Overview', '##');
+      if(nutr) { md += nutr; md += `---\n\n`; }
     }
 
-    // Weekly macro breakdown
-    const weekMacroBuckets = {};
-    eatingFoodDates.forEach(d => {
-      const dt = strToDate(d);
-      const day = dt.getDay();
-      const mon = new Date(dt); mon.setDate(dt.getDate() - ((day + 6) % 7));
-      const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
-      const key = dateToStr(mon);
-      if(!weekMacroBuckets[key]) weekMacroBuckets[key] = { monStr:dateToStr(mon), sunStr:dateToStr(sun), days:0, cal:0, protein:0, carbs:0, fat:0, pDays:0, cDays:0, fDays:0 };
-      const b = weekMacroBuckets[key];
-      const entries = foodLog[d] || [];
-      const dayCal = entries.reduce((sum, e) => sum + (e.calories || 0), 0);
-      const dayP = entries.reduce((sum, e) => sum + (e.protein || 0), 0);
-      const dayC = entries.reduce((sum, e) => sum + (e.carbs || 0), 0);
-      const dayF = entries.reduce((sum, e) => sum + (e.fat || 0), 0);
-      b.days++; b.cal += dayCal;
-      if(dayP > 0) { b.protein += dayP; b.pDays++; }
-      if(dayC > 0) { b.carbs += dayC; b.cDays++; }
-      if(dayF > 0) { b.fat += dayF; b.fDays++; }
-    });
-    const weekMacroKeys = Object.keys(weekMacroBuckets).sort();
-    if(weekMacroKeys.length >= 2) {
-      md += `### Weekly Macro Averages\n\n`;
-      md += `| Week | Avg Cal | Avg Protein | Avg Carbs | Avg Fat |\n`;
-      md += `|------|---------|-------------|-----------|----------|\n`;
-      weekMacroKeys.forEach(k => {
-        const b = weekMacroBuckets[k];
-        const wCal = Math.round(b.cal / b.days);
-        const wP = b.pDays > 0 ? Math.round(b.protein / b.pDays) + 'g' : '—';
-        const wC = b.cDays > 0 ? Math.round(b.carbs / b.cDays) + 'g' : '—';
-        const wF = b.fDays > 0 ? Math.round(b.fat / b.fDays) + 'g' : '—';
-        md += `| ${b.monStr.slice(5)} to ${b.sunStr.slice(5)} | ${wCal} cal | ${wP} | ${wC} | ${wF} |\n`;
-      });
-      md += `\n`;
-      md += `*Targets: ${targetP}g protein, ${targetC}g carbs, ${targetF}g fat per eating day.*\n\n`;
+    if(incCompliance && logDates.length) {
+      md += buildDailyLog(allDates, 'Daily Log', '##');
+      md += `---\n\n`;
     }
-    md += `---\n\n`;
+
+    if(incFoodLog) {
+      const fl = buildFoodLog(allDates, 'Food Log', '##');
+      if(fl) { md += fl; md += `---\n\n`; }
+    }
   }
 
-  // ═══ 7. WEIGHT TREND — WEEKLY AVERAGES + FULL LOG ═══
+  // ═══ WEIGHT TREND — WEEKLY AVERAGES + FULL LOG ═══
   if(incWeights && filteredW.length) {
     md += `## Weight Trend\n\n`;
 
@@ -5920,7 +6130,6 @@ function generateExport() {
       const weekBuckets = {};
       filteredW.forEach(w => {
         const d = strToDate(w.date);
-        // Get Monday of that week
         const day = d.getDay();
         const mon = new Date(d); mon.setDate(d.getDate() - ((day + 6) % 7));
         const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
@@ -5938,7 +6147,7 @@ function generateExport() {
           const b = weekBuckets[k];
           const avg = b.weights.reduce((s,v)=>s+v,0) / b.weights.length;
           const delta = prevAvg !== null ? `${(avg-prevAvg)>=0?'+':''}${(avg-prevAvg).toFixed(1)} kg` : '—';
-          const monD = b.monStr.slice(5); // MM-DD
+          const monD = b.monStr.slice(5);
           const sunD = b.sunStr.slice(5);
           md += `| ${monD} to ${sunD} | ${avg.toFixed(1)} kg | ${delta} |\n`;
           prevAvg = avg;
@@ -5959,62 +6168,7 @@ function generateExport() {
     md += `\n---\n\n`;
   }
 
-  // ═══ 8. DAILY LOG ═══
-  if(incCompliance && logDates.length) {
-    md += `## Daily Log\n\n`;
-    md += `| Date | Type | Score | Status |`;
-    if(incWater) md += ` Water |`;
-    if(incEnergy) md += ` Energy |`;
-    md += `\n`;
-    md += `|------|------|-------|--------|`;
-    if(incWater) md += `-------|`;
-    if(incEnergy) md += `--------|`;
-    md += `\n`;
-    logDates.forEach(dateStr => {
-      const log = dayLogs[dateStr];
-      const type = fastDays[dateStr] ? 'Fast' : (lightDaysData[dateStr] ? 'Light' : 'Normal');
-      let score = '—', status = '—';
-      if(log.checks) {
-        const done = Object.values(log.checks).filter(Boolean).length;
-        const total = Object.keys(log.checks).length;
-        if(total > 0) {
-          const pct = Math.round(done/total*100);
-          score = `${done}/${total} (${pct}%)`;
-          status = pct === 100 ? 'Full' : pct >= 75 ? 'Good' : pct >= 50 ? 'Partial' : 'Low';
-        }
-      }
-      md += `| ${dateStr} | ${type} | ${score} | ${status} |`;
-      if(incWater) md += ` ${log.water ? log.water+'L' : '—'} |`;
-      if(incEnergy) md += ` ${log.energy || '—'} |`;
-      md += `\n`;
-    });
-    md += `\n---\n\n`;
-  }
-
-  // ═══ 9. FOOD LOG ═══
-  if(foodDates.length) {
-    md += `## Food Log\n\n`;
-    foodDates.forEach(dateStr => {
-      const entries = foodLog[dateStr];
-      if(!entries || !entries.length) return;
-      md += `### ${dateStr}\n\n`;
-      let dayCalTotal = 0;
-      entries.forEach(e => {
-        const parts = [];
-        if(e.protein) parts.push(`P: ${e.protein}g`);
-        if(e.carbs) parts.push(`C: ${e.carbs}g`);
-        if(e.fat) parts.push(`F: ${e.fat}g`);
-        const macros = parts.length ? ` (${parts.join(', ')})` : '';
-        md += `- ${e.name} — ${e.calories} cal${macros}\n`;
-        dayCalTotal += e.calories || 0;
-      });
-      const cal = s.calories || 1500;
-      md += `- **Total: ${dayCalTotal} / ${cal} cal**\n\n`;
-    });
-    md += `---\n\n`;
-  }
-
-  // ═══ 10. NOTES ═══
+  // ═══ NOTES ═══
   if(incNotes) {
     const noteDates = logDates.filter(d => dayLogs[d].notes);
     if(noteDates.length) {
