@@ -1163,7 +1163,7 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '3.0.0';
+const APP_VERSION = '3.0.1';
 const APP_VERSION_MSG = 'Export reports now split by scheduled vs non-scheduled days with day-type breakdowns, per-date macro targets, and full checkbox control over every report section.';
 
 // Static lookup arrays used throughout rendering
@@ -3615,7 +3615,7 @@ function updateDurationBar() {
   const now = new Date(); now.setHours(0,0,0,0);
   const elapsed = Math.max(0, Math.floor((now - start)/86400000));
   const dayNum = Math.min(elapsed + 1, sched.totalDays); // cap at total — don't show DAY N+1/N
-  const pct = Math.min(100, Math.round((elapsed/sched.totalDays)*100));
+  const pct = sched.totalDays > 0 ? Math.min(100, Math.round((elapsed/sched.totalDays)*100)) : 0;
   document.getElementById('durationStrip').classList.add('visible');
   document.getElementById('durationLabel').textContent = `${sched.planName||'PLAN'} — DAY ${dayNum} / ${sched.totalDays}`;
   document.getElementById('durationPct').textContent = pct+'%';
@@ -5727,7 +5727,7 @@ function generateExport() {
   const allDatesInRange = [];
   const cur = strToDate(fromStr);
   const end = strToDate(toStr);
-  while(cur <= end) { allDatesInRange.push(dateToStr(cur)); cur.setDate(cur.getDate()+1); }
+  while(cur <= end) { allDatesInRange.push(dateToStr(cur)); cur.setDate(cur.getDate() + 1); }
 
   const scheduledDates = allDatesInRange.filter(d => schedDaysSet.has(d));
   const nonScheduledDates = allDatesInRange.filter(d => !schedDaysSet.has(d));
