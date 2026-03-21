@@ -4,6 +4,16 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 2.9.1 — 2026-03-21
+
+**Scope:** Patch (critical data loss fix)
+**Banner:** No banner (patch).
+
+- **Fix: checklist checks lost when toggling day type** — Tapping a checklist item on the TODAY tab after toggling between normal/fast/light day types would permanently destroy checks from the other day type. The `toggle()` function created a new empty checks object from only DOM-visible items, overwriting all stored checks. Now preserves existing checks from storage (matching the pattern already used correctly in the day modal's `toggleModalCheck()`). Same fix applied to `resetToday()` which also cleared all day types' checks instead of only the visible ones.
+- **Fix: radar chart isBulkRadar uses latest weight** — `isBulkRadar` was comparing target against `s.currentKg` (initial settings value). Now uses the latest weight log entry, so the radar correctly detects direction even if the user overshoots their target.
+
+---
+
 ## Version 2.9.0 — 2026-03-21
 
 **Scope:** Minor (radar chart bulk support + 4 fixes)

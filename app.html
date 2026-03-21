@@ -1158,7 +1158,7 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '2.9.0';
+const APP_VERSION = '2.9.1';
 const APP_VERSION_MSG = 'Radar chart now works for bulk plans — weight trend, goal progress, and NIGHT checklist group gets its own color.';
 
 // Static lookup arrays used throughout rendering
@@ -3520,7 +3520,8 @@ function loadChecklist() {
 // and fires DAY_SAVED so the calendar cell color updates too.
 function toggle(el) {
   el.classList.toggle('done');
-  const checks = {};
+  const log = getDayLog(todayStr());
+  const checks = Object.assign({}, log.checks||{});
   document.querySelectorAll('.check-item').forEach(item=>{
     checks[item.dataset.id] = item.classList.contains('done');
   });
@@ -3533,7 +3534,10 @@ function toggle(el) {
 function resetToday() {
   showConfirm('RESET CHECKLIST', 'Clear all checked items for today?', () => {
     document.querySelectorAll('.check-item').forEach(i=>i.classList.remove('done'));
-    saveDayLogField(todayStr(), { checks:{} });
+    const log = getDayLog(todayStr());
+    const checks = Object.assign({}, log.checks||{});
+    document.querySelectorAll('.check-item').forEach(item=>{ checks[item.dataset.id] = false; });
+    saveDayLogField(todayStr(), { checks });
     updateProgress();
     dispatch('DAY_SAVED');
   }, { yesLabel:'RESET', danger:true });
@@ -3873,7 +3877,8 @@ function computeRadarMetrics(days) {
   // 5. WEIGHT TREND — normalised score based on whether weight is moving in the right direction
   // 100 = moving toward target at or above expected rate, 0 = moving away from target
   let weightTrend = null;
-  const isBulkRadar = s.targetKg && s.currentKg && s.targetKg > s.currentKg;
+  const radarCurrentW = weights.length > 0 ? weights[0].weight : s.currentKg;
+  const isBulkRadar = s.targetKg && radarCurrentW && s.targetKg > radarCurrentW;
   if (weights.length >= 2) {
     const windowWeights = weights.filter(w => {
       const wd = strToDate(w.date);
@@ -4503,7 +4508,7 @@ function saveDayLog(dateStr) {
   if(!isNaN(water) && water >= 0) fields.water = water;
   saveDayLogField(dateStr, fields);
 
-  if(!isNaN(wt) && wt > 40) {
+  if(!isNaN(wt) && wt >= 40 && wt <= 250) {
     const weights = gs(SK.weights)||[];
     const idx = weights.findIndex(w=>w.date===dateStr);
     if(idx>=0) weights.splice(idx,1);
