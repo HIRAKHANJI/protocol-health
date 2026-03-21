@@ -42,6 +42,8 @@ self.addEventListener('install', event => {
             './PH_LOGO_192.png',
             './PH_LOGO_512.png',
             './PH_ARROWS_LOGO.png',
+            './favicon.ico',
+            './favicon-32.png',
             'https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap'
           ].map(url => cache.add(url).catch(() => {
             // Silently skip if a non-critical file can't be cached (e.g. no internet at install time)

@@ -1157,7 +1157,7 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '2.8.0';
+const APP_VERSION = '2.8.1';
 const APP_VERSION_MSG = 'Doctor-ready reports — patient profile, group-level compliance, nutrition overview, weekly weight trends, BMI tracking.';
 
 // Static lookup arrays used throughout rendering
@@ -1169,8 +1169,8 @@ const DAYS_SHORT = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
 function esc(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
 // gs (get storage): safely reads and JSON-parses a localStorage key. Returns null on missing or parse error.
 function gs(k) { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } }
-// ss (set storage): safely JSON-stringifies and writes to localStorage. Silently fails if storage is full.
-function ss(k,v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+// ss (set storage): safely JSON-stringifies and writes to localStorage. Alerts user if storage is full.
+function ss(k,v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) { if(e.name==='QuotaExceededError'||e.code===22) { if(typeof showAlert==='function') showAlert('Storage is full. Your data may not be saved. Back up now and clear old data.'); } } }
 // todayStr: returns today as "YYYY-MM-DD" — the universal date format used everywhere in the app.
 function todayStr() { return dateToStr(new Date()); }
 // dateToStr: converts a JS Date object to "YYYY-MM-DD" string, handling timezone correctly.
@@ -3569,6 +3569,16 @@ function updateGoalBar(current) {
   // Start = oldest logged weight entry, fall back to settings.currentKg
   const weights = gs(SK.weights)||[];
   const start = weights.length ? weights[weights.length-1].weight : (s.currentKg || current);
+  // Guard: if no weight data exists at all, show dashes instead of "null"
+  if(current === null || current === undefined) {
+    document.getElementById('currentWeightDisplay').textContent = '—';
+    document.getElementById('gs-current').textContent = '—';
+    document.getElementById('gs-target').textContent = target;
+    document.getElementById('gs-remain').textContent = '—';
+    document.getElementById('goalBarFill').style.width = '0%';
+    document.getElementById('goalPct').textContent = 'No data yet';
+    return;
+  }
   // Detect plan direction: bulk (gaining) vs cut (losing)
   const isBulk = target > start;
   const totalChange = isBulk ? (target - start) : (start - target);
@@ -5220,7 +5230,7 @@ function applySchedule() {
     days,
     startDate: p.startDateStr,
     totalDays: useDays,
-    planName: PLANS[p.planVal].badge,
+    planName: (PLANS[p.planVal]||PLANS.default).badge,
     startWeight: p.curKg,
     scheduleMode: mode,
     complianceRate: p.complianceRate || 1.0,
@@ -5290,9 +5300,11 @@ function openManageSchedule() {
   const startW  = sched.startWeight || s.currentKg || 0;
   const curW    = getLatestWeight() || startW;
   const elapsed = Math.max(0, Math.floor((new Date().getTime() - strToDate(sched.startDate).getTime()) / 86400000));
-  const lost    = parseFloat((startW - curW).toFixed(1));
-  const rate    = elapsed > 0 ? parseFloat((lost / elapsed * 7).toFixed(2)) : 0;
-  const remain  = parseFloat((curW - (s.targetKg||91)).toFixed(1));
+  const isBulkSched = (s.targetKg||91) > startW;
+  const changed = isBulkSched ? parseFloat((curW - startW).toFixed(1)) : parseFloat((startW - curW).toFixed(1));
+  const rate    = elapsed > 0 ? parseFloat((changed / elapsed * 7).toFixed(2)) : 0;
+  const remain  = isBulkSched ? parseFloat(((s.targetKg||91) - curW).toFixed(1)) : parseFloat((curW - (s.targetKg||91)).toFixed(1));
+  const changeLabel = isBulkSched ? 'Gained' : 'Lost';
 
   const modeLabel = sched.scheduleMode === 'realistic'
     ? ` · <span style="color:var(--accent2)">REALISTIC (${Math.round((sched.complianceRate||1)*100)}%)</span>`
@@ -5301,7 +5313,7 @@ function openManageSchedule() {
   document.getElementById('msStatusText').innerHTML =
     `Started: <b>${sched.startDate}</b> · Day <b>${elapsed+1}</b> of <b>${sched.totalDays}</b>${modeLabel}<br>` +
     `Start weight: <b>${startW}kg</b> → Current: <b>${curW}kg</b><br>` +
-    `Lost: <b>${Math.max(0,lost)}kg</b> · Rate: <b>${rate}kg/week actual</b><br>` +
+    `${changeLabel}: <b>${Math.max(0,changed)}kg</b> · Rate: <b>${rate}kg/week actual</b><br>` +
     `Still to target: <b>${Math.max(0,remain)}kg</b>`;
 
   // Pre-fill adjust fields
@@ -5346,8 +5358,9 @@ function calcAdjust() {
   const startW  = sched.startWeight || s.currentKg || 0;
   const curW    = getLatestWeight() || startW;
   const elapsed = Math.max(1, Math.floor((new Date().getTime() - strToDate(sched.startDate).getTime()) / 86400000));
-  const lost    = Math.max(0, startW - curW);
-  const actualRate = lost / elapsed; // kg/day observed
+  const isBulkAdj = newTarget > startW;
+  const changed   = isBulkAdj ? Math.max(0, curW - startW) : Math.max(0, startW - curW);
+  const actualRate = changed / elapsed; // kg/day observed
 
   const plan = PLANS[s.plan||'default'] || PLANS.default;
   const fastDaysPerWeek = plan.fastDaysPerWeek || 0;
@@ -5357,7 +5370,7 @@ function calcAdjust() {
     ? Math.round(newCal * 0.6 + avgActualForAdjust * 0.4)
     : newCal;
   const weeklyDeficit = (eatDaysPerWeek * (tdee - effectiveCal)) + (fastDaysPerWeek * tdee);
-  const formulaRate   = weeklyDeficit / 7 / 7700; // kg/day formula
+  const formulaRate   = isBulkAdj ? Math.abs(weeklyDeficit / 7 / 7700) : weeklyDeficit / 7 / 7700; // kg/day formula
 
   // Select rate based on adjust mode
   let useRate, modeLabel;
@@ -5373,7 +5386,7 @@ function calcAdjust() {
     modeLabel = 'BLENDED';
   }
 
-  const remainKg   = Math.max(0, curW - newTarget);
+  const remainKg   = isBulkAdj ? Math.max(0, newTarget - curW) : Math.max(0, curW - newTarget);
   const remainDays = useRate > 0 ? Math.ceil(remainKg / useRate) : 999;
   const kgPerWeek  = parseFloat((useRate * 7).toFixed(2));
 
@@ -5659,7 +5672,7 @@ function generateExport() {
   const weights = gs(SK.weights)||[];
   const foodLog = gs(SK.foodLog)||{};
   const s = getSettings();
-  const plan = PLANS[s.plan||'default'];
+  const plan = PLANS[s.plan||'default'] || PLANS.default;
   const exportDate = new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 

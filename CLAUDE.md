@@ -207,9 +207,9 @@ Nothing else changes. `getActivePlan()` reads `settings.plan`, looks up `PLANS[s
 
 | Area | How | Limits |
 |------|-----|--------|
-| **Checklist items** | Add/remove items in `checklistNormal`, `checklistFast`, and `checklistLight` arrays | Unlimited items, any `id` string (must be unique within the plan) |
+| **Checklist items** | Add/remove items in `checklistNormal`, `checklistFast`, and `checklistLight` (if plan uses light days) arrays | Unlimited items, any `id` string (must be unique within the plan) |
 | **Checklist groups** | Set any `group` string on items — groups auto-render as sections | Built-in tag colors: MORNING, EATING, EVENING, FAST, LIGHT, NIGHT. Custom groups get `tag-rules` styling by default. Add CSS class for custom colors. |
-| **Light eating days** | Set `lightDaysDow` array and `lightDaysPerWeek` + provide `checklistLight` | For bulk/maintenance plans. Light days are mutually exclusive with fast days. |
+| **Light eating days** | Set `lightDaysDow` array and `lightDaysPerWeek` + provide `checklistLight` | For bulk/maintenance plans. `checklistLight` is optional — if omitted, code falls back to `checklistNormal`. Light days are mutually exclusive with fast days. |
 | **Workout sections** | Return any HTML from `workoutContent()` | Use `workoutCard()` + `exRow()` helpers for consistency, or write raw HTML |
 | **Nutrition content** | Return any HTML from `nutritionContent(s)` | Has access to settings for dynamic values (calories, macros) |
 | **Rules content** | Return any HTML from `rulesContent(s)` | Has access to settings. Use `ruleCard()` helper for consistent styling |
@@ -249,7 +249,7 @@ ph_wt_v1   — weight log: array of { date, weight, ts }
 ph_dl_v1   — day logs: { "YYYY-MM-DD": { checks, weight, water, energy, notes, ts } }
 ph_fd_v1   — fast days: { "YYYY-MM-DD": true }
 ph_ld_v1   — light eating days: { "YYYY-MM-DD": true }
-ph_st_v1   — settings: { plan, currentKg, targetKg, calories, tdee, risk, exerciseBurn, startDate }
+ph_st_v1   — settings: { plan, currentKg, targetKg, calories, tdee, risk, startDate, age, height, sex, activityLevel, name }
 ph_sc_v1   — schedule: { days[], startDate, totalDays, planName, startWeight }
 ph_sv_v1   — last seen app version (for update banner)
 ph_fl_v1   — food log: { "YYYY-MM-DD": [{ id, name, calories, protein, carbs, fat, notes, ts }] }
@@ -509,7 +509,7 @@ The app has two independent version numbers that serve different purposes:
 When making changes, update these two lines near the top of the script in `app.html`:
 
 ```javascript
-const APP_VERSION = '2.6.0';                         // ← bump according to rules above
+const APP_VERSION = '2.8.1';                         // ← bump according to rules above
 const APP_VERSION_MSG = 'Description of changes.';    // ← short description of what changed
 ```
 
@@ -558,7 +558,7 @@ Data writes:  always end with dispatch("EVENT_NAME")
 Dialogs:      showConfirm(), showAlert() — never native confirm/alert
 Dates:        dateToStr(d), strToDate(s), todayStr() — never toISOString()
 Cache:        sw.js CACHE_NAME = "protocol-health-v11" — bump on every significant push
-App version:  APP_VERSION = "2.6.0" — bump on notable updates (see Section 12)
+App version:  APP_VERSION = "2.8.1" — bump on notable updates (see Section 12)
 Update log:   UPDATE_LOG.md — every version bump must be documented here
 ```
 
