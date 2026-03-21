@@ -764,6 +764,13 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
     </div>
     <div class="settings-body">
 
+      <!-- YOUR NAME -->
+      <div class="settings-section">
+        <div class="settings-section-title">Your Name</div>
+        <input class="field-input" type="text" id="settingName" placeholder="Enter your name" style="width:100%;box-sizing:border-box;margin-bottom:4px">
+        <p style="font-size:0.62rem;color:var(--muted);margin:0;line-height:1.5">Used in exported reports. Saved until you change it.</p>
+      </div>
+
       <!-- PLAN SELECTION -->
       <div class="settings-section">
         <div class="settings-section-title">Training Plan</div>
@@ -1150,8 +1157,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '2.7.0';
-const APP_VERSION_MSG = 'Export overhaul — structured markdown reports with summary stats, styled preview, and downloadable HTML reports.';
+const APP_VERSION = '2.8.0';
+const APP_VERSION_MSG = 'Doctor-ready reports — patient profile, group-level compliance, nutrition overview, weekly weight trends, BMI tracking.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -1175,7 +1182,7 @@ function strToDate(s) { const [y,m,d]=s.split('-').map(Number); return new Date(
 // getSettings: always returns a full settings object with defaults. Never returns null.
 // Add any new settings fields here with a default value.
 function getSettings() {
-  const defaults = { plan:'default', currentKg:null, targetKg:null, calories:null, tdee:2600, risk:'aggressive', startDate:null, age:null, height:null, sex:'male', activityLevel:'1.55' };
+  const defaults = { plan:'default', currentKg:null, targetKg:null, calories:null, tdee:2600, risk:'aggressive', startDate:null, age:null, height:null, sex:'male', activityLevel:'1.55', name:'' };
   const saved = gs(SK.settings);
   if(!saved) return defaults;
   return Object.assign({}, defaults, saved);
@@ -4609,6 +4616,7 @@ function deleteDayNote(dateStr) {
 // this way the field always shows actual logged weight, not a stale settings value.
 function openSettings() {
   const s = getSettings();
+  document.getElementById('settingName').value = s.name||'';
   document.getElementById('planSelect').value = s.plan||'default';
   // Pre-fill current weight from latest logged entry, not stale settings value
   document.getElementById('settingCurrentKg').value = getLatestWeight()||'';
@@ -4662,6 +4670,7 @@ function confirmPlan() {
   const val = document.getElementById('planSelect').value;
   const s = getSettings();
   s.plan = val;
+  s.name = (document.getElementById('settingName').value||'').trim();
   const calInput = parseFloat(document.getElementById('settingCalories').value);
   if(!isNaN(calInput) && calInput >= 0) s.calories = calInput;
   const tdeeInput = parseFloat(document.getElementById('settingTdee').value);
@@ -5652,18 +5661,9 @@ function generateExport() {
   const s = getSettings();
   const plan = PLANS[s.plan||'default'];
   const exportDate = new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 
-  let md = '';
-
-  // ─── HEADER ───
-  md += `# Protocol Health — Progress Report\n\n`;
-  md += `**Name:** Mohammed Faiz Syed  \n`;
-  md += `**Plan:** ${plan.name}  \n`;
-  md += `**Period:** ${fromStr} → ${toStr}  \n`;
-  md += `**Exported:** ${exportDate}\n\n`;
-  md += `---\n\n`;
-
-  // ─── SUMMARY TABLE ───
+  // ─── Shared computations ───
   const filteredW = weights.filter(w=>w.date>=fromStr&&w.date<=toStr);
   const startW = filteredW.length ? filteredW[filteredW.length-1].weight : null;
   const endW = filteredW.length ? filteredW[0].weight : null;
@@ -5671,25 +5671,52 @@ function generateExport() {
   const dayCount = Math.round((strToDate(toStr) - strToDate(fromStr)) / 86400000) + 1;
   const weeks = dayCount / 7;
   const avgRate = (totalChange !== null && weeks > 0) ? (totalChange / weeks) : null;
-
-  // Compliance average
   const logDates = Object.keys(dayLogs).filter(d=>d>=fromStr&&d<=toStr).sort().reverse();
-  let compTotal = 0, compCount = 0;
-  logDates.forEach(d => {
-    const c = dayLogs[d].checks;
-    if(c) {
-      const done = Object.values(c).filter(Boolean).length;
-      const total = Object.keys(c).length;
-      if(total > 0) { compTotal += (done/total)*100; compCount++; }
-    }
-  });
-  const avgComp = compCount > 0 ? Math.round(compTotal / compCount) : null;
-
-  // Fast/light day counts
   const fastInRange = Object.keys(fastDays).filter(d=>d>=fromStr&&d<=toStr);
   const lightInRange = Object.keys(lightDaysData).filter(d=>d>=fromStr&&d<=toStr);
   const scheduledFasts = plan.fastDaysPerWeek > 0 ? Math.round(plan.fastDaysPerWeek * weeks) : 0;
 
+  // BMI helper
+  const calcBMI = (kg) => (s.height && kg) ? (kg / Math.pow(s.height/100, 2)).toFixed(1) : null;
+
+  let md = '';
+
+  // ═══ 1. HEADER ═══
+  md += `# Protocol Health — Progress Report\n\n`;
+  md += `**Period:** ${fromStr} to ${toStr}  \n`;
+  md += `**Exported:** ${exportDate}\n\n`;
+  md += `---\n\n`;
+
+  // ═══ 2. PATIENT PROFILE ═══
+  md += `## Patient Profile\n\n`;
+  if(s.name) md += `**Name:** ${s.name}  \n`;
+  if(s.age) md += `**Age:** ${s.age}  \n`;
+  if(s.sex) md += `**Sex:** ${s.sex.charAt(0).toUpperCase() + s.sex.slice(1)}  \n`;
+  if(s.height) md += `**Height:** ${s.height} cm  \n`;
+  if(endW) md += `**Current Weight:** ${endW} kg  \n`;
+  const currentBMI = calcBMI(endW);
+  if(currentBMI) md += `**BMI:** ${currentBMI}  \n`;
+  md += `\n---\n\n`;
+
+  // ═══ 3. ACTIVE PROTOCOL ═══
+  md += `## Active Protocol\n\n`;
+  md += `| Parameter | Value |\n`;
+  md += `|-----------|-------|\n`;
+  md += `| Plan | ${plan.name} |\n`;
+  md += `| Description | ${plan.subtitle} |\n`;
+  md += `| TDEE | ${s.tdee || plan.tdee} cal/day |\n`;
+  if(s.calories) md += `| Calorie Ceiling | ${s.calories} cal/day |\n`;
+  if(plan.fastDaysPerWeek > 0) {
+    const fastDayNames = plan.fastDaysDow.map(d => dayNames[d]).join(', ');
+    md += `| Fasting Schedule | ${plan.fastDaysPerWeek} days/week (${fastDayNames}) |\n`;
+  }
+  if(plan.lightDaysPerWeek > 0) {
+    const lightDayNames = plan.lightDaysDow.map(d => dayNames[d]).join(', ');
+    md += `| Light Eating Days | ${plan.lightDaysPerWeek} days/week (${lightDayNames}) |\n`;
+  }
+  md += `\n---\n\n`;
+
+  // ═══ 4. SUMMARY ═══
   md += `## Summary\n\n`;
   md += `| Metric | Value |\n`;
   md += `|--------|-------|\n`;
@@ -5698,14 +5725,138 @@ function generateExport() {
   if(totalChange !== null) md += `| Total Change | ${totalChange >= 0 ? '+' : ''}${totalChange.toFixed(1)} kg |\n`;
   if(avgRate !== null) md += `| Avg Rate | ${avgRate >= 0 ? '+' : ''}${avgRate.toFixed(2)} kg/week |\n`;
   md += `| Days in Range | ${dayCount} |\n`;
-  if(avgComp !== null) md += `| Compliance | ${avgComp}% avg |\n`;
-  if(fastInRange.length > 0) md += `| Fast Days Completed | ${fastInRange.length}${scheduledFasts > 0 ? ' / '+scheduledFasts : ''} |\n`;
+  const startBMI = calcBMI(startW);
+  const endBMI = calcBMI(endW);
+  if(startBMI && endBMI && startW !== endW) md += `| BMI Change | ${startBMI} → ${endBMI} |\n`;
+  if(fastInRange.length > 0) md += `| Fast Days Completed | ${fastInRange.length}${scheduledFasts > 0 ? ' / '+scheduledFasts+' scheduled' : ''} |\n`;
   if(lightInRange.length > 0) md += `| Light Days | ${lightInRange.length} |\n`;
   md += `\n---\n\n`;
 
-  // ─── WEIGHT LOG ───
+  // ═══ 5. PROTOCOL COMPLIANCE (group-level) ═══
+  if(incCompliance && logDates.length) {
+    // Build all checklist items from active plan
+    const allItems = [...plan.checklistNormal, ...plan.checklistFast, ...(plan.checklistLight||[])];
+    // Track per-group and per-item stats
+    const groupStats = {};  // { GROUP: { done, total } }
+    const itemStats = {};   // { id: { done, total, label, group } }
+    allItems.forEach(item => {
+      if(!itemStats[item.id]) itemStats[item.id] = { done:0, total:0, label:item.label, group:item.group };
+    });
+
+    logDates.forEach(dateStr => {
+      const log = dayLogs[dateStr];
+      if(!log || !log.checks) return;
+      // Determine which checklist was active this day
+      const isFast = !!fastDays[dateStr];
+      const isLight = !!lightDaysData[dateStr];
+      const dayChecklist = isFast ? plan.checklistFast : (isLight ? (plan.checklistLight||plan.checklistNormal) : plan.checklistNormal);
+      dayChecklist.forEach(item => {
+        const grp = item.group;
+        if(!groupStats[grp]) groupStats[grp] = { done:0, total:0 };
+        groupStats[grp].total++;
+        if(!itemStats[item.id]) itemStats[item.id] = { done:0, total:0, label:item.label, group:item.group };
+        itemStats[item.id].total++;
+        if(log.checks[item.id]) {
+          groupStats[grp].done++;
+          itemStats[item.id].done++;
+        }
+      });
+    });
+
+    const groupEntries = Object.entries(groupStats).filter(([,v]) => v.total > 0);
+    if(groupEntries.length) {
+      md += `## Protocol Compliance\n\n`;
+      md += `| Category | Completed | Rate |\n`;
+      md += `|----------|-----------|------|\n`;
+      groupEntries.forEach(([grp, v]) => {
+        md += `| ${grp} | ${v.done} / ${v.total} | ${Math.round(v.done/v.total*100)}% |\n`;
+      });
+      // Overall
+      const totalDone = groupEntries.reduce((s,e) => s+e[1].done, 0);
+      const totalAll = groupEntries.reduce((s,e) => s+e[1].total, 0);
+      if(totalAll > 0) md += `| **OVERALL** | **${totalDone} / ${totalAll}** | **${Math.round(totalDone/totalAll*100)}%** |\n`;
+      md += `\n`;
+
+      // Weak spots — 3 items with lowest completion rate (min 5 data points)
+      const weakItems = Object.values(itemStats)
+        .filter(it => it.total >= 5)
+        .map(it => ({ ...it, rate: it.done / it.total }))
+        .sort((a,b) => a.rate - b.rate)
+        .slice(0, 3);
+      if(weakItems.length) {
+        md += `### Weak Spots\n\n`;
+        weakItems.forEach(it => {
+          md += `- "${it.label}" — ${it.done}/${it.total} days (${Math.round(it.rate*100)}%)\n`;
+        });
+        md += `\n`;
+      }
+      md += `---\n\n`;
+    }
+  }
+
+  // ═══ 6. NUTRITION OVERVIEW ═══
+  const foodDates = Object.keys(foodLog).filter(d=>d>=fromStr&&d<=toStr).sort().reverse();
+  const eatingFoodDates = foodDates.filter(d => !fastDays[d] && !lightDaysData[d]);
+  if(eatingFoodDates.length) {
+    let totalCal = 0, totalProtein = 0, proteinDays = 0, overCount = 0, underCount = 0;
+    eatingFoodDates.forEach(d => {
+      const entries = foodLog[d] || [];
+      const dayCal = entries.reduce((sum, e) => sum + (e.calories || 0), 0);
+      totalCal += dayCal;
+      if(s.calories) { if(dayCal > s.calories) overCount++; else underCount++; }
+      const dayProtein = entries.reduce((sum, e) => sum + (e.protein || 0), 0);
+      if(dayProtein > 0) { totalProtein += dayProtein; proteinDays++; }
+    });
+    const avgCal = Math.round(totalCal / eatingFoodDates.length);
+    md += `## Nutrition Overview\n\n`;
+    md += `| Metric | Value |\n`;
+    md += `|--------|-------|\n`;
+    md += `| Avg Daily Intake (eating days) | ${avgCal} cal |\n`;
+    if(s.calories) md += `| Calorie Ceiling | ${s.calories} cal |\n`;
+    if(s.calories) md += `| Days Under Ceiling | ${underCount} / ${eatingFoodDates.length} |\n`;
+    if(s.calories) md += `| Days Over Ceiling | ${overCount} / ${eatingFoodDates.length} |\n`;
+    if(proteinDays > 0) md += `| Avg Protein (eating days) | ${Math.round(totalProtein / proteinDays)}g |\n`;
+    md += `\n---\n\n`;
+  }
+
+  // ═══ 7. WEIGHT TREND — WEEKLY AVERAGES + FULL LOG ═══
   if(incWeights && filteredW.length) {
-    md += `## Weight Log\n\n`;
+    md += `## Weight Trend\n\n`;
+
+    // Weekly averages
+    if(filteredW.length >= 3) {
+      const weekBuckets = {};
+      filteredW.forEach(w => {
+        const d = strToDate(w.date);
+        // Get Monday of that week
+        const day = d.getDay();
+        const mon = new Date(d); mon.setDate(d.getDate() - ((day + 6) % 7));
+        const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+        const key = dateToStr(mon);
+        if(!weekBuckets[key]) weekBuckets[key] = { weights:[], monStr:dateToStr(mon), sunStr:dateToStr(sun) };
+        weekBuckets[key].weights.push(w.weight);
+      });
+      const weekKeys = Object.keys(weekBuckets).sort();
+      if(weekKeys.length >= 2) {
+        md += `### Weekly Averages\n\n`;
+        md += `| Week | Avg Weight | Change |\n`;
+        md += `|------|-----------|--------|\n`;
+        let prevAvg = null;
+        weekKeys.forEach(k => {
+          const b = weekBuckets[k];
+          const avg = b.weights.reduce((s,v)=>s+v,0) / b.weights.length;
+          const delta = prevAvg !== null ? `${(avg-prevAvg)>=0?'+':''}${(avg-prevAvg).toFixed(1)} kg` : '—';
+          const monD = b.monStr.slice(5); // MM-DD
+          const sunD = b.sunStr.slice(5);
+          md += `| ${monD} to ${sunD} | ${avg.toFixed(1)} kg | ${delta} |\n`;
+          prevAvg = avg;
+        });
+        md += `\n`;
+      }
+    }
+
+    // Full weight log
+    md += `### Daily Weights\n\n`;
     md += `| Date | Weight | Change |\n`;
     md += `|------|--------|--------|\n`;
     filteredW.forEach((w,i) => {
@@ -5716,27 +5867,31 @@ function generateExport() {
     md += `\n---\n\n`;
   }
 
-  // ─── DAILY COMPLIANCE ───
+  // ═══ 8. DAILY LOG ═══
   if(incCompliance && logDates.length) {
-    md += `## Daily Compliance\n\n`;
-    md += `| Date | Type | Completion |`;
+    md += `## Daily Log\n\n`;
+    md += `| Date | Type | Score | Status |`;
     if(incWater) md += ` Water |`;
     if(incEnergy) md += ` Energy |`;
     md += `\n`;
-    md += `|------|------|------------|`;
+    md += `|------|------|-------|--------|`;
     if(incWater) md += `-------|`;
     if(incEnergy) md += `--------|`;
     md += `\n`;
     logDates.forEach(dateStr => {
       const log = dayLogs[dateStr];
       const type = fastDays[dateStr] ? 'Fast' : (lightDaysData[dateStr] ? 'Light' : 'Normal');
-      let comp = '—';
+      let score = '—', status = '—';
       if(log.checks) {
         const done = Object.values(log.checks).filter(Boolean).length;
         const total = Object.keys(log.checks).length;
-        comp = total > 0 ? `${done}/${total} (${Math.round(done/total*100)}%)` : '—';
+        if(total > 0) {
+          const pct = Math.round(done/total*100);
+          score = `${done}/${total} (${pct}%)`;
+          status = pct === 100 ? 'Full' : pct >= 75 ? 'Good' : pct >= 50 ? 'Partial' : 'Low';
+        }
       }
-      md += `| ${dateStr} | ${type} | ${comp} |`;
+      md += `| ${dateStr} | ${type} | ${score} | ${status} |`;
       if(incWater) md += ` ${log.water ? log.water+'L' : '—'} |`;
       if(incEnergy) md += ` ${log.energy || '—'} |`;
       md += `\n`;
@@ -5744,8 +5899,7 @@ function generateExport() {
     md += `\n---\n\n`;
   }
 
-  // ─── FOOD LOG ───
-  const foodDates = Object.keys(foodLog).filter(d=>d>=fromStr&&d<=toStr).sort().reverse();
+  // ═══ 9. FOOD LOG ═══
   if(foodDates.length) {
     md += `## Food Log\n\n`;
     foodDates.forEach(dateStr => {
@@ -5754,12 +5908,11 @@ function generateExport() {
       md += `### ${dateStr}\n\n`;
       let dayCalTotal = 0;
       entries.forEach(e => {
-        let macros = '';
         const parts = [];
         if(e.protein) parts.push(`P: ${e.protein}g`);
         if(e.carbs) parts.push(`C: ${e.carbs}g`);
         if(e.fat) parts.push(`F: ${e.fat}g`);
-        if(parts.length) macros = ` (${parts.join(', ')})`;
+        const macros = parts.length ? ` (${parts.join(', ')})` : '';
         md += `- ${e.name} — ${e.calories} cal${macros}\n`;
         dayCalTotal += e.calories || 0;
       });
@@ -5769,7 +5922,7 @@ function generateExport() {
     md += `---\n\n`;
   }
 
-  // ─── NOTES ───
+  // ═══ 10. NOTES ═══
   if(incNotes) {
     const noteDates = logDates.filter(d => dayLogs[d].notes);
     if(noteDates.length) {
