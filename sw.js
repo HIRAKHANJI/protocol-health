@@ -34,7 +34,7 @@ self.addEventListener('install', event => {
     caches.open(CACHE_NAME).then(cache => {
 
       // Critical files — these must be cached for the app to work offline
-      return cache.addAll(['./app.html', './manifest.json'])
+      return cache.addAll(['./app.html', './index.html', './manifest.json'])
         .then(() => {
           // Best-effort files — icons and Google Fonts
           // Promise.allSettled means one failure won't block the others
