@@ -1163,8 +1163,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '3.0.2';
-const APP_VERSION_MSG = 'Export reports now split by scheduled vs non-scheduled days with day-type breakdowns, per-date macro targets, and full checkbox control over every report section.';
+const APP_VERSION = '3.0.3';
+const APP_VERSION_MSG = 'Fix: removing a schedule now correctly clears today\'s fast/light day marker instead of leaving it behind.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -5516,14 +5516,14 @@ function endScheduleToday() {
 function removeSchedule() {
   showConfirm(
     'REMOVE SCHEDULE',
-    'Wipe schedule structure completely? Future auto-set fast and light eating days will be cleared. All logged weights, notes, and day logs are kept.',
+    'Wipe schedule structure completely? Today\'s and future auto-set fast and light eating days will be cleared. All logged weights, notes, and day logs are kept.',
     () => {
       const today = todayStr();
       const fd = gs(SK.fastDays)||{};
-      Object.keys(fd).forEach(d=>{ if(d > today) delete fd[d]; });
+      Object.keys(fd).forEach(d=>{ if(d >= today) delete fd[d]; });
       ss(SK.fastDays, fd);
       const ld = gs(SK.lightDays)||{};
-      Object.keys(ld).forEach(d=>{ if(d > today) delete ld[d]; });
+      Object.keys(ld).forEach(d=>{ if(d >= today) delete ld[d]; });
       ss(SK.lightDays, ld);
       ss(SK.schedule, null);
       dispatch('SCHEDULE_REMOVED');

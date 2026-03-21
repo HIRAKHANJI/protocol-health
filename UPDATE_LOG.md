@@ -4,6 +4,15 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 3.0.3 — 2026-03-21
+
+**Scope:** Patch (bug fix)
+**Banner:** No banner (patch).
+
+- **Fix: schedule removal leaves today highlighted as fast/light day** — `removeSchedule()` used strict greater-than (`d > today`) when clearing auto-set fast and light days, so today's entry was never removed. Changed to `d >= today` so the current day is also cleared. Updated confirmation message to reflect this.
+
+---
+
 ## Version 3.0.2 — 2026-03-21
 
 **Scope:** Patch (bug fix from codebase scan)
