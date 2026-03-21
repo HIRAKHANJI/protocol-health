@@ -290,8 +290,24 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
 .export-overlay.active { display:flex; align-items:flex-start; justify-content:center; padding-top:28px; }
 .export-box { background:var(--bg); border:1px solid var(--border); border-radius:14px; max-width:500px; width:100%; padding:20px; max-height:80vh; overflow-y:auto; }
 .export-box h3 { font-family:'Bebas Neue',sans-serif; font-size:1.1rem; letter-spacing:2px; color:var(--accent); margin-bottom:11px; }
-.export-text { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:13px; font-family:'DM Mono',monospace; font-size:0.68rem; color:var(--text); line-height:1.8; white-space:pre-wrap; max-height:50vh; overflow-y:auto; margin-bottom:9px; }
+.export-text { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:13px; font-family:'DM Mono',monospace; font-size:0.68rem; color:var(--text); line-height:1.8; max-height:50vh; overflow-y:auto; margin-bottom:9px; }
+.export-text h1 { font-family:'Bebas Neue',sans-serif; font-size:1rem; letter-spacing:2px; color:var(--accent); margin:0 0 8px 0; }
+.export-text h2 { font-family:'Bebas Neue',sans-serif; font-size:0.85rem; letter-spacing:1.5px; color:var(--accent2); margin:14px 0 6px 0; border-bottom:1px solid var(--border); padding-bottom:4px; }
+.export-text h3 { font-family:'DM Mono',monospace; font-size:0.65rem; color:var(--text); margin:10px 0 4px 0; }
+.export-text p { margin:2px 0; line-height:1.6; }
+.export-text hr { border:none; border-top:1px solid var(--border); margin:10px 0; }
+.export-text table { width:100%; border-collapse:collapse; margin:6px 0; font-size:0.62rem; }
+.export-text th { text-align:left; padding:4px 6px; background:var(--surface2); border:1px solid var(--border); color:var(--accent); font-weight:600; }
+.export-text td { padding:4px 6px; border:1px solid var(--border); color:var(--text); }
+.export-text blockquote { border-left:2px solid var(--accent2); padding-left:8px; margin:4px 0; color:var(--muted); font-style:italic; }
+.export-text ul { padding-left:16px; margin:4px 0; }
+.export-text li { margin:2px 0; line-height:1.5; }
+.export-text strong { color:var(--text); }
 .copy-btn { width:100%; padding:11px; background:var(--accent); color:#000; border:none; border-radius:8px; font-weight:700; font-size:0.82rem; cursor:pointer; margin-bottom:7px; font-family:'Bebas Neue',sans-serif; letter-spacing:2px; }
+.export-btn-row { display:flex; gap:7px; margin-bottom:7px; }
+.export-btn-row button { flex:1; padding:11px; border:none; border-radius:8px; font-weight:700; font-size:0.75rem; cursor:pointer; font-family:'Bebas Neue',sans-serif; letter-spacing:2px; }
+.export-btn-copy { background:var(--accent); color:#000; }
+.export-btn-download { background:var(--surface2); color:var(--accent); border:1px solid var(--accent)!important; }
 
 /* ══ SETTINGS PANEL ══ */
 .settings-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:3000; padding:16px; overflow-y:auto; }
@@ -729,9 +745,12 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
       <div class="export-check-item"><input type="checkbox" id="exWater" checked><label for="exWater">Water</label></div>
       <div class="export-check-item"><input type="checkbox" id="exEnergy" checked><label for="exEnergy">Energy</label></div>
     </div>
-    <button class="export-range-btn" onclick="generateExport()" style="width:100%;margin-bottom:10px">GENERATE</button>
+    <button class="export-range-btn" onclick="generateExport()" style="width:100%;margin-bottom:10px">GENERATE REPORT</button>
     <div class="export-text" id="exportText" style="display:none"></div>
-    <button class="copy-btn" id="exportCopyBtn" onclick="copyExport()" style="display:none">COPY TO CLIPBOARD</button>
+    <div class="export-btn-row" id="exportBtnRow" style="display:none">
+      <button class="export-btn-copy" onclick="copyExport()">COPY MARKDOWN</button>
+      <button class="export-btn-download" onclick="downloadReport()">DOWNLOAD REPORT</button>
+    </div>
     <button class="reset-btn" onclick="document.getElementById('exportOverlay').classList.remove('active')" style="margin-top:6px">CLOSE</button>
   </div>
 </div>
@@ -1131,8 +1150,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '2.6.0';
-const APP_VERSION_MSG = 'Dispatcher fixes, storage key cleanup, plan consistency, SW cache improvements.';
+const APP_VERSION = '2.7.0';
+const APP_VERSION_MSG = 'Export overhaul — structured markdown reports with summary stats, styled preview, and downloadable HTML reports.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -5597,8 +5616,9 @@ function showBackupStatus(msg, color) {
 }
 
 // ─── EXPORT — RANGE BASED ────────────────────────────────────────────────────
-// Different from backup — this generates a human-readable plain text log
-// for a selected date range, intended for sharing or reviewing in a notes app.
+// Different from backup — this generates a structured markdown progress report
+// for a selected date range. Preview renders as styled HTML in the modal.
+// Two outputs: COPY MARKDOWN (for Notion/Obsidian) and DOWNLOAD REPORT (styled HTML file).
 // Backup = machine-readable full snapshot. Export = human-readable selected range.
 function openExport() {
   // Default range: last 30 days
@@ -5607,8 +5627,9 @@ function openExport() {
   document.getElementById('exportFrom').value = dateToStr(from);
   document.getElementById('exportTo').value = dateToStr(to);
   document.getElementById('exportText').style.display = 'none';
-  document.getElementById('exportCopyBtn').style.display = 'none';
+  document.getElementById('exportBtnRow').style.display = 'none';
   document.getElementById('exportOverlay').classList.add('active');
+  window._exportMd = '';
 }
 
 function generateExport() {
@@ -5625,73 +5646,262 @@ function generateExport() {
 
   const dayLogs = gs(SK.dayLogs)||{};
   const fastDays = gs(SK.fastDays)||{};
+  const lightDaysData = gs(SK.lightDays)||{};
   const weights = gs(SK.weights)||[];
+  const foodLog = gs(SK.foodLog)||{};
   const s = getSettings();
+  const plan = PLANS[s.plan||'default'];
+  const exportDate = new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
 
-  let text = `PROTOCOL HEALTH — LOG EXPORT\n`;
-  text += `Plan: ${PLANS[s.plan||'default'].name}\n`;
-  text += `Goal: ${s.currentKg||'?'}kg → ${s.targetKg||'?'}kg\n`;
-  text += `Range: ${fromStr} → ${toStr}\n`;
-  text += `Exported: ${new Date().toLocaleDateString('en-US',{weekday:'short',year:'numeric',month:'long',day:'numeric'})}\n`;
-  text += '─'.repeat(44)+'\n\n';
+  let md = '';
 
-  if(incWeights){
-    const filtered = weights.filter(w=>w.date>=fromStr&&w.date<=toStr);
-    if(filtered.length){
-      text+=`WEIGHT LOG\n`;
-      filtered.forEach((w,i)=>{
-        const prev=filtered[i+1];
-        const delta=prev?` (${(w.weight-prev.weight)>=0?'+':''}${(w.weight-prev.weight).toFixed(1)}kg)`:'';
-        text+=`  ${w.date}: ${w.weight}kg${delta}\n`;
+  // ─── HEADER ───
+  md += `# Protocol Health — Progress Report\n\n`;
+  md += `**Name:** Mohammed Faiz Syed  \n`;
+  md += `**Plan:** ${plan.name}  \n`;
+  md += `**Period:** ${fromStr} → ${toStr}  \n`;
+  md += `**Exported:** ${exportDate}\n\n`;
+  md += `---\n\n`;
+
+  // ─── SUMMARY TABLE ───
+  const filteredW = weights.filter(w=>w.date>=fromStr&&w.date<=toStr);
+  const startW = filteredW.length ? filteredW[filteredW.length-1].weight : null;
+  const endW = filteredW.length ? filteredW[0].weight : null;
+  const totalChange = (startW && endW) ? (endW - startW) : null;
+  const dayCount = Math.round((strToDate(toStr) - strToDate(fromStr)) / 86400000) + 1;
+  const weeks = dayCount / 7;
+  const avgRate = (totalChange !== null && weeks > 0) ? (totalChange / weeks) : null;
+
+  // Compliance average
+  const logDates = Object.keys(dayLogs).filter(d=>d>=fromStr&&d<=toStr).sort().reverse();
+  let compTotal = 0, compCount = 0;
+  logDates.forEach(d => {
+    const c = dayLogs[d].checks;
+    if(c) {
+      const done = Object.values(c).filter(Boolean).length;
+      const total = Object.keys(c).length;
+      if(total > 0) { compTotal += (done/total)*100; compCount++; }
+    }
+  });
+  const avgComp = compCount > 0 ? Math.round(compTotal / compCount) : null;
+
+  // Fast/light day counts
+  const fastInRange = Object.keys(fastDays).filter(d=>d>=fromStr&&d<=toStr);
+  const lightInRange = Object.keys(lightDaysData).filter(d=>d>=fromStr&&d<=toStr);
+  const scheduledFasts = plan.fastDaysPerWeek > 0 ? Math.round(plan.fastDaysPerWeek * weeks) : 0;
+
+  md += `## Summary\n\n`;
+  md += `| Metric | Value |\n`;
+  md += `|--------|-------|\n`;
+  if(startW) md += `| Start Weight | ${startW} kg |\n`;
+  if(endW) md += `| End Weight | ${endW} kg |\n`;
+  if(totalChange !== null) md += `| Total Change | ${totalChange >= 0 ? '+' : ''}${totalChange.toFixed(1)} kg |\n`;
+  if(avgRate !== null) md += `| Avg Rate | ${avgRate >= 0 ? '+' : ''}${avgRate.toFixed(2)} kg/week |\n`;
+  md += `| Days in Range | ${dayCount} |\n`;
+  if(avgComp !== null) md += `| Compliance | ${avgComp}% avg |\n`;
+  if(fastInRange.length > 0) md += `| Fast Days Completed | ${fastInRange.length}${scheduledFasts > 0 ? ' / '+scheduledFasts : ''} |\n`;
+  if(lightInRange.length > 0) md += `| Light Days | ${lightInRange.length} |\n`;
+  md += `\n---\n\n`;
+
+  // ─── WEIGHT LOG ───
+  if(incWeights && filteredW.length) {
+    md += `## Weight Log\n\n`;
+    md += `| Date | Weight | Change |\n`;
+    md += `|------|--------|--------|\n`;
+    filteredW.forEach((w,i) => {
+      const prev = filteredW[i+1];
+      const delta = prev ? `${(w.weight-prev.weight)>=0?'+':''}${(w.weight-prev.weight).toFixed(1)} kg` : '—';
+      md += `| ${w.date} | ${w.weight} kg | ${delta} |\n`;
+    });
+    md += `\n---\n\n`;
+  }
+
+  // ─── DAILY COMPLIANCE ───
+  if(incCompliance && logDates.length) {
+    md += `## Daily Compliance\n\n`;
+    md += `| Date | Type | Completion |`;
+    if(incWater) md += ` Water |`;
+    if(incEnergy) md += ` Energy |`;
+    md += `\n`;
+    md += `|------|------|------------|`;
+    if(incWater) md += `-------|`;
+    if(incEnergy) md += `--------|`;
+    md += `\n`;
+    logDates.forEach(dateStr => {
+      const log = dayLogs[dateStr];
+      const type = fastDays[dateStr] ? 'Fast' : (lightDaysData[dateStr] ? 'Light' : 'Normal');
+      let comp = '—';
+      if(log.checks) {
+        const done = Object.values(log.checks).filter(Boolean).length;
+        const total = Object.keys(log.checks).length;
+        comp = total > 0 ? `${done}/${total} (${Math.round(done/total*100)}%)` : '—';
+      }
+      md += `| ${dateStr} | ${type} | ${comp} |`;
+      if(incWater) md += ` ${log.water ? log.water+'L' : '—'} |`;
+      if(incEnergy) md += ` ${log.energy || '—'} |`;
+      md += `\n`;
+    });
+    md += `\n---\n\n`;
+  }
+
+  // ─── FOOD LOG ───
+  const foodDates = Object.keys(foodLog).filter(d=>d>=fromStr&&d<=toStr).sort().reverse();
+  if(foodDates.length) {
+    md += `## Food Log\n\n`;
+    foodDates.forEach(dateStr => {
+      const entries = foodLog[dateStr];
+      if(!entries || !entries.length) return;
+      md += `### ${dateStr}\n\n`;
+      let dayCalTotal = 0;
+      entries.forEach(e => {
+        let macros = '';
+        const parts = [];
+        if(e.protein) parts.push(`P: ${e.protein}g`);
+        if(e.carbs) parts.push(`C: ${e.carbs}g`);
+        if(e.fat) parts.push(`F: ${e.fat}g`);
+        if(parts.length) macros = ` (${parts.join(', ')})`;
+        md += `- ${e.name} — ${e.calories} cal${macros}\n`;
+        dayCalTotal += e.calories || 0;
       });
-      text+='\n';
+      const cal = s.calories || 1500;
+      md += `- **Total: ${dayCalTotal} / ${cal} cal**\n\n`;
+    });
+    md += `---\n\n`;
+  }
+
+  // ─── NOTES ───
+  if(incNotes) {
+    const noteDates = logDates.filter(d => dayLogs[d].notes);
+    if(noteDates.length) {
+      md += `## Notes\n\n`;
+      noteDates.forEach(dateStr => {
+        const log = dayLogs[dateStr];
+        md += `### ${dateStr}\n\n`;
+        md += `> ${log.notes.replace(/\n/g, '\n> ')}\n`;
+        const extras = [];
+        if(log.energy) extras.push(`Energy: ${log.energy}`);
+        if(log.weight) extras.push(`Weight: ${log.weight}kg`);
+        if(extras.length) md += `> ${extras.join(' · ')}\n`;
+        md += `\n`;
+      });
     }
   }
 
-  const fastList = Object.keys(fastDays).filter(d=>d>=fromStr&&d<=toStr).sort();
-  if(fastList.length){text+=`WATER FAST DAYS\n`;fastList.forEach(d=>{text+=`  ${d}\n`;});text+='\n';}
-  const lightDaysData = gs(SK.lightDays)||{};
-  const lightList = Object.keys(lightDaysData).filter(d=>d>=fromStr&&d<=toStr).sort();
-  if(lightList.length){text+=`LIGHT EATING DAYS\n`;lightList.forEach(d=>{text+=`  ${d}\n`;});text+='\n';}
-
-  // Day logs
-  const logDates = Object.keys(dayLogs).filter(d=>d>=fromStr&&d<=toStr).sort().reverse();
-  if(logDates.length){
-    text+=`DAY LOGS\n${'─'.repeat(30)}\n`;
-    logDates.forEach(dateStr=>{
-      const log=dayLogs[dateStr];
-      const fast=fastDays[dateStr]?' ⚡ FAST':'';
-      text+=`\n${dateStr}${fast}\n`;
-      if(incWeights&&log.weight) text+=`  Weight: ${log.weight}kg\n`;
-      if(incWater&&log.water) text+=`  Water: ${log.water}L\n`;
-      if(incEnergy&&log.energy) text+=`  Energy: ${log.energy}\n`;
-      if(incCompliance&&log.checks){
-        const p=Object.values(log.checks).filter(Boolean).length;
-        const t=Object.keys(log.checks).length;
-        text+=`  Compliance: ${p}/${t}\n`;
-        // List what was done — search ALL plans' checklists since we don't store which plan was active
-        const allItems = [];
-        Object.values(PLANS).forEach(pl => { allItems.push(...pl.checklistNormal, ...pl.checklistFast, ...(pl.checklistLight||[])); });
-        const seen = new Set();
-        const doneItems = allItems.filter(i => log.checks[i.id] && !seen.has(i.id) && seen.add(i.id)).map(i=>i.label);
-        if(doneItems.length) text+=`    ✓ ${doneItems.join('\n    ✓ ')}\n`;
-      }
-      if(incNotes&&log.notes) text+=`  Notes: ${log.notes}\n`;
-    });
+  if(!logDates.length && !filteredW.length && !foodDates.length) {
+    md += `*No data found in this date range.*\n`;
   }
 
-  if(!logDates.length&&!weights.length) text+='No data found in this date range.\n';
+  // Store markdown for copy/download
+  window._exportMd = md;
 
+  // Render preview
   const box = document.getElementById('exportText');
-  box.textContent = text;
+  box.innerHTML = renderMarkdownPreview(md);
   box.style.display = 'block';
-  document.getElementById('exportCopyBtn').style.display = 'block';
+  document.getElementById('exportBtnRow').style.display = 'flex';
+}
+
+// Minimal markdown→HTML converter for in-app preview.
+// Only handles patterns that generateExport() produces — not a general parser.
+function renderMarkdownPreview(md) {
+  const lines = md.split('\n');
+  let html = '';
+  let inTable = false;
+  let inList = false;
+
+  for(let i = 0; i < lines.length; i++) {
+    let line = lines[i];
+
+    // Horizontal rule
+    if(line.trim() === '---') { if(inTable) { html += '</table>'; inTable = false; } if(inList) { html += '</ul>'; inList = false; } html += '<hr>'; continue; }
+    // H1
+    if(line.startsWith('# ')) { if(inList) { html += '</ul>'; inList = false; } html += `<h1>${inlineFormat(line.slice(2))}</h1>`; continue; }
+    // H2
+    if(line.startsWith('## ')) { if(inList) { html += '</ul>'; inList = false; } html += `<h2>${inlineFormat(line.slice(3))}</h2>`; continue; }
+    // H3
+    if(line.startsWith('### ')) { if(inList) { html += '</ul>'; inList = false; } html += `<h3>${inlineFormat(line.slice(4))}</h3>`; continue; }
+    // Table row
+    if(line.startsWith('|')) {
+      // Skip separator rows like |---|---|
+      if(line.match(/^\|[\s\-|:]+\|$/)) { continue; }
+      if(!inTable) { html += '<table>'; inTable = true; }
+      const cells = line.split('|').slice(1, -1).map(c => c.trim());
+      // First table row = header if we just opened table
+      const tag = (html.endsWith('<table>')) ? 'th' : 'td';
+      html += '<tr>' + cells.map(c => `<${tag}>${inlineFormat(c)}</${tag}>`).join('') + '</tr>';
+      continue;
+    } else if(inTable) { html += '</table>'; inTable = false; }
+    // Blockquote
+    if(line.startsWith('> ')) { if(inList) { html += '</ul>'; inList = false; } html += `<blockquote>${inlineFormat(line.slice(2))}</blockquote>`; continue; }
+    // List item
+    if(line.startsWith('- ')) {
+      if(!inList) { html += '<ul>'; inList = true; }
+      html += `<li>${inlineFormat(line.slice(2))}</li>`;
+      continue;
+    } else if(inList) { html += '</ul>'; inList = false; }
+    // Emphasis-only line (italic)
+    if(line.startsWith('*') && line.endsWith('*') && line.length > 2) { html += `<p><em>${inlineFormat(line.slice(1, -1))}</em></p>`; continue; }
+    // Paragraph (non-empty lines)
+    if(line.trim()) { html += `<p>${inlineFormat(line)}</p>`; }
+  }
+  if(inTable) html += '</table>';
+  if(inList) html += '</ul>';
+  return html;
+}
+
+// Inline formatting: **bold**, trailing double-space line breaks
+function inlineFormat(s) {
+  return s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/ {2}$/, '<br>');
 }
 
 function copyExport() {
-  navigator.clipboard.writeText(document.getElementById('exportText').textContent)
-    .then(()=>{ const btn=document.getElementById('exportCopyBtn'); btn.textContent='✓ COPIED'; setTimeout(()=>btn.textContent='COPY TO CLIPBOARD',1500); })
+  if(!window._exportMd) return;
+  navigator.clipboard.writeText(window._exportMd)
+    .then(()=>{ const btn=document.querySelector('.export-btn-copy'); btn.textContent='✓ COPIED'; setTimeout(()=>btn.textContent='COPY MARKDOWN',1500); })
     .catch(()=>showAlert('Select all and copy manually.'));
+}
+
+function downloadReport() {
+  if(!window._exportMd) return;
+  const md = window._exportMd;
+  // Build a self-contained styled HTML document
+  const htmlDoc = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Protocol Health — Progress Report</title>
+<style>
+  body { font-family: 'Segoe UI', -apple-system, sans-serif; max-width: 700px; margin: 40px auto; color: #111; font-size: 13px; line-height: 1.6; padding: 0 20px; }
+  h1 { font-size: 20px; border-bottom: 2px solid #333; padding-bottom: 6px; margin-bottom: 16px; }
+  h2 { font-size: 16px; margin-top: 28px; color: #333; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
+  h3 { font-size: 14px; margin-top: 18px; color: #444; }
+  hr { border: none; border-top: 1px solid #ddd; margin: 20px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; font-size: 12px; }
+  th { background: #f5f5f5; font-weight: 600; }
+  blockquote { border-left: 3px solid #999; padding-left: 12px; color: #555; margin: 8px 0; font-style: italic; }
+  ul { padding-left: 20px; }
+  li { margin: 3px 0; }
+  strong { color: #111; }
+  p { margin: 4px 0; }
+  @media print { body { margin: 20px; max-width: 100%; } }
+</style>
+</head>
+<body>
+${renderMarkdownPreview(md)}
+</body>
+</html>`;
+
+  const blob = new Blob([htmlDoc], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'protocol-health-report-' + dateToStr(new Date()) + '.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 document.getElementById('exportOverlay').addEventListener('click',e=>{if(e.target.id==='exportOverlay')document.getElementById('exportOverlay').classList.remove('active');});
