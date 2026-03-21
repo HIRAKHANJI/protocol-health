@@ -4,6 +4,22 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 2.8.1 — 2026-03-21
+
+**Scope:** Patch (bug fixes from full codebase scan)
+**Banner:** No banner (patch).
+
+- **Fix: generateExport() crash on invalid plan key** — Added `|| PLANS.default` fallback to the PLANS lookup in `generateExport()`. Every other PLANS reference in the codebase had this guard; the export function was the only one missing it, causing a crash if `settings.plan` held a deleted/invalid key.
+- **Fix: applySchedule() crash on invalid plan key** — Same `|| PLANS.default` fallback added to `applySchedule()` line that accessed `PLANS[p.planVal].badge` without a guard.
+- **Fix: "null" displayed on first launch** — `updateGoalBar()` now guards against `null`/`undefined` weight. New installs with no weight data show "—" and "No data yet" instead of literal "null" text in the header and goal strip.
+- **Fix: index.html footer version** — Footer was stuck at v2.5.0 while hero badge was correct. Both now show v2.8.1.
+- **Fix: favicon files not cached offline** — Added `favicon.ico` and `favicon-32.png` to the service worker's best-effort cache list. Previously only PNG logos were cached.
+- **Fix: calcAdjust() broken for bulk plans** — Schedule ADJUST now detects plan direction (cut vs bulk) and inverts the math accordingly. `remainKg` correctly calculates `target - current` for bulk and `current - target` for cut. Formula rate uses `Math.abs()` for bulk surplus. `openManageSchedule()` status text also updated to show "Gained" instead of "Lost" for bulk plans.
+- **Fix: silent data loss on storage full** — `ss()` now catches `QuotaExceededError` specifically and shows a `showAlert()` warning telling the user to back up and clear old data, instead of silently swallowing the error.
+- **CLAUDE.md updated** — Version references updated from 2.6.0 to 2.8.1. Settings field list corrected: removed `exerciseBurn` (deleted in v2.2.0), added `age`, `height`, `sex`, `activityLevel`, `name`. `checklistLight` spec clarified as optional for plans with 0 light days.
+
+---
+
 ## Version 2.8.0 — 2026-03-21
 
 **Scope:** Minor (new feature — doctor-ready export report + name setting)
