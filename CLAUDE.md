@@ -236,9 +236,9 @@ Nothing else changes. `getActivePlan()` reads `settings.plan`, looks up `PLANS[s
 | `app.html` | The entire app — HTML, CSS, and all JavaScript in one file. ~5000+ lines. No build process, no bundler, no framework. |
 | `index.html` | Landing/product page. Links to `app.html`. |
 | `manifest.json` | PWA manifest. App name, icons, display mode (standalone = fullscreen), theme color. |
-| `sw.js` | Service Worker. Caches all app files after first load for offline use. Cache-first strategy. Current cache name: `protocol-health-v7`. Bump version on major deploys. |
-| `icon-192.png` | Home screen icon at 192×192px. |
-| `icon-512.png` | Splash screen icon at 512×512px. |
+| `sw.js` | Service Worker. Caches all app files after first load for offline use. Cache-first strategy. Current cache name: `protocol-health-v11`. Bump version on major deploys. |
+| `PH_LOGO_192.png` | Home screen icon at 192×192px. |
+| `PH_LOGO_512.png` | Splash screen icon at 512×512px. |
 
 ### Data Storage
 
@@ -428,18 +428,18 @@ Push to GitHub → GitHub Pages serves new files (~60s)
 
 The service worker caches files under `CACHE_NAME` in `sw.js`. If this name does not change, the SW may keep serving the old cached version even after new files are pushed.
 
-**Current version:** `protocol-health-v7`
+**Current version:** `protocol-health-v11`
 
 > **Rule: Bump `CACHE_NAME` on every significant update to `main`.**
 > - Only bump when merging or pushing to `main` — feature branches do not need cache version increments
-> - On any JS logic change, new feature, or bug fix → increment: `v6` → `v7` → `v8`
+> - On any JS logic change, new feature, or bug fix → increment: `v10` → `v11` → `v12`
 > - On pure content changes (text, nutrition rules, workout descriptions) → optional but safe to bump
 > - **Always bump when:** changing storage key schemas, adding new dispatch events, restructuring plans
 > - Never skip the bump when unsure — a stale cache is harder to debug than an unnecessary version increment
 
 ```javascript
 // sw.js — line 22
-const CACHE_NAME = 'protocol-health-v7'; // ← increment this on every significant push
+const CACHE_NAME = 'protocol-health-v11'; // ← increment this on every significant push
 ```
 
 ### Files That Must Be Pushed Together
@@ -494,11 +494,11 @@ The app has two independent version numbers that serve different purposes:
 | **+0.1.0** (minor) | A new feature, a meaningful UI change, or 4+ bug fixes bundled together | Yes | Added streak counter, redesigned settings panel, new checklist group |
 | **+1.0.0** (major) | New plan added, major rework of a core system, or something that changes how you use the app | Yes | New combat training plan, schedule system rewrite, new tab added |
 
-**Current version:** `2.0.0`
+**Current version:** `2.6.0`
 
 ### How It Works
 
-1. `APP_VERSION` and `APP_VERSION_MSG` are constants at the top of the script in `index.html`
+1. `APP_VERSION` and `APP_VERSION_MSG` are constants at the top of the script in `app.html`
 2. On app load, `checkVersionUpdate()` compares `APP_VERSION` to the last seen version stored in `SK.seenVer`
 3. If the major or minor digit changed → show a slide-down banner with the version and message
 4. If only the patch digit changed → silently update `SK.seenVer`, no banner
@@ -509,7 +509,7 @@ The app has two independent version numbers that serve different purposes:
 When making changes, update these two lines near the top of the script in `app.html`:
 
 ```javascript
-const APP_VERSION = '2.0.0';                         // ← bump according to rules above
+const APP_VERSION = '2.6.0';                         // ← bump according to rules above
 const APP_VERSION_MSG = 'Description of changes.';    // ← short description of what changed
 ```
 
@@ -534,7 +534,7 @@ Repository:   github.com/HIRAKHANJI/protocol-health
 Live URL:     https://hirakhanji.github.io/protocol-health/
 App file:     app.html (single file, ~5000+ lines)
 Landing:      index.html (product page)
-PWA files:    manifest.json, sw.js, icon-192.png, icon-512.png
+PWA files:    manifest.json, sw.js, PH_LOGO_192.png, PH_LOGO_512.png
 
 Storage keys (all in SK object at top of script):
   ph_wt_v1  — weight log
@@ -547,6 +547,7 @@ Storage keys (all in SK object at top of script):
   ph_fl_v1  — food log (per-day entries with macros)
   ph_fb_v1  — food library (autocomplete + macro memory)
   ph_ex_v1  — exercise levels (per-day progression tracking)
+  ph_sw_v1  — last dismissed SW cache version (for reload banner)
 
 Plans:        PLANS.default, PLANS.agro, PLANS.cut, PLANS.bulk, PLANS.maintenance
 Active plan:  getActivePlan() — never reference PLANS[x] directly elsewhere
@@ -554,8 +555,8 @@ Day types:    getDayType(dateStr) → 'fast' | 'light' | 'normal'
 Data writes:  always end with dispatch("EVENT_NAME")
 Dialogs:      showConfirm(), showAlert() — never native confirm/alert
 Dates:        dateToStr(d), strToDate(s), todayStr() — never toISOString()
-Cache:        sw.js CACHE_NAME = "protocol-health-v7" — bump on every significant push
-App version:  APP_VERSION = "2.0.0" — bump on notable updates (see Section 12)
+Cache:        sw.js CACHE_NAME = "protocol-health-v11" — bump on every significant push
+App version:  APP_VERSION = "2.6.0" — bump on notable updates (see Section 12)
 Update log:   UPDATE_LOG.md — every version bump must be documented here
 ```
 

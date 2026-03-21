@@ -7,7 +7,7 @@ graph TB
     subgraph PWA["📱 PWA Shell"]
         SW["sw.js<br/>Service Worker<br/>Cache-first strategy"]
         MAN["manifest.json<br/>Standalone display"]
-        ICONS["icon-192 / icon-512"]
+        ICONS["PH_LOGO_192 / PH_LOGO_512"]
     end
 
     subgraph APP["app.html — Single File Application"]
@@ -26,6 +26,8 @@ graph TB
         SK_FB["ph_fb_v1<br/>Food Library"]
         SK_EX["ph_ex_v1<br/>Exercise Levels"]
         SK_SV["ph_sv_v1<br/>Seen Version"]
+        SK_LD["ph_ld_v1<br/>Light Days"]
+        SK_SW["ph_sw_v1<br/>SW Dismissed Ver"]
     end
 
     USER["👤 User"] -->|"installs PWA"| PWA

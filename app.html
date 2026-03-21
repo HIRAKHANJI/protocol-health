@@ -1121,7 +1121,8 @@ const SK = {
   foodLog:   'ph_fl_v1',   // object keyed by dateStr — each value: array of { id, name, calories, notes, ts }
   foodLib:   'ph_fb_v1',   // array of { name, lastCalories, useCount } — sorted by useCount desc
   exLevels:  'ph_ex_v1',   // object keyed by dateStr — each value: { groupId: levelIndex, ... }
-  lightDays: 'ph_ld_v1'    // object keyed by dateStr — value: true if that day is a light eating day
+  lightDays: 'ph_ld_v1',   // object keyed by dateStr — value: true if that day is a light eating day
+  swDismissedVer: 'ph_sw_v1' // string — last SW cache version the user dismissed the reload banner for
 };
 
 // ─── APP VERSION ─────────────────────────────────────────────────────────────
@@ -1130,8 +1131,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '2.5.0';
-const APP_VERSION_MSG = '15 bug fixes: goal calculator math, bulk goal bar, projection accuracy, light day handling, midnight refresh.';
+const APP_VERSION = '2.6.0';
+const APP_VERSION_MSG = 'Dispatcher fixes, storage key cleanup, plan consistency, SW cache improvements.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -1703,10 +1704,10 @@ const DISPATCH_MAP = {
   WEIGHT_LOGGED:     ['goalBar','projection','recentNotes','durationBar'],
   DAY_SAVED:         ['calendarCell','monthStats','recentNotes','projection'],
   FAST_DAY_TOGGLED:  ['fastUI','checklist','calendarCell','projection'],
-  PLAN_CHANGED:      ['allTabs','checklist','durationBar','projection','calendar'],
+  PLAN_CHANGED:      ['allTabs','checklist','durationBar','projection','calendar','goalBar'],
   CALORIES_CHANGED:  ['projection','durationBar','nutritionMacros'],
-  SCHEDULE_SET:      ['durationBar','calendarHighlights','manageSchedBtn'],
-  SCHEDULE_ADJUSTED: ['durationBar','calendarHighlights','projection','manageSchedBtn'],
+  SCHEDULE_SET:      ['durationBar','calendarHighlights','manageSchedBtn','goalBar'],
+  SCHEDULE_ADJUSTED: ['durationBar','calendarHighlights','projection','manageSchedBtn','goalBar'],
   SCHEDULE_ENDED:    ['durationBar','calendarHighlights','manageSchedBtn'],
   SCHEDULE_REMOVED:  ['durationBar','calendarHighlights','manageSchedBtn'],
   FOOD_LOGGED:       ['projection','goalBar','recentNotes','foodModal','todayCalStrip','nutritionMacros','radar'],
@@ -1901,6 +1902,8 @@ const PLANS = {
     bannerBg: 'var(--surface)',
     bannerBorder: 'var(--border)',
     fastDaysDow: [0, 3, 6], // Sun/Wed/Sat
+    lightDaysPerWeek: 0,
+    lightDaysDow: [],
 
     // Week icons for workout grid
     weekIcons: {0:'🚶',1:'💪',2:'🦵',3:'💪',4:'🦵',5:'💪',6:'🦵'},
@@ -2090,6 +2093,8 @@ const PLANS = {
     bannerBg: 'rgba(255,107,53,0.07)',
     bannerBorder: 'rgba(255,107,53,0.35)',
     fastDaysDow: [0, 3, 6], // Sun/Wed/Sat
+    lightDaysPerWeek: 0,
+    lightDaysDow: [],
 
     weekIcons: {0:'🚶',1:'💪',2:'🦵',3:'🏃',4:'🤸',5:'🦵',6:'🏃'},
 
@@ -2478,6 +2483,8 @@ PLANS.cut = {
   bannerBg: 'rgba(78,205,196,0.07)',
   bannerBorder: 'rgba(78,205,196,0.35)',
   fastDaysDow: [],
+  lightDaysPerWeek: 0,
+  lightDaysDow: [],
   macroSplit: { base:[50,30,20], rest:[58,22,20], preFast:[46,34,20], stall:[56,24,20], satiety:[58,22,20] },
   proteinFloorMultiplier: 1.6,
 
@@ -4657,7 +4664,6 @@ function confirmPlan() {
   applyPlanUI(val);
   dispatch('PLAN_CHANGED');
   dispatch('CALORIES_CHANGED');
-  updateGoalBar(getLatestWeight());
   const btn = document.querySelector('.confirm-plan-btn');
   btn.textContent = '✓ PLAN CONFIRMED';
   setTimeout(()=>{btn.textContent='CONFIRM PLAN';},1500);
@@ -5202,7 +5208,6 @@ function applySchedule() {
   }
   dispatch('SCHEDULE_SET');
   dispatch('PLAN_CHANGED');
-  updateGoalBar(p.curKg);
   closeSettings();
 
   const monthsBtn = Array.from(document.querySelectorAll('.tab')).find(t => t.textContent.trim() === 'MONTHS');
@@ -5428,7 +5433,6 @@ function confirmAdjust() {
 
   dispatch('SCHEDULE_ADJUSTED');
   dispatch('CALORIES_CHANGED');
-  updateGoalBar(getLatestWeight());
   closeManageSchedule();
   setTimeout(()=>renderCalendar(),50);
 }
@@ -5574,8 +5578,6 @@ function restoreData(event) {
           dispatch('FOOD_LOGGED');
           dispatch('FAST_DAY_TOGGLED');
           if(typeof EXERCISE_PROGRESSIONS !== 'undefined') dispatch('EXERCISE_LEVEL_CHANGED');
-          renderCalendar();
-          renderRadar();
           showBackupStatus(`✓ Restored ${keys.length} data sets from backup (${exported}). All data reloaded.`, 'var(--green)');
         },
         { yesLabel: 'RESTORE', danger: true }
@@ -5840,7 +5842,6 @@ if('serviceWorker' in navigator) {
   // When the user dismisses (X or RELOAD), we store the SW cache version
   // that triggered the banner. The banner won't show again until a
   // genuinely new SW version arrives (different CACHE_NAME).
-  const SW_DISMISSED_KEY = 'ph_sw_banner_dismissed_ver';
   let _swCacheVersion = null;   // set when SW_UPDATED message arrives
   let _bannerDismissed = false; // session flag — prevents re-show within same page load
 
@@ -5849,7 +5850,7 @@ if('serviceWorker' in navigator) {
     // If we know the cache version, check if user already dismissed this one
     const ver = cacheVer || _swCacheVersion;
     if(ver) {
-      const dismissed = localStorage.getItem(SW_DISMISSED_KEY);
+      const dismissed = gs(SK.swDismissedVer);
       if(dismissed === ver) return;
       _swCacheVersion = ver;
     }
@@ -5860,7 +5861,7 @@ if('serviceWorker' in navigator) {
   // Called by both the RELOAD button and the X button
   window.dismissSwBanner = function() {
     _bannerDismissed = true;
-    if(_swCacheVersion) localStorage.setItem(SW_DISMISSED_KEY, _swCacheVersion);
+    if(_swCacheVersion) ss(SK.swDismissedVer, _swCacheVersion);
     const banner = document.getElementById('swReloadBanner');
     if(banner) banner.classList.remove('visible');
   };
