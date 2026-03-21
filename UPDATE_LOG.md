@@ -4,6 +4,21 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 2.8.2 — 2026-03-21
+
+**Scope:** Patch (bulk plan display fixes + cleanup)
+**Banner:** No banner (patch).
+
+- **Fix: calcAdjust() rate sign wrong for bulk plans** — Schedule ADJUST rate display now shows `+X.XXkg/wk` for bulk plans instead of always showing a minus sign. Same fix applied to the observed/formula info line.
+- **Fix: projection color logic broken for bulk** — Weight projection "good"/"warn" coloring now correctly detects bulk direction. Previously, losing weight on a bulk plan still showed green (good) because the condition only checked `projSunday <= target`. Now checks `projSunday > latest.weight` for bulk plans.
+- **Fix: calcAdjust() aggressive warning threshold not bulk-aware** — Warning now fires at >0.5 kg/week for bulk plans (mostly fat gain territory) instead of the cut-only >2 kg/week threshold. Matches the bulk-specific thresholds already used in `calcDuration()`.
+- **Fix: restoreData() date display timezone bug** — Backup restore confirmation now uses `strToDate()` instead of `new Date()` to parse the export date string. `new Date("YYYY-MM-DD")` parses as UTC midnight which could display as the previous day in negative UTC offset timezones — the exact bug the codebase's date rules exist to prevent.
+- **Fix: projection band variable naming** — Renamed `bestCase`/`worstCase` to `lowCase`/`highCase` to match the direction-neutral UI labels ("LOW"/"HIGH"). The old names assumed cut-only semantics.
+- **CLAUDE.md self-update rule** — Added instruction requiring all version references in CLAUDE.md to be updated whenever APP_VERSION is bumped. Prevents stale version numbers in project documentation.
+- **Deleted dead files** — Removed `favicon-16.png` and `favicon-48.png` which were not referenced by any HTML, manifest, or service worker file.
+
+---
+
 ## Version 2.8.1 — 2026-03-21
 
 **Scope:** Patch (bug fixes from full codebase scan)

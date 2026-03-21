@@ -1157,8 +1157,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '2.8.1';
-const APP_VERSION_MSG = 'Doctor-ready reports — patient profile, group-level compliance, nutrition overview, weekly weight trends, BMI tracking.';
+const APP_VERSION = '2.8.2';
+const APP_VERSION_MSG = 'Bulk plan fixes — correct rate signs, projection colors, warning thresholds, and timezone-safe backup restore.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -3743,10 +3743,10 @@ function updateProjection() {
   const projSunday = parseFloat((latest.weight - projectedDrop).toFixed(1));
   const delta = parseFloat((projectedDrop).toFixed(1));
 
-  // Confidence band — labelled best/worst case
+  // Confidence band — LOW / HIGH range (±15% of projected change)
   const bandSize = Math.abs(projectedDrop) * 0.15;
-  const bestCase = parseFloat((projSunday - bandSize).toFixed(1));  // more loss = better
-  const worstCase = parseFloat((projSunday + bandSize).toFixed(1)); // less loss = worse
+  const lowCase = parseFloat((projSunday - bandSize).toFixed(1));
+  const highCase = parseFloat((projSunday + bandSize).toFixed(1));
 
   const sundayEl = document.getElementById('projSundayKg');
   const deltaEl = document.getElementById('projDelta');
@@ -3754,10 +3754,15 @@ function updateProjection() {
   deltaEl.textContent = delta > 0 ? `−${delta}kg by Sun` : delta < 0 ? `+${Math.abs(delta)}kg by Sun` : 'no change';
 
   const target = s.targetKg || 91;
-  sundayEl.className = 'proj-main ' + (projSunday <= target ? 'good' : projSunday < latest.weight ? 'good' : 'warn');
+  const isBulkProj = target > latest.weight;
+  if(isBulkProj) {
+    sundayEl.className = 'proj-main ' + (projSunday >= target ? 'good' : projSunday > latest.weight ? 'good' : 'warn');
+  } else {
+    sundayEl.className = 'proj-main ' + (projSunday <= target ? 'good' : projSunday < latest.weight ? 'good' : 'warn');
+  }
 
-  document.getElementById('projLow').textContent = bestCase + 'kg';
-  document.getElementById('projHigh').textContent = worstCase + 'kg';
+  document.getElementById('projLow').textContent = lowCase + 'kg';
+  document.getElementById('projHigh').textContent = highCase + 'kg';
 
   const basisParts = [];
   basisParts.push(`Based on ${recent.length} day${recent.length>1?'s':''} of data`);
@@ -5397,7 +5402,7 @@ function calcAdjust() {
   document.getElementById('adjResultTitle').textContent = 'ADJUSTED PROJECTION (' + modeLabel + ')';
   document.getElementById('adjWeeks').textContent   = Math.ceil(remainDays/7);
   document.getElementById('adjDays').textContent    = remainDays;
-  document.getElementById('adjRate').textContent    = '-'+kgPerWeek+'kg/wk';
+  document.getElementById('adjRate').textContent    = (isBulkAdj?'+':'-')+kgPerWeek+'kg/wk';
   document.getElementById('adjEndDate').textContent = endDateStr;
 
   // Observed vs formula info
@@ -5406,7 +5411,8 @@ function calcAdjust() {
     const obsKgWk = (actualRate * 7).toFixed(2);
     const frmKgWk = (formulaRate * 7).toFixed(2);
     const blendPct = Math.round(observedBlendWeight * 100);
-    obsInfo.innerHTML = `Observed: <b>-${obsKgWk}kg/wk</b> (${elapsed} days data) · Formula: <b>-${frmKgWk}kg/wk</b>` +
+    const rateSign = isBulkAdj ? '+' : '-';
+    obsInfo.innerHTML = `Observed: <b>${rateSign}${obsKgWk}kg/wk</b> (${elapsed} days data) · Formula: <b>${rateSign}${frmKgWk}kg/wk</b>` +
       (adjustMode === 'blended' ? ` · Blend: ${blendPct}% observed / ${100-blendPct}% formula` : '');
     obsInfo.style.display = 'block';
   }
@@ -5415,8 +5421,8 @@ function calcAdjust() {
   if(adjustMode === 'observed' && elapsed < 7) {
     warn.textContent = '⚠ Less than 7 days of data — observed rate may be unreliable. Consider blended mode.';
     warn.style.display='block';
-  } else if(kgPerWeek > 2) {
-    warn.textContent = '⚡ Rate is aggressive — expect some variance.';
+  } else if(kgPerWeek > (isBulkAdj ? 0.5 : 2)) {
+    warn.textContent = isBulkAdj ? '⚡ Bulk rate above 0.5kg/wk — mostly fat gain territory.' : '⚡ Rate is aggressive — expect some variance.';
     warn.style.display='block';
   } else { warn.style.display='none'; }
 
@@ -5596,7 +5602,7 @@ function restoreData(event) {
       }
 
       // Confirm before overwriting
-      const exported = backup.exportedAt ? new Date(backup.exportedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : 'unknown date';
+      const exported = backup.exportedAt ? strToDate(backup.exportedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : 'unknown date';
       showConfirm(
         'RESTORE BACKUP',
         `This will overwrite ALL current app data with the backup from ${exported}. This cannot be undone.`,
