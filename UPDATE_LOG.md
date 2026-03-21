@@ -4,6 +4,18 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 3.0.1 — 2026-03-21
+
+**Scope:** Patch (bug fixes from codebase scan)
+**Banner:** No banner (patch).
+
+- **Fix: duration bar NaN when totalDays is 0** — `updateDurationBar()` now guards against `sched.totalDays === 0` to prevent NaN/Infinity percentage display.
+- **Fix: index.html footer version mismatch** — Footer showed `v2.10.0` while hero badge showed `v3.0.0`. Both now show `v3.0.1`.
+- **Fix: CLAUDE.md stale version references** — Quick Reference and Current Version sections still referenced `2.10.0`. Updated to `3.0.1`.
+- **Fix: missing theme-color meta tag in index.html** — Added `<meta name="theme-color" content="#0a0a0a">` to match app.html and manifest.json.
+
+---
+
 ## Version 3.0.0 — 2026-03-21
 
 **Scope:** Major (version rollover from 2.10.0 — export report restructure with schedule-aware sections)
