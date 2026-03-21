@@ -3873,7 +3873,8 @@ function computeRadarMetrics(days) {
   // 5. WEIGHT TREND — normalised score based on whether weight is moving in the right direction
   // 100 = moving toward target at or above expected rate, 0 = moving away from target
   let weightTrend = null;
-  const isBulkRadar = s.targetKg && s.currentKg && s.targetKg > s.currentKg;
+  const radarCurrentW = weights.length > 0 ? weights[0].weight : s.currentKg;
+  const isBulkRadar = s.targetKg && radarCurrentW && s.targetKg > radarCurrentW;
   if (weights.length >= 2) {
     const windowWeights = weights.filter(w => {
       const wd = strToDate(w.date);
