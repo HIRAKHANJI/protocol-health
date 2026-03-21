@@ -4508,7 +4508,7 @@ function saveDayLog(dateStr) {
   if(!isNaN(water) && water >= 0) fields.water = water;
   saveDayLogField(dateStr, fields);
 
-  if(!isNaN(wt) && wt > 40) {
+  if(!isNaN(wt) && wt >= 40 && wt <= 250) {
     const weights = gs(SK.weights)||[];
     const idx = weights.findIndex(w=>w.date===dateStr);
     if(idx>=0) weights.splice(idx,1);
