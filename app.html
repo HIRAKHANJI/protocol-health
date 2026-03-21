@@ -1163,7 +1163,7 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '3.0.1';
+const APP_VERSION = '3.0.2';
 const APP_VERSION_MSG = 'Export reports now split by scheduled vs non-scheduled days with day-type breakdowns, per-date macro targets, and full checkbox control over every report section.';
 
 // Static lookup arrays used throughout rendering
@@ -5631,12 +5631,12 @@ function restoreData(event) {
           document.getElementById('planSelect').value = s.plan || 'default';
           document.getElementById('settingRisk').value = s.risk || 'aggressive';
           document.getElementById('settingSex').value = s.sex || 'male';
-          document.getElementById('settingActivity').value = s.activityLevel || '1.55';
+          document.getElementById('settingActivityLevel').value = s.activityLevel || '1.55';
           applyPlanUI(s.plan||'default');
           syncCustomSelect('planSelectCustom','planSelect');
           syncCustomSelect('riskSelectCustom','settingRisk');
           syncCustomSelect('sexSelectCustom','settingSex');
-          syncCustomSelect('activitySelectCustom','settingActivity');
+          syncCustomSelect('activitySelectCustom','settingActivityLevel');
           dispatch('PLAN_CHANGED');
           dispatch('WEIGHT_LOGGED');
           dispatch('SCHEDULE_SET');
