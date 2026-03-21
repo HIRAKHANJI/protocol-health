@@ -4,6 +4,18 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 2.10.0 — 2026-03-21
+
+**Scope:** Minor (enhanced nutrition reporting in exports)
+**Banner:** "Nutrition reports — weekly macro averages, actual vs target comparison, and calorie compliance breakdown in exports."
+
+- **Enhanced Nutrition Overview in exports** — The Nutrition Overview section in generated reports now includes a full macro comparison table showing actual daily averages vs plan targets for calories, protein, carbs, and fat. Each row shows an "On track" / "Below target" / "Over target" status so doctors and users can immediately see which macros are hitting targets and which aren't.
+- **Weekly Macro Averages table** — New sub-section below the daily averages showing week-by-week average calories, protein, carbs, and fat (Mon–Sun buckets). Target macro values shown as a reference line below the table. Only renders when 2+ weeks of food data exist in the selected range.
+- **Calorie compliance table** — Days under/over ceiling now shown in a separate compliance table for clarity, rather than mixed into the daily averages table.
+- **All three macros tracked** — Previously only protein was shown in the nutrition overview. Now carbs and fat are included with per-macro day counting (only days where that macro was logged contribute to its average, preventing 0-entry days from skewing the numbers).
+
+---
+
 ## Version 2.9.1 — 2026-03-21
 
 **Scope:** Patch (critical data loss fix)

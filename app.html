@@ -1158,8 +1158,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '2.9.1';
-const APP_VERSION_MSG = 'Radar chart now works for bulk plans — weight trend, goal progress, and NIGHT checklist group gets its own color.';
+const APP_VERSION = '2.10.0';
+const APP_VERSION_MSG = 'Nutrition reports — weekly macro averages, actual vs target comparison, and calorie compliance breakdown in exports.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -5830,25 +5830,85 @@ function generateExport() {
   const foodDates = Object.keys(foodLog).filter(d=>d>=fromStr&&d<=toStr).sort().reverse();
   const eatingFoodDates = foodDates.filter(d => !fastDays[d] && !lightDaysData[d]);
   if(eatingFoodDates.length) {
-    let totalCal = 0, totalProtein = 0, proteinDays = 0, overCount = 0, underCount = 0;
+    let totalCal = 0, totalProtein = 0, totalCarbs = 0, totalFat = 0;
+    let proteinDays = 0, carbsDays = 0, fatDays = 0, overCount = 0, underCount = 0;
     eatingFoodDates.forEach(d => {
       const entries = foodLog[d] || [];
       const dayCal = entries.reduce((sum, e) => sum + (e.calories || 0), 0);
       totalCal += dayCal;
       if(s.calories) { if(dayCal > s.calories) overCount++; else underCount++; }
-      const dayProtein = entries.reduce((sum, e) => sum + (e.protein || 0), 0);
-      if(dayProtein > 0) { totalProtein += dayProtein; proteinDays++; }
+      const dayP = entries.reduce((sum, e) => sum + (e.protein || 0), 0);
+      const dayC = entries.reduce((sum, e) => sum + (e.carbs || 0), 0);
+      const dayF = entries.reduce((sum, e) => sum + (e.fat || 0), 0);
+      if(dayP > 0) { totalProtein += dayP; proteinDays++; }
+      if(dayC > 0) { totalCarbs += dayC; carbsDays++; }
+      if(dayF > 0) { totalFat += dayF; fatDays++; }
     });
     const avgCal = Math.round(totalCal / eatingFoodDates.length);
+    const avgP = proteinDays > 0 ? Math.round(totalProtein / proteinDays) : null;
+    const avgC = carbsDays > 0 ? Math.round(totalCarbs / carbsDays) : null;
+    const avgF = fatDays > 0 ? Math.round(totalFat / fatDays) : null;
+
+    // Get target macros from current plan for comparison
+    const macroTarget = computeMacros(todayStr());
+    const targetP = macroTarget.proteinG;
+    const targetC = macroTarget.carbsG;
+    const targetF = macroTarget.fatG;
+
     md += `## Nutrition Overview\n\n`;
-    md += `| Metric | Value |\n`;
-    md += `|--------|-------|\n`;
-    md += `| Avg Daily Intake (eating days) | ${avgCal} cal |\n`;
-    if(s.calories) md += `| Calorie Ceiling | ${s.calories} cal |\n`;
-    if(s.calories) md += `| Days Under Ceiling | ${underCount} / ${eatingFoodDates.length} |\n`;
-    if(s.calories) md += `| Days Over Ceiling | ${overCount} / ${eatingFoodDates.length} |\n`;
-    if(proteinDays > 0) md += `| Avg Protein (eating days) | ${Math.round(totalProtein / proteinDays)}g |\n`;
-    md += `\n---\n\n`;
+    md += `### Daily Averages (eating days only)\n\n`;
+    md += `| Metric | Actual | Target | Status |\n`;
+    md += `|--------|--------|--------|--------|\n`;
+    md += `| Calories | ${avgCal} cal | ${s.calories || '—'} cal | ${s.calories ? (avgCal <= s.calories ? 'Within ceiling' : 'Over ceiling') : '—'} |\n`;
+    if(avgP !== null) md += `| Protein | ${avgP}g | ${targetP}g | ${avgP >= targetP ? 'On track' : 'Below target'} |\n`;
+    if(avgC !== null) md += `| Carbs | ${avgC}g | ${targetC}g | ${avgC <= targetC + 20 ? 'On track' : 'Over target'} |\n`;
+    if(avgF !== null) md += `| Fat | ${avgF}g | ${targetF}g | ${avgF <= targetF + 10 ? 'On track' : 'Over target'} |\n`;
+    md += `\n`;
+    if(s.calories) {
+      md += `| Compliance | Value |\n`;
+      md += `|------------|-------|\n`;
+      md += `| Days Under Ceiling | ${underCount} / ${eatingFoodDates.length} |\n`;
+      md += `| Days Over Ceiling | ${overCount} / ${eatingFoodDates.length} |\n`;
+      md += `\n`;
+    }
+
+    // Weekly macro breakdown
+    const weekMacroBuckets = {};
+    eatingFoodDates.forEach(d => {
+      const dt = strToDate(d);
+      const day = dt.getDay();
+      const mon = new Date(dt); mon.setDate(dt.getDate() - ((day + 6) % 7));
+      const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+      const key = dateToStr(mon);
+      if(!weekMacroBuckets[key]) weekMacroBuckets[key] = { monStr:dateToStr(mon), sunStr:dateToStr(sun), days:0, cal:0, protein:0, carbs:0, fat:0, pDays:0, cDays:0, fDays:0 };
+      const b = weekMacroBuckets[key];
+      const entries = foodLog[d] || [];
+      const dayCal = entries.reduce((sum, e) => sum + (e.calories || 0), 0);
+      const dayP = entries.reduce((sum, e) => sum + (e.protein || 0), 0);
+      const dayC = entries.reduce((sum, e) => sum + (e.carbs || 0), 0);
+      const dayF = entries.reduce((sum, e) => sum + (e.fat || 0), 0);
+      b.days++; b.cal += dayCal;
+      if(dayP > 0) { b.protein += dayP; b.pDays++; }
+      if(dayC > 0) { b.carbs += dayC; b.cDays++; }
+      if(dayF > 0) { b.fat += dayF; b.fDays++; }
+    });
+    const weekMacroKeys = Object.keys(weekMacroBuckets).sort();
+    if(weekMacroKeys.length >= 2) {
+      md += `### Weekly Macro Averages\n\n`;
+      md += `| Week | Avg Cal | Avg Protein | Avg Carbs | Avg Fat |\n`;
+      md += `|------|---------|-------------|-----------|----------|\n`;
+      weekMacroKeys.forEach(k => {
+        const b = weekMacroBuckets[k];
+        const wCal = Math.round(b.cal / b.days);
+        const wP = b.pDays > 0 ? Math.round(b.protein / b.pDays) + 'g' : '—';
+        const wC = b.cDays > 0 ? Math.round(b.carbs / b.cDays) + 'g' : '—';
+        const wF = b.fDays > 0 ? Math.round(b.fat / b.fDays) + 'g' : '—';
+        md += `| ${b.monStr.slice(5)} to ${b.sunStr.slice(5)} | ${wCal} cal | ${wP} | ${wC} | ${wF} |\n`;
+      });
+      md += `\n`;
+      md += `*Targets: ${targetP}g protein, ${targetC}g carbs, ${targetF}g fat per eating day.*\n\n`;
+    }
+    md += `---\n\n`;
   }
 
   // ═══ 7. WEIGHT TREND — WEEKLY AVERAGES + FULL LOG ═══
