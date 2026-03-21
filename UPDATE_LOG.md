@@ -4,6 +4,18 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 2.9.0 — 2026-03-21
+
+**Scope:** Minor (radar chart bulk support + 4 fixes)
+**Banner:** "Radar chart now works for bulk plans — weight trend, goal progress, and NIGHT checklist group gets its own color."
+
+- **Fix: radar chart weight trend broken for bulk plans** — Weight trend axis was hardcoded to score weight loss as good. On bulk plans, gaining weight scored 0-17 (terrible) instead of 75-100 (on track). Now detects plan direction via `isBulkRadar` and inverts the scoring: gaining weight on bulk = good, losing weight on bulk = bad.
+- **Fix: radar chart goal progress missing for bulk plans** — Goal progress axis calculated `totalDrop = start - target` which is negative for bulk (target > start), failing the `> 0` guard and leaving the axis as null/missing. Now calculates bidirectionally: `totalChange = target - start` for bulk, `start - target` for cut.
+- **Fix: restore doesn't sync all custom dropdowns** — After backup restore, activity level and sex custom dropdowns showed stale values until manually changed. Now syncs `settingSex`/`sexSelectCustom` and `settingActivity`/`activitySelectCustom` alongside plan and risk dropdowns.
+- **Fix: NIGHT checklist group missing tag color** — NIGHT group items fell through to generic `tag-rules` (blue) styling. Added `tag-night` CSS class (indigo) and added NIGHT to the tag color ternary chain in both TODAY checklist and day modal renderers.
+
+---
+
 ## Version 2.8.2 — 2026-03-21
 
 **Scope:** Patch (bulk plan display fixes + cleanup)
