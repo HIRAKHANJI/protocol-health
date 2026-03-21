@@ -1,248 +1,160 @@
-# Implementation Plan: Default Cut / Default Bulk / Default Maintenance
+# Plan: Doctor-Ready Export Report (v2.8.0)
 
-## Overview
+## The Compliance Problem
 
-Add 3 new plans to Protocol Health. Each plan is a self-contained object in the `PLANS` constant, following the existing architecture. The research document provides all content — this plan covers the exact code changes.
+A doctor doesn't need to see "Wake & 500ml water immediately — checked 28/30 days". That's too granular. But just "Compliance: 87%" is useless — 87% compliance towards *what*?
 
----
+**Middle ground: Group-level compliance with weak spots.**
 
-## Critical Discovery: TODAY Tab Checklist is Hardcoded
+Instead of listing every checklist item, show compliance broken down by **group** (MORNING, EATING, EVENING, SUPPLEMENTS, FAST, NIGHT). Each group gets a percentage. Then show the **3 most-missed items** specifically — the weak spots a doctor would actually want to discuss.
 
-The TODAY tab's checklist items are **hardcoded HTML** (lines 588–630). Only the sub-text is updated dynamically from the plan object. The day modal (MONTHS tab) correctly generates its checklist from `plan.checklistNormal` / `plan.checklistFast`.
-
-This means: if the new plans have different checklist items (different IDs, different counts, different labels), the TODAY tab will show the wrong items.
-
-**The research doc specifies different checklists per plan** (Section 5.3), so the TODAY tab checklist **must be made dynamic**.
+This tells a doctor: "Patient followed eating rules 72% of the time — most commonly broke calorie ceiling and skipped the 6PM cutoff."
 
 ---
 
-## Change List (in order)
+## Changes
 
-### 1. Make TODAY Tab Checklist Dynamic
+### 1. Settings: Add `name` field
 
-**What:** Replace the hardcoded checklist HTML (lines ~588–630) with a single container div. Add a `renderTodayChecklist()` function that builds checklist HTML from `getActivePlan().checklistNormal` and `getActivePlan().checklistFast`.
+- Add `name: ''` to `getSettings()` defaults
+- Add a text input at the top of the settings panel (above plan selector): label "YOUR NAME", placeholder "Enter your name"
+- Save on settings confirm like all other fields
+- Report pulls `s.name` — if blank, omit the Name line
 
-**Why:** New plans have different items. This also makes future plan additions zero-effort for the checklist.
+### 2. Report: Patient Profile section (new, after header)
 
-**HTML change:**
-- Replace the MORNING, EATING, FAST, EVENING, NIGHT groups with:
-  ```html
-  <div id="todayChecklistContainer"></div>
-  <button class="reset-btn" onclick="resetToday()">↺ RESET TODAY'S CHECKLIST</button>
-  ```
+Placed right after the title/header block, before Summary. Pulls from settings + latest weight:
 
-**JS change — new function `renderTodayChecklist()`:**
-- Reads `getActivePlan()` to get `checklistNormal` and `checklistFast`
-- Reads `isFastDay(todayStr())` to pick which list
-- Groups items by `group` field
-- For each group: renders a `group-header` with the correct tag class + group items
-- Uses the same tag color mapping as `openDayModal()`: MORNING→tag-morning, EATING→tag-food, EVENING→tag-evening, FAST→tag-fast, NIGHT→tag-rules, else→tag-rules
-- Preserves existing `data-id` + `onclick="toggle(this)"` pattern
-- Updates `#todayChecklistContainer` innerHTML
-- Then calls `loadChecklist()` to restore check states
-- Preserves the `todayMorningSub`, `todayEveningSub`, `todayStretchSub` dynamic sub-text by finding items with IDs matching `m3`/`e2`/`e3` and injecting the plan's day-specific sub-text
+| Field | Source | Notes |
+|-------|--------|-------|
+| Name | `s.name` | Omit if blank |
+| Age | `s.age` | Omit if null |
+| Sex | `s.sex` | Capitalize first letter |
+| Height | `s.height` cm | Omit if null |
+| Current Weight | Latest weight entry in range | From filtered weights array |
+| BMI | `weight / (height/100)²` | Only if both height and weight exist |
 
-**Integration:**
-- Called from `updateTodayTab()` (replaces the mSub/eSub/stSub assignments)
-- Called from `updateFastUI()` (when fast day toggles, re-render the checklist)
-- Called on `PLAN_CHANGED` dispatch
+Rendered as a simple key-value list (not a table — too clinical for a profile block).
 
-**`updateFastUI()` change:**
-- Instead of toggling `foodGroup`/`fastGroup` display, it calls `renderTodayChecklist()` which handles the fast/normal switch internally
+### 3. Report: Active Protocol section (new, after Patient Profile)
 
-### 2. Add 3 Plan Objects to `PLANS`
+Gives the doctor context on what the user is doing. Pulls from plan object + settings:
 
-Add `PLANS.cut`, `PLANS.bulk`, `PLANS.maintenance` after `PLANS.agro` (around line 2340).
+| Field | Source |
+|-------|--------|
+| Plan Name | `plan.name` |
+| Description | `plan.subtitle` |
+| TDEE | `plan.tdee` or `s.tdee` |
+| Calorie Ceiling | `s.calories` |
+| Fasting Schedule | `plan.fastDaysPerWeek` + day names from `plan.fastDaysDow` |
+| Light Day Schedule | `plan.lightDaysPerWeek` + day names (if applicable) |
+| Exercise Burn | `s.exerciseBurn` cal/day (if set) |
 
-Each plan object follows the exact structure documented in CLAUDE.md Section 4. Content comes from the research document.
+Rendered as a markdown table.
 
-#### PLANS.cut (Default Cut)
+### 4. Report: Replace flat "Compliance: X%" with Group-Level Breakdown
+
+**New section: "Protocol Compliance"** replaces the old compliance column.
+
+For each group that appears in the active plan's checklists (MORNING, EATING, EVENING, SUPPLEMENTS, FAST, LIGHT, NIGHT), compute:
+- Total possible ticks across all days in range for items in that group
+- Actual ticks completed
+- Percentage
+
+Rendered as a table:
+
 ```
-name: 'DEFAULT CUT'
-badge: 'DEFAULT CUT'
-badgeClass: 'cut'
-subtitle: 'Fat loss · Muscle preservation · Flexible deficit'
-bannerColor: '#4ecdc4'  (teal)
-bannerBg: 'rgba(78,205,196,0.07)'
-bannerBorder: 'rgba(78,205,196,0.35)'
-tdee: 2400
-fastDaysPerWeek: 0
-fastDaysDow: []
-weekIcons: {0:'🚶',1:'💪',2:'🦵',3:'🚶',4:'💪',5:'🦵',6:'💪'}
-checklistNormal: [items from research doc Section 5.3 — Cut column]
-checklistFast: [same generic fast checklist as default/agro]
-workoutContent(): 6 workout cards from research doc Section 1.4
-nutritionContent(s): macro grid + 80/20 principle + food guidelines from Section 1.3
-rulesContent(s): eating rules + training rules from research doc
-```
-
-#### PLANS.bulk (Default Bulk)
-```
-name: 'DEFAULT BULK'
-badge: 'DEFAULT BULK'
-badgeClass: 'bulk'
-subtitle: 'Muscle growth · Controlled surplus · Clean bulk'
-bannerColor: '#f7dc6f'  (gold)
-bannerBg: 'rgba(247,220,111,0.07)'
-bannerBorder: 'rgba(247,220,111,0.35)'
-tdee: 2400
-fastDaysPerWeek: 0
-fastDaysDow: []
-weekIcons: {0:'🚶',1:'💪',2:'💪',3:'🚶',4:'🦵',5:'💪',6:'🤸'}
-checklistNormal: [items from research doc Section 5.3 — Bulk column]
-checklistFast: [same generic fast checklist]
-workoutContent(): 6 workout cards from research doc Section 2.4
-nutritionContent(s): macro grid + surplus strategy + meal examples from Section 2.3
-rulesContent(s): bulking rules from research doc
+| Group | Completion | Rate |
+|-------|-----------|------|
+| MORNING | 112 / 120 | 93% |
+| EATING | 108 / 150 | 72% |
+| EVENING | 85 / 90 | 94% |
+| SUPPLEMENTS | 45 / 60 | 75% |
 ```
 
-#### PLANS.maintenance (Default Maintenance)
+Then: **"Weak Spots"** — the 3 individual checklist items with the lowest completion rate (minimum 5 data points to avoid noise). Shown as a short list:
+
 ```
-name: 'DEFAULT MAINTENANCE'
-badge: 'DEFAULT MAINTENANCE'
-badgeClass: 'maint'
-subtitle: 'Sustain composition · Build habits · Flexible for life'
-bannerColor: '#82e0aa'  (soft green)
-bannerBg: 'rgba(130,224,170,0.07)'
-bannerBorder: 'rgba(130,224,170,0.35)'
-tdee: 2400
-fastDaysPerWeek: 0
-fastDaysDow: []
-weekIcons: {0:'🚶',1:'💪',2:'🚶',3:'💪',4:'🚶',5:'💪',6:'🤸'}
-checklistNormal: [items from research doc Section 5.3 — Maintenance column]
-checklistFast: [same generic fast checklist]
-workoutContent(): 4 workout cards from research doc Section 3.4
-nutritionContent(s): macro grid + equilibrium approach from Section 3.3
-rulesContent(s): maintenance rules from research doc
+- "Stayed under calorie ceiling" — completed 18/30 days (60%)
+- "Last meal before 6PM" — completed 20/30 days (67%)
+- "Morning supplements taken" — completed 22/30 days (73%)
 ```
 
-### 3. Add Badge CSS Classes
+This gives a doctor the signal without the noise.
 
-Add after the existing `.plan-badge.agro` rule (line 53):
+### 5. Report: Nutrition Overview (new section, after compliance)
 
-```css
-.plan-badge.cut { border-color:#4ecdc4; color:#4ecdc4; background:rgba(78,205,196,0.08); }
-.plan-badge.bulk { border-color:#f7dc6f; color:#f7dc6f; background:rgba(247,220,111,0.08); }
-.plan-badge.maint { border-color:#82e0aa; color:#82e0aa; background:rgba(130,224,170,0.08); }
+Computed from food log data in range:
+
+| Metric | Source |
+|-------|--------|
+| Avg daily intake (eating days) | Sum all food log calories on non-fast, non-light days, divide by count |
+| Calorie ceiling | `s.calories` |
+| Days over ceiling | Count of eating days where total > ceiling |
+| Days under ceiling | Count of eating days where total ≤ ceiling |
+| Avg protein (if macro data exists) | Average protein from food entries that have protein logged |
+
+Rendered as a table. Only shown if food log data exists in the range.
+
+### 6. Report: Weight Trend — Add Weekly Averages
+
+Keep the existing weight log table. Add a **Weekly Averages** sub-table above it:
+
+Group weight entries by ISO week, compute average per week. Show:
+
+```
+| Week | Avg Weight | Change |
+|------|-----------|--------|
+| Mar 10–16 | 104.2 kg | — |
+| Mar 17–23 | 103.5 kg | -0.7 kg |
 ```
 
-Add plan description CSS variants (after `.plan-description.agro-desc` on line 299):
+This is what a doctor actually wants to see — smoothed trend, not daily noise.
 
-```css
-.plan-description.cut-desc { border-color:rgba(78,205,196,0.3); background:rgba(78,205,196,0.05); color:#4ecdc4; }
-.plan-description.bulk-desc { border-color:rgba(247,220,111,0.3); background:rgba(247,220,111,0.05); color:#f7dc6f; }
-.plan-description.maint-desc { border-color:rgba(130,224,170,0.3); background:rgba(130,224,170,0.05); color:#82e0aa; }
-```
+### 7. Report: BMI at Start/End
 
-### 4. Fix `onPlanSelectChange()` Description Styling
+Add to the Summary table:
+- BMI (start of range) — computed from first weight in range + height
+- BMI (end of range) — computed from last weight in range + height
+- Only shown if height is set in settings
 
-Currently line 3610 hardcodes `agro-desc` for any plan with a `badgeClass`:
-```javascript
-desc.className = 'plan-description' + (plan.badgeClass ? ' agro-desc' : '');
-```
+### 8. Remove Target Weight from Report
 
-Change to use a `descClass` property from the plan object:
-```javascript
-desc.className = 'plan-description' + (plan.descClass ? ' ' + plan.descClass : '');
-```
+As requested — no `s.targetKg` anywhere in the report. The target may have been different during the selected range.
 
-Add `descClass` property to each plan:
-- `default`: `descClass: ''`
-- `agro`: `descClass: 'agro-desc'`
-- `cut`: `descClass: 'cut-desc'`
-- `bulk`: `descClass: 'bulk-desc'`
-- `maintenance`: `descClass: 'maint-desc'`
+### 9. Daily Compliance Table — Simplified
 
-### 5. Update `computeMacros()` for Plan-Specific Splits
+The existing daily compliance table stays but gets the day type column enhanced:
+- Instead of just "Normal/Fast/Light", show the completion percentage with a text indicator:
+  - 100% → "Full"
+  - 75-99% → "Good"
+  - 50-74% → "Partial"
+  - <50% → "Low"
 
-Currently `computeMacros()` uses hardcoded splits (50/30/20 base). The research doc specifies different base splits per plan:
-
-- Default / AGRO: 50% protein, 30% carbs, 20% fat (unchanged)
-- Cut: 50% protein, 30% carbs, 20% fat (same as default)
-- Bulk: 30% protein, 50% carbs, 20% fat
-- Maintenance: 35% protein, 45% carbs, 20% fat
-
-**Change:** Add a `macroSplit` property to each plan object:
-```javascript
-macroSplit: { base: [50,30,20], rest: [58,22,20], preFast: [46,34,20], stall: [56,24,20], satiety: [58,22,20] }
-```
-
-Modify `computeMacros()` to read splits from `plan.macroSplit` instead of hardcoded values. Fall back to current hardcoded splits if the property doesn't exist (backward compat for default/agro).
-
-Also add plan-specific protein floors:
-- Add `proteinFloorMultiplier` to plan: Cut = 1.6, Bulk = 1.4, Maintenance = 1.2, Default/AGRO = 1.3
-
-### 6. Add Plan Selector Options (Settings HTML)
-
-Add 3 new options to both the native select and custom dropdown (around lines 762-777):
-
-**Native select:**
-```html
-<option value="cut">DEFAULT CUT</option>
-<option value="bulk">DEFAULT BULK</option>
-<option value="maintenance">DEFAULT MAINTENANCE</option>
-```
-
-**Custom dropdown:**
-```html
-<div class="custom-select-option" data-value="cut" onclick="selectCustomOption('planSelectCustom','planSelect',this)">DEFAULT CUT</div>
-<div class="custom-select-option" data-value="bulk" onclick="selectCustomOption('planSelectCustom','planSelect',this)">DEFAULT BULK</div>
-<div class="custom-select-option" data-value="maintenance" onclick="selectCustomOption('planSelectCustom','planSelect',this)">DEFAULT MAINTENANCE</div>
-```
-
-Order: DEFAULT PROTOCOL → DEFAULT CUT → DEFAULT BULK → DEFAULT MAINTENANCE → AGRO CUT CALISTHENICS
-
-### 7. Bump APP_VERSION
-
-```javascript
-const APP_VERSION = '1.9.0';
-const APP_VERSION_MSG = 'New plans: Default Cut, Default Bulk, Default Maintenance.';
-```
-
-Minor version bump — 3 new features (plans) + dynamic checklist system.
+This keeps the per-day detail available without needing a separate section.
 
 ---
 
-## What Does NOT Change
+## Section Order in Generated Report
 
-- **Tab structure** — same 6 tabs
-- **Storage keys** — no new SK keys needed
-- **Weight tracking** — completely independent of plans
-- **Calendar logic** — reads checklist items from plan object (already dynamic in day modal)
-- **Schedule system** — reads `fastDaysPerWeek` / `fastDaysDow` from plan (already dynamic)
-- **Goal calculator** — reads `tdee` / `fastDaysPerWeek` from plan (already dynamic)
-- **Backup/restore** — no schema changes
-- **Service worker** — no CACHE_NAME bump (feature branch, not merging to main)
-- **EXERCISE_PROGRESSIONS** — same progression ladders shared across all plans
-- **Existing plans** — DEFAULT PROTOCOL and AGRO CUT unchanged in behavior
-
----
-
-## Risk Assessment
-
-| Risk | Mitigation |
-|------|-----------|
-| Dynamic checklist breaks TODAY tab toggle/save | Preserve exact same `data-id` + `onclick="toggle(this)"` pattern. `loadChecklist()` operates on `.check-item` class, not specific IDs. |
-| Calendar day modal breaks | Already dynamic — reads from plan object. No change needed. |
-| Check state lost on plan switch | Checks are stored by item ID in dayLogs. Different plans have different IDs. Old IDs remain in storage but are ignored by the new plan's checklist — no data loss. |
-| computeMacros signal logic breaks | Fall back to current hardcoded splits if plan has no `macroSplit` property. Existing plans unaffected. |
-| Progress bar breaks | `updateProgress()` counts `.check-item` elements — works regardless of how many items exist. |
+1. **Title** — "Protocol Health — Progress Report"
+2. **Patient Profile** — name, age, sex, height, current weight, BMI
+3. **Active Protocol** — plan name, TDEE, calories, fasting schedule
+4. **Summary** — weight change, avg rate, days, BMI start/end, fast day count
+5. **Protocol Compliance** — group-level breakdown table + weak spots
+6. **Nutrition Overview** — avg intake, ceiling adherence, protein avg (if food data)
+7. **Weight Trend** — weekly averages table + full weight log table
+8. **Daily Log** — per-day compliance table (simplified)
+9. **Food Log** — per-day food entries with macros
+10. **Notes** — dated notes with blockquotes
 
 ---
 
-## File Changes Summary
+## Files Changed
 
-| File | Changes |
-|------|---------|
-| `app.html` | CSS: 6 new rules (badges + desc). HTML: replace hardcoded checklist with container + add 6 dropdown options. JS: new `renderTodayChecklist()`, modify `updateTodayTab()`, modify `updateFastUI()`, modify `computeMacros()`, fix `onPlanSelectChange()`, add 3 plan objects, bump APP_VERSION. |
+- `app.html` — settings defaults, settings UI, generateExport(), report sections
+- `UPDATE_LOG.md` — version entry
 
-Single file. No new files created.
+## Version
 
----
-
-## Estimated Scope
-
-- ~50 lines CSS
-- ~40 lines HTML changes (remove hardcoded checklist, add dropdown options)
-- ~600-800 lines JS (3 plan objects with workout/nutrition/rules content + renderTodayChecklist + computeMacros changes)
-- Total net: ~700-900 lines added to the file
+- `2.7.0` → `2.8.0` (minor — new feature: doctor-ready report + name setting)
