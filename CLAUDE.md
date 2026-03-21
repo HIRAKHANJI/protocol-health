@@ -517,6 +517,8 @@ const APP_VERSION_MSG = 'Description of changes.';    // ← short description o
 
 > **Non-Negotiable:** Every commit that changes `app.html` must include an `APP_VERSION` bump according to the thresholds above. Never skip this — the version bump is part of the change, not a separate step. Accumulate changes within a session and apply the appropriate bump level (patch/minor/major) based on the total scope of changes in that commit.
 
+> **Non-Negotiable:** When `APP_VERSION` is bumped, also update the version in the hero badge in `index.html` (`<div class="hero-badge">PROGRESSIVE WEB APP — vX.Y.Z — ZERO DEPENDENCIES</div>`) to match. The landing page must always reflect the current app version.
+
 ### Version Rollover Rule
 
 > **When the minor version reaches 10 (e.g. `X.10.Z`), the next minor bump rolls over to the next major version.** Example: after `1.10.0`, the next minor bump becomes `2.0.0` (not `1.11.0` — that is invalid). Patch bumps within `.10.Z` are fine (e.g. `1.10.1` is valid). Only the next *minor* bump triggers the rollover. Nothing above `.10.Z` should ever exist.
