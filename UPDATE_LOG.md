@@ -4,6 +4,16 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 3.0.2 — 2026-03-21
+
+**Scope:** Patch (bug fix from codebase scan)
+**Banner:** No banner (patch).
+
+- **Fix: backup restore breaks activity level dropdown** — `restoreData()` referenced element ID `settingActivity` instead of `settingActivityLevel` (lines 5634, 5639). After restoring a backup, the activity level dropdown was not populated and TDEE calculations would use the wrong multiplier.
+- **Fix: stale version in CLAUDE.md code example** — The "How to Bump" example showed `APP_VERSION = '2.8.1'` instead of the current version.
+
+---
+
 ## Version 3.0.1 — 2026-03-21
 
 **Scope:** Patch (bug fixes from codebase scan)
