@@ -1201,8 +1201,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '3.2.0';
-const APP_VERSION_MSG = 'Customisable daily timing — set wake time, last meal, evening session, and eating window in Settings. All plans adapt automatically.';
+const APP_VERSION = '3.2.1';
+const APP_VERSION_MSG = 'Bug fixes — XSS hardening, schedule cleanup, goal calculator improvements, and timing edge case fixes.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -1270,15 +1270,15 @@ function resolveItemTimes(id, label, sub, s) {
   // wf2: "Electrolyte tablet mid-morning (9-10am)" → relative to wake time
   if(id === 'wf2' && wakeRaw && /\d{1,2}(-\d{1,2})?(am|pm)/i.test(label)) {
     const [wh] = wakeRaw.split(':').map(Number);
-    const midH = wh + 4; // ~4 hours after wake
-    const midEnd = midH + 1;
+    const midH = (wh + 4) % 24; // ~4 hours after wake
+    const midEnd = (midH + 1) % 24;
     label = label.replace(/\(\d{1,2}(-\d{1,2})?(am|pm)\)/i, '(' + formatTime(String(midH).padStart(2,'0')+':00') + '–' + formatTime(String(midEnd).padStart(2,'0')+':00') + ')');
   }
   // wf3: "pre-evening (20 min before training)" → show actual time
   if(id === 'wf3' && evSession && /before training/i.test(label)) {
     const [eh, em] = evSession.split(':').map(Number);
     const preMin = em - 20 < 0 ? em + 40 : em - 20;
-    const preH = em - 20 < 0 ? eh - 1 : eh;
+    const preH = ((em - 20 < 0 ? eh - 1 : eh) + 24) % 24;
     const preTime = formatTime(String(preH).padStart(2,'0') + ':' + String(preMin).padStart(2,'0'));
     label = 'Electrolyte tablet pre-evening (~' + preTime + ')';
   }
@@ -1539,7 +1539,7 @@ function onFoodModalNameInput(input) {
     const matches = lib.filter(f => f.name.toLowerCase().includes(lower)).slice(0, 5);
     if(!matches.length) { sugEl.classList.remove('visible'); return; }
     sugEl.innerHTML = matches.map(f =>
-      `<div class="food-sug-item" onmousedown="selectFoodModalSuggestion('${esc(f.name).replace(/'/g,"\\'")}',${f.lastCalories},${f.lastProtein != null ? f.lastProtein : 'null'},${f.lastCarbs != null ? f.lastCarbs : 'null'},${f.lastFat != null ? f.lastFat : 'null'})">
+      `<div class="food-sug-item" onmousedown="selectFoodModalSuggestion('${esc(f.name).replace(/\\/g,'\\\\').replace(/'/g,"\\'")}',${f.lastCalories},${f.lastProtein != null ? f.lastProtein : 'null'},${f.lastCarbs != null ? f.lastCarbs : 'null'},${f.lastFat != null ? f.lastFat : 'null'})">
         <span>${esc(f.name)}</span><span class="food-sug-cal">${f.lastCalories} cal</span>
       </div>`
     ).join('');
@@ -1587,7 +1587,7 @@ function renderFoodModalEntries() {
     `<div class="food-entry">
       <div class="food-entry-info"><div class="food-entry-name">${esc(e.name)}</div>${e.notes ? `<div class="food-entry-notes">${esc(e.notes)}</div>` : ''}</div>
       <div class="food-entry-cal">${e.calories}</div>
-      <button class="food-entry-del" onclick="showConfirm('REMOVE','Remove ${esc(e.name).replace(/'/g,"\\'")}?',()=>{removeFoodEntry('${today}','${e.id}')},{yesLabel:'REMOVE',danger:true})">×</button>
+      <button class="food-entry-del" onclick="showConfirm('REMOVE','Remove ${esc(e.name).replace(/\\/g,'\\\\').replace(/'/g,"\\'")}?',()=>{removeFoodEntry('${today}','${e.id}')},{yesLabel:'REMOVE',danger:true})">×</button>
     </div>`
   ).join('');
   const s = getSettings();
@@ -2014,6 +2014,7 @@ const PLANS = {
   // ─────────────────────────────────────────────────────────────────────────
   default: {
     name: 'DEFAULT PROTOCOL',
+    goalMode: 'cut',
     tdee: 2600,
     fastDaysPerWeek: 3,
     badge: 'DEFAULT PROTOCOL',
@@ -2026,6 +2027,8 @@ const PLANS = {
     fastDaysDow: [0, 3, 6], // Sun/Wed/Sat
     lightDaysPerWeek: 0,
     lightDaysDow: [],
+    macroSplit: { base:[50,30,20], rest:[58,22,20], preFast:[46,34,20], stall:[56,24,20], satiety:[58,22,20] },
+    proteinFloorMultiplier: 1.3,
 
     // Default timing values — used when user hasn't set custom times in Settings
     defaultTimes: { wakeTime:'05:30', lastMealTime:'18:00', eveningSessionTime:'17:00', eatingWindowStart:'11:00' },
@@ -2209,6 +2212,7 @@ const PLANS = {
   // ─────────────────────────────────────────────────────────────────────────
   agro: {
     name: 'AGRO CUT CALISTHENICS',
+    goalMode: 'cut',
     tdee: 2600,
     fastDaysPerWeek: 3,
     badge: 'AGRO CUT CALISTHENICS',
@@ -2221,6 +2225,8 @@ const PLANS = {
     fastDaysDow: [0, 3, 6], // Sun/Wed/Sat
     lightDaysPerWeek: 0,
     lightDaysDow: [],
+    macroSplit: { base:[50,30,20], rest:[58,22,20], preFast:[46,34,20], stall:[56,24,20], satiety:[58,22,20] },
+    proteinFloorMultiplier: 1.3,
 
     defaultTimes: { wakeTime:'05:30', lastMealTime:'18:00', eveningSessionTime:'17:00', eatingWindowStart:'11:00' },
 
@@ -2501,8 +2507,8 @@ const PLANS = {
       ${(()=>{
         const _wk = getPlanTime(s,'wakeTime') || '05:30';
         const [_wh] = _wk.split(':').map(Number);
-        const _midH = _wh + 4;
-        const _midRange = formatTime(String(_midH).padStart(2,'0')+':00') + '-' + formatTime(String(_midH+1).padStart(2,'0')+':00');
+        const _midH = (_wh + 4) % 24;
+        const _midRange = formatTime(String(_midH).padStart(2,'0')+':00') + '-' + formatTime(String((_midH+1)%24).padStart(2,'0')+':00');
         return `<div class="rule-card">
         <div class="rule-num">FAST DAY PROTOCOL \u2014 SUN/WED/SAT</div>
         <div class="rule-text">Wake: 500ml water + salt \u00b7 ${_midRange}: electrolyte tab #1 (99mg K) \u00b7 Pre-training: 2\u00d7 MCT gels (2,000mg) \u00b7 During/post: 500ml water \u00b7 Mid-afternoon: electrolyte tab #2 \u00b7 Throughout: 3.5L total water \u00b7 Before bed: Magnesium Complex</div>
@@ -2516,7 +2522,7 @@ const PLANS = {
         const _ews = formatTime(getPlanTime(s,'eatingWindowStart') || '11:00');
         const _wk2 = getPlanTime(s,'wakeTime') || '05:30';
         const [_wh2] = _wk2.split(':').map(Number);
-        const _midR2 = formatTime(String(_wh2+4).padStart(2,'0')+':00');
+        const _midR2 = formatTime(String((_wh2+4)%24).padStart(2,'0')+':00');
         return ruleCard('MORNING STACK (EATING DAYS)','Osteocare 2 tabs \u00b7 D3+K2 1 tab \u00b7 MCT 1 gel \u00b7 Zinc 50mg (EOD only: Sun/Tue/Thu/Sat)','Take with breakfast at ' + _ews + '. D3+K2 needs fat for absorption \u2014 meal provides it.','#82e0aa')
         + ruleCard('MORNING STACK (FAST DAYS)','D3+K2 1 tab (with MCT gel \u2014 fat carrier present) \u00b7 Zinc (Sun/Sat only) \u00b7 2 MCT gels pre-training','No Osteocare on fast days \u2014 calcium needs food for full absorption.','#82e0aa')
         + ruleCard('ZINC \u2014 EVERY OTHER DAY ONLY','Sun \u00b7 Tue \u00b7 Thu \u00b7 Sat. Never daily. 50mg/day exceeds NIH upper limit (40mg). Alternate-day = 28.6mg avg.','Daily dosing depletes copper \u2192 anemia risk.','#82e0aa')
@@ -2613,6 +2619,7 @@ const PLANS = {
 // Research: Morton et al. (2017), 80/20 adherence study, ISSN position stands.
 PLANS.cut = {
   name: 'DEFAULT CUT',
+  goalMode: 'cut',
   tdee: 2400,
   fastDaysPerWeek: 0,
   badge: 'DEFAULT CUT',
@@ -2848,6 +2855,7 @@ PLANS.cut = {
 // Research: Sports Medicine Open (2023), PureGym bulk research, ISSN position stands.
 PLANS.bulk = {
   name: 'DEFAULT BULK',
+  goalMode: 'bulk',
   tdee: 2400,
   fastDaysPerWeek: 0,
   lightDaysPerWeek: 2,
@@ -3103,6 +3111,7 @@ PLANS.bulk = {
 // Research: PMC (2019) long-term maintenance, progressive overload meta-analysis (2024).
 PLANS.maintenance = {
   name: 'DEFAULT MAINTENANCE',
+  goalMode: 'maintenance',
   tdee: 2400,
   fastDaysPerWeek: 0,
   lightDaysPerWeek: 1,
@@ -5001,9 +5010,9 @@ function calcDuration() {
     resultEl.classList.remove('visible'); schedBtn.classList.remove('visible'); schedBtnReal.style.display='none'; return;
   }
 
-  // Determine plan goal direction
+  // Determine plan goal direction — uses plan.goalMode if defined, falls back to key-based detection
   const plan = PLANS[planVal] || PLANS.default;
-  const planMode = planVal === 'bulk' ? 'bulk' : (planVal === 'maintenance' ? 'maintenance' : 'cut');
+  const planMode = plan.goalMode || (planVal === 'bulk' ? 'bulk' : (planVal === 'maintenance' ? 'maintenance' : 'cut'));
 
   // Hard rejects — plan-aware
   if(planMode === 'cut' && tgtKg >= curKg) {
@@ -5567,8 +5576,8 @@ function downloadScheduleHTML() {
   <div class="info-box"><div class="info-label">CALORIE CEILING</div><div class="info-val">${cal} cal/day</div></div>
   <div class="info-box"><div class="info-label">START WEIGHT</div><div class="info-val">${p.curKg} kg</div></div>
   <div class="info-box"><div class="info-label">TARGET WEIGHT</div><div class="info-val">${p.tgtKg} kg</div></div>
-  <div class="info-box"><div class="info-label">TDEE</div><div class="info-val">${plan.tdee || s.tdee || 2600} cal</div></div>
-  <div class="info-box"><div class="info-label">WEIGHT TO LOSE</div><div class="info-val">${(p.curKg - p.tgtKg).toFixed(1)} kg</div></div>
+  <div class="info-box"><div class="info-label">TDEE</div><div class="info-val">${s.tdee || plan.tdee || 2600} cal</div></div>
+  <div class="info-box"><div class="info-label">${p.tgtKg > p.curKg ? 'WEIGHT TO GAIN' : 'WEIGHT TO LOSE'}</div><div class="info-val">${Math.abs(p.curKg - p.tgtKg).toFixed(1)} kg</div></div>
 </div>
 
 ${s.name ? `<div class="info-grid" style="grid-template-columns:1fr 1fr 1fr"><div class="info-box"><div class="info-label">NAME</div><div class="info-val">${esc(s.name)}</div></div><div class="info-box"><div class="info-label">AGE</div><div class="info-val">${s.age || '—'}</div></div><div class="info-box"><div class="info-label">HEIGHT</div><div class="info-val">${s.height ? s.height + ' cm' : '—'}</div></div></div>` : ''}
@@ -5802,7 +5811,7 @@ function calcAdjust() {
   }
 
   const remainKg   = isBulkAdj ? Math.max(0, newTarget - curW) : Math.max(0, curW - newTarget);
-  const remainDays = useRate > 0 ? Math.ceil(remainKg / useRate) : 999;
+  const remainDays = remainKg === 0 ? 0 : (useRate > 0 ? Math.min(730, Math.ceil(remainKg / useRate)) : 730);
   const kgPerWeek  = parseFloat((useRate * 7).toFixed(2));
 
   const endD = new Date();
@@ -5895,7 +5904,7 @@ function confirmAdjust() {
 }
 
 function endScheduleToday() {
-  showConfirm('END SCHEDULE TODAY', 'Mark today as the final day? All past progress is kept.', () => {
+  showConfirm('END SCHEDULE TODAY', 'Mark today as the final day? Future auto-set fast and light eating days will be cleared. All past progress is kept.', () => {
     const sched = gs(SK.schedule);
     if(!sched) return;
     const today = todayStr();
@@ -5903,6 +5912,13 @@ function endScheduleToday() {
     sched.totalDays= sched.days.length;
     sched.endDate  = today;
     ss(SK.schedule, sched);
+    // Clear future auto-set fast/light days (keep today's)
+    const fd = gs(SK.fastDays)||{};
+    Object.keys(fd).forEach(d=>{ if(d > today) delete fd[d]; });
+    ss(SK.fastDays, fd);
+    const ld = gs(SK.lightDays)||{};
+    Object.keys(ld).forEach(d=>{ if(d > today) delete ld[d]; });
+    ss(SK.lightDays, ld);
     dispatch('SCHEDULE_ENDED');
     closeManageSchedule();
     setTimeout(()=>renderCalendar(),50);
@@ -5916,10 +5932,10 @@ function removeSchedule() {
     () => {
       const today = todayStr();
       const fd = gs(SK.fastDays)||{};
-      Object.keys(fd).forEach(d=>{ if(d >= today) delete fd[d]; });
+      Object.keys(fd).forEach(d=>{ if(d > today) delete fd[d]; });
       ss(SK.fastDays, fd);
       const ld = gs(SK.lightDays)||{};
-      Object.keys(ld).forEach(d=>{ if(d >= today) delete ld[d]; });
+      Object.keys(ld).forEach(d=>{ if(d > today) delete ld[d]; });
       ss(SK.lightDays, ld);
       ss(SK.schedule, null);
       dispatch('SCHEDULE_REMOVED');
@@ -6056,11 +6072,13 @@ function restoreData(event) {
   reader.readAsText(file);
 }
 
+let _backupStatusTimer = null;
 function showBackupStatus(msg, color) {
   const el = document.getElementById('backupStatus');
   el.textContent = msg;
   el.style.cssText = `display:block;margin-top:10px;padding:10px 13px;border-radius:8px;font-family:'DM Mono',monospace;font-size:0.7rem;line-height:1.6;background:var(--surface);border:1px solid ${color};color:${color}`;
-  setTimeout(() => { el.style.display = 'none'; }, 6000);
+  clearTimeout(_backupStatusTimer);
+  _backupStatusTimer = setTimeout(() => { el.style.display = 'none'; }, 6000);
 }
 
 // ─── EXPORT — RANGE BASED ────────────────────────────────────────────────────

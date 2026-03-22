@@ -4,6 +4,24 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 3.2.1 — 2026-03-22
+
+**Scope:** Patch (bug fixes from full codebase scan)
+**Banner:** No banner (patch).
+
+- **XSS fix: food name backslash escaping** — food suggestion and delete button inline handlers now escape backslashes before single quotes, preventing JS syntax errors from food names containing backslash characters.
+- **Time overflow fix** — `resolveItemTimes` and AGRO nutritionContent now use modulo 24 arithmetic, preventing invalid times when wake time is set very late (e.g. 20:00 producing 24:00+).
+- **Schedule download TDEE** — now correctly prefers user-configured TDEE over plan default TDEE. Also fixed "WEIGHT TO LOSE" label to show "WEIGHT TO GAIN" for bulk plans with correct absolute value.
+- **removeSchedule preserves today** — changed `>=` to `>` so removing a schedule no longer clears today's fast/light day status mid-day, which could swap the checklist from fast to normal and lose checked items.
+- **endScheduleToday clears future days** — ending a schedule now also clears future auto-set fast and light eating days, matching removeSchedule behavior. Previously these orphaned future day markers persisted.
+- **Backup status timeout race** — `showBackupStatus` now clears the previous timeout before setting a new one, preventing an earlier timeout from hiding a newer message prematurely.
+- **calcAdjust edge cases** — capped maximum remaining days at 730 (2 years) instead of 999 to prevent oversized localStorage arrays. Also returns 0 remaining days when target is already reached instead of incorrectly showing 730/999.
+- **Explicit macroSplit on all plans** — DEFAULT and AGRO plans now declare their own `macroSplit` and `proteinFloorMultiplier` fields explicitly instead of relying on hardcoded fallbacks in `computeMacros()`. All 5 plans are now truly self-contained.
+- **goalMode field on all plans** — each plan now declares `goalMode: 'cut'|'bulk'|'maintenance'` so the goal calculator reads the plan object instead of hardcoding mode detection by plan key name. Future custom plans will work correctly without code changes.
+- **CLAUDE.md version sync** — updated all stale `3.0.2` version references to match current `3.2.1`.
+
+---
+
 ## Version 3.2.0 — 2026-03-22
 
 **Scope:** Minor (new feature)
