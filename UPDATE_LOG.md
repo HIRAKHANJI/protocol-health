@@ -4,6 +4,23 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 3.2.0 — 2026-03-22
+
+**Scope:** Minor (new feature)
+**Banner:** "Customisable daily timing — set wake time, last meal, evening session, and eating window in Settings. All plans adapt automatically."
+
+- **Customisable daily timing** — new "Daily Timing" section in Settings with 4 time fields: wake time, last meal by, evening session, and eating window start. Each plan defines its own defaults; user overrides persist across plan switches.
+- **`formatTime()` utility** — converts 24h `"HH:MM"` to display format like `"5:30AM"` or `"6PM"`. Used across checklist, nutrition, and rules rendering.
+- **`getPlanTime()` / `getEatingWindow()` helpers** — resolve user override → plan default → null fallback chain for all time lookups.
+- **`resolveItemTimes()` function** — dynamically replaces hardcoded time references in checklist item labels at render time. Affects: "Last meal before 6PM" (all plans with the item), "Electrolyte tablet mid-morning (9-10am)" (agro fast days), "Electrolyte tablet pre-evening" (agro fast days).
+- **Dynamic group headers** — MORNING and EVENING group headers on TODAY tab now show "From 5:30AM" / "From 5PM" based on configured times. EATING group shows calorie ceiling + eating window.
+- **Nutrition/rules content updated** — eating window, last meal time, supplement timing, and fast day protocol in DEFAULT and AGRO plans now use dynamic times from settings instead of hardcoded strings.
+- **Day modal updated** — past-day checklist items in the calendar modal also resolve dynamic times.
+- **Eating window start visibility** — the "Eating window opens" field is only shown in Settings when the active plan has fasting days (fastDaysPerWeek > 0).
+- **Plan defaults**: DEFAULT/AGRO: wake 5:30AM, window 11AM, last meal 6PM, session 5PM. CUT/BULK/MAINTENANCE: wake 7AM, last meal 8PM, session 6PM, no eating window.
+
+---
+
 ## Version 3.1.1 — 2026-03-22
 
 **Scope:** Patch (codebase scan fixes)
