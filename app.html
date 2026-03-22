@@ -1176,7 +1176,7 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '3.1.0';
+const APP_VERSION = '3.1.1';
 const APP_VERSION_MSG = 'Download Schedule — export your full schedule as a printable HTML document with daily tasks, workouts, nutrition, and rules.';
 
 // Static lookup arrays used throughout rendering
@@ -3473,7 +3473,7 @@ function autoSetPlanFastDays(startDateStr, totalDays) {
     if(fastDow.includes(d.getDay())) fd[dateToStr(d)] = true;
   }
   ss(SK.fastDays, fd);
-  updateFastUI();
+  dispatch('FAST_DAY_TOGGLED');
 }
 
 // autoSetPlanLightDays: when a schedule is created for a bulk/maintenance plan,
@@ -3489,7 +3489,7 @@ function autoSetPlanLightDays(startDateStr, totalDays) {
     if(lightDow.includes(d.getDay())) ld[dateToStr(d)] = true;
   }
   ss(SK.lightDays, ld);
-  updateFastUI();
+  dispatch('FAST_DAY_TOGGLED');
 }
 
 // updateFastUI: shows/hides the fast/light day banners and re-renders the checklist
@@ -5432,7 +5432,7 @@ function downloadScheduleHTML() {
   <div class="info-box"><div class="info-label">WEIGHT TO LOSE</div><div class="info-val">${(p.curKg - p.tgtKg).toFixed(1)} kg</div></div>
 </div>
 
-${s.name ? `<div class="info-grid" style="grid-template-columns:1fr 1fr 1fr"><div class="info-box"><div class="info-label">NAME</div><div class="info-val">${s.name}</div></div><div class="info-box"><div class="info-label">AGE</div><div class="info-val">${s.age || '—'}</div></div><div class="info-box"><div class="info-label">HEIGHT</div><div class="info-val">${s.height ? s.height + ' cm' : '—'}</div></div></div>` : ''}
+${s.name ? `<div class="info-grid" style="grid-template-columns:1fr 1fr 1fr"><div class="info-box"><div class="info-label">NAME</div><div class="info-val">${esc(s.name)}</div></div><div class="info-box"><div class="info-label">AGE</div><div class="info-val">${s.age || '—'}</div></div><div class="info-box"><div class="info-label">HEIGHT</div><div class="info-val">${s.height ? s.height + ' cm' : '—'}</div></div></div>` : ''}
 
 ${plan.fastDaysPerWeek > 0 ? `<div style="margin:12px 0;padding:10px 14px;background:rgba(179,136,255,0.08);border:1px solid rgba(179,136,255,0.2);border-radius:8px;font-size:12px;color:#b388ff"><strong>WATER FAST DAYS:</strong> ${fastDow.map(d => dayNames[d]).join(', ')} (${plan.fastDaysPerWeek}/week)</div>` : ''}
 ${plan.lightDaysPerWeek > 0 ? `<div style="margin:12px 0;padding:10px 14px;background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.2);border-radius:8px;font-size:12px;color:#f5a623"><strong>LIGHT EATING DAYS:</strong> ${lightDow.map(d => dayNames[d]).join(', ')} (${plan.lightDaysPerWeek}/week)</div>` : ''}
@@ -5881,10 +5881,12 @@ function restoreData(event) {
         'RESTORE BACKUP',
         `This will overwrite ALL current app data with the backup from ${exported}. This cannot be undone.`,
         () => {
-          // Write all keys back to localStorage
+          // Write all keys back to localStorage, track unknown keys
+          const skippedKeys = [];
           Object.entries(backup.data).forEach(([key, val]) => {
             const storageKey = SK[key];
             if(storageKey) ss(storageKey, val);
+            else skippedKeys.push(key);
           });
           // Full UI refresh via dispatcher
           const s = getSettings();
@@ -5903,7 +5905,8 @@ function restoreData(event) {
           dispatch('FOOD_LOGGED');
           dispatch('FAST_DAY_TOGGLED');
           if(typeof EXERCISE_PROGRESSIONS !== 'undefined') dispatch('EXERCISE_LEVEL_CHANGED');
-          showBackupStatus(`✓ Restored ${keys.length} data sets from backup (${exported}). All data reloaded.`, 'var(--green)');
+          const skippedNote = skippedKeys.length ? ` (${skippedKeys.length} key${skippedKeys.length>1?'s':''} from a newer app version could not be restored: ${skippedKeys.join(', ')})` : '';
+          showBackupStatus(`✓ Restored ${keys.length} data sets from backup (${exported}). All data reloaded.${skippedNote}`, 'var(--green)');
         },
         { yesLabel: 'RESTORE', danger: true }
       );

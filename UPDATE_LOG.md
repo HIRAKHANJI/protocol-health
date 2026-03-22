@@ -4,6 +4,17 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 3.1.1 — 2026-03-22
+
+**Scope:** Patch (codebase scan fixes)
+**Banner:** No banner (patch).
+
+- **Fix: escape user name in schedule download** — `downloadScheduleHTML()` now uses `esc(s.name)` to sanitize the user's name before injecting into generated HTML, preventing potential HTML injection.
+- **Fix: restore warns about unknown backup keys** — `restoreData()` now tracks keys present in the backup but missing from the current SK object and appends a note to the success message listing them, so the user knows if data from a newer app version was skipped.
+- **Fix: autoSetPlanFastDays/LightDays now dispatch** — Both functions now end with `dispatch('FAST_DAY_TOGGLED')` instead of calling `updateFastUI()` directly, following the architectural rule that all data writes end with a dispatch event.
+
+---
+
 ## Version 3.1.0 — 2026-03-22
 
 **Scope:** Minor (new feature)
