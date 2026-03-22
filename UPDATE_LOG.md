@@ -4,6 +4,23 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 3.1.0 — 2026-03-22
+
+**Scope:** Minor (new feature)
+**Banner:** "Download Schedule — export your full schedule as a printable HTML document with daily tasks, workouts, nutrition, and rules."
+
+- **New: Download Schedule as HTML** — When pressing "Add to Schedule" or "Add Realistic to Schedule" in the goal calculator, a choice popup now appears with two options: "ADD TO APP" (existing behavior) and "DOWNLOAD SCHEDULE". The download generates a standalone HTML document containing:
+  - Schedule overview (start/end dates, duration, calorie ceiling, start/target weight, TDEE, user details)
+  - Full weekly routine (Monday–Sunday) with day type labels (eating/fast/light), checklist items grouped by category, and morning/evening workout sub-text
+  - Complete workout cards with all exercises, sets, and cooldown stretches
+  - Nutrition section with macro targets, eating rules, supplement protocol, food sources
+  - All plan rules (eating, training, discipline)
+  - Dark theme styling matching the app, with print-friendly light theme via `@media print`
+- The document can be opened in any browser, printed to PDF, or shared with a doctor/trainer.
+- Includes version 3.0.3 bug fix: schedule removal now clears today's fast/light day marker.
+
+---
+
 ## Version 3.0.3 — 2026-03-21
 
 **Scope:** Patch (bug fix)
