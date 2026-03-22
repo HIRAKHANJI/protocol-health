@@ -2500,8 +2500,6 @@ const PLANS = {
 
       ${(()=>{
         const _wk = getPlanTime(s,'wakeTime') || '05:30';
-        const _ev = getPlanTime(s,'eveningSessionTime') || '17:00';
-        const _ew = formatTime(getPlanTime(s,'eatingWindowStart') || '11:00');
         const [_wh] = _wk.split(':').map(Number);
         const _midH = _wh + 4;
         const _midRange = formatTime(String(_midH).padStart(2,'0')+':00') + '-' + formatTime(String(_midH+1).padStart(2,'0')+':00');
