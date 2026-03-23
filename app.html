@@ -1201,7 +1201,7 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '3.4.0';
+const APP_VERSION = '3.4.1';
 const APP_VERSION_MSG = 'Live calorie tracking on Nutrition tab, food log history on Track tab, radar scoring fix.';
 
 // Static lookup arrays used throughout rendering
@@ -4109,16 +4109,47 @@ function computeRadarMetrics(days) {
   const cal = s.calories || 1500;
   const now = new Date(); now.setHours(0,0,0,0);
 
-  // Collect date strings for the window (looking back from yesterday for behavioral, today inclusive for weight)
+  // Establish anchor — earliest date user actually started tracking
+  // All behavioral axes only score days from anchor onward
+  const sched = gs(SK.schedule) || {};
+  let anchorDate = null;
+  if (sched.startDate) anchorDate = sched.startDate;
+  if (weights.length > 0) {
+    const oldestWeight = weights[weights.length - 1].date;
+    if (!anchorDate || oldestWeight < anchorDate) anchorDate = oldestWeight;
+  }
+  Object.entries(dayLogs).forEach(([ds, log]) => {
+    if (log && log.checks && Object.values(log.checks).some(Boolean)) {
+      if (!anchorDate || ds < anchorDate) anchorDate = ds;
+    }
+  });
+
+  // Collect date strings for the window
   const windowDates = [];
   for (let i = 0; i < days; i++) {
     const d = new Date(now); d.setDate(d.getDate() - i);
     windowDates.push(dateToStr(d));
   }
 
-  // 1. CHECKLIST COMPLIANCE — avg completion % across days with any log data
+  // Helper: is this date within the user's tracking period AND in the past (completed day)?
+  const isPastTracked = (ds) => {
+    if (anchorDate && ds < anchorDate) return false;
+    return strToDate(ds) < now; // strictly past — today is still in progress
+  };
+  // Helper: is this date within tracking period (including today)?
+  const isTracked = (ds) => {
+    if (anchorDate && ds < anchorDate) return false;
+    return strToDate(ds) <= now;
+  };
+
+  // Count how many completed (past) tracked days we have — used for minimum-data gates
+  const completedDays = windowDates.filter(isPastTracked).length;
+
+  // 1. CHECKLIST COMPLIANCE — avg completion % across tracked days with any log data
+  // On day 1 with only today (in-progress), show today's live score
   let checkTotal = 0, checkCount = 0;
   windowDates.forEach(ds => {
+    if (!isTracked(ds)) return;
     const log = dayLogs[ds];
     if (log && log.checks) {
       const vals = Object.values(log.checks);
@@ -4130,62 +4161,71 @@ function computeRadarMetrics(days) {
   });
   const checklist = checkCount > 0 ? Math.round(checkTotal / checkCount) : null;
 
-  // 2. CALORIE DISCIPLINE — % of eating days at or under ceiling
-  // Count eating days without food data as non-compliant (missed logging = missed target)
-  // Only count past days (not today or future), and only after anchor date
-  let calUnder = 0, calTotal = 0;
+  // 2. CALORIE DISCIPLINE — % of completed eating days at or under ceiling
+  // Only scores past days (today excluded — day isn't over)
+  // Only counts days from anchor onward — don't penalise pre-start days
+  // Requires at least 1 completed eating day with food data to score
+  let calUnder = 0, calTotal = 0, calDataDays = 0;
   const _ldMap = gs(SK.lightDays)||{};
   windowDates.forEach(ds => {
+    if (!isPastTracked(ds)) return;
     if (fastDays[ds] || _ldMap[ds]) return; // skip fast/light days
-    if (strToDate(ds) >= now) return; // skip today and future — day isn't over yet
     calTotal++;
     const dc = getDayCalories(ds);
-    if (dc.hasData && dc.total <= cal) calUnder++;
-    // if !hasData, counts as a miss (calUnder not incremented)
+    if (dc.hasData) {
+      calDataDays++;
+      if (dc.total <= cal) calUnder++;
+    }
+    // days without food data: count as miss only if user has logged food on at least 1 day
   });
-  const calories = calTotal > 0 ? Math.round((calUnder / calTotal) * 100) : null;
+  // Gate: need at least 1 eating day with actual food data to produce a score
+  // Otherwise we'd just be measuring "did you log food" not "did you hit your ceiling"
+  const calories = (calTotal > 0 && calDataDays > 0) ? Math.round((calUnder / calTotal) * 100) : null;
 
   // 3. FASTING / LIGHT DAY ADHERENCE — % of scheduled fast or light days actually observed
   const lightDaysMap = gs(SK.lightDays)||{};
   const lightDow = plan.lightDaysDow || [];
   let fastScheduled = 0, fastCompleted = 0;
   windowDates.forEach(ds => {
+    if (!isPastTracked(ds) && !(isTracked(ds) && ds === todayStr())) return;
+    // Include today for fasting — you know by morning if it's a fast day
+    if (!isTracked(ds)) return;
     const dow = strToDate(ds).getDay();
-    if (strToDate(ds) <= now) {
-      if (plan.fastDaysDow.includes(dow)) {
-        fastScheduled++;
-        if (fastDays[ds]) {
-          const dc = getDayCalories(ds);
-          if (!dc.hasData || dc.total === 0) fastCompleted++;
-          else fastCompleted += 0.3;
-        }
-      } else if (lightDow.includes(dow)) {
-        fastScheduled++;
-        if (lightDaysMap[ds]) {
-          const dc = getDayCalories(ds);
-          const lightCeil = Math.round((s.tdee || 2600) * 0.6);
-          if (!dc.hasData || dc.total <= lightCeil) fastCompleted++;
-          else fastCompleted += 0.5; // partial credit if over light ceiling
-        }
+    if (plan.fastDaysDow.includes(dow)) {
+      fastScheduled++;
+      if (fastDays[ds]) {
+        const dc = getDayCalories(ds);
+        if (!dc.hasData || dc.total === 0) fastCompleted++;
+        else fastCompleted += 0.3;
+      }
+    } else if (lightDow.includes(dow)) {
+      fastScheduled++;
+      if (lightDaysMap[ds]) {
+        const dc = getDayCalories(ds);
+        const lightCeil = Math.round((s.tdee || 2600) * 0.6);
+        if (!dc.hasData || dc.total <= lightCeil) fastCompleted++;
+        else fastCompleted += 0.5;
       }
     }
   });
   const fasting = fastScheduled > 0 ? Math.round((fastCompleted / fastScheduled) * 100) : null;
 
-  // 4. WATER INTAKE — avg vs 3L target
+  // 4. WATER INTAKE — avg vs 3L target across tracked days
+  // Gate: need at least 2 days of water data for a meaningful average
+  // With only 1 day, show it but flag it in legend as provisional
   let waterSum = 0, waterCount = 0;
   windowDates.forEach(ds => {
+    if (!isTracked(ds)) return;
     const log = dayLogs[ds];
     if (log && log.water && log.water > 0) {
       waterSum += log.water;
       waterCount++;
     }
   });
-  const waterTarget = 3.0; // liters
+  const waterTarget = 3.0;
   const water = waterCount > 0 ? Math.min(100, Math.round((waterSum / waterCount / waterTarget) * 100)) : null;
 
   // 5. WEIGHT TREND — normalised score based on whether weight is moving in the right direction
-  // 100 = moving toward target at or above expected rate, 0 = moving away from target
   let weightTrend = null;
   const radarCurrentW = weights.length > 0 ? weights[0].weight : s.currentKg;
   const isBulkRadar = s.targetKg && radarCurrentW && s.targetKg > radarCurrentW;
@@ -4199,7 +4239,6 @@ function computeRadarMetrics(days) {
       const newest = windowWeights[0].weight;
       const oldest = windowWeights[windowWeights.length - 1].weight;
       const dailyChange = (oldest - newest) / Math.max(1, (strToDate(windowWeights[0].date) - strToDate(windowWeights[windowWeights.length-1].date)) / 86400000);
-      // For cut: dailyChange > 0 means losing (good). For bulk: dailyChange < 0 means gaining (good).
       const dailyProgress = isBulkRadar ? -dailyChange : dailyChange;
       const targetRate = 0.15;
       if (dailyProgress >= targetRate) weightTrend = 100;
@@ -4209,7 +4248,8 @@ function computeRadarMetrics(days) {
     }
   }
 
-  // 6. GOAL PROGRESS — all-time, same regardless of window
+  // 6. GOAL PROGRESS — overall progress toward target weight
+  // This is all-time by nature, BUT we show window-specific rate in the legend
   let goalProgress = null;
   if (weights.length > 0) {
     const target = s.targetKg || 91;
@@ -4222,27 +4262,14 @@ function computeRadarMetrics(days) {
     }
   }
 
-  // 7. CONSISTENCY — % of days in window (from anchor onward) with meaningful activity
-  // Establish anchor — earliest date user actually started tracking
-  const sched = gs(SK.schedule) || {};
-  let anchorDate = null;
-  if (sched.startDate) {
-    anchorDate = sched.startDate;
-  }
-  if (weights.length > 0) {
-    const oldestWeight = weights[weights.length - 1].date;
-    if (!anchorDate || oldestWeight < anchorDate) anchorDate = oldestWeight;
-  }
-  Object.entries(dayLogs).forEach(([ds, log]) => {
-    if (log && log.checks && Object.values(log.checks).some(Boolean)) {
-      if (!anchorDate || ds < anchorDate) anchorDate = ds;
-    }
-  });
-
+  // 7. CONSISTENCY — % of tracked days in window with meaningful activity
+  // Only counts days from anchor onward. Today counts (you're using the app right now).
+  // Gate: need at least 2 tracked days to produce a meaningful score.
+  // With only 1 day, return null — "you just started" is not 100% consistency.
   let loggedDays = 0;
   let effectiveDays = 0;
   windowDates.forEach(ds => {
-    if (anchorDate && ds < anchorDate) return;
+    if (!isTracked(ds)) return;
     effectiveDays++;
     const log = dayLogs[ds];
     const hasWeight = weights.some(w => w.date === ds);
@@ -4251,9 +4278,10 @@ function computeRadarMetrics(days) {
     const hasMeaningfulLog = log && (log.water || log.energy || log.notes);
     if (hasRealChecks || hasMeaningfulLog || hasWeight || hasFood) loggedDays++;
   });
-  const consistency = effectiveDays > 0 ? Math.round((loggedDays / effectiveDays) * 100) : null;
+  // Gate: 1 day = you just started, not enough to measure consistency
+  const consistency = effectiveDays >= 2 ? Math.round((loggedDays / effectiveDays) * 100) : null;
 
-  return [
+  const result = [
     { key: 'checklist', label: 'CHECKLIST', value: checklist, color: 'var(--accent)' },
     { key: 'calories', label: 'CALORIES', value: calories, color: 'var(--accent2)' },
     { key: 'fasting', label: lightDow.length > 0 && plan.fastDaysDow.length === 0 ? 'LIGHT DAYS' : 'FASTING', value: fasting, color: lightDow.length > 0 && plan.fastDaysDow.length === 0 ? 'var(--light)' : 'var(--fast)' },
@@ -4262,6 +4290,9 @@ function computeRadarMetrics(days) {
     { key: 'goal', label: 'GOAL', value: goalProgress, color: '#ff7043' },
     { key: 'consistency', label: 'CONSISTENCY', value: consistency, color: '#ce93d8' }
   ];
+  result._anchor = anchorDate;
+  result._completedDays = completedDays;
+  return result;
 }
 
 function renderRadar() {
@@ -4373,7 +4404,13 @@ function renderRadar() {
   container.innerHTML = svg;
 
   // Legend — full labels with values
+  // Show a note about data span when both windows would look the same
   const windowLabel = radarWindow === 7 ? '7-DAY' : '30-DAY';
+  const now = new Date(); now.setHours(0,0,0,0);
+  const daysFromAnchor = (() => {
+    if(!metrics._anchor) return 0;
+    return Math.floor((now - strToDate(metrics._anchor)) / 86400000) + 1;
+  })();
   const legendNotes = {
     'checklist': 'Avg completion',
     'calories': 'Under ceiling',
@@ -4383,12 +4420,18 @@ function renderRadar() {
     'goal': 'All-time',
     'consistency': 'Days logged'
   };
-  legend.innerHTML = axes.map(a => {
+  let legendHtml = '';
+  // Show data span note when tracking period is shorter than the selected window
+  if(daysFromAnchor > 0 && daysFromAnchor <= 7) {
+    legendHtml += `<div style="font-family:'DM Mono',monospace;font-size:0.5rem;color:var(--muted);text-align:center;margin-bottom:8px;letter-spacing:0.5px">DAY ${daysFromAnchor} OF TRACKING — 7D and 30D will diverge after 7 days of data</div>`;
+  }
+  legendHtml += axes.map(a => {
     const dotBg = a.noData ? '#333' : a.color;
     const valDisplay = a.noData ? '<span style="color:#444;">—</span>' : `${a.value}%`;
     const noteText = a.noData ? 'No data yet' : (legendNotes[a.key]||'');
     return `<div class="radar-leg-item"><div class="radar-leg-dot" style="background:${dotBg}"></div><div style="display:flex;flex-direction:column;gap:1px;flex:1;min-width:0;"><span style="color:${a.noData ? '#555' : 'var(--text)'};font-size:0.52rem;">${a.label}</span><span style="font-size:0.42rem;opacity:0.6;">${noteText}</span></div><span class="radar-leg-val">${valDisplay}</span></div>`;
   }).join('');
+  legend.innerHTML = legendHtml;
 }
 
 function buildWeekGrid() {
