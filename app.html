@@ -1201,8 +1201,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '3.4.1';
-const APP_VERSION_MSG = 'Live calorie tracking on Nutrition tab, food log history on Track tab, radar scoring fix.';
+const APP_VERSION = '3.5.0';
+const APP_VERSION_MSG = 'Consistency now measures engagement depth + streaks, not just attendance.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -4262,24 +4262,51 @@ function computeRadarMetrics(days) {
     }
   }
 
-  // 7. CONSISTENCY — % of tracked days in window with meaningful activity
-  // Only counts days from anchor onward. Today counts (you're using the app right now).
+  // 7. CONSISTENCY — depth of daily engagement + streak bonus
+  // Not just "did you show up" but "how much did you do after showing up"
+  // Daily quality (0-1): checklist depth × 0.50, food logged × 0.20, weight logged × 0.15, tracking × 0.15
+  // Streak bonus: +1 per 2 consecutive days with quality ≥ 0.3, max +10
   // Gate: need at least 2 tracked days to produce a meaningful score.
-  // With only 1 day, return null — "you just started" is not 100% consistency.
-  let loggedDays = 0;
+  let qualitySum = 0;
   let effectiveDays = 0;
-  windowDates.forEach(ds => {
-    if (!isTracked(ds)) return;
+  // Sort window dates chronologically (oldest first) for streak calculation
+  const chronoDates = [...windowDates].reverse();
+  const dailyQualities = [];
+  chronoDates.forEach(ds => {
+    if (!isTracked(ds)) { dailyQualities.push(-1); return; } // -1 = not trackable
     effectiveDays++;
     const log = dayLogs[ds];
-    const hasWeight = weights.some(w => w.date === ds);
-    const hasFood = getDayCalories(ds).hasData;
-    const hasRealChecks = log && Object.values(log.checks||{}).some(Boolean);
-    const hasMeaningfulLog = log && (log.water || log.energy || log.notes);
-    if (hasRealChecks || hasMeaningfulLog || hasWeight || hasFood) loggedDays++;
+    // Checklist depth: what % of the day's checklist was completed (not just "any box")
+    const dayType = getDayType(ds);
+    const dayChecklist = dayType === 'fast' ? plan.checklistFast
+      : (dayType === 'light' && plan.checklistLight ? plan.checklistLight : plan.checklistNormal);
+    const totalItems = dayChecklist.length;
+    let checkedCount = 0;
+    if (log && log.checks && totalItems > 0) {
+      dayChecklist.forEach(item => { if (log.checks[item.id]) checkedCount++; });
+    }
+    const checklistDepth = totalItems > 0 ? (checkedCount / totalItems) : 0;
+    // Other engagement signals
+    const hasWeight = weights.some(w => w.date === ds) ? 1 : 0;
+    const hasFood = getDayCalories(ds).hasData ? 1 : 0;
+    const hasTracking = (log && (log.water || log.energy || log.notes)) ? 1 : 0;
+    // Weighted quality score
+    const quality = (checklistDepth * 0.50) + (hasFood * 0.20) + (hasWeight * 0.15) + (hasTracking * 0.15);
+    qualitySum += quality;
+    dailyQualities.push(quality);
   });
+  // Streak bonus: consecutive days with quality ≥ 0.3 ending at today/yesterday
+  let currentStreak = 0;
+  for (let i = dailyQualities.length - 1; i >= 0; i--) {
+    if (dailyQualities[i] === -1) continue; // skip non-trackable
+    if (dailyQualities[i] >= 0.3) currentStreak++;
+    else break;
+  }
+  const streakBonus = Math.min(10, Math.floor(currentStreak / 2));
   // Gate: 1 day = you just started, not enough to measure consistency
-  const consistency = effectiveDays >= 2 ? Math.round((loggedDays / effectiveDays) * 100) : null;
+  const consistency = effectiveDays >= 2
+    ? Math.min(100, Math.round((qualitySum / effectiveDays) * 100 + streakBonus))
+    : null;
 
   const result = [
     { key: 'checklist', label: 'CHECKLIST', value: checklist, color: 'var(--accent)' },
@@ -4292,6 +4319,7 @@ function computeRadarMetrics(days) {
   ];
   result._anchor = anchorDate;
   result._completedDays = completedDays;
+  result._streak = currentStreak;
   return result;
 }
 
@@ -4418,7 +4446,7 @@ function renderRadar() {
     'water': 'Vs 3L target',
     'weight': radarWindow === 7 ? '7d direction' : '30d loss rate',
     'goal': 'All-time',
-    'consistency': 'Days logged'
+    'consistency': metrics._streak >= 4 ? `Depth + ${metrics._streak}d streak` : 'Engagement depth'
   };
   let legendHtml = '';
   // Show data span note when tracking period is shorter than the selected window
