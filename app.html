@@ -1201,8 +1201,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '3.5.0';
-const APP_VERSION_MSG = 'Consistency now measures engagement depth + streaks, not just attendance.';
+const APP_VERSION = '3.6.0';
+const APP_VERSION_MSG = 'Fat + carb source cards added to AGRO nutrition tab. All 3 macro source lists are now collapsible.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -1928,8 +1928,10 @@ function selectCustomOption(customId, nativeId, optEl) {
   nativeEl.dispatchEvent(new Event('change'));
 }
 function syncCustomSelect(customId, nativeId) {
-  const val = document.getElementById(nativeId).value;
+  const nativeEl = document.getElementById(nativeId);
   const customEl = document.getElementById(customId);
+  if(!nativeEl || !customEl) return;
+  const val = nativeEl.value;
   const match = customEl.querySelector(`.custom-select-option[data-value="${val}"]`);
   if(match) {
     customEl.querySelectorAll('.custom-select-option').forEach(o => o.classList.remove('selected'));
@@ -2653,7 +2655,8 @@ const PLANS = {
       })()}
       </div>
 
-      <div class="section-title" style="margin-top:8px">HIGH PROTEIN <span>SOURCES</span></div>
+      <div class="section-title" style="margin-top:8px;cursor:pointer" onclick="const el=document.getElementById('proteinSrcGrid');el.style.display=el.style.display==='none'?'block':'none';this.querySelector('.src-chev').textContent=el.style.display==='none'?'\u25b8':'\u25be'">HIGH PROTEIN <span>SOURCES <span class="src-chev" style="font-size:0.7rem">\u25b8</span></span></div>
+      <div id="proteinSrcGrid" style="display:none">
       <div class="snack-grid">
         <div class="snack-item"><div class="snack-name">Chicken breast (150g)</div><div class="snack-cal">250 cal</div><div class="snack-note">46g protein \u00b7 King of protein density</div></div>
         <div class="snack-item"><div class="snack-name">Eggs (3 large)</div><div class="snack-cal">215 cal</div><div class="snack-note">18g protein \u00b7 Batch cook 12 at a time</div></div>
@@ -2663,6 +2666,35 @@ const PLANS = {
         <div class="snack-item"><div class="snack-name">Cottage cheese (100g)</div><div class="snack-cal">100 cal</div><div class="snack-note">12g protein \u00b7 Casein \u2014 slow digestion</div></div>
         <div class="snack-item"><div class="snack-name">Turkey mince (100g)</div><div class="snack-cal">150 cal</div><div class="snack-note">30g protein \u00b7 Lean ground meat</div></div>
         <div class="snack-item"><div class="snack-name">Whey protein (1 scoop)</div><div class="snack-cal">120 cal</div><div class="snack-note">25g protein \u00b7 Only if food protein falls short</div></div>
+      </div>
+      </div>
+
+      <div class="section-title" style="margin-top:8px;cursor:pointer" onclick="const el=document.getElementById('fatSrcGrid');el.style.display=el.style.display==='none'?'block':'none';this.querySelector('.src-chev').textContent=el.style.display==='none'?'\u25b8':'\u25be'">FAT <span>SOURCES (~25g FAT) <span class="src-chev" style="font-size:0.7rem">\u25b8</span></span></div>
+      <div id="fatSrcGrid" style="display:none">
+      <div class="snack-grid">
+        <div class="snack-item"><div class="snack-name">Peanuts (55g)</div><div class="snack-cal">310 cal</div><div class="snack-note">25g fat \u00b7 14g protein \u00b7 Two handfuls</div></div>
+        <div class="snack-item"><div class="snack-name">Almonds (45g)</div><div class="snack-cal">260 cal</div><div class="snack-note">22g fat \u00b7 10g protein \u00b7 1.5 handfuls</div></div>
+        <div class="snack-item"><div class="snack-name">Peanut butter (3 tbsp)</div><div class="snack-cal">285 cal</div><div class="snack-note">24g fat \u00b7 10g protein \u00b7 Spoon from jar</div></div>
+        <div class="snack-item"><div class="snack-name">Cheese/paneer (80g)</div><div class="snack-cal">280 cal</div><div class="snack-note">23g fat \u00b7 18g protein \u00b7 Slice or cube</div></div>
+        <div class="snack-item"><div class="snack-name">Boiled eggs (4)</div><div class="snack-cal">280 cal</div><div class="snack-note">20g fat \u00b7 24g protein \u00b7 Batch cook, fridge</div></div>
+        <div class="snack-item"><div class="snack-name">Coconut chunks (70g dried)</div><div class="snack-cal">230 cal</div><div class="snack-note">24g fat \u00b7 2g protein \u00b7 Snack bag</div></div>
+        <div class="snack-item"><div class="snack-name">Mixed seeds (50g)</div><div class="snack-cal">290 cal</div><div class="snack-note">24g fat \u00b7 12g protein \u00b7 Zinc + magnesium</div></div>
+        <div class="snack-item"><div class="snack-name">Cashews (45g)</div><div class="snack-cal">250 cal</div><div class="snack-note">20g fat \u00b7 8g protein \u00b7 Available everywhere</div></div>
+      </div>
+      </div>
+
+      <div class="section-title" style="margin-top:8px;cursor:pointer" onclick="const el=document.getElementById('carbSrcGrid');el.style.display=el.style.display==='none'?'block':'none';this.querySelector('.src-chev').textContent=el.style.display==='none'?'\u25b8':'\u25be'">CARB <span>SOURCES (\u226463g CARBS) <span class="src-chev" style="font-size:0.7rem">\u25b8</span></span></div>
+      <div id="carbSrcGrid" style="display:none">
+      <div class="snack-grid">
+        <div class="snack-item"><div class="snack-name">Bananas (2 medium)</div><div class="snack-cal">210 cal</div><div class="snack-note">54g carbs \u00b7 Peel and eat</div></div>
+        <div class="snack-item"><div class="snack-name">Dates (6 pieces)</div><div class="snack-cal">200 cal</div><div class="snack-note">50g carbs \u00b7 Instant energy, pocket-sized</div></div>
+        <div class="snack-item"><div class="snack-name">Roti/chapati (3)</div><div class="snack-cal">360 cal</div><div class="snack-note">60g carbs \u00b7 Cold or warm, always available</div></div>
+        <div class="snack-item"><div class="snack-name">Muri/puffed rice (70g)</div><div class="snack-cal">260 cal</div><div class="snack-note">58g carbs \u00b7 Dirt cheap everywhere</div></div>
+        <div class="snack-item"><div class="snack-name">Apple + banana combo</div><div class="snack-cal">200 cal</div><div class="snack-note">52g carbs \u00b7 Two fruits, zero prep</div></div>
+        <div class="snack-item"><div class="snack-name">Roasted chana (80g)</div><div class="snack-cal">290 cal</div><div class="snack-note">48g carbs \u00b7 14g protein bonus \u00b7 Crunchy</div></div>
+        <div class="snack-item"><div class="snack-name">Sweet potato (200g boiled)</div><div class="snack-cal">180 cal</div><div class="snack-note">42g carbs \u00b7 Boil in batch, eat cold</div></div>
+        <div class="snack-item"><div class="snack-name">Oats (70g dry + water)</div><div class="snack-cal">265 cal</div><div class="snack-note">47g carbs \u00b7 9g protein \u00b7 3 min microwave</div></div>
+      </div>
       </div>
 
       <div class="section-title" style="margin-top:8px">CHEAP SNACKS</div>
@@ -4002,7 +4034,7 @@ function updateProjection() {
       }
       return sum + dayScore;
     },0) / recentLogs.length;
-    complianceScore = avgCompliance;
+    complianceScore = Math.max(0.3, avgCompliance); // floor: even worst compliance still has fasting deficit
   }
 
   // Days until Sunday

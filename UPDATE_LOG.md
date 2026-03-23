@@ -4,6 +4,28 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 3.6.0 — 2026-03-23
+
+**Scope:** Minor (new nutrition content + collapsible UI)
+**Banner:** "Fat + carb source cards added to AGRO nutrition tab. All 3 macro source lists are now collapsible."
+
+- **Fat sources card** — 8 fat-portioned items (~25g fat each) added to AGRO nutrition tab: peanuts, almonds, peanut butter, cheese/paneer, boiled eggs, coconut chunks, mixed seeds, cashews. India-available, zero-prep options.
+- **Carb sources card** — 8 carb-portioned items (max ~63g carbs each) added to AGRO nutrition tab: bananas, dates, roti/chapati, muri/puffed rice, apple+banana, roasted chana, sweet potato, oats. India-available, cheap, minimal prep.
+- **Collapsible macro source lists** — all three cards (HIGH PROTEIN SOURCES, FAT SOURCES, CARB SOURCES) are now collapsible with tap-to-expand headers using the same inline toggle pattern as the supplement schedule. Collapsed by default to reduce scroll on the nutrition tab.
+
+---
+
+## Version 3.5.1 — 2026-03-23
+
+**Scope:** Patch (bug fixes from codebase scan)
+**Banner:** No banner (patch).
+
+- **Compliance score floor** — projection compliance modifier now has a 0.3 minimum. Previously, 3+ days of poor checklist + calorie overages could drive compliance to near 0, making weight projections absurdly pessimistic (150+ weeks for 5kg). Fasting days still create a deficit even at worst compliance — the floor reflects that.
+- **syncCustomSelect null guards** — function no longer throws if either the native select or custom dropdown element doesn't exist. Prevents potential crashes during backup restore or when elements are conditionally rendered.
+- **index.html footer version sync** — footer was stuck at v3.2.1 while hero badge and app were at v3.5.x. Now in sync.
+
+---
+
 ## Version 3.5.0 — 2026-03-23
 
 **Scope:** Minor (consistency metric redesign)
