@@ -4,6 +4,21 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 3.3.0 — 2026-03-23
+
+**Scope:** Minor (new feature — day-aware supplement display)
+**Banner:** "Day-aware supplements — checklist and nutrition tab now show only what you take today, not the full week."
+
+- **Day-aware supplement checklist (TODAY tab)** — AGRO plan supplement items now dynamically resolve sub-text based on today's day of week and day type (fast/eating). Every supplement item shows exact pills, doses, and timing computed from user settings (wake time, eating window start, evening session time). On zinc days (Sun/Tue/Thu/Sat for eating days, Sun/Sat for fast days), zinc appears in the morning stack. On non-zinc days, zinc is omitted entirely — no more mental filtering needed. Applied to both `renderTodayChecklist()` and the day modal for past dates.
+- **Dynamic timing on all supplement items** — morning stack shows actual take time (eating window start for eating days, wake time for fast days). MCT pre-training gels show computed pre-session time. Omega-3 shows exact dose breakdown. Magnesium says "take before bed tonight". All times respect user-configured settings and fall back to plan defaults.
+- **Day-aware supplement section (NUTRITION tab)** — AGRO plan's NUTRITION tab now shows a "TODAY'S SUPPLEMENTS" section that displays only what applies right now: morning stack with exact pill list and timing, MCT pre-training (fast days), zinc status with next zinc day, omega-3 or skip notice, electrolytes with exact tab timing (fast days only), magnesium. Active supplements shown in green (#82e0aa), skipped items shown in grey (#666) with reason. All times computed from settings.
+- **Full schedule reference (collapsible)** — the complete weekly supplement protocol is preserved under a collapsible "SUPPLEMENT FULL SCHEDULE" section below the day-aware cards. Also shows computed times from settings. Tap to expand for reference.
+- **Supplement group time label** — TODAY tab's SUPPLEMENTS group header now shows "Eating day stack" or "Fast day stack" instead of generic "Daily stack".
+- **Schedule-driven day type** — supplement display is driven by `getDayType()` which reads `SK.fastDays` — when a schedule is set, the auto-marked fast days automatically drive which supplement stack appears on each day. Toggle a fast day manually and the supplements update immediately.
+- **New helper: `resolveSupplementSub()`** — centralised function for day-aware supplement sub-text resolution with full timing computation, used by both the TODAY checklist and the day modal. Zinc EOD schedule, dose info, and timing all defined once here. Only applies to AGRO plan — other plans pass through unchanged.
+
+---
+
 ## Version 3.2.1 — 2026-03-22
 
 **Scope:** Patch (bug fixes from full codebase scan)
