@@ -4,6 +4,20 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 3.4.0 — 2026-03-23
+
+**Scope:** Minor (live calorie tracking, food log history, radar fix, storage persistence)
+**Banner:** "Live calorie tracking on Nutrition tab, food log history on Track tab, radar scoring fix."
+
+- **Live calorie intake on NUTRITION tab** — AGRO plan's nutrition tab now shows a "TODAY'S INTAKE" card below the macro grid that reads from the food log in real-time. Shows calories consumed vs ceiling with a progress bar, remaining/over text, and macro progress bars (protein/carbs/fat) when macro data is available. On fast days, shows a fast day notice instead. Updates via `FOOD_LOGGED` dispatch event whenever food is logged.
+- **Food log history on TRACK tab** — new "FOOD LOG" section on the TRACK tab showing the last 7 days of food entries with per-day totals, individual items with macros, and color-coded budget status. Updates live via new `trackFoodLog` dispatch target.
+- **Radar calorie scoring fix** — eating days without food data are now counted as non-compliant (missed logging = missed target) instead of being silently skipped. Previously, logging food on 1 of 7 eating days and staying under ceiling gave 100% — now gives 14%. Only scores past days (today excluded — day isn't over).
+- **Removed duplicate Export Logs button** — the Export Logs button was duplicated in both Settings > Data Management and the MONTHS tab. Removed from settings; kept on MONTHS tab where it's contextually appropriate next to the calendar.
+- **Persistent storage request** — app now calls `navigator.storage.persist()` on load, asking Chrome to protect localStorage from automatic eviction under storage pressure. Won't prevent manual "Clear browsing data" wipe, but stops silent data loss. PWAs installed to home screen are more likely to be granted persistence.
+- **New dispatch target: `trackFoodLog`** — added to `FOOD_LOGGED` event and `DISPATCH_MAP`. Renders food log history on TRACK tab when active.
+
+---
+
 ## Version 3.3.0 — 2026-03-23
 
 **Scope:** Minor (new feature — day-aware supplement display)
