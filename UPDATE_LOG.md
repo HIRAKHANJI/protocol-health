@@ -4,6 +4,17 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 3.6.0 — 2026-03-23
+
+**Scope:** Minor (new nutrition content + collapsible UI)
+**Banner:** "Fat + carb source cards added to AGRO nutrition tab. All 3 macro source lists are now collapsible."
+
+- **Fat sources card** — 8 fat-portioned items (~25g fat each) added to AGRO nutrition tab: peanuts, almonds, peanut butter, cheese/paneer, boiled eggs, coconut chunks, mixed seeds, cashews. India-available, zero-prep options.
+- **Carb sources card** — 8 carb-portioned items (max ~63g carbs each) added to AGRO nutrition tab: bananas, dates, roti/chapati, muri/puffed rice, apple+banana, roasted chana, sweet potato, oats. India-available, cheap, minimal prep.
+- **Collapsible macro source lists** — all three cards (HIGH PROTEIN SOURCES, FAT SOURCES, CARB SOURCES) are now collapsible with tap-to-expand headers using the same inline toggle pattern as the supplement schedule. Collapsed by default to reduce scroll on the nutrition tab.
+
+---
+
 ## Version 3.5.1 — 2026-03-23
 
 **Scope:** Patch (bug fixes from codebase scan)
