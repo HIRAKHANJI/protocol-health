@@ -4,6 +4,16 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 3.6.1 — 2026-03-23
+
+**Scope:** Patch (additional macro source items)
+**Banner:** No banner (patch).
+
+- **5 more fat sources** — avocado, full-fat yogurt, macadamia nuts, olives, trail mix added to fat sources card (now 13 items total).
+- **7 more carb sources** — toast+honey, cornflakes+milk, grapes, granola bars, orange juice, crackers, dried apricots added to carb sources card (now 15 items total).
+
+---
+
 ## Version 3.6.0 — 2026-03-23
 
 **Scope:** Minor (new nutrition content + collapsible UI)
