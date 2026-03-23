@@ -4,6 +4,18 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 3.5.0 — 2026-03-23
+
+**Scope:** Minor (consistency metric redesign)
+**Banner:** "Consistency now measures engagement depth + streaks, not just attendance."
+
+- **Consistency metric redesign** — the CONSISTENCY axis on the performance radar no longer uses binary "did you show up" scoring. Previously, checking a single box out of 15 gave 100% for that day — same as completing everything. Now measures **engagement depth**: checklist completion depth (50% weight), food logged (20%), weight logged (15%), water/energy/notes (15%). A day where you check 1 item and log nothing else scores ~3%, not 100%.
+- **Streak bonus** — consecutive days with quality ≥ 0.3 earn a streak bonus: +1 point per 2 consecutive days, capped at +10. Rewards showing up AND doing the work day after day. Streak resets on days with low engagement (< 0.3 quality score).
+- **Streak display in legend** — when streak is 4+ days, the consistency legend shows "Depth + Xd streak" instead of generic "Engagement depth", giving visibility into the streak factor.
+- **Day-type-aware scoring** — consistency now uses the correct checklist for each day type (fast/light/normal) when calculating completion depth, so fast days are scored against the fast checklist, not the normal one.
+
+---
+
 ## Version 3.4.1 — 2026-03-23
 
 **Scope:** Patch (radar scoring overhaul)
