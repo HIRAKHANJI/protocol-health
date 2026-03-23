@@ -4,6 +4,20 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 3.4.1 — 2026-03-23
+
+**Scope:** Patch (radar scoring overhaul)
+**Banner:** No banner (patch).
+
+- **Radar anchor-based filtering** — all behavioral axes (checklist, calories, fasting, water, consistency) now only score days from the anchor date (earliest of: schedule start, first weight, first checklist) onward. Days before the user started tracking are never counted — prevents false failures on pre-start dates.
+- **Consistency minimum-data gate** — requires at least 2 tracked days to produce a score. On day 1, consistency returns null ("—") instead of 100%. One day of data is not enough to measure consistency.
+- **Calorie axis honest scoring** — past eating days without food data count as non-compliant (you should have logged but didn't), but only after anchor date. Today is excluded (day isn't over). Requires at least 1 day with actual food data before scoring — avoids showing 0% when food logging hasn't started yet.
+- **Checklist includes today** — checklist axis now scores today's in-progress checklist alongside completed past days. Since you're actively checking items, the live score is meaningful.
+- **Data span indicator** — legend now shows "DAY X OF TRACKING" with a note that 7D and 30D will diverge after 7 days of data. Explains why the shapes are identical early on.
+- **Anchor metadata** — `computeRadarMetrics()` now returns `_anchor` and `_completedDays` alongside the axis array for use by the renderer.
+
+---
+
 ## Version 3.4.0 — 2026-03-23
 
 **Scope:** Minor (live calorie tracking, food log history, radar fix, storage persistence)
