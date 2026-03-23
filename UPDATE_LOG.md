@@ -4,6 +4,17 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 3.5.1 — 2026-03-23
+
+**Scope:** Patch (bug fixes from codebase scan)
+**Banner:** No banner (patch).
+
+- **Compliance score floor** — projection compliance modifier now has a 0.3 minimum. Previously, 3+ days of poor checklist + calorie overages could drive compliance to near 0, making weight projections absurdly pessimistic (150+ weeks for 5kg). Fasting days still create a deficit even at worst compliance — the floor reflects that.
+- **syncCustomSelect null guards** — function no longer throws if either the native select or custom dropdown element doesn't exist. Prevents potential crashes during backup restore or when elements are conditionally rendered.
+- **index.html footer version sync** — footer was stuck at v3.2.1 while hero badge and app were at v3.5.x. Now in sync.
+
+---
+
 ## Version 3.5.0 — 2026-03-23
 
 **Scope:** Minor (consistency metric redesign)

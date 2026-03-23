@@ -1201,7 +1201,7 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '3.5.0';
+const APP_VERSION = '3.5.1';
 const APP_VERSION_MSG = 'Consistency now measures engagement depth + streaks, not just attendance.';
 
 // Static lookup arrays used throughout rendering
@@ -1928,8 +1928,10 @@ function selectCustomOption(customId, nativeId, optEl) {
   nativeEl.dispatchEvent(new Event('change'));
 }
 function syncCustomSelect(customId, nativeId) {
-  const val = document.getElementById(nativeId).value;
+  const nativeEl = document.getElementById(nativeId);
   const customEl = document.getElementById(customId);
+  if(!nativeEl || !customEl) return;
+  const val = nativeEl.value;
   const match = customEl.querySelector(`.custom-select-option[data-value="${val}"]`);
   if(match) {
     customEl.querySelectorAll('.custom-select-option').forEach(o => o.classList.remove('selected'));
@@ -4002,7 +4004,7 @@ function updateProjection() {
       }
       return sum + dayScore;
     },0) / recentLogs.length;
-    complianceScore = avgCompliance;
+    complianceScore = Math.max(0.3, avgCompliance); // floor: even worst compliance still has fasting deficit
   }
 
   // Days until Sunday
