@@ -704,6 +704,10 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
     <div id="weightEntries"><div class="empty-state">No entries yet.<br>Log your first weight above.</div></div>
   </div>
   <div style="height:18px"></div>
+  <div class="section-title">FOOD <span>LOG</span></div>
+  <p class="section-note">Recent food entries from the last 7 days. Tap FOOD LOG on the TODAY tab to add entries.</p>
+  <div id="trackFoodLog"><div class="empty-state">No food logged yet.</div></div>
+  <div style="height:18px"></div>
   <div class="section-title">DAY <span>NOTES</span></div>
   <p class="section-note">Notes logged from today's checklist or calendar day modal. Tap a day on MONTHS to add notes.</p>
   <div id="recentNotes"><div class="empty-state">No notes logged yet.</div></div>
@@ -981,10 +985,6 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
         </div>
         <input type="file" id="restoreFileInput" accept=".json" style="display:none" onchange="restoreData(event)">
         <div id="backupStatus" style="display:none;margin-top:10px;padding:10px 13px;border-radius:8px;font-family:'DM Mono',monospace;font-size:0.7rem;line-height:1.6"></div>
-        <div style="height:8px"></div>
-        <div class="action-row">
-          <button class="reset-btn" onclick="openExport()" style="border-color:var(--accent);color:var(--accent);width:100%">↗ EXPORT LOGS</button>
-        </div>
       </div>
 
     </div>
@@ -1201,8 +1201,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '3.3.0';
-const APP_VERSION_MSG = 'Day-aware supplements — checklist and nutrition tab now show only what you take today, not the full week.';
+const APP_VERSION = '3.4.0';
+const APP_VERSION_MSG = 'Live calorie tracking on Nutrition tab, food log history on Track tab, radar scoring fix.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -1832,7 +1832,7 @@ const DISPATCH_MAP = {
   SCHEDULE_ADJUSTED: ['durationBar','calendarHighlights','projection','manageSchedBtn','goalBar'],
   SCHEDULE_ENDED:    ['durationBar','calendarHighlights','manageSchedBtn'],
   SCHEDULE_REMOVED:  ['durationBar','calendarHighlights','manageSchedBtn'],
-  FOOD_LOGGED:       ['projection','goalBar','recentNotes','foodModal','todayCalStrip','nutritionMacros','radar'],
+  FOOD_LOGGED:       ['projection','goalBar','recentNotes','foodModal','todayCalStrip','nutritionMacros','radar','trackFoodLog'],
   EXERCISE_LEVEL_CHANGED: ['workoutLevelDisplay'],
 };
 
@@ -1966,6 +1966,9 @@ function dispatch(event) {
       case 'nutritionMacros':   if(document.getElementById('tab-nutrition').classList.contains('active')) renderNutrition(); break;
       case 'foodModal':         renderFoodModalEntries(); break;
       case 'todayCalStrip':     updateTodayCalStrip(); break;
+      case 'trackFoodLog':
+        if(document.getElementById('tab-track').classList.contains('active')) renderTrackFoodLog();
+        break;
       case 'radar':
         if(document.getElementById('tab-track').classList.contains('active')) renderRadar();
         break;
@@ -2497,6 +2500,24 @@ const PLANS = {
       </div>
       ${signalChip}
       ${warningHtml}
+
+      ${(()=>{
+        const _dt2 = getDayType(todayStr());
+        if(_dt2 === 'fast') return '<div class="rule-card" style="border-left-color:var(--fast)"><div class="rule-num">TODAY IS A FAST DAY</div><div class="rule-text">No food intake. Water, black coffee, and green tea only.</div></div>';
+        const _dc = getDayCalories(todayStr());
+        const _dm = getDayMacros(todayStr());
+        const _rem = cal - _dc.total;
+        const _cls = !_dc.hasData ? 'var(--muted)' : _dc.total > cal ? 'var(--danger)' : (_rem <= 100 ? 'var(--accent2)' : 'var(--accent)');
+        const _remTxt = !_dc.hasData ? 'No food logged yet — tap FOOD LOG on TODAY tab' : (_rem >= 0 ? _rem + ' cal remaining' : Math.abs(_rem) + ' cal OVER ceiling');
+        const _pctW = _dc.hasData ? Math.min(100, Math.round(_dc.total / cal * 100)) : 0;
+        const _barColor = _dc.total > cal ? 'var(--danger)' : _dc.total > cal * 0.85 ? 'var(--accent2)' : 'var(--accent)';
+        let _macroHtml = '';
+        if(_dc.hasData && _dm.hasMacroData) {
+          const _mkP = (lbl,cur,tgt,c) => {const p=tgt>0?Math.min(100,Math.round(cur/tgt*100)):0;const ov=cur>tgt;return '<div style="margin-bottom:4px"><div style="display:flex;justify-content:space-between;font-family:DM Mono,monospace;font-size:0.55rem;margin-bottom:1px"><span style="color:'+(ov?'var(--danger)':'var(--muted)')+';letter-spacing:1px">'+lbl+'</span><span style="color:'+(ov?'var(--danger)':'var(--muted)')+'">'+cur+'g / '+tgt+'g</span></div><div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden"><div style="height:100%;width:'+p+'%;background:'+(ov?'var(--danger)':c)+';border-radius:2px"></div></div></div>';};
+          _macroHtml = '<div style="margin-top:8px">'+_mkP('PROTEIN',_dm.protein,proteinG,'#ff9966')+_mkP('CARBS',_dm.carbs,carbsG,'var(--accent2)')+_mkP('FAT',_dm.fat,fatG,'#88ccff')+'</div>';
+        }
+        return '<div class="rule-card" style="border-left-color:'+_cls+'"><div class="rule-num">TODAY\'S INTAKE</div><div class="rule-text" style="font-size:0.85rem;color:'+_cls+'">'+(_dc.hasData ? _dc.total + ' / ' + cal + ' cal' : '0 / ' + cal + ' cal')+'</div><div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin:6px 0"><div style="height:100%;width:'+_pctW+'%;background:'+_barColor+';border-radius:3px;transition:width 0.3s"></div></div><div class="rule-sub">'+_remTxt+'</div>'+_macroHtml+'</div>';
+      })()}
 
       <div class="rule-card" style="border-left-color:#ff8855">
         <div class="rule-num">EATING WINDOW</div>
@@ -3576,7 +3597,7 @@ function switchTab(id, btn) {
   if(id==='workouts') renderWorkouts();
   if(id==='nutrition') renderNutrition();
   if(id==='rules') renderRules();
-  if(id==='track') { renderWeights(); renderRecentNotes(); renderRadar(); }
+  if(id==='track') { renderWeights(); renderTrackFoodLog(); renderRecentNotes(); renderRadar(); }
 }
 
 // ─── TODAY ───────────────────────────────────────────────────────────────────
@@ -4110,14 +4131,17 @@ function computeRadarMetrics(days) {
   const checklist = checkCount > 0 ? Math.round(checkTotal / checkCount) : null;
 
   // 2. CALORIE DISCIPLINE — % of eating days at or under ceiling
+  // Count eating days without food data as non-compliant (missed logging = missed target)
+  // Only count past days (not today or future), and only after anchor date
   let calUnder = 0, calTotal = 0;
+  const _ldMap = gs(SK.lightDays)||{};
   windowDates.forEach(ds => {
-    if (fastDays[ds] || (gs(SK.lightDays)||{})[ds]) return; // skip fast/light days
+    if (fastDays[ds] || _ldMap[ds]) return; // skip fast/light days
+    if (strToDate(ds) >= now) return; // skip today and future — day isn't over yet
+    calTotal++;
     const dc = getDayCalories(ds);
-    if (dc.hasData) {
-      calTotal++;
-      if (dc.total <= cal) calUnder++;
-    }
+    if (dc.hasData && dc.total <= cal) calUnder++;
+    // if !hasData, counts as a miss (calUnder not incremented)
   });
   const calories = calTotal > 0 ? Math.round((calUnder / calTotal) * 100) : null;
 
@@ -4881,6 +4905,46 @@ function clearWeightLog() {
 // ─── RECENT NOTES (TRACK TAB) ────────────────────────────────────────────────
 // Shows the last 14 days that have any logged data (weight, water, energy, notes, checklist).
 // Provides a quick-glance history without opening the calendar.
+function renderTrackFoodLog() {
+  const container = document.getElementById('trackFoodLog');
+  if(!container) return;
+  const fl = gs(SK.foodLog) || {};
+  const s = getSettings();
+  const ceiling = s.calories || 1500;
+  // Collect last 7 days with food data, sorted newest first
+  const now = new Date(); now.setHours(0,0,0,0);
+  const days = [];
+  for(let i = 0; i < 7; i++) {
+    const d = new Date(now); d.setDate(d.getDate() - i);
+    const ds = dateToStr(d);
+    const entries = fl[ds];
+    if(entries && entries.length > 0) days.push({ date: ds, entries });
+  }
+  if(days.length === 0) {
+    container.innerHTML = '<div class="empty-state">No food logged in the last 7 days.</div>';
+    return;
+  }
+  const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  let html = '';
+  days.forEach(day => {
+    const d = strToDate(day.date);
+    const total = day.entries.reduce((s,e) => s + (e.calories || 0), 0);
+    const rem = ceiling - total;
+    const cls = total > ceiling ? 'color:var(--danger)' : rem <= 100 ? 'color:var(--accent2)' : 'color:var(--accent)';
+    const isToday = day.date === todayStr();
+    const label = isToday ? 'TODAY' : dayNames[d.getDay()] + ' ' + d.getDate() + '/' + (d.getMonth()+1);
+    html += '<div style="margin-bottom:12px;padding:10px 12px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="font-family:Bebas Neue,sans-serif;font-size:0.85rem;letter-spacing:1px;color:var(--text)">' + label + '</span><span style="font-family:DM Mono,monospace;font-size:0.75rem;' + cls + '">' + total + ' / ' + ceiling + ' cal</span></div>';
+    day.entries.forEach(e => {
+      const macroStr = (e.protein != null || e.carbs != null || e.fat != null) ?
+        ' · ' + [e.protein != null ? e.protein+'g P' : null, e.carbs != null ? e.carbs+'g C' : null, e.fat != null ? e.fat+'g F' : null].filter(Boolean).join(' · ') : '';
+      html += '<div style="display:flex;justify-content:space-between;padding:3px 0;font-family:DM Mono,monospace;font-size:0.65rem;color:var(--muted)"><span>' + esc(e.name) + macroStr + '</span><span style="color:var(--text)">' + (e.calories||0) + '</span></div>';
+    });
+    html += '</div>';
+  });
+  container.innerHTML = html;
+}
+
 function renderRecentNotes() {
   const dayLogs = gs(SK.dayLogs)||{};
   const container = document.getElementById('recentNotes');
@@ -6984,6 +7048,16 @@ if('serviceWorker' in navigator) {
       setInterval(() => { reg.update(); }, 30 * 60 * 1000);
 
     }).catch(err => console.log('SW registration failed:', err));
+
+    // Request persistent storage — protects localStorage from automatic browser eviction.
+    // Won't prevent manual "Clear browsing data" but stops Chrome from silently wiping
+    // app data when storage pressure is high. PWAs installed to home screen are more
+    // likely to be granted persistent storage automatically.
+    if(navigator.storage && navigator.storage.persist) {
+      navigator.storage.persist().then(granted => {
+        if(!granted) console.log('Persistent storage not granted — data may be evicted under storage pressure');
+      });
+    }
   });
 
   // ── iOS PWA resume detection ──────────────────────────────────────────
