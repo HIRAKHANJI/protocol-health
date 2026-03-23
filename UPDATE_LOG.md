@@ -4,6 +4,19 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 3.3.0 — 2026-03-23
+
+**Scope:** Minor (new feature — day-aware supplement display)
+**Banner:** "Day-aware supplements — checklist and nutrition tab now show only what you take today, not the full week."
+
+- **Day-aware supplement checklist (TODAY tab)** — AGRO plan supplement items now dynamically resolve sub-text based on today's day of week. On zinc days (Sun/Tue/Thu/Sat for eating days, Sun/Sat for fast days), zinc appears in the morning stack. On non-zinc days, zinc is omitted entirely — no more mental filtering needed. Applied to both `renderTodayChecklist()` and the day modal for past dates.
+- **Day-aware supplement section (NUTRITION tab)** — AGRO plan's NUTRITION tab now shows a "TODAY'S SUPPLEMENTS" section that displays only what applies right now: morning stack with/without zinc, omega-3 (eating days) or skip notice (fast days), electrolytes (fast days only), magnesium (every night). Active supplements shown in green (#82e0aa), skipped items shown in grey (#666) with reason.
+- **Full schedule reference (collapsible)** — the complete weekly supplement protocol is preserved under a collapsible "SUPPLEMENT FULL SCHEDULE" section below the day-aware cards. Tap to expand for reference.
+- **Supplement group time label** — TODAY tab's SUPPLEMENTS group header now shows "Eating day stack" or "Fast day stack" instead of generic "Daily stack".
+- **New helper: `resolveSupplementSub()`** — centralised function for day-aware supplement sub-text resolution, used by both the TODAY checklist and the day modal. Zinc EOD schedule (Sun/Tue/Thu/Sat eating, Sun/Sat fast) is defined once here.
+
+---
+
 ## Version 3.2.1 — 2026-03-22
 
 **Scope:** Patch (bug fixes from full codebase scan)

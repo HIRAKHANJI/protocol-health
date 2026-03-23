@@ -1201,8 +1201,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '3.2.1';
-const APP_VERSION_MSG = 'Bug fixes — XSS hardening, schedule cleanup, goal calculator improvements, and timing edge case fixes.';
+const APP_VERSION = '3.3.0';
+const APP_VERSION_MSG = 'Day-aware supplements — checklist and nutrition tab now show only what you take today, not the full week.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -2516,20 +2516,63 @@ const PLANS = {
       </div>`;
       })()}
 
-      <div class="section-title" style="margin-top:8px">SUPPLEMENT <span>PROTOCOL</span></div>
+      <div class="section-title" style="margin-top:8px">TODAY'S <span>SUPPLEMENTS</span></div>
 
       ${(()=>{
         const _ews = formatTime(getPlanTime(s,'eatingWindowStart') || '11:00');
         const _wk2 = getPlanTime(s,'wakeTime') || '05:30';
         const [_wh2] = _wk2.split(':').map(Number);
         const _midR2 = formatTime(String((_wh2+4)%24).padStart(2,'0')+':00');
-        return ruleCard('MORNING STACK (EATING DAYS)','Osteocare 2 tabs \u00b7 D3+K2 1 tab \u00b7 MCT 1 gel \u00b7 Zinc 50mg (EOD only: Sun/Tue/Thu/Sat)','Take with breakfast at ' + _ews + '. D3+K2 needs fat for absorption \u2014 meal provides it.','#82e0aa')
-        + ruleCard('MORNING STACK (FAST DAYS)','D3+K2 1 tab (with MCT gel \u2014 fat carrier present) \u00b7 Zinc (Sun/Sat only) \u00b7 2 MCT gels pre-training','No Osteocare on fast days \u2014 calcium needs food for full absorption.','#82e0aa')
-        + ruleCard('ZINC \u2014 EVERY OTHER DAY ONLY','Sun \u00b7 Tue \u00b7 Thu \u00b7 Sat. Never daily. 50mg/day exceeds NIH upper limit (40mg). Alternate-day = 28.6mg avg.','Daily dosing depletes copper \u2192 anemia risk.','#82e0aa')
-        + ruleCard('OMEGA-3 FISH OIL \u2014 EATING DAYS ONLY','3 caps with largest meal. Total: 1,485mg EPA + 990mg DHA = 2,475mg.','Meets anti-inflammatory threshold (\u22652,400mg). Skip on fast days \u2014 effects are chronic not acute.','#82e0aa')
-        + ruleCard('MAGNESIUM COMPLEX \u2014 EVERY NIGHT','1 serving before bed, all 7 days. ~67.6mg elemental Mg.','Glycinate targets sleep/NMDA pathway. Malate supports Krebs cycle. Most critical supplement \u2014 runs out first.','#82e0aa')
-        + ruleCard('ELECTROLYTES \u2014 FAST DAYS ONLY','2 tabs on Sun/Wed/Sat: 1 mid-morning (' + _midR2 + ') + 1 pre-evening training (20 min before).','99mg potassium each. Prevents palpitations, cramps, and headaches during fasted sessions.','#82e0aa');
+        const _dow = new Date().getDay();
+        const _dt = getDayType(todayStr());
+        const _isFast = _dt === 'fast';
+        const _zincEating = [0,2,4,6].includes(_dow);
+        const _zincFast = [0,6].includes(_dow);
+        const _isZincDay = _isFast ? _zincFast : _zincEating;
+        const _dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+        const _nextZinc = (()=>{ const zd=[0,2,4,6]; const i=zd.findIndex(d=>d>_dow); return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][i>=0?zd[i]:zd[0]]; })();
+
+        let cards = '';
+        if(_isFast) {
+          const zPart = _isZincDay ? ' \u00b7 Zinc 50mg' : '';
+          cards += ruleCard('MORNING STACK \u2014 ' + _dayNames[_dow].toUpperCase(),'D3+K2 1 tab (with MCT gel \u2014 fat carrier present)' + zPart + ' \u00b7 2 MCT gels pre-training','No Osteocare on fast days \u2014 calcium needs food for full absorption.','#82e0aa');
+        } else {
+          const zPart = _isZincDay ? ' \u00b7 Zinc 50mg' : '';
+          cards += ruleCard('MORNING STACK \u2014 ' + _dayNames[_dow].toUpperCase(),'Osteocare 2 tabs \u00b7 D3+K2 1 tab' + zPart + ' \u00b7 MCT 1 gel','Take with breakfast at ' + _ews + '. D3+K2 needs fat for absorption \u2014 meal provides it.','#82e0aa');
+        }
+        if(_isZincDay) {
+          cards += ruleCard('ZINC \u2014 TODAY IS A ZINC DAY','50mg with morning stack. Alternate-day schedule = 28.6mg/day avg (under 40mg NIH limit).','Daily dosing depletes copper \u2192 anemia risk. Alternate-day keeps you safe.','#82e0aa');
+        } else {
+          cards += ruleCard('ZINC \u2014 NO ZINC TODAY','Next zinc day: ' + _nextZinc + '. 50mg/day exceeds NIH upper limit (40mg). Alternate-day = 28.6mg avg.','Daily dosing depletes copper \u2192 anemia risk.','#666');
+        }
+        if(!_isFast) {
+          cards += ruleCard('OMEGA-3 FISH OIL \u2014 WITH LARGEST MEAL','3 caps. Total: 1,485mg EPA + 990mg DHA = 2,475mg.','Meets anti-inflammatory threshold (\u22652,400mg).','#82e0aa');
+        } else {
+          cards += ruleCard('OMEGA-3 \u2014 SKIP TODAY','No omega-3 on fast days. Effects are chronic not acute \u2014 missing one day has zero impact.','Resume with next eating day meal.','#666');
+        }
+        if(_isFast) {
+          cards += ruleCard('ELECTROLYTES \u2014 2 TABS TODAY','1 mid-morning (' + _midR2 + ') + 1 pre-evening training (20 min before).','99mg potassium each. Prevents palpitations, cramps, and headaches during fasted sessions.','#82e0aa');
+        }
+        cards += ruleCard('MAGNESIUM COMPLEX \u2014 TONIGHT','1 serving before bed. ~67.6mg elemental Mg.','Glycinate targets sleep/NMDA pathway. Malate supports Krebs cycle. Most critical supplement \u2014 runs out first.','#82e0aa');
+
+        return cards;
       })()}
+
+      <div class="section-title" style="margin-top:8px;cursor:pointer" onclick="const el=document.getElementById('fullSupProto');el.style.display=el.style.display==='none'?'block':'none';this.querySelector('span').textContent=el.style.display==='none'?'FULL SCHEDULE \u25b8':'FULL SCHEDULE \u25be'">SUPPLEMENT <span>FULL SCHEDULE \u25b8</span></div>
+      <div id="fullSupProto" style="display:none">
+      ${(()=>{
+        const _ews2 = formatTime(getPlanTime(s,'eatingWindowStart') || '11:00');
+        const _wk3 = getPlanTime(s,'wakeTime') || '05:30';
+        const [_wh3] = _wk3.split(':').map(Number);
+        const _midR3 = formatTime(String((_wh3+4)%24).padStart(2,'0')+':00');
+        return ruleCard('EATING DAY STACK','Osteocare 2 tabs \u00b7 D3+K2 1 tab \u00b7 MCT 1 gel \u00b7 Zinc 50mg (Sun/Tue/Thu/Sat only)','Take with breakfast at ' + _ews2 + '. D3+K2 needs fat for absorption \u2014 meal provides it.','#666')
+        + ruleCard('FAST DAY STACK','D3+K2 1 tab (with MCT gel \u2014 fat carrier present) \u00b7 Zinc (Sun/Sat only) \u00b7 2 MCT gels pre-training','No Osteocare on fast days \u2014 calcium needs food for full absorption.','#666')
+        + ruleCard('ZINC SCHEDULE','Sun \u00b7 Tue \u00b7 Thu \u00b7 Sat. Never daily. 50mg/day exceeds NIH upper limit (40mg). Alternate-day = 28.6mg avg.','Daily dosing depletes copper \u2192 anemia risk.','#666')
+        + ruleCard('OMEGA-3','3 caps with largest meal on eating days. Total: 1,485mg EPA + 990mg DHA = 2,475mg.','Skip on fast days \u2014 effects are chronic not acute.','#666')
+        + ruleCard('MAGNESIUM','1 serving before bed, all 7 days. ~67.6mg elemental Mg.','Glycinate targets sleep/NMDA pathway. Malate supports Krebs cycle.','#666')
+        + ruleCard('ELECTROLYTES','2 tabs on fast days (Sun/Wed/Sat): 1 mid-morning (' + _midR3 + ') + 1 pre-evening training.','99mg potassium each.','#666');
+      })()}
+      </div>
 
       <div class="section-title" style="margin-top:8px">HIGH PROTEIN <span>SOURCES</span></div>
       <div class="snack-grid">
@@ -3502,6 +3545,29 @@ function getDayType(dateStr) {
   return 'normal';
 }
 
+// resolveSupplementSub: returns day-aware supplement sub-text for checklist items.
+// Zinc is EOD (Sun/Tue/Thu/Sat on eating days, Sun/Sat on fast days).
+// This ensures only today's actual supplements appear — no mental filtering needed.
+function resolveSupplementSub(itemId, originalSub, dayOfWeek, dayType) {
+  const zincEatingDays = [0, 2, 4, 6]; // Sun, Tue, Thu, Sat
+  const zincFastDays = [0, 6]; // Sun, Sat
+  if(itemId === 's1') {
+    // Eating day morning stack
+    const isZincDay = zincEatingDays.includes(dayOfWeek);
+    return isZincDay
+      ? 'Osteocare 2 tabs · D3+K2 1 tab · Zinc 50mg · MCT 1 gel'
+      : 'Osteocare 2 tabs · D3+K2 1 tab · MCT 1 gel';
+  }
+  if(itemId === 'sf1') {
+    // Fast day morning stack
+    const isZincDay = zincFastDays.includes(dayOfWeek);
+    return isZincDay
+      ? 'D3+K2 1 tab (with MCT gel for absorption) · Zinc 50mg · 2 MCT gels pre-training'
+      : 'D3+K2 1 tab (with MCT gel for absorption) · 2 MCT gels pre-training';
+  }
+  return originalSub;
+}
+
 // renderTodayChecklist: dynamically builds the TODAY tab checklist from the active plan's
 // checklistNormal or checklistFast array. Called on init, plan change, and fast day toggle.
 function renderTodayChecklist() {
@@ -3534,7 +3600,7 @@ function renderTodayChecklist() {
       else if(item.group==='MORNING') timeLabel = wt ? 'From ' + wt : 'Morning';
       else if(item.group==='EVENING') timeLabel = est ? 'From ' + est : 'Evening';
       else if(item.group==='NIGHT') timeLabel = 'Before sleep';
-      else if(item.group==='SUPPLEMENTS') timeLabel = 'Daily stack';
+      else if(item.group==='SUPPLEMENTS') timeLabel = dayType === 'fast' ? 'Fast day stack' : 'Eating day stack';
       const foodStyle = (item.group==='EATING' && plan.foodGroupBg) ? ` style="background:${plan.foodGroupBg};color:${plan.foodGroupColor}"` : '';
       html += `<div class="checklist-group"${groupId}><div class="group-header"><span class="group-tag ${tagColor}"${foodStyle}>${item.group==='EATING' ? (plan.foodGroupLabel||'EATING') : item.group}</span><span class="group-time">${timeLabel}</span></div>`;
     }
@@ -3546,6 +3612,8 @@ function renderTodayChecklist() {
       if(item.id === 'e2' || (item.id === 'e1' && !items.find(i=>i.id==='e2'))) sub = plan.eveningSub[day];
     }
     if(item.id === 'e3' && plan.stretchSub && plan.stretchSub[day]) sub = plan.stretchSub[day];
+    // Inject day-aware supplement sub-text — only show today's actual supplements
+    if(item.group === 'SUPPLEMENTS') sub = resolveSupplementSub(item.id, sub, day, dayType);
     // Inject dynamic times into labels/subs
     const resolved = resolveItemTimes(item.id, label, sub, s);
     label = resolved.label; sub = resolved.sub;
@@ -4508,7 +4576,9 @@ function openDayModal(dateStr, dt) {
           html += `<div class="modal-check-group"><div class="modal-group-label ${tagColor}" style="margin-bottom:6px">${item.group}</div>`;
         }
         const done = !!checks[item.id];
-        const _r = resolveItemTimes(item.id, item.label, item.sub, getSettings());
+        let _sub = item.sub;
+        if(item.group === 'SUPPLEMENTS') _sub = resolveSupplementSub(item.id, _sub, strToDate(dateStr).getDay(), dayType);
+        const _r = resolveItemTimes(item.id, item.label, _sub, getSettings());
         html += `<div class="modal-check-item ${done?'done':''}" onclick="toggleModalCheck(this,'${dateStr}','${item.id}')">
           <div class="modal-cb">${done?'✓':''}</div>
           <div><div class="m-title">${_r.label}</div><div class="m-sub">${_r.sub}</div></div>
