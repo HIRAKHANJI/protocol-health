@@ -1201,8 +1201,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '3.6.2';
-const APP_VERSION_MSG = 'Fixed exercise level selectors — duplicate exercises no longer overwrite each other.';
+const APP_VERSION = '3.7.0';
+const APP_VERSION_MSG = 'Default Bulk plan enhanced: research-backed nutrition, per-meal protein dosing, calorie cycling, food source grids, supplement tracking.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -3036,7 +3036,7 @@ PLANS.bulk = {
   fastDaysDow: [],
   lightDaysDow: [0, 3],  // Sun/Wed — rest days = light eating days for gut recovery
   macroSplit: { base:[30,50,20], rest:[35,45,20], preFast:[30,50,20], stall:[35,45,20], satiety:[35,45,20] },
-  proteinFloorMultiplier: 1.4,
+  proteinFloorMultiplier: 1.6, // Iraki et al. 2019 (PMC6680710): 1.6–2.2g/kg for muscle growth
 
   defaultTimes: { wakeTime:'07:00', lastMealTime:'20:00', eveningSessionTime:'18:00', eatingWindowStart:null },
 
@@ -3071,17 +3071,20 @@ PLANS.bulk = {
   },
 
   checklistNormal: [
-    { id:'m1', group:'MORNING', label:'Wake & 500ml water immediately', sub:'Before phone. Non-negotiable.' },
-    { id:'m2', group:'MORNING', label:'10 min mobility (CARs + warm-up)', sub:'CARs = Controlled Articular Rotations (slow full-circle joint movements). Hip CARs × 5 each way per hip · Cat-cow × 10 · Thoracic rotation · Wrist CARs × 10' },
+    { id:'m1', group:'MORNING', label:'Wake & 500ml water immediately', sub:'Hydration before anything else.' },
+    { id:'m2', group:'MORNING', label:'10 min mobility (CARs + warm-up)', sub:'CARs = Controlled Articular Rotations (slow full-circle joint movements). Hip CARs \u00d7 5 each way per hip \u00b7 Cat-cow \u00d7 10 \u00b7 Thoracic rotation \u00b7 Wrist CARs \u00d7 10' },
     { id:'m3', group:'MORNING', label:'Training session (if training day)', sub:'See WORKOUTS tab for today\'s session' },
-    { id:'m4', group:'MORNING', label:'Log morning weight in TRACK tab', sub:'Track weekly trend. Aim 0.25–0.5% bodyweight/week gain.' },
-    { id:'f1', group:'EATING', label:'Hit protein target', sub:'1.4–1.8g/kg. Protein density first in every meal.' },
-    { id:'f2', group:'EATING', label:'Hit calorie ceiling', sub:'250–400 cal above TDEE. Eat enough to grow.' },
-    { id:'f3', group:'EATING', label:'Carbs around training', sub:'30–60 min before + within 60 min after session.' },
-    { id:'f4', group:'EATING', label:'2.5–3L water across the day', sub:'Hydration supports muscle protein synthesis.' },
-    { id:'e1', group:'EVENING', label:'Evening session (most days)', sub:'See WORKOUTS tab for today\'s session' },
-    { id:'e2', group:'EVENING', label:'Post-workout cooldown stretches', sub:'5–10 min static stretching. See WORKOUTS tab.' },
-    { id:'n2', group:'NIGHT', label:'Sleep 8+ hours', sub:'Growth hormone peaks during deep sleep. Critical for muscle growth.' }
+    { id:'m4', group:'MORNING', label:'Log morning weight (weekly minimum)', sub:'Track weekly trend. Aim 0.25\u20130.5% bodyweight/week gain.' },
+    { id:'f1', group:'EATING', label:'Hit protein target (1.6\u20132.2g/kg)', sub:'Distribute across 3\u20135 meals. 30\u201350g per meal. Protein density first.' },
+    { id:'f2', group:'EATING', label:'Hit calorie ceiling (eat in surplus)', sub:'10\u201320% above TDEE. You MUST eat enough \u2014 under-eating wastes training stimulus.' },
+    { id:'f3', group:'EATING', label:'Hit carb target around training', sub:'Carbs 1\u20132 hours pre-training + within 60 min post-training. \u22653\u20135g/kg/day.' },
+    { id:'f4', group:'EATING', label:'Pre-training meal (1\u20132 hours before)', sub:'30\u201340g protein + 40\u201360g carbs. Fuels the session and starts MPS.' },
+    { id:'f5', group:'EATING', label:'Post-training protein within 60 min', sub:'30\u201340g protein + carbs. Maximises muscle protein synthesis window.' },
+    { id:'f6', group:'EATING', label:'2.5\u20133L water across the day', sub:'Hydration supports muscle protein synthesis and performance.' },
+    { id:'s1', group:'SUPPLEMENTS', label:'Creatine 5g taken today', sub:'Most evidence-backed supplement for muscle growth. Take daily, timing doesn\'t matter. With food or shake.' },
+    { id:'e1', group:'EVENING', label:'Evening session (most training days)', sub:'See WORKOUTS tab for today\'s session' },
+    { id:'e2', group:'EVENING', label:'Post-workout cooldown stretches', sub:'5\u201310 min static stretching. See WORKOUTS tab.' },
+    { id:'n2', group:'NIGHT', label:'Sleep 7\u20139 hours', sub:'Growth hormone peaks during deep sleep. This is when muscle protein synthesis happens. Non-negotiable.' }
   ],
   checklistFast: [
     { id:'wf1', group:'FAST', label:'500ml water + pinch salt on waking', sub:'Prevents headaches. Do this before anything else.' },
@@ -3093,12 +3096,13 @@ PLANS.bulk = {
   ],
   checklistLight: [
     { id:'l1', group:'LIGHT', label:'Wake & 500ml water', sub:'Hydration first. Light day, not skip day.' },
-    { id:'l2', group:'LIGHT', label:'Light mobility or walk', sub:'20–30 min walk or gentle stretching. No heavy training.' },
-    { id:'l3', group:'LIGHT', label:'Eat at or below TDEE', sub:'Small, clean meals. No surplus today — give digestion a break.' },
-    { id:'l4', group:'LIGHT', label:'Protein-focused meals only', sub:'Lean protein + vegetables. No heavy carbs, no junk, no processed food.' },
-    { id:'l5', group:'LIGHT', label:'No snacking between meals', sub:'2–3 structured meals. Let the gut rest between them.' },
-    { id:'l6', group:'LIGHT', label:'2.5L+ water', sub:'Stay hydrated. Water, herbal tea, black coffee only.' },
-    { id:'l7', group:'NIGHT', label:'Sleep 8+ hours', sub:'Recovery is amplified on light days. Don\'t waste it.' }
+    { id:'l2', group:'LIGHT', label:'Light mobility or walk', sub:'20\u201330 min walk or gentle stretching. No heavy training.' },
+    { id:'l3', group:'LIGHT', label:'Eat at or slightly below TDEE', sub:'Maintenance calories or slightly under. Protein stays high. Give digestion a break.' },
+    { id:'l4', group:'LIGHT', label:'Protein still hits 1.6g/kg minimum', sub:'Lean protein + vegetables. Muscle doesn\'t stop needing protein on rest days.' },
+    { id:'l5', group:'LIGHT', label:'No junk food or heavy processed meals', sub:'Light, clean meals. This is gut recovery \u2014 treat it like one.' },
+    { id:'l6', group:'LIGHT', label:'Creatine 5g taken today', sub:'Daily \u2014 don\'t skip on rest or light days.' },
+    { id:'l7', group:'LIGHT', label:'2.5L+ water', sub:'Stay hydrated. Water, herbal tea, black coffee only.' },
+    { id:'l8', group:'NIGHT', label:'Sleep 7\u20139 hours', sub:'Recovery is amplified on light days. Don\'t waste it.' }
   ],
 
   foodGroupLabel: 'EATING',
@@ -3108,7 +3112,7 @@ PLANS.bulk = {
   workoutContent() {
     return `
     <div class="section-title">DEFAULT BULK <span>TRAINING</span></div>
-    <p class="section-note">5 training days + 1 active rest + 1 full rest. Higher volume — surplus fuels recovery.</p>
+    <p class="section-note">5 training days + 1 active rest + 1 full rest. Each muscle group is hit 2\u00d7 per week. Research shows this frequency is superior to 1\u00d7 for hypertrophy (ISSN 2018). Higher volume \u2014 surplus fuels recovery.</p>
 
     ${workoutCard('PUSH A — VOLUME','MON · 40–50 MIN',
       exRow('Hip CARs + Cat-cow + Arm circles','Hip CARs: slow full circles with raised knee, 5 each way per hip. Cat-cow: arch/round spine ×10. Arm circles: small to large, both directions.','5 min')+
@@ -3183,7 +3187,12 @@ PLANS.bulk = {
       exRow('Complete recovery','Sleep, nutrition, stretching only','—'),
       '',
       'SUN'
-    )}`;
+    )}
+
+    <div style="margin-top:6px;padding:5px 8px;background:var(--surface);border-radius:6px;border-left:2px solid var(--accent);">
+      <div style="font-family:'DM Mono',monospace;font-size:0.4rem;color:var(--accent);letter-spacing:1px;">PUSH:PULL RATIO \u2014 BALANCED ACROSS WEEK</div>
+      <div style="font-family:'DM Mono',monospace;font-size:0.38rem;color:var(--muted);margin-top:2px;">Cools 2016 \u00b7 Prinold 2016 \u2014 scapular stabiliser research. Each muscle group trained 2\u00d7/week (ISSN 2018).</div>
+    </div>`;
   },
 
   nutritionContent(s) {
@@ -3199,13 +3208,18 @@ PLANS.bulk = {
       `<div style="border-left:3px solid var(--accent2);padding:6px 10px;margin-bottom:6px;border-radius:4px;background:var(--surface);font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--accent2);line-height:1.6">${w}</div>`
     ).join('') : '';
 
+    // Per-meal protein dosing example (Iraki et al. 2019: 0.40\u20130.55g/kg per meal)
+    const wt = s.currentKg || 80;
+    const mealLow = Math.round(wt * 0.40);
+    const mealHigh = Math.round(wt * 0.55);
+
     return `
     <div class="section-title">DEFAULT BULK <span>NUTRITION</span></div>
-    <p class="section-note">Clean surplus. Carb-forward for muscle growth. Protein: 1.4g/kg floor.</p>
+    <p class="section-note">Clean surplus. Carb-forward for muscle growth. Protein: 1.6\u20132.2g/kg (Iraki et al. 2019).</p>
 
     <div class="macro-grid">
       <div class="macro-box"><div class="macro-val" style="color:#f7dc6f">${cal}</div><div class="macro-lbl">Cal ceiling</div></div>
-      <div class="macro-box"><div class="macro-val" style="color:#ff9966">${proteinG}g</div><div class="macro-lbl">Protein</div></div>
+      <div class="macro-box"><div class="macro-val" style="color:#ff9966">${proteinG}g</div><div class="macro-lbl">Protein (1.6\u20132.2g/kg)</div></div>
       <div class="macro-box"><div class="macro-val" style="color:var(--accent2)">${carbsG}g</div><div class="macro-lbl">Carbs</div></div>
       <div class="macro-box"><div class="macro-val" style="color:#88ccff">${fatG}g</div><div class="macro-lbl">Fats</div></div>
     </div>
@@ -3214,42 +3228,119 @@ PLANS.bulk = {
 
     <div class="rule-card" style="border-left-color:#f7dc6f">
       <div class="rule-num">SURPLUS TARGET</div>
-      <div class="rule-text">250–400 cal/day above TDEE. Gain rate: 0.25–0.5% bodyweight/week.</div>
-      <div class="rule-sub">Research: 10% surplus produces muscle growth with minimal fat gain. 40% surplus = 60–70% of extra weight is fat.</div>
+      <div class="rule-text">250\u2013400 cal/day above TDEE. Gain rate: 0.25\u20130.5% bodyweight/week.</div>
+      <div class="rule-sub">PMC10620361 (2023): 5\u201310% surplus captures nearly all hypertrophic benefit with less fat gain than 15%+ surpluses.</div>
     </div>
 
     <div class="rule-card">
-      <div class="rule-num">PROTEIN DISTRIBUTION</div>
-      <div class="rule-text">30–40g protein per meal across 3–5 meals. Anchor every meal with a complete protein source.</div>
-      <div class="rule-sub">Higher frequency distributes protein for sustained MPS throughout the day.</div>
+      <div class="rule-num">PER-MEAL PROTEIN DOSING</div>
+      <div class="rule-text">${mealLow}\u2013${mealHigh}g protein per meal across 3\u20135 meals (0.40\u20130.55g/kg per meal).</div>
+      <div class="rule-sub">Iraki et al. 2019 (PMC6680710): Distribute protein evenly including within 1\u20132 hours pre- and post-training. At ${wt}kg: ${mealLow}\u2013${mealHigh}g \u00d7 4 meals = ${mealLow*4}\u2013${mealHigh*4}g total.</div>
+    </div>
+
+    <div class="rule-card" style="border-left-color:var(--accent2)">
+      <div class="rule-num">NUTRIENT TIMING</div>
+      <div class="rule-text">Pre-training: 30\u201340g protein + 40\u201360g carbs, 1\u20132 hours before. Post-training: 30\u201340g protein + carbs within 60 min.</div>
+      <div class="rule-sub">ISSN 2018 (PMC6090881): Protein timing around training supports muscle protein synthesis. Carb availability is essential for high-intensity resistance training.</div>
+    </div>
+
+    <div class="rule-card" style="border-left-color:#88ccff">
+      <div class="rule-num">CALORIE CYCLING</div>
+      <div class="rule-text">Training days: full surplus (TDEE + 10\u201320%). Rest/light days: eat at TDEE or slight surplus (TDEE + 0\u20135%).</div>
+      <div class="rule-sub">Reduces unnecessary fat gain on non-training days. Anabolic stimulus is highest around training \u2014 that\u2019s when surplus matters most.</div>
     </div>
 
     <div class="rule-card" style="border-left-color:var(--accent2)">
       <div class="rule-num">CARBS AROUND TRAINING</div>
-      <div class="rule-text">Carbohydrates 30–60 min before session + within 60 min post-session.</div>
-      <div class="rule-sub">Maximises glycogen replenishment and MPS. Carbs drive insulin — a primary anabolic signal for muscle growth.</div>
+      <div class="rule-text">Carbohydrates 1\u20132 hours before session + within 60 min post-session. \u22653\u20135g/kg/day.</div>
+      <div class="rule-sub">Maximises glycogen replenishment and MPS. Carbs drive insulin \u2014 a primary anabolic signal for muscle growth. Iraki 2019: \u22653\u20135g/kg/day after protein and fat are allocated.</div>
     </div>
 
     <div class="section-title" style="margin-top:8px">MEAL <span>EXAMPLES</span></div>
     <div class="snack-grid">
-      <div class="snack-item"><div class="snack-name">Breakfast</div><div class="snack-cal">650–700 cal</div><div class="snack-note">3 eggs + 80g oats + banana + nuts. 35g protein.</div></div>
-      <div class="snack-item"><div class="snack-name">Lunch</div><div class="snack-cal">700–750 cal</div><div class="snack-note">200g chicken + 200g rice + veg + olive oil. 50g protein.</div></div>
-      <div class="snack-item"><div class="snack-name">Snack</div><div class="snack-cal">300–350 cal</div><div class="snack-note">Greek yogurt + fruit + pumpkin seeds. 20g protein.</div></div>
-      <div class="snack-item"><div class="snack-name">Dinner</div><div class="snack-cal">550–600 cal</div><div class="snack-note">150g tuna + sweet potato + spinach + egg. 45g protein.</div></div>
+      <div class="snack-item"><div class="snack-name">Breakfast</div><div class="snack-cal">650\u2013700 cal</div><div class="snack-note">3 eggs + 80g oats + banana + nuts. 35g protein.</div></div>
+      <div class="snack-item"><div class="snack-name">Lunch</div><div class="snack-cal">700\u2013750 cal</div><div class="snack-note">200g chicken + 200g rice + veg + olive oil. 50g protein.</div></div>
+      <div class="snack-item"><div class="snack-name">Snack</div><div class="snack-cal">300\u2013350 cal</div><div class="snack-note">Greek yogurt + fruit + pumpkin seeds. 20g protein.</div></div>
+      <div class="snack-item"><div class="snack-name">Dinner</div><div class="snack-cal">550\u2013600 cal</div><div class="snack-note">150g tuna + sweet potato + spinach + egg. 45g protein.</div></div>
+    </div>
+
+    <div class="section-title" style="margin-top:8px;cursor:pointer" onclick="const el=document.getElementById('bulkProteinSrcGrid');el.style.display=el.style.display==='none'?'block':'none';this.querySelector('.src-chev').textContent=el.style.display==='none'?'\u25b8':'\u25be'">HIGH PROTEIN <span>SOURCES <span class="src-chev" style="font-size:0.7rem">\u25b8</span></span></div>
+    <div id="bulkProteinSrcGrid" style="display:none">
+    <div class="snack-grid">
+      <div class="snack-item"><div class="snack-name">Chicken breast (150g)</div><div class="snack-cal">250 cal</div><div class="snack-note">46g protein \u00b7 King of protein density</div></div>
+      <div class="snack-item"><div class="snack-name">Eggs (3 large)</div><div class="snack-cal">215 cal</div><div class="snack-note">18g protein \u00b7 Batch cook 12 at a time</div></div>
+      <div class="snack-item"><div class="snack-name">Greek yogurt (200g)</div><div class="snack-cal">130 cal</div><div class="snack-note">20g protein \u00b7 Buy plain, not flavoured</div></div>
+      <div class="snack-item"><div class="snack-name">Canned tuna (100g)</div><div class="snack-cal">100 cal</div><div class="snack-note">25g protein \u00b7 Best cal:protein ratio</div></div>
+      <div class="snack-item"><div class="snack-name">Lentils/dal (200g cooked)</div><div class="snack-cal">230 cal</div><div class="snack-note">18g protein \u00b7 Plant protein + fibre</div></div>
+      <div class="snack-item"><div class="snack-name">Cottage cheese (100g)</div><div class="snack-cal">100 cal</div><div class="snack-note">12g protein \u00b7 Casein \u2014 slow digestion</div></div>
+      <div class="snack-item"><div class="snack-name">Turkey mince (100g)</div><div class="snack-cal">150 cal</div><div class="snack-note">30g protein \u00b7 Lean ground meat</div></div>
+      <div class="snack-item"><div class="snack-name">Whey protein (1 scoop)</div><div class="snack-cal">120 cal</div><div class="snack-note">25g protein \u00b7 Only if food protein falls short</div></div>
+    </div>
+    </div>
+
+    <div class="section-title" style="margin-top:8px;cursor:pointer" onclick="const el=document.getElementById('bulkFatSrcGrid');el.style.display=el.style.display==='none'?'block':'none';this.querySelector('.src-chev').textContent=el.style.display==='none'?'\u25b8':'\u25be'">FAT <span>SOURCES (~25g FAT) <span class="src-chev" style="font-size:0.7rem">\u25b8</span></span></div>
+    <div id="bulkFatSrcGrid" style="display:none">
+    <div class="snack-grid">
+      <div class="snack-item"><div class="snack-name">Peanuts (55g)</div><div class="snack-cal">310 cal</div><div class="snack-note">25g fat \u00b7 14g protein \u00b7 Two handfuls</div></div>
+      <div class="snack-item"><div class="snack-name">Almonds (45g)</div><div class="snack-cal">260 cal</div><div class="snack-note">22g fat \u00b7 10g protein \u00b7 1.5 handfuls</div></div>
+      <div class="snack-item"><div class="snack-name">Peanut butter (3 tbsp)</div><div class="snack-cal">285 cal</div><div class="snack-note">24g fat \u00b7 10g protein \u00b7 Spoon from jar</div></div>
+      <div class="snack-item"><div class="snack-name">Cheese/paneer (80g)</div><div class="snack-cal">280 cal</div><div class="snack-note">23g fat \u00b7 18g protein \u00b7 Slice or cube</div></div>
+      <div class="snack-item"><div class="snack-name">Boiled eggs (4)</div><div class="snack-cal">280 cal</div><div class="snack-note">20g fat \u00b7 24g protein \u00b7 Batch cook, fridge</div></div>
+      <div class="snack-item"><div class="snack-name">Avocado (1 medium)</div><div class="snack-cal">240 cal</div><div class="snack-note">22g fat \u00b7 3g protein \u00b7 Slice, salt, eat</div></div>
+      <div class="snack-item"><div class="snack-name">Full-fat yogurt (250g)</div><div class="snack-cal">200 cal</div><div class="snack-note">22g fat \u00b7 10g protein \u00b7 Bowl from fridge</div></div>
+      <div class="snack-item"><div class="snack-name">Cashews (45g)</div><div class="snack-cal">250 cal</div><div class="snack-note">20g fat \u00b7 8g protein \u00b7 Available everywhere</div></div>
+    </div>
+    </div>
+
+    <div class="section-title" style="margin-top:8px;cursor:pointer" onclick="const el=document.getElementById('bulkCarbSrcGrid');el.style.display=el.style.display==='none'?'block':'none';this.querySelector('.src-chev').textContent=el.style.display==='none'?'\u25b8':'\u25be'">CARB <span>SOURCES <span class="src-chev" style="font-size:0.7rem">\u25b8</span></span></div>
+    <div id="bulkCarbSrcGrid" style="display:none">
+    <div class="snack-grid">
+      <div class="snack-item"><div class="snack-name">Bananas (2 medium)</div><div class="snack-cal">210 cal</div><div class="snack-note">54g carbs \u00b7 Peel and eat</div></div>
+      <div class="snack-item"><div class="snack-name">Oats (70g dry + water)</div><div class="snack-cal">265 cal</div><div class="snack-note">47g carbs \u00b7 9g protein \u00b7 3 min microwave</div></div>
+      <div class="snack-item"><div class="snack-name">Sweet potato (200g boiled)</div><div class="snack-cal">180 cal</div><div class="snack-note">42g carbs \u00b7 Boil in batch, eat cold</div></div>
+      <div class="snack-item"><div class="snack-name">Rice (200g cooked)</div><div class="snack-cal">260 cal</div><div class="snack-note">58g carbs \u00b7 Staple bulk carb source</div></div>
+      <div class="snack-item"><div class="snack-name">Toast + honey (2 slices)</div><div class="snack-cal">240 cal</div><div class="snack-note">50g carbs \u00b7 2 minutes</div></div>
+      <div class="snack-item"><div class="snack-name">Dates (6 pieces)</div><div class="snack-cal">200 cal</div><div class="snack-note">50g carbs \u00b7 Instant energy, pocket-sized</div></div>
+      <div class="snack-item"><div class="snack-name">Cornflakes + milk (50g+150ml)</div><div class="snack-cal">250 cal</div><div class="snack-note">48g carbs \u00b7 Pour and eat</div></div>
+      <div class="snack-item"><div class="snack-name">Granola bars (2)</div><div class="snack-cal">240 cal</div><div class="snack-note">42g carbs \u00b7 Wrapper off, done</div></div>
+    </div>
+    </div>
+
+    <div class="section-title" style="margin-top:8px">TRACKING <span>YOUR BULK</span></div>
+    <div class="rule-card" style="border-left-color:#f7dc6f">
+      <div class="rule-num">HOW TO KNOW IT\u2019S WORKING</div>
+      <div class="rule-text">Weigh weekly (same conditions each time) \u00b7 Measure waist monthly \u2014 if waist growing faster than weight, surplus is too high \u00b7 Monthly mirror photos (front, side, back) \u2014 same lighting, same time</div>
+      <div class="rule-sub">If gaining >0.5% BW/week for 3+ weeks, reduce surplus by 100\u2013150 cal. If waist:weight ratio worsens, you\u2019re gaining too much fat.</div>
     </div>
 
     <div class="section-title" style="margin-top:8px">WHEN TO <span>STOP BULKING</span></div>
     <div class="rule-card" style="border-left-color:var(--danger)">
       <div class="rule-num">TRANSITION SIGNALS</div>
-      <div class="rule-text">Waist circumference +4–5cm from start · Scale rising >0.5% BW/week for 3+ weeks · After 12–16 weeks · Strength gains plateau despite adequate sleep and nutrition</div>
-      <div class="rule-sub">Most individuals benefit from a 6–12 week maintenance or cut phase before the next bulk.</div>
+      <div class="rule-text">Waist circumference +4\u20135cm from start \u00b7 Scale rising >0.5% BW/week for 3+ weeks \u00b7 After 12\u201316 weeks \u00b7 Strength gains plateau despite adequate sleep and nutrition</div>
+      <div class="rule-sub">Most individuals benefit from a 6\u201312 week maintenance or cut phase before the next bulk.</div>
     </div>
 
-    <div class="section-title" style="margin-top:8px">SUPPLEMENTS <span>(OPTIONAL)</span></div>
+    <div class="section-title" style="margin-top:8px">SUPPLEMENTS <span>(EVIDENCE-BASED)</span></div>
     <div class="rule-card">
-      <div class="rule-num">PRIORITY STACK</div>
-      <div class="rule-text">Creatine 5g/day — strongest evidence base, 5–15% strength increase · Whey protein if food intake consistently below 1.4g/kg · Multivitamin + Vitamin D3 2,000–4,000 IU</div>
-      <div class="rule-sub">ZMA before bed if sleep quality is poor. Mass gainers — generally avoid (sugar-heavy, poor nutrient density).</div>
+      <div class="rule-num">CREATINE MONOHYDRATE</div>
+      <div class="rule-text">5g/day, every day. ISSN 2018: strongest evidence base for increasing muscle mass and strength during resistance training (3\u20135g/day).</div>
+      <div class="rule-sub">No loading phase required \u2014 daily consistent dose reaches saturation in ~3 weeks. Timing doesn\u2019t matter. Take with any meal or shake.</div>
+    </div>
+    <div class="rule-card">
+      <div class="rule-num">ADDITIONAL</div>
+      <div class="rule-text">Whey protein if food intake consistently below 1.6g/kg \u00b7 Multivitamin + Vitamin D3 2,000\u20134,000 IU \u00b7 ZMA before bed if sleep quality is poor</div>
+      <div class="rule-sub">Mass gainers \u2014 generally avoid (sugar-heavy, poor nutrient density). D3 dose within NIH UL of 4,000 IU.</div>
+    </div>
+
+    <div class="section-title" style="margin-top:8px">DRINKS</div>
+    <div class="rule-card" style="border-left-color:var(--green)">
+      <div class="rule-num">ALLOWED \u2014 ALWAYS</div>
+      <div class="rule-text">Water \u00b7 Black coffee \u00b7 Plain tea \u00b7 Milk (counts toward calories) \u00b7 Protein shakes</div>
+    </div>
+    <div class="rule-card" style="border-left-color:var(--danger)">
+      <div class="rule-num">AVOID</div>
+      <div class="rule-text">Soda \u00b7 Energy drinks \u00b7 Sugary juice \u00b7 Alcohol (inhibits MPS by up to 37%)</div>
+      <div class="rule-sub">Empty liquid calories that displace nutritious food and impair recovery.</div>
     </div>`;
   },
 
@@ -3257,19 +3348,22 @@ PLANS.bulk = {
     const cal = s.calories || 2800;
     return `
     <div class="section-title">EATING <span>RULES</span></div>
-    ${ruleCard('RULE 01','Hit your ' + cal + ' cal/day ceiling.','Surplus is required for growth. Eating below TDEE during a bulk wastes training stimulus.')}
-    ${ruleCard('RULE 02','Protein density first — anchor every meal.','1.4–1.8g/kg. Complete protein source before adding carbs and fats.')}
-    ${ruleCard('RULE 03','Don\'t fear carbs around training.','Insulin is anabolic. Carbs before and after sessions maximise glycogen and MPS.')}
-    ${ruleCard('RULE 04','2.5–3L water daily.','Hydration supports muscle protein synthesis and performance.')}
-    ${ruleCard('RULE 05','Track scale weekly — aim 0.25–0.5% BW/week gain.','Faster than this means excess fat accumulation. Slower means insufficient surplus.')}
+    ${ruleCard('RULE 01','Hit your ' + cal + ' cal/day ceiling daily.','Surplus is required for growth. Eating below TDEE during a bulk wastes training stimulus. PMC10620361: even a moderate 5\u201310% surplus captures nearly all hypertrophic benefit.')}
+    ${ruleCard('RULE 02','Protein density first \u2014 1.6\u20132.2g/kg, distributed across 3\u20135 meals.','0.40\u20130.55g/kg per meal (Iraki et al. 2019). Anchor every meal with a complete protein source before adding carbs and fats.')}
+    ${ruleCard('RULE 03','Carbs around training \u2014 pre-training 1\u20132hrs before, post-training within 60 min.','ISSN 2018: carb availability is essential for high-intensity resistance training. \u22653\u20135g/kg/day after protein and fat are allocated.')}
+    ${ruleCard('RULE 04','Calorie cycling \u2014 full surplus on training days, maintenance on rest/light days.','Reduces unnecessary fat gain. Anabolic stimulus is highest around training \u2014 that\u2019s when surplus matters most.')}
+    ${ruleCard('RULE 05','2.5\u20133L water daily.','Hydration supports muscle protein synthesis and performance.')}
+    ${ruleCard('RULE 06','Monthly body composition check.','Weigh weekly (same conditions). Measure waist monthly. Mirror photos monthly (front, side, back). If waist:weight ratio worsens, reduce surplus.')}
     <div class="section-title" style="margin-top:8px">TRAINING <span>RULES</span></div>
-    ${ruleCard('RULE 06','5 training days per week.','Push / Pull / Rest / Lower / Push+Pull / Full Body. Push:pull balanced across the week. Volume is higher because surplus supports recovery.','var(--accent2)')}
-    ${ruleCard('RULE 07','Add reps before advancing levels.','When current level feels easy for all sets, add reps to top of range, then advance to next level.','var(--accent2)')}
-    ${ruleCard('RULE 08','Deload every 8–10 weeks.','Reduce volume by 40% for one week. Full recovery before the next progression block.','var(--accent2)')}
-    ${ruleCard('RULE 09','Sleep 8+ hours — non-negotiable.','Growth hormone peaks during deep sleep. This is when muscle protein synthesis happens.','var(--accent2)')}
+    ${ruleCard('RULE 07','5 training days per week \u2014 Push / Pull / Rest / Lower / Push+Pull / Full Body.','Push:pull balanced across the week. Volume is higher because surplus supports recovery.','var(--accent2)')}
+    ${ruleCard('RULE 08','Each muscle group trained 2\u00d7 per week minimum.','ISSN 2018 (PMC6090881): training frequency of 2\u00d7 per muscle group per week is superior to 1\u00d7 for hypertrophy.','var(--accent2)')}
+    ${ruleCard('RULE 09','Push:pull balanced across the week \u2014 never push-dominant.','Cools 2016 (PMC4886800): scapular stabiliser research. Pull work prevents impingement and anterior shoulder issues.','var(--accent2)')}
+    ${ruleCard('RULE 10','Progressive overload \u2014 add reps to top of range, then advance to next level.','Plotkin 2022 (PMC9528903): rep-based progression matches load-based for muscle growth. Calisthenics progression = gym progression.','var(--accent2)')}
+    ${ruleCard('RULE 11','Deload every 8\u201310 weeks \u2014 reduce volume 40% for one week.','Full recovery before the next progression block. Deload week is not a rest week \u2014 train at reduced intensity.','var(--accent2)')}
+    ${ruleCard('RULE 12','Sleep 7\u20139 hours \u2014 non-negotiable.','Growth hormone peaks during deep sleep. This is when muscle protein synthesis happens. No amount of training or food compensates for poor sleep.','var(--accent2)')}
     <div class="section-title" style="margin-top:8px">DISCIPLINE <span>RULES</span></div>
-    ${ruleCard('RULE 10','One miss = noise. Two = pattern. Three = decision.','Minimum beats zero every time.','#70c8ff')}
-    ${ruleCard('RULE 11','Boredom = add progression, not novelty.','Every 2 weeks: +1 rep, -5 sec rest, or harder variation.','#70c8ff')}`;
+    ${ruleCard('RULE 13','One miss = noise. Two = pattern. Three = decision.','Minimum beats zero every time.','#70c8ff')}
+    ${ruleCard('RULE 14','Travel changes nothing \u2014 20 min on a floor.','Bodyweight training has zero location dependency. Kotarsky 2018: push-up progressions produce equivalent strength gains to bench press.','#70c8ff')}`;
   }
 };
 

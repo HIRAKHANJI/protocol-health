@@ -4,6 +4,21 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 3.7.0 — 2026-03-24
+
+**Scope:** Minor (Default Bulk plan research-backed enhancement)
+**Banner:** "Default Bulk plan enhanced: research-backed nutrition, per-meal protein dosing, calorie cycling, food source grids, supplement tracking."
+
+- **Protein floor raised** — `proteinFloorMultiplier` changed from 1.4 to 1.6g/kg, matching Iraki et al. 2019 (PMC6680710) lower bound of 1.6–2.2g/kg for muscle growth.
+- **Checklist (eating day)** — expanded from 11 to 14 items: added pre-training meal, post-training protein, carb target, creatine tracking (SUPPLEMENTS group), updated protein target to show 1.6–2.2g/kg range.
+- **Checklist (light day)** — expanded from 7 to 8 items: added creatine tracking, explicit 1.6g/kg protein minimum, updated descriptions.
+- **Nutrition tab rewrite** — added per-meal protein dosing card (0.40–0.55g/kg per meal, dynamic calculation from user weight, Iraki 2019), nutrient timing card (ISSN 2018), calorie cycling card (full surplus on training days, maintenance on rest), bulk tracking guidance card (weekly weigh-in, monthly waist, photos). Added collapsible protein/fat/carb source grids (8 items each). Expanded supplement section with creatine monohydrate dosing detail. Added drinks section.
+- **Rules tab rewrite** — expanded from 11 to 14 rules: added 2× frequency per muscle group (ISSN 2018), push:pull balance (Cools 2016), calorie cycling, monthly body composition check, travel rule (Kotarsky 2018). All rules now cite research sources.
+- **Workout tab** — section note updated to mention 2×/week frequency (ISSN 2018). Push:pull balance note added at bottom (Cools 2016, Prinold 2016).
+- **No other plans modified** — all changes scoped exclusively to PLANS.bulk.
+
+---
+
 ## Version 3.6.2 — 2026-03-24
 
 **Scope:** Patch (bug fix)
