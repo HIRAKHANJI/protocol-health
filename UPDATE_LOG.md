@@ -4,6 +4,15 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 3.6.2 — 2026-03-24
+
+**Scope:** Patch (bug fix)
+**Banner:** No banner (patch).
+
+- **Exercise level selector collision fix** — when the same exercise group (e.g. `push`, `pull`, `core`) appeared multiple times in a workout session, changing the level on one instance would overwrite all others sharing that groupId. Root cause: `exRowWithLevel` used the raw groupId as the storage key, so all instances of `push` read/wrote the same key. Fix: auto-index instances — first occurrence keeps original key (backward compatible with existing saved data), subsequent occurrences get suffixed keys (`push_2`, `push_3`). Each instance now tracks its own level independently while still showing the same progression options. Day modal exercise history also updated to display instance suffixes correctly.
+
+---
+
 ## Version 3.6.1 — 2026-03-23
 
 **Scope:** Patch (additional macro source items)

@@ -1201,8 +1201,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '3.6.1';
-const APP_VERSION_MSG = 'Fat + carb source cards added to AGRO nutrition tab. All 3 macro source lists are now collapsible.';
+const APP_VERSION = '3.6.2';
+const APP_VERSION_MSG = 'Fixed exercise level selectors — duplicate exercises no longer overwrite each other.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -1777,13 +1777,14 @@ function setExerciseLevel(groupId, level) {
   dispatch('EXERCISE_LEVEL_CHANGED');
 }
 
-function openLevelSelector(groupId) {
+function openLevelSelector(instanceKey, groupId) {
+  groupId = groupId || instanceKey; // backward compat if called with single arg
   const prog = typeof EXERCISE_PROGRESSIONS !== 'undefined' ? EXERCISE_PROGRESSIONS[groupId] : null;
   if(!prog) return;
-  const current = getCurrentExerciseLevel(groupId);
+  const current = getCurrentExerciseLevel(instanceKey);
   document.getElementById('levelModalTitle').textContent = prog.name + ' PROGRESSION';
   document.getElementById('levelModalBody').innerHTML = prog.levels.map(l =>
-    `<div class="level-row${l.level === current ? ' current' : ''}" onclick="setExerciseLevel('${groupId}',${l.level});closeLevelSelector();if(document.getElementById('tab-workouts').classList.contains('active'))renderWorkouts();">
+    `<div class="level-row${l.level === current ? ' current' : ''}" onclick="setExerciseLevel('${instanceKey}',${l.level});closeLevelSelector();if(document.getElementById('tab-workouts').classList.contains('active'))renderWorkouts();">
       <div class="level-num">${l.level}</div>
       <div class="level-info"><div class="level-ex-name">${l.exercise}</div><div class="level-ex-notes">${l.notes || ''}</div></div>
       <div class="level-sets">${l.sets}</div>
@@ -3606,17 +3607,29 @@ const EXERCISE_PROGRESSIONS = {
 
 // exRowWithLevel: exercise row with level badge (AGRO plan only).
 // Shows the selected level's exercise if one is set, otherwise shows the fallback.
+// exRowWithLevel instance tracking — reset before each workoutContent() call
+// Prevents duplicate groupIds from sharing a single level selector
+let _exRowInstanceCount = {};
+function _resetExRowInstances() { _exRowInstanceCount = {}; }
+
 function exRowWithLevel(groupId, fallbackName, fallbackDetail, fallbackSets) {
-  const level = getCurrentExerciseLevel(groupId);
+  // Track instance count per groupId so duplicates get unique storage keys
+  if(!_exRowInstanceCount[groupId]) _exRowInstanceCount[groupId] = 0;
+  _exRowInstanceCount[groupId]++;
+  const instanceNum = _exRowInstanceCount[groupId];
+  // First instance keeps original key (backward compat), subsequent get suffix
+  const instanceKey = instanceNum === 1 ? groupId : groupId + '_' + instanceNum;
+
+  const level = getCurrentExerciseLevel(instanceKey);
   const prog = EXERCISE_PROGRESSIONS[groupId];
   if(level !== null && prog) {
     const l = prog.levels.find(lv => lv.level === level);
     if(l) {
-      return `<div class="exercise-row"><div><div class="ex-name">${l.exercise}</div><div class="ex-detail">${l.notes || fallbackDetail}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="ex-sets">${l.sets}</div><button class="level-badge" onclick="event.stopPropagation();openLevelSelector('${groupId}')">Lv${level}<span class="level-max">/${prog.levels[prog.levels.length-1].level}</span></button></div></div>`;
+      return `<div class="exercise-row"><div><div class="ex-name">${l.exercise}</div><div class="ex-detail">${l.notes || fallbackDetail}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="ex-sets">${l.sets}</div><button class="level-badge" onclick="event.stopPropagation();openLevelSelector('${instanceKey}','${groupId}')">Lv${level}<span class="level-max">/${prog.levels[prog.levels.length-1].level}</span></button></div></div>`;
     }
   }
   const maxLvl = prog ? prog.levels[prog.levels.length-1].level : '?';
-  return `<div class="exercise-row"><div><div class="ex-name">${fallbackName}</div><div class="ex-detail">${fallbackDetail}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="ex-sets">${fallbackSets}</div><button class="level-badge level-badge-unset" onclick="event.stopPropagation();openLevelSelector('${groupId}')">SET<span class="level-max">/${maxLvl}</span></button></div></div>`;
+  return `<div class="exercise-row"><div><div class="ex-name">${fallbackName}</div><div class="ex-detail">${fallbackDetail}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="ex-sets">${fallbackSets}</div><button class="level-badge level-badge-unset" onclick="event.stopPropagation();openLevelSelector('${instanceKey}','${groupId}')">SET<span class="level-max">/${maxLvl}</span></button></div></div>`;
 }
 
 // ─── ACTIVE PLAN HELPER ──────────────────────────────────────────────────────
@@ -4528,6 +4541,7 @@ function renderWorkouts() {
   const s = getSettings();
   const container = document.getElementById('workoutContent');
   buildWeekGrid();
+  _resetExRowInstances();
   container.innerHTML = plan.workoutContent(s);
   const todayDay = DAYS_SHORT[new Date().getDay()]; // 'SUN','MON', etc.
   container.querySelectorAll('.workout-card').forEach(card=>{
@@ -4838,10 +4852,13 @@ function openDayModal(dateStr, dt) {
     if(dayExLevels && typeof EXERCISE_PROGRESSIONS !== 'undefined') {
       html += `<div class="field-group"><label class="field-label">Exercise Levels</label><div class="ex-level-history">`;
       Object.entries(dayExLevels).forEach(([gid, lvl]) => {
-        const prog = EXERCISE_PROGRESSIONS[gid];
+        // Instance keys like 'push_2' map back to base groupId 'push'
+        const baseGid = gid.replace(/_\d+$/, '');
+        const prog = EXERCISE_PROGRESSIONS[gid] || EXERCISE_PROGRESSIONS[baseGid];
         const lvlData = prog ? prog.levels.find(l => l.level === lvl) : null;
         if(prog && lvlData) {
-          html += `${prog.name}: Lv ${lvl} (${lvlData.exercise})<br>`;
+          const suffix = gid !== baseGid ? ` (#${gid.split('_')[1]})` : '';
+          html += `${prog.name}${suffix}: Lv ${lvl} (${lvlData.exercise})<br>`;
         }
       });
       html += `</div></div>`;
