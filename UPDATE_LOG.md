@@ -4,6 +4,14 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 3.9.1 — 2026-03-25
+
+**Scope:** Patch (TRACK tab notes display fix)
+
+- **Notes fully hidden by default** — Day notes in the TRACK tab are now completely hidden behind a "Show Note" button instead of showing a truncated 80-character preview. Tapping "Show Note" reveals the full text with a "hide" button to collapse it back. Reduces vertical scroll clutter when multiple days have long notes.
+
+---
+
 ## Version 3.9.0 — 2026-03-25
 
 **Scope:** Minor (2 new features — workout exercise checklist, supplement sub-items)
