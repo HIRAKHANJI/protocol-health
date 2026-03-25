@@ -1232,7 +1232,7 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '3.9.0';
+const APP_VERSION = '3.9.1';
 const APP_VERSION_MSG = 'Workout exercise checkboxes on WORKOUTS tab with per-day progress tracking. Supplement checklist items now expandable with individual pill checkboxes.';
 
 // Static lookup arrays used throughout rendering
@@ -5449,12 +5449,10 @@ function renderRecentNotes() {
       </div>
       ${log.notes ? (() => {
         const noteText = esc(log.notes);
-        const isLong = log.notes.length > 80;
-        const truncated = isLong ? esc(log.notes.substring(0, 80)) + '...' : noteText;
         const noteId = 'note-' + dateStr;
         return `<div>
-          <div id="${noteId}-short" style="font-size:0.76rem;color:var(--text);line-height:1.5;padding-top:2px">${truncated}${isLong ? ` <button onclick="document.getElementById('${noteId}-short').style.display='none';document.getElementById('${noteId}-full').style.display='block'" style="background:none;border:none;color:var(--accent);font-family:'DM Mono',monospace;font-size:0.65rem;cursor:pointer;padding:0;margin-left:4px">show more</button>` : ''}</div>
-          ${isLong ? `<div id="${noteId}-full" style="display:none;font-size:0.76rem;color:var(--text);line-height:1.5;padding-top:2px">${noteText} <button onclick="document.getElementById('${noteId}-full').style.display='none';document.getElementById('${noteId}-short').style.display='block'" style="background:none;border:none;color:var(--muted);font-family:'DM Mono',monospace;font-size:0.65rem;cursor:pointer;padding:0;margin-left:4px">show less</button></div>` : ''}
+          <div id="${noteId}-btn" style="padding-top:2px"><button onclick="document.getElementById('${noteId}-btn').style.display='none';document.getElementById('${noteId}-full').style.display='block'" style="background:none;border:1px solid var(--border);color:var(--accent);font-family:'DM Mono',monospace;font-size:0.6rem;cursor:pointer;padding:3px 8px;border-radius:4px">Show Note</button></div>
+          <div id="${noteId}-full" style="display:none;font-size:0.76rem;color:var(--text);line-height:1.5;padding-top:2px">${noteText} <button onclick="document.getElementById('${noteId}-full').style.display='none';document.getElementById('${noteId}-btn').style.display='block'" style="background:none;border:none;color:var(--muted);font-family:'DM Mono',monospace;font-size:0.6rem;cursor:pointer;padding:0;margin-left:4px">hide</button></div>
         </div>`;
       })() : ''}
     </div>`;
