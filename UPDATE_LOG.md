@@ -4,6 +4,20 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 3.8.0 — 2026-03-25
+
+**Scope:** Minor (5 bug fixes — radar scoring, notes display, settings persistence, checklist grouping)
+**Banner:** "Radar scoring improved (proportional calories, dampened weight trend, fasting excludes today). Notes collapsible. Age/height persist. Fast day electrolytes in supplements section."
+
+- **BUG 1: AGRO fast day checklist grouping** — Electrolyte items (wf2, wf3) moved from FAST group to SUPPLEMENTS group. Array reordered so all SUPPLEMENTS items (sf1, wf2, wf3, sf2) render as one coherent section. Item IDs unchanged to preserve existing dayLog check states.
+- **BUG 2A: Radar calorie scoring — proportional** — Replaced binary pass/fail calorie scoring with proportional: at or under ceiling = 100%, over ceiling = ceiling/actual ratio (e.g. 1150 on 1000 ceiling = 87%, not 0%). Affects all plans.
+- **BUG 2B: Radar weight trend — sparse data dampening** — Weight trend score now scales by data confidence: full score at 7+ data points, linearly dampened below that (e.g. 2 points = 29% of raw score). Prevents misleading 100% from early water weight drops.
+- **BUG 3: Collapsible notes in TRACK tab** — Notes longer than 80 characters now truncated with "show more" / "show less" toggle. Short notes render unchanged. Reduces vertical scrolling on TRACK tab.
+- **BUG 4: Age/height persistence** — autoFillTDEE() now saves age, height, sex, and activityLevel to settings immediately when TDEE is computed. Values no longer lost when settings panel is closed without clicking CONFIRM PLAN.
+- **BUG 5: Radar fasting — today excluded, checklist-weighted scoring** — Today excluded from fasting completion scoring (in-progress day can't be scored). Past fast days now scored by combining food absence with checklist completion: full fast + full checklist = 100%, full fast + no checklist = 50%, broken fast scored proportionally. Light day scoring also excludes today.
+
+---
+
 ## Version 3.7.0 — 2026-03-24
 
 **Scope:** Minor (Default Bulk plan research-backed enhancement)
