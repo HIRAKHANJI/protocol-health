@@ -1201,8 +1201,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '3.7.0';
-const APP_VERSION_MSG = 'Default Bulk plan enhanced: research-backed nutrition, per-meal protein dosing, calorie cycling, food source grids, supplement tracking.';
+const APP_VERSION = '3.8.0';
+const APP_VERSION_MSG = 'Radar scoring improved (proportional calories, dampened weight trend, fasting excludes today). Notes collapsible. Age/height persist. Fast day electrolytes in supplements section.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -2286,14 +2286,14 @@ const PLANS = {
     ],
     checklistFast: [
       { id:'wf1', group:'FAST', label:'500ml water + pinch salt on waking', sub:'Prevents headaches. Do this before anything else.' },
-      { id:'wf2', group:'FAST', label:'Electrolyte tablet mid-morning (9-10am)', sub:'99mg potassium. First of 2 daily doses.' },
-      { id:'wf3', group:'FAST', label:'Electrolyte tablet pre-evening (20 min before training)', sub:'99mg potassium. Second dose. Prevents palpitations during fasted work.' },
       { id:'wf4', group:'FAST', label:'Black coffee or green tea only', sub:'Appetite suppression. Zero calories. Allowed.' },
       { id:'wf5', group:'FAST', label:'3.5L+ water total today', sub:'Sip constantly. Don\'t chug all at once.' },
       { id:'wf6', group:'FAST', label:'No food consumed today', sub:'Fast is unbroken. If you break it \u2014 log it honestly.' },
+      { id:'wf7', group:'FAST', label:'Fast day intensity: 70-80% only', sub:'Training fasted is fine. Don\'t push 100% on zero calories.' },
       { id:'sf1', group:'SUPPLEMENTS', label:'Morning supplements taken', sub:'D3+K2 1 tab (with MCT gel for absorption) \u00b7 Zinc (Sun/Sat only) \u00b7 2 MCT gels pre-training' },
-      { id:'sf2', group:'SUPPLEMENTS', label:'Magnesium before bed', sub:'1 serving (~67.6mg elemental). Every night including fast days.' },
-      { id:'wf7', group:'FAST', label:'Fast day intensity: 70-80% only', sub:'Training fasted is fine. Don\'t push 100% on zero calories.' }
+      { id:'wf2', group:'SUPPLEMENTS', label:'Electrolyte tablet mid-morning (9-10am)', sub:'99mg potassium. First of 2 daily doses.' },
+      { id:'wf3', group:'SUPPLEMENTS', label:'Electrolyte tablet pre-evening (20 min before training)', sub:'99mg potassium. Second dose. Prevents palpitations during fasted work.' },
+      { id:'sf2', group:'SUPPLEMENTS', label:'Magnesium before bed', sub:'1 serving (~67.6mg elemental). Every night including fast days.' }
     ],
 
     foodGroupLabel: 'AGRO EATING',
@@ -4312,11 +4312,12 @@ function computeRadarMetrics(days) {
   });
   const checklist = checkCount > 0 ? Math.round(checkTotal / checkCount) : null;
 
-  // 2. CALORIE DISCIPLINE — % of completed eating days at or under ceiling
+  // 2. CALORIE DISCIPLINE — proportional scoring (not binary)
+  // At or under ceiling = 100%. Over ceiling = ceiling/actual ratio.
+  // This means 1150 on a 1000 ceiling = 87%, not 0%.
   // Only scores past days (today excluded — day isn't over)
-  // Only counts days from anchor onward — don't penalise pre-start days
   // Requires at least 1 completed eating day with food data to score
-  let calUnder = 0, calTotal = 0, calDataDays = 0;
+  let calScoreSum = 0, calTotal = 0, calDataDays = 0;
   const _ldMap = gs(SK.lightDays)||{};
   windowDates.forEach(ds => {
     if (!isPastTracked(ds)) return;
@@ -4325,31 +4326,48 @@ function computeRadarMetrics(days) {
     const dc = getDayCalories(ds);
     if (dc.hasData) {
       calDataDays++;
-      if (dc.total <= cal) calUnder++;
+      if (dc.total <= cal) {
+        calScoreSum += 100;
+      } else {
+        // Proportional: how close to ceiling? Floored at 0.
+        calScoreSum += Math.max(0, Math.round((cal / dc.total) * 100));
+      }
     }
-    // days without food data: count as miss only if user has logged food on at least 1 day
   });
   // Gate: need at least 1 eating day with actual food data to produce a score
-  // Otherwise we'd just be measuring "did you log food" not "did you hit your ceiling"
-  const calories = (calTotal > 0 && calDataDays > 0) ? Math.round((calUnder / calTotal) * 100) : null;
+  const calories = (calTotal > 0 && calDataDays > 0) ? Math.round(calScoreSum / calTotal) : null;
 
   // 3. FASTING / LIGHT DAY ADHERENCE — % of scheduled fast or light days actually observed
+  // Today is excluded — day is in-progress, can't score completion yet
+  // Past fast days scored by food absence weighted by checklist completion
   const lightDaysMap = gs(SK.lightDays)||{};
   const lightDow = plan.lightDaysDow || [];
+  const todayDateStr = dateToStr(new Date());
   let fastScheduled = 0, fastCompleted = 0;
   windowDates.forEach(ds => {
-    if (!isPastTracked(ds) && !(isTracked(ds) && ds === todayStr())) return;
-    // Include today for fasting — you know by morning if it's a fast day
-    if (!isTracked(ds)) return;
+    if (!isPastTracked(ds)) return;
+    if (ds === todayDateStr) return; // Today is in-progress — don't score
     const dow = strToDate(ds).getDay();
     if (plan.fastDaysDow.includes(dow)) {
       fastScheduled++;
       if (fastDays[ds]) {
         const dc = getDayCalories(ds);
-        if (!dc.hasData || dc.total === 0) fastCompleted++;
-        else fastCompleted += 0.3;
+        const log = dayLogs[ds];
+        const checks = log ? Object.values(log.checks || {}) : [];
+        const checksDone = checks.filter(Boolean).length;
+        const checksTotal = checks.length;
+        const checklistScore = checksTotal > 0 ? checksDone / checksTotal : 0;
+
+        if (!dc.hasData || dc.total === 0) {
+          // Food absence confirmed. Score weighted by checklist completion.
+          fastCompleted += 0.5 + (checklistScore * 0.5);
+        } else {
+          // Food was logged on a fast day = fast was broken. Partial credit.
+          fastCompleted += 0.3 * checklistScore;
+        }
       }
     } else if (lightDow.includes(dow)) {
+      if (ds === todayDateStr) return; // Today is in-progress — don't score
       fastScheduled++;
       if (lightDaysMap[ds]) {
         const dc = getDayCalories(ds);
@@ -4396,6 +4414,13 @@ function computeRadarMetrics(days) {
       else if (dailyProgress > 0) weightTrend = Math.round(50 + (dailyProgress / targetRate) * 50);
       else if (dailyProgress === 0) weightTrend = 50;
       else weightTrend = Math.max(0, Math.round(50 + (dailyProgress / targetRate) * 50));
+
+      // Dampen weight trend when data is sparse — early readings are unreliable
+      // Full confidence at 7+ data points. Below that, scale linearly.
+      if (weightTrend !== null && windowWeights.length < 7) {
+        const confidence = windowWeights.length / 7;
+        weightTrend = Math.round(weightTrend * confidence);
+      }
     }
   }
 
@@ -5195,7 +5220,16 @@ function renderRecentNotes() {
           <button onclick="event.stopPropagation();deleteDayNote('${dateStr}')" style="background:none;border:1px solid var(--border);color:var(--muted);width:22px;height:22px;border-radius:5px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s;margin-left:4px" onmouseover="this.style.borderColor='var(--danger)';this.style.color='var(--danger)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'" title="Delete this day log">×</button>
         </span>
       </div>
-      ${log.notes?`<div style="font-size:0.76rem;color:var(--text);line-height:1.5;padding-top:2px">${esc(log.notes)}</div>`:''}
+      ${log.notes ? (() => {
+        const noteText = esc(log.notes);
+        const isLong = log.notes.length > 80;
+        const truncated = isLong ? esc(log.notes.substring(0, 80)) + '...' : noteText;
+        const noteId = 'note-' + dateStr;
+        return `<div>
+          <div id="${noteId}-short" style="font-size:0.76rem;color:var(--text);line-height:1.5;padding-top:2px">${truncated}${isLong ? ` <button onclick="document.getElementById('${noteId}-short').style.display='none';document.getElementById('${noteId}-full').style.display='block'" style="background:none;border:none;color:var(--accent);font-family:'DM Mono',monospace;font-size:0.65rem;cursor:pointer;padding:0;margin-left:4px">show more</button>` : ''}</div>
+          ${isLong ? `<div id="${noteId}-full" style="display:none;font-size:0.76rem;color:var(--text);line-height:1.5;padding-top:2px">${noteText} <button onclick="document.getElementById('${noteId}-full').style.display='none';document.getElementById('${noteId}-short').style.display='block'" style="background:none;border:none;color:var(--muted);font-family:'DM Mono',monospace;font-size:0.65rem;cursor:pointer;padding:0;margin-left:4px">show less</button></div>` : ''}
+        </div>`;
+      })() : ''}
     </div>`;
   }).join('');
 }
@@ -5384,6 +5418,19 @@ function autoFillTDEE() {
     field.value = tdee;
     field.style.borderColor = 'var(--accent2)';
     setTimeout(() => field.style.borderColor = '', 2000);
+
+    // Persist age, height, sex, activityLevel to settings immediately
+    // so they survive settings panel close/reopen without CONFIRM PLAN
+    const s = getSettings();
+    const ageVal = parseFloat(document.getElementById('settingAge').value);
+    const heightVal = parseFloat(document.getElementById('settingHeight').value);
+    if(!isNaN(ageVal) && ageVal >= 16) s.age = ageVal;
+    if(!isNaN(heightVal) && heightVal >= 140) s.height = heightVal;
+    s.sex = document.getElementById('settingSex').value || 'male';
+    s.activityLevel = document.getElementById('settingActivityLevel').value || '1.55';
+    s.tdee = tdee;
+    saveSettings(s);
+
     calcDuration();
   }
 }
