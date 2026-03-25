@@ -157,6 +157,36 @@ body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif
 .ex-name { font-size:0.8rem; font-weight:500; }
 .ex-detail { font-family:'DM Mono',monospace; font-size:0.6rem; color:var(--muted); margin-top:2px; }
 .ex-sets { font-family:'DM Mono',monospace; font-size:0.68rem; color:var(--accent2); text-align:right; white-space:nowrap; }
+
+/* WORKOUT EXERCISE CHECKBOXES */
+.wex-row { cursor:pointer; transition:all 0.15s; }
+.wex-row:active { background:rgba(200,245,66,0.05); }
+.wex-cb { width:16px; height:16px; border:2px solid var(--border); border-radius:3px; flex-shrink:0; margin-top:2px; display:flex; align-items:center; justify-content:center; transition:all 0.15s; }
+.wex-tick { color:#000; font-size:9px; font-weight:bold; display:none; }
+.wex-done .wex-cb { background:var(--accent); border-color:var(--accent); }
+.wex-done .wex-tick { display:block; }
+.wex-done .ex-name { text-decoration:line-through; color:var(--muted); }
+.wex-done .ex-sets { color:var(--muted); }
+
+/* SUPPLEMENT SUB-ITEMS */
+.sup-panel { margin-top:6px; border-top:1px solid var(--border); padding-top:6px; }
+.sup-item { display:flex; align-items:center; gap:8px; padding:5px 0; cursor:pointer; transition:all 0.1s; }
+.sup-item:active { opacity:0.7; }
+.sup-cb { width:14px; height:14px; border:2px solid var(--border); border-radius:3px; flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:all 0.15s; }
+.sup-tick { color:#000; font-size:8px; font-weight:bold; display:none; }
+.sup-item.done .sup-cb { background:#82e0aa; border-color:#82e0aa; }
+.sup-item.done .sup-tick { display:block; }
+.sup-item.done .sup-name { text-decoration:line-through; color:var(--muted); }
+.sup-name { font-size:0.72rem; }
+.sup-dose { font-family:'DM Mono',monospace; font-size:0.6rem; color:var(--accent2); margin-left:4px; }
+.sup-when { font-family:'DM Mono',monospace; font-size:0.55rem; color:var(--muted); }
+.sup-count { font-family:'DM Mono',monospace; font-size:0.6rem; color:#82e0aa; margin-left:6px; }
+.check-item.has-subitems .checkbox { border-color:rgba(130,224,170,0.5); }
+.check-item.has-subitems.done .checkbox { background:#82e0aa; border-color:#82e0aa; }
+.check-item.has-subitems.partial .checkbox { background:rgba(130,224,170,0.4); border-color:#82e0aa; }
+.check-item.has-subitems.partial .checkbox-tick { display:block; color:rgba(0,0,0,0.4); }
+.sup-expand-icon { font-size:0.55rem; color:var(--muted); transition:transform 0.2s; flex-shrink:0; }
+.sup-expand-icon.open { transform:rotate(180deg); }
 .chevron { color:var(--muted); font-size:0.7rem; transition:transform 0.2s; display:block; margin-top:3px; }
 .chevron.open { transform:rotate(180deg); }
 
@@ -669,6 +699,7 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
 <div class="section" id="tab-workouts">
   <div style="height:10px"></div>
   <div class="week-grid" id="weekGrid"></div>
+  <div id="workoutProgressBar" style="margin-bottom:10px"></div>
   <div id="workoutContent"></div>
 </div>
 
@@ -1201,8 +1232,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '3.8.0';
-const APP_VERSION_MSG = 'Radar scoring improved (proportional calories, dampened weight trend, fasting excludes today). Notes collapsible. Age/height persist. Fast day electrolytes in supplements section.';
+const APP_VERSION = '3.9.0';
+const APP_VERSION_MSG = 'Workout exercise checkboxes on WORKOUTS tab with per-day progress tracking. Supplement checklist items now expandable with individual pill checkboxes.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -1835,6 +1866,7 @@ const DISPATCH_MAP = {
   SCHEDULE_REMOVED:  ['durationBar','calendarHighlights','manageSchedBtn'],
   FOOD_LOGGED:       ['projection','goalBar','recentNotes','foodModal','todayCalStrip','nutritionMacros','radar','trackFoodLog'],
   EXERCISE_LEVEL_CHANGED: ['workoutLevelDisplay'],
+  WORKOUT_CHECKED: ['recentNotes'],
 };
 
 // ─── CUSTOM DIALOGS (native confirm/alert blocked in sandboxed iframes) ──────
@@ -2279,7 +2311,14 @@ const PLANS = {
       { id:'e1', group:'EVENING', label:'Change clothes on arriving home', sub:'Trigger signal. Don\'t sit down first.' },
       { id:'e2', group:'EVENING', label:'Evening session (40-45 min)', sub:'Evening A/B/C or Run \u2014 see WORKOUTS tab' },
       { id:'e3', group:'EVENING', label:'Post-workout stretch protocol', sub:'Cooldown per day \u2014 see WORKOUTS tab' },
-      { id:'s1', group:'SUPPLEMENTS', label:'Morning supplements taken', sub:'Osteocare 2 tabs \u00b7 D3+K2 1 tab \u00b7 Zinc 50mg (EOD only: Sun/Tue/Thu/Sat) \u00b7 MCT 1 gel' },
+      { id:'s1', group:'SUPPLEMENTS', label:'Morning supplements taken', sub:'Tap to expand',
+        subItems: [
+          { id:'s1_a', name:'Osteocare', dose:'2 tabs', when:'With breakfast' },
+          { id:'s1_b', name:'D3+K2', dose:'1 tab', when:'With MCT gel for absorption' },
+          { id:'s1_c', name:'Zinc 50mg', dose:'1 tab', when:'Alternate days only', days:[0,2,4,6] },
+          { id:'s1_d', name:'MCT gel', dose:'1 gel', when:'Fat carrier for D3' }
+        ]
+      },
       { id:'s2', group:'SUPPLEMENTS', label:'Omega-3 with largest meal', sub:'3 caps with lunch or dinner. 2,475mg EPA+DHA total.' },
       { id:'s3', group:'SUPPLEMENTS', label:'Magnesium before bed', sub:'1 serving (~67.6mg elemental). Every night, 7 days.' },
       { id:'n2', group:'NIGHT', label:'Sleep before midnight', sub:'Recovery is training. Don\'t skip it.' }
@@ -2290,7 +2329,13 @@ const PLANS = {
       { id:'wf5', group:'FAST', label:'3.5L+ water total today', sub:'Sip constantly. Don\'t chug all at once.' },
       { id:'wf6', group:'FAST', label:'No food consumed today', sub:'Fast is unbroken. If you break it \u2014 log it honestly.' },
       { id:'wf7', group:'FAST', label:'Fast day intensity: 70-80% only', sub:'Training fasted is fine. Don\'t push 100% on zero calories.' },
-      { id:'sf1', group:'SUPPLEMENTS', label:'Morning supplements taken', sub:'D3+K2 1 tab (with MCT gel for absorption) \u00b7 Zinc (Sun/Sat only) \u00b7 2 MCT gels pre-training' },
+      { id:'sf1', group:'SUPPLEMENTS', label:'Morning supplements taken', sub:'Tap to expand',
+        subItems: [
+          { id:'sf1_a', name:'D3+K2', dose:'1 tab', when:'With MCT gel on waking' },
+          { id:'sf1_b', name:'Zinc 50mg', dose:'1 tab', when:'Fast days: Sun/Sat only', days:[0,6] },
+          { id:'sf1_c', name:'MCT gel', dose:'2 gels', when:'Pre-training' }
+        ]
+      },
       { id:'wf2', group:'SUPPLEMENTS', label:'Electrolyte tablet mid-morning (9-10am)', sub:'99mg potassium. First of 2 daily doses.' },
       { id:'wf3', group:'SUPPLEMENTS', label:'Electrolyte tablet pre-evening (20 min before training)', sub:'99mg potassium. Second dose. Prevents palpitations during fasted work.' },
       { id:'sf2', group:'SUPPLEMENTS', label:'Magnesium before bed', sub:'1 serving (~67.6mg elemental). Every night including fast days.' }
@@ -3704,7 +3749,8 @@ const EXERCISE_PROGRESSIONS = {
 // exRowWithLevel instance tracking — reset before each workoutContent() call
 // Prevents duplicate groupIds from sharing a single level selector
 let _exRowInstanceCount = {};
-function _resetExRowInstances() { _exRowInstanceCount = {}; }
+let _wexCounter = 0;
+function _resetExRowInstances() { _exRowInstanceCount = {}; _wexCounter = 0; }
 
 function exRowWithLevel(groupId, fallbackName, fallbackDetail, fallbackSets) {
   // Track instance count per groupId so duplicates get unique storage keys
@@ -3714,16 +3760,17 @@ function exRowWithLevel(groupId, fallbackName, fallbackDetail, fallbackSets) {
   // First instance keeps original key (backward compat), subsequent get suffix
   const instanceKey = instanceNum === 1 ? groupId : groupId + '_' + instanceNum;
 
+  const wid = 'wex' + (_wexCounter++);
   const level = getCurrentExerciseLevel(instanceKey);
   const prog = EXERCISE_PROGRESSIONS[groupId];
   if(level !== null && prog) {
     const l = prog.levels.find(lv => lv.level === level);
     if(l) {
-      return `<div class="exercise-row"><div><div class="ex-name">${l.exercise}</div><div class="ex-detail">${l.notes || fallbackDetail}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="ex-sets">${l.sets}</div><button class="level-badge" onclick="event.stopPropagation();openLevelSelector('${instanceKey}','${groupId}')">Lv${level}<span class="level-max">/${prog.levels[prog.levels.length-1].level}</span></button></div></div>`;
+      return `<div class="exercise-row wex-row" data-wid="${wid}" onclick="toggleWorkoutEx(this)"><div style="display:flex;gap:8px;align-items:flex-start"><div class="wex-cb"><span class="wex-tick">✓</span></div><div><div class="ex-name">${l.exercise}</div><div class="ex-detail">${l.notes || fallbackDetail}</div></div></div><div style="display:flex;align-items:center;gap:8px"><div class="ex-sets">${l.sets}</div><button class="level-badge" onclick="event.stopPropagation();openLevelSelector('${instanceKey}','${groupId}')">Lv${level}<span class="level-max">/${prog.levels[prog.levels.length-1].level}</span></button></div></div>`;
     }
   }
   const maxLvl = prog ? prog.levels[prog.levels.length-1].level : '?';
-  return `<div class="exercise-row"><div><div class="ex-name">${fallbackName}</div><div class="ex-detail">${fallbackDetail}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="ex-sets">${fallbackSets}</div><button class="level-badge level-badge-unset" onclick="event.stopPropagation();openLevelSelector('${instanceKey}','${groupId}')">SET<span class="level-max">/${maxLvl}</span></button></div></div>`;
+  return `<div class="exercise-row wex-row" data-wid="${wid}" onclick="toggleWorkoutEx(this)"><div style="display:flex;gap:8px;align-items:flex-start"><div class="wex-cb"><span class="wex-tick">✓</span></div><div><div class="ex-name">${fallbackName}</div><div class="ex-detail">${fallbackDetail}</div></div></div><div style="display:flex;align-items:center;gap:8px"><div class="ex-sets">${fallbackSets}</div><button class="level-badge level-badge-unset" onclick="event.stopPropagation();openLevelSelector('${instanceKey}','${groupId}')">SET<span class="level-max">/${maxLvl}</span></button></div></div>`;
 }
 
 // ─── ACTIVE PLAN HELPER ──────────────────────────────────────────────────────
@@ -3867,11 +3914,21 @@ function renderTodayChecklist() {
     }
     if(item.id === 'e3' && plan.stretchSub && plan.stretchSub[day]) sub = plan.stretchSub[day];
     // Inject day-aware supplement sub-text — only show today's actual supplements with times
-    if(item.group === 'SUPPLEMENTS') sub = resolveSupplementSub(item.id, sub, day, dayType, s);
+    if(item.group === 'SUPPLEMENTS' && !item.subItems) sub = resolveSupplementSub(item.id, sub, day, dayType, s);
     // Inject dynamic times into labels/subs
     const resolved = resolveItemTimes(item.id, label, sub, s);
     label = resolved.label; sub = resolved.sub;
-    html += `<div class="check-item" onclick="toggle(this)" data-id="${item.id}"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">${label}</div><div class="item-sub">${sub}</div></div></div>`;
+    // Items with subItems get expandable panel instead of direct toggle
+    if(item.subItems && item.subItems.length) {
+      const visibleSubs = item.subItems.filter(si => !si.days || si.days.includes(day));
+      html += `<div class="check-item has-subitems" onclick="toggleSupExpand(this)" data-id="${item.id}"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">${label} <span class="sup-count" id="sup-count-${item.id}"></span></div><div class="item-sub" id="sup-sub-${item.id}"></div><div class="sup-panel" id="sup-panel-${item.id}" style="display:none">`;
+      visibleSubs.forEach(si => {
+        html += `<div class="sup-item" data-sid="${si.id}" onclick="event.stopPropagation();toggleSupItem(this,'${item.id}')"><div class="sup-cb"><span class="sup-tick">✓</span></div><div><div class="sup-name">${si.name} <span class="sup-dose">${si.dose}</span></div><div class="sup-when">${si.when}</div></div></div>`;
+      });
+      html += `</div></div><span class="sup-expand-icon">▼</span></div>`;
+    } else {
+      html += `<div class="check-item" onclick="toggle(this)" data-id="${item.id}"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">${label}</div><div class="item-sub">${sub}</div></div></div>`;
+    }
   });
   if(currentGroup) html += '</div>';
   container.innerHTML = html;
@@ -3968,9 +4025,79 @@ function loadChecklist() {
   const log = getDayLog(todayStr());
   const checks = log.checks || {};
   document.querySelectorAll('.check-item').forEach(item=>{
-    item.classList.toggle('done', !!checks[item.dataset.id]);
+    if(item.classList.contains('has-subitems')) {
+      // Load sub-item states and derive parent state
+      const panel = item.querySelector('.sup-panel');
+      if(panel) {
+        const subs = panel.querySelectorAll('.sup-item');
+        let subDone = 0, subTotal = subs.length;
+        subs.forEach(si => {
+          const sid = si.dataset.sid;
+          if(checks[sid]) { si.classList.add('done'); subDone++; }
+          else si.classList.remove('done');
+        });
+        // Update parent state: done if all sub-items done, partial if some
+        item.classList.remove('done','partial');
+        if(subTotal > 0 && subDone === subTotal) { item.classList.add('done'); checks[item.dataset.id] = true; }
+        else if(subDone > 0) { item.classList.add('partial'); checks[item.dataset.id] = false; }
+        else { checks[item.dataset.id] = false; }
+        // Update count display
+        updateSupCount(item.dataset.id, subDone, subTotal);
+      }
+    } else {
+      item.classList.toggle('done', !!checks[item.dataset.id]);
+    }
   });
   updateProgress();
+}
+
+// toggleSupExpand: expand/collapse the supplement sub-items panel
+function toggleSupExpand(el) {
+  const panel = el.querySelector('.sup-panel');
+  const icon = el.querySelector('.sup-expand-icon');
+  if(panel) {
+    const isOpen = panel.style.display !== 'none';
+    panel.style.display = isOpen ? 'none' : 'block';
+    if(icon) icon.classList.toggle('open', !isOpen);
+  }
+}
+
+// toggleSupItem: toggle individual supplement sub-item checkbox
+function toggleSupItem(el, parentId) {
+  el.classList.toggle('done');
+  const parentEl = el.closest('.check-item');
+  const panel = parentEl.querySelector('.sup-panel');
+  const subs = panel.querySelectorAll('.sup-item');
+  let subDone = 0, subTotal = subs.length;
+  subs.forEach(si => { if(si.classList.contains('done')) subDone++; });
+  // Update parent state
+  parentEl.classList.remove('done','partial');
+  if(subTotal > 0 && subDone === subTotal) parentEl.classList.add('done');
+  else if(subDone > 0) parentEl.classList.add('partial');
+  // Update count
+  updateSupCount(parentId, subDone, subTotal);
+  // Save all checks including sub-items
+  const log = getDayLog(todayStr());
+  const checks = Object.assign({}, log.checks||{});
+  // Save sub-item states
+  subs.forEach(si => { checks[si.dataset.sid] = si.classList.contains('done'); });
+  // Save parent state (true only if all sub-items done)
+  checks[parentId] = (subDone === subTotal && subTotal > 0);
+  // Also save all other regular check-items
+  document.querySelectorAll('.check-item:not(.has-subitems)').forEach(item => {
+    checks[item.dataset.id] = item.classList.contains('done');
+  });
+  saveDayLogField(todayStr(), { checks });
+  updateProgress();
+  dispatch('DAY_SAVED');
+}
+
+// updateSupCount: update the count display and sub-text for a supplement parent item
+function updateSupCount(parentId, done, total) {
+  const countEl = document.getElementById('sup-count-' + parentId);
+  const subEl = document.getElementById('sup-sub-' + parentId);
+  if(countEl) countEl.textContent = done + '/' + total;
+  if(subEl) subEl.textContent = done === total ? 'All taken' : done === 0 ? 'Tap to expand' : done + ' of ' + total + ' taken';
 }
 
 // toggle: called when a checklist item is tapped on the TODAY tab.
@@ -3980,8 +4107,14 @@ function toggle(el) {
   el.classList.toggle('done');
   const log = getDayLog(todayStr());
   const checks = Object.assign({}, log.checks||{});
-  document.querySelectorAll('.check-item').forEach(item=>{
+  document.querySelectorAll('.check-item:not(.has-subitems)').forEach(item=>{
     checks[item.dataset.id] = item.classList.contains('done');
+  });
+  // Preserve sub-item states for has-subitems parents
+  document.querySelectorAll('.check-item.has-subitems').forEach(item=>{
+    checks[item.dataset.id] = item.classList.contains('done');
+    const panel = item.querySelector('.sup-panel');
+    if(panel) panel.querySelectorAll('.sup-item').forEach(si => { checks[si.dataset.sid] = si.classList.contains('done'); });
   });
   saveDayLogField(todayStr(), { checks });
   updateProgress();
@@ -4674,6 +4807,7 @@ function renderWorkouts() {
     }
     h.addEventListener('click', ()=>toggleWorkout(h));
   });
+  loadWorkoutChecks();
 }
 
 function toggleWorkout(header) {
@@ -4684,7 +4818,8 @@ function toggleWorkout(header) {
 
 // exRow: returns an HTML row for one exercise (name + detail + sets/duration)
 function exRow(name, detail, sets) {
-  return `<div class="exercise-row"><div><div class="ex-name">${name}</div><div class="ex-detail">${detail}</div></div><div class="ex-sets">${sets}</div></div>`;
+  const wid = 'wex' + (_wexCounter++);
+  return `<div class="exercise-row wex-row" data-wid="${wid}" onclick="toggleWorkoutEx(this)"><div style="display:flex;gap:8px;align-items:flex-start"><div class="wex-cb"><span class="wex-tick">✓</span></div><div><div class="ex-name">${name}</div><div class="ex-detail">${detail}</div></div></div><div class="ex-sets">${sets}</div></div>`;
 }
 
 // workoutCard: wraps exercise rows in a collapsible card with a header and optional stretch rows
@@ -4701,7 +4836,55 @@ function workoutCard(title, meta, rows, stretchRows='', days='') {
 
 // stretchRow: same as exRow but rendered in purple to distinguish cooldown/stretch work
 function stretchRow(name, detail, duration) {
-  return `<div class="exercise-row"><div><div class="ex-name" style="color:#dd88ff">${name}</div><div class="ex-detail">${detail}</div></div><div class="ex-sets" style="color:#dd88ff">${duration}</div></div>`;
+  const wid = 'wex' + (_wexCounter++);
+  return `<div class="exercise-row wex-row" data-wid="${wid}" onclick="toggleWorkoutEx(this)"><div style="display:flex;gap:8px;align-items:flex-start"><div class="wex-cb"><span class="wex-tick">✓</span></div><div><div class="ex-name" style="color:#dd88ff">${name}</div><div class="ex-detail">${detail}</div></div></div><div class="ex-sets" style="color:#dd88ff">${duration}</div></div>`;
+}
+
+// ─── WORKOUT EXERCISE CHECKLIST ──────────────────────────────────────────────
+// Per-exercise completion tracking on the WORKOUTS tab.
+// Each exercise row has a checkbox. States stored in dayLogs[today].workoutChecks.
+
+function toggleWorkoutEx(el) {
+  // Don't toggle if level badge was clicked (stopPropagation handles this but belt+suspenders)
+  el.classList.toggle('wex-done');
+  const today = todayStr();
+  const log = getDayLog(today);
+  const wChecks = Object.assign({}, log.workoutChecks || {});
+  document.querySelectorAll('.wex-row').forEach(row => {
+    const wid = row.dataset.wid;
+    if(wid) wChecks[wid] = row.classList.contains('wex-done');
+  });
+  saveDayLogField(today, { workoutChecks: wChecks });
+  updateWorkoutProgress();
+  dispatch('WORKOUT_CHECKED');
+}
+
+function loadWorkoutChecks() {
+  const log = getDayLog(todayStr());
+  const wChecks = log.workoutChecks || {};
+  document.querySelectorAll('.wex-row').forEach(row => {
+    const wid = row.dataset.wid;
+    if(wid && wChecks[wid]) row.classList.add('wex-done');
+  });
+  updateWorkoutProgress();
+}
+
+function updateWorkoutProgress() {
+  const container = document.getElementById('workoutProgressBar');
+  if(!container) return;
+  const todayDay = DAYS_SHORT[new Date().getDay()];
+  let total = 0, done = 0;
+  document.querySelectorAll('.workout-card').forEach(card => {
+    const daysAttr = card.dataset.days;
+    if(!daysAttr || daysAttr === 'DAILY' || daysAttr.split(',').includes(todayDay)) {
+      card.querySelectorAll('.wex-row').forEach(row => {
+        total++; if(row.classList.contains('wex-done')) done++;
+      });
+    }
+  });
+  if(total === 0) { container.innerHTML = ''; return; }
+  const pct = Math.round((done / total) * 100);
+  container.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span style="font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--muted);letter-spacing:1px">TODAY'S EXERCISES</span><span style="font-family:'DM Mono',monospace;font-size:0.62rem;color:${pct===100?'var(--accent)':'var(--muted)'}">${done}/${total} ${pct===100?'COMPLETE':''}</span></div><div style="height:3px;background:var(--border);border-radius:2px;overflow:hidden"><div style="height:100%;background:${pct===100?'var(--accent)':'var(--accent2)'};width:${pct}%;transition:width 0.3s"></div></div>`;
 }
 
 // ─── NUTRITION CONTENT ───────────────────────────────────────────────────────
@@ -4932,14 +5115,38 @@ function openDayModal(dateStr, dt) {
         const done = !!checks[item.id];
         let _sub = item.sub;
         const _modalS = getSettings();
-        if(item.group === 'SUPPLEMENTS') _sub = resolveSupplementSub(item.id, _sub, strToDate(dateStr).getDay(), dayType, _modalS);
+        const _modalDay = strToDate(dateStr).getDay();
+        if(item.group === 'SUPPLEMENTS' && !item.subItems) _sub = resolveSupplementSub(item.id, _sub, _modalDay, dayType, _modalS);
         const _r = resolveItemTimes(item.id, item.label, _sub, _modalS);
-        html += `<div class="modal-check-item ${done?'done':''}" onclick="toggleModalCheck(this,'${dateStr}','${item.id}')">
-          <div class="modal-cb">${done?'✓':''}</div>
-          <div><div class="m-title">${_r.label}</div><div class="m-sub">${_r.sub}</div></div>
-        </div>`;
+        if(item.subItems && item.subItems.length) {
+          const visSubs = item.subItems.filter(si => !si.days || si.days.includes(_modalDay));
+          const subDone = visSubs.filter(si => !!checks[si.id]).length;
+          const parentDone = subDone === visSubs.length && visSubs.length > 0;
+          html += `<div class="modal-check-item ${parentDone?'done':''}" style="flex-direction:column;align-items:stretch">
+            <div style="display:flex;align-items:center;gap:8px"><div class="modal-cb">${parentDone?'✓':''}</div><div><div class="m-title">${_r.label} <span style="font-family:'DM Mono',monospace;font-size:0.55rem;color:#82e0aa">${subDone}/${visSubs.length}</span></div></div></div>`;
+          visSubs.forEach(si => {
+            const siDone = !!checks[si.id];
+            html += `<div class="sup-item ${siDone?'done':''}" onclick="toggleModalSupItem(this,'${dateStr}','${si.id}','${item.id}')" style="margin-left:26px"><div class="sup-cb"><span class="sup-tick">✓</span></div><div><div class="sup-name">${si.name} <span class="sup-dose">${si.dose}</span></div><div class="sup-when">${si.when}</div></div></div>`;
+          });
+          html += `</div>`;
+        } else {
+          html += `<div class="modal-check-item ${done?'done':''}" onclick="toggleModalCheck(this,'${dateStr}','${item.id}')">
+            <div class="modal-cb">${done?'✓':''}</div>
+            <div><div class="m-title">${_r.label}</div><div class="m-sub">${_r.sub}</div></div>
+          </div>`;
+        }
       });
       html += `</div></div>`;
+    }
+
+    // Workout completion for this day
+    const dayWChecks = log.workoutChecks || {};
+    const wxEntries = Object.entries(dayWChecks);
+    const wxDone = wxEntries.filter(([,v]) => v === true).length;
+    const wxTotal = wxEntries.length;
+    if(wxTotal > 0) {
+      const wxPct = Math.round((wxDone / wxTotal) * 100);
+      html += `<div class="field-group"><label class="field-label">Workout Completion</label><div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:'DM Mono',monospace;font-size:0.68rem;color:${wxPct===100?'var(--accent)':'var(--muted)'};line-height:1.8">${wxDone}/${wxTotal} exercises completed (${wxPct}%)</div></div>`;
     }
 
     // Food log for this day
@@ -5024,6 +5231,26 @@ function toggleModalCheck(el, dateStr, itemId) {
   const log = getDayLog(dateStr);
   const checks = Object.assign({}, log.checks||{});
   checks[itemId] = isDone;
+  saveDayLogField(dateStr, { checks });
+  dispatch('DAY_SAVED');
+}
+
+// toggleModalSupItem: toggle a supplement sub-item in the day modal for past days
+function toggleModalSupItem(el, dateStr, subId, parentId) {
+  el.classList.toggle('done');
+  const log = getDayLog(dateStr);
+  const checks = Object.assign({}, log.checks||{});
+  checks[subId] = el.classList.contains('done');
+  // Recalculate parent state from all sibling sub-items
+  const parentEl = el.closest('.modal-check-item');
+  const siblings = parentEl.querySelectorAll('.sup-item');
+  let subDone = 0, subTotal = siblings.length;
+  siblings.forEach(si => { if(si.classList.contains('done')) subDone++; });
+  const allDone = subDone === subTotal && subTotal > 0;
+  checks[parentId] = allDone;
+  parentEl.classList.toggle('done', allDone);
+  const parentCb = parentEl.querySelector('.modal-cb');
+  if(parentCb) parentCb.textContent = allDone ? '✓' : '';
   saveDayLogField(dateStr, { checks });
   dispatch('DAY_SAVED');
 }
