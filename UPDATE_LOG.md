@@ -4,6 +4,31 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 3.9.0 — 2026-03-25
+
+**Scope:** Minor (2 new features — workout exercise checklist, supplement sub-items)
+**Banner:** "Workout exercise checkboxes on WORKOUTS tab with per-day progress tracking. Supplement checklist items now expandable with individual pill checkboxes."
+
+### ISSUE 1: Workout tab per-exercise completion checklist
+- **Exercise checkboxes** — every exercise row (`exRow`, `exRowWithLevel`, `stretchRow`) now has a tappable checkbox on the left. Checking off exercises saves to `dayLogs[date].workoutChecks`.
+- **Progress bar** — WORKOUTS tab shows "TODAY'S EXERCISES X/Y" progress bar at top, counting only exercises from today's workout cards (using `data-days` matching).
+- **Workout ID system** — counter-based `wex0`, `wex1`, etc. generated per render, reset via `_resetExRowInstances()`. Deterministic and stable across re-renders.
+- **Day modal integration** — past days show "Workout Completion: X/Y exercises completed (Z%)" in the day modal.
+- **Dispatch event** — added `WORKOUT_CHECKED` event to `DISPATCH_MAP` (refreshes recentNotes).
+- **CSS** — `.wex-row`, `.wex-cb`, `.wex-done` classes for checkbox appearance and strikethrough.
+
+### ISSUE 2: Supplement checklist expandable sub-items
+- **subItems array** — checklist items can now include a `subItems` array with individual supplements: `{ id, name, dose, when, days? }`. The `days` array (optional) restricts sub-item to specific days of week.
+- **AGRO plan updated** — `s1` (eating day morning stack) has 4 sub-items: Osteocare, D3+K2, Zinc (EOD: Sun/Tue/Thu/Sat), MCT gel. `sf1` (fast day morning stack) has 3 sub-items: D3+K2, Zinc (Sun/Sat), MCT gel.
+- **Expandable UI** — items with subItems show expand/collapse panel. Tapping the parent expands; tapping individual sub-items toggles their checkbox.
+- **Parent state** — auto-derived: empty (0 done), partial (some done), done (all done). Parent checkbox reflects sub-item completion with partial fill state.
+- **Count display** — shows "3/4" count on parent item, sub-text updates to "3 of 4 taken" or "All taken".
+- **Storage** — sub-item states stored as individual keys in `dayLogs[date].checks` (e.g., `s1_a: true, s1_b: true`). Parent key auto-set based on sub-item completion.
+- **Day modal** — past days show expandable sub-items with individual toggles via `toggleModalSupItem()`.
+- **CSS** — `.sup-panel`, `.sup-item`, `.sup-cb`, `.has-subitems`, `.partial` classes for expandable UI.
+
+---
+
 ## Version 3.8.0 — 2026-03-25
 
 **Scope:** Minor (5 bug fixes — radar scoring, notes display, settings persistence, checklist grouping)
