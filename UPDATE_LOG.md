@@ -4,6 +4,20 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 3.10.0 — 2026-03-26
+
+**Scope:** Minor (Water tracking inline input on TODAY tab)
+**Banner:** "Water tracking: tap the water checklist item to log liters with +/− buttons. Auto-ticks when daily target is met."
+
+- **Water input replaces checkbox** — Water checklist items across all 5 plans now have `type:'water'` and `waterTarget` fields. Tapping the water card on the TODAY tab expands an inline panel with a numeric input and ±0.25L buttons instead of toggling done/undone directly.
+- **Auto-tick on target met** — When the entered value meets or exceeds the plan's daily water target (e.g., 3.0L for AGRO/DEFAULT normal days, 3.5L for fast days, 2.5L for CUT, 2.0L for MAINTENANCE), the card auto-marks as complete (green). Below target = unchecked.
+- **Single source of truth** — Water value saves to `dayLogs[date].water`, which the radar WATER axis and day modal already read. No dual-tracking between checkbox and liter value.
+- **All plans covered** — 12 water items across all 5 plans' checklistNormal, checklistFast, and checklistLight arrays tagged with type/target.
+- **State persistence** — `loadChecklist()` restores water input values and card done state from storage on tab revisit or app reopen.
+- **Functions added** — `toggleWaterExpand()`, `onWaterInput()`, `adjustWater()`, `updateWaterCardState()`. `toggle()` skips items with `data-water-target`.
+
+---
+
 ## Version 3.9.1 — 2026-03-25
 
 **Scope:** Patch (TRACK tab notes display fix)
