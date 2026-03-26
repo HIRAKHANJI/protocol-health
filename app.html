@@ -1232,8 +1232,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '3.9.1';
-const APP_VERSION_MSG = 'Workout exercise checkboxes on WORKOUTS tab with per-day progress tracking. Supplement checklist items now expandable with individual pill checkboxes.';
+const APP_VERSION = '3.10.0';
+const APP_VERSION_MSG = 'Water tracking: tap the water checklist item to log liters with +/− buttons. Auto-ticks when daily target is met.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -2113,7 +2113,7 @@ const PLANS = {
       { id:'f1', group:'EATING', label:'Protein in first meal (60-70g)', sub:'Eggs · chicken · tuna · lentils. Anchor here first.' },
       { id:'f2', group:'EATING', label:'Stayed under calorie ceiling', sub:'Hard ceiling. Never more.' },
       { id:'f3', group:'EATING', label:'Last meal before 6PM', sub:'12+ hour overnight fast every day.' },
-      { id:'f4', group:'EATING', label:'3L+ water across the day', sub:'500ml wake · 500ml pre-meal · sip continuously' },
+      { id:'f4', group:'EATING', label:'3L+ water across the day', sub:'500ml wake · 500ml pre-meal · sip continuously', type:'water', waterTarget:3.0 },
       { id:'f5', group:'EATING', label:'No liquid calories', sub:'Water · black coffee · plain green tea only.' },
       { id:'e1', group:'EVENING', label:'Change clothes on arriving home', sub:'Trigger signal. Don\'t sit down first.' },
       { id:'e2', group:'EVENING', label:'Evening session (40–45 min)', sub:'Evening A/B/C — see WORKOUTS tab' },
@@ -2124,7 +2124,7 @@ const PLANS = {
       { id:'wf1', group:'FAST', label:'500ml water + pinch salt on waking', sub:'Prevents headaches. Do this before anything else.' },
       { id:'wf2', group:'FAST', label:'Electrolyte tablet mid-morning', sub:'Sodium + potassium. Non-negotiable on a fast.' },
       { id:'wf3', group:'FAST', label:'Black coffee or green tea only', sub:'Appetite suppression. Zero calories. Allowed.' },
-      { id:'wf4', group:'FAST', label:'3.5L+ water total today', sub:'Sip constantly. Don\'t chug all at once.' },
+      { id:'wf4', group:'FAST', label:'3.5L+ water total today', sub:'Sip constantly. Don\'t chug all at once.', type:'water', waterTarget:3.5 },
       { id:'wf5', group:'FAST', label:'No food consumed today', sub:'Fast is unbroken. If you break it — log it honestly.' },
       { id:'wf6', group:'FAST', label:'Magnesium 400mg before sleep', sub:'Prevents cramps. Sleep quality tanks on fasts without this.' }
     ],
@@ -2306,7 +2306,7 @@ const PLANS = {
       { id:'f1', group:'EATING', label:'Protein in first meal (60-70g)', sub:'Eggs \u00b7 chicken \u00b7 tuna \u00b7 lentils \u00b7 Greek yogurt. Anchor protein first.' },
       { id:'f2', group:'EATING', label:'Stayed under calorie ceiling', sub:'Hard ceiling. Never more. Log in FOOD LOG.' },
       { id:'f3', group:'EATING', label:'Last meal before 6PM', sub:'16+ hour overnight fast every day.' },
-      { id:'f4', group:'EATING', label:'3L+ water across the day', sub:'500ml wake \u00b7 500ml pre-meal \u00b7 sip continuously' },
+      { id:'f4', group:'EATING', label:'3L+ water across the day', sub:'500ml wake \u00b7 500ml pre-meal \u00b7 sip continuously', type:'water', waterTarget:3.0 },
       { id:'f5', group:'EATING', label:'No liquid calories', sub:'Water \u00b7 black coffee \u00b7 plain green tea only.' },
       { id:'e1', group:'EVENING', label:'Change clothes on arriving home', sub:'Trigger signal. Don\'t sit down first.' },
       { id:'e2', group:'EVENING', label:'Evening session (40-45 min)', sub:'Evening A/B/C or Run \u2014 see WORKOUTS tab' },
@@ -2326,7 +2326,7 @@ const PLANS = {
     checklistFast: [
       { id:'wf1', group:'FAST', label:'500ml water + pinch salt on waking', sub:'Prevents headaches. Do this before anything else.' },
       { id:'wf4', group:'FAST', label:'Black coffee or green tea only', sub:'Appetite suppression. Zero calories. Allowed.' },
-      { id:'wf5', group:'FAST', label:'3.5L+ water total today', sub:'Sip constantly. Don\'t chug all at once.' },
+      { id:'wf5', group:'FAST', label:'3.5L+ water total today', sub:'Sip constantly. Don\'t chug all at once.', type:'water', waterTarget:3.5 },
       { id:'wf6', group:'FAST', label:'No food consumed today', sub:'Fast is unbroken. If you break it \u2014 log it honestly.' },
       { id:'wf7', group:'FAST', label:'Fast day intensity: 70-80% only', sub:'Training fasted is fine. Don\'t push 100% on zero calories.' },
       { id:'sf1', group:'SUPPLEMENTS', label:'Morning supplements taken', sub:'Tap to expand',
@@ -2887,7 +2887,7 @@ PLANS.cut = {
     { id:'f1', group:'EATING', label:'Hit protein target', sub:'1.6g/kg minimum. Protein anchors every meal.' },
     { id:'f2', group:'EATING', label:'Stayed under calorie ceiling', sub:'400–600 cal below TDEE. Hard ceiling.' },
     { id:'f3', group:'EATING', label:'No liquid calories', sub:'Water · black coffee · plain tea only.' },
-    { id:'f4', group:'EATING', label:'2.5L+ water across the day', sub:'500ml wake · 500ml pre-meal · sip continuously' },
+    { id:'f4', group:'EATING', label:'2.5L+ water across the day', sub:'500ml wake · 500ml pre-meal · sip continuously', type:'water', waterTarget:2.5 },
     { id:'e1', group:'EVENING', label:'Evening session (if training day)', sub:'See WORKOUTS tab for today\'s session' },
     { id:'e2', group:'EVENING', label:'Post-workout cooldown stretches', sub:'5–10 min static stretching. See WORKOUTS tab.' },
     { id:'n2', group:'NIGHT', label:'Sleep before midnight', sub:'Recovery is training. Don\'t skip it.' }
@@ -2896,7 +2896,7 @@ PLANS.cut = {
     { id:'wf1', group:'FAST', label:'500ml water + pinch salt on waking', sub:'Prevents headaches. Do this before anything else.' },
     { id:'wf2', group:'FAST', label:'Electrolyte tablet mid-morning', sub:'Sodium + potassium. Non-negotiable on a fast.' },
     { id:'wf3', group:'FAST', label:'Black coffee or green tea only', sub:'Appetite suppression. Zero calories. Allowed.' },
-    { id:'wf4', group:'FAST', label:'3.5L+ water total today', sub:'Sip constantly. Don\'t chug all at once.' },
+    { id:'wf4', group:'FAST', label:'3.5L+ water total today', sub:'Sip constantly. Don\'t chug all at once.', type:'water', waterTarget:3.5 },
     { id:'wf5', group:'FAST', label:'No food consumed today', sub:'Fast is unbroken. If you break it — log it honestly.' },
     { id:'wf6', group:'FAST', label:'Magnesium 400mg before sleep', sub:'Prevents cramps. Sleep quality tanks on fasts without this.' }
   ],
@@ -3125,7 +3125,7 @@ PLANS.bulk = {
     { id:'f3', group:'EATING', label:'Hit carb target around training', sub:'Carbs 1\u20132 hours pre-training + within 60 min post-training. \u22653\u20135g/kg/day.' },
     { id:'f4', group:'EATING', label:'Pre-training meal (1\u20132 hours before)', sub:'30\u201340g protein + 40\u201360g carbs. Fuels the session and starts MPS.' },
     { id:'f5', group:'EATING', label:'Post-training protein within 60 min', sub:'30\u201340g protein + carbs. Maximises muscle protein synthesis window.' },
-    { id:'f6', group:'EATING', label:'2.5\u20133L water across the day', sub:'Hydration supports muscle protein synthesis and performance.' },
+    { id:'f6', group:'EATING', label:'2.5\u20133L water across the day', sub:'Hydration supports muscle protein synthesis and performance.', type:'water', waterTarget:2.5 },
     { id:'s1', group:'SUPPLEMENTS', label:'Creatine 5g taken today', sub:'Most evidence-backed supplement for muscle growth. Take daily, timing doesn\'t matter. With food or shake.' },
     { id:'e1', group:'EVENING', label:'Evening session (most training days)', sub:'See WORKOUTS tab for today\'s session' },
     { id:'e2', group:'EVENING', label:'Post-workout cooldown stretches', sub:'5\u201310 min static stretching. See WORKOUTS tab.' },
@@ -3135,7 +3135,7 @@ PLANS.bulk = {
     { id:'wf1', group:'FAST', label:'500ml water + pinch salt on waking', sub:'Prevents headaches. Do this before anything else.' },
     { id:'wf2', group:'FAST', label:'Electrolyte tablet mid-morning', sub:'Sodium + potassium. Non-negotiable on a fast.' },
     { id:'wf3', group:'FAST', label:'Black coffee or green tea only', sub:'Appetite suppression. Zero calories. Allowed.' },
-    { id:'wf4', group:'FAST', label:'3.5L+ water total today', sub:'Sip constantly. Don\'t chug all at once.' },
+    { id:'wf4', group:'FAST', label:'3.5L+ water total today', sub:'Sip constantly. Don\'t chug all at once.', type:'water', waterTarget:3.5 },
     { id:'wf5', group:'FAST', label:'No food consumed today', sub:'Fast is unbroken. If you break it — log it honestly.' },
     { id:'wf6', group:'FAST', label:'Magnesium 400mg before sleep', sub:'Prevents cramps. Sleep quality tanks on fasts without this.' }
   ],
@@ -3146,7 +3146,7 @@ PLANS.bulk = {
     { id:'l4', group:'LIGHT', label:'Protein still hits 1.6g/kg minimum', sub:'Lean protein + vegetables. Muscle doesn\'t stop needing protein on rest days.' },
     { id:'l5', group:'LIGHT', label:'No junk food or heavy processed meals', sub:'Light, clean meals. This is gut recovery \u2014 treat it like one.' },
     { id:'l6', group:'LIGHT', label:'Creatine 5g taken today', sub:'Daily \u2014 don\'t skip on rest or light days.' },
-    { id:'l7', group:'LIGHT', label:'2.5L+ water', sub:'Stay hydrated. Water, herbal tea, black coffee only.' },
+    { id:'l7', group:'LIGHT', label:'2.5L+ water', sub:'Stay hydrated. Water, herbal tea, black coffee only.', type:'water', waterTarget:2.5 },
     { id:'l8', group:'NIGHT', label:'Sleep 7\u20139 hours', sub:'Recovery is amplified on light days. Don\'t waste it.' }
   ],
 
@@ -3472,7 +3472,7 @@ PLANS.maintenance = {
     { id:'m4', group:'MORNING', label:'Log weight (weekly minimum)', sub:'Track weekly trend. Weight should be stable ±1.5kg.' },
     { id:'f1', group:'EATING', label:'Hit protein target', sub:'1.2–1.6g/kg. Protein in every meal.' },
     { id:'f2', group:'EATING', label:'Stay near calorie ceiling (±200 cal)', sub:'At TDEE. Small daily variance is fine.' },
-    { id:'f3', group:'EATING', label:'2L+ water across the day', sub:'Sip continuously throughout the day.' },
+    { id:'f3', group:'EATING', label:'2L+ water across the day', sub:'Sip continuously throughout the day.', type:'water', waterTarget:2.0 },
     { id:'e1', group:'EVENING', label:'Evening session or mobility work', sub:'See WORKOUTS tab. Mobility on rest days.' },
     { id:'n2', group:'NIGHT', label:'Sleep before midnight', sub:'Consistency matters more than duration.' }
   ],
@@ -3480,7 +3480,7 @@ PLANS.maintenance = {
     { id:'wf1', group:'FAST', label:'500ml water + pinch salt on waking', sub:'Prevents headaches. Do this before anything else.' },
     { id:'wf2', group:'FAST', label:'Electrolyte tablet mid-morning', sub:'Sodium + potassium. Non-negotiable on a fast.' },
     { id:'wf3', group:'FAST', label:'Black coffee or green tea only', sub:'Appetite suppression. Zero calories. Allowed.' },
-    { id:'wf4', group:'FAST', label:'3.5L+ water total today', sub:'Sip constantly. Don\'t chug all at once.' },
+    { id:'wf4', group:'FAST', label:'3.5L+ water total today', sub:'Sip constantly. Don\'t chug all at once.', type:'water', waterTarget:3.5 },
     { id:'wf5', group:'FAST', label:'No food consumed today', sub:'Fast is unbroken. If you break it — log it honestly.' },
     { id:'wf6', group:'FAST', label:'Magnesium 400mg before sleep', sub:'Prevents cramps. Sleep quality tanks on fasts without this.' }
   ],
@@ -3489,7 +3489,7 @@ PLANS.maintenance = {
     { id:'l2', group:'LIGHT', label:'Light movement only', sub:'Walk, gentle stretch, or complete rest. No structured training.' },
     { id:'l3', group:'LIGHT', label:'Eat 300–500 cal below TDEE', sub:'Smaller portions. Clean, simple meals. Give the gut a break.' },
     { id:'l4', group:'LIGHT', label:'Protein in every meal', sub:'Lean protein + vegetables. Avoid heavy, processed, or fried food.' },
-    { id:'l5', group:'LIGHT', label:'2L+ water', sub:'Stay hydrated. Herbal tea, black coffee allowed.' },
+    { id:'l5', group:'LIGHT', label:'2L+ water', sub:'Stay hydrated. Herbal tea, black coffee allowed.', type:'water', waterTarget:2.0 },
     { id:'l6', group:'NIGHT', label:'Sleep before midnight', sub:'Recovery day. Let the body reset.' }
   ],
 
@@ -3926,6 +3926,24 @@ function renderTodayChecklist() {
         html += `<div class="sup-item" data-sid="${si.id}" onclick="event.stopPropagation();toggleSupItem(this,'${item.id}')"><div class="sup-cb"><span class="sup-tick">✓</span></div><div><div class="sup-name">${si.name} <span class="sup-dose">${si.dose}</span></div><div class="sup-when">${si.when}</div></div></div>`;
       });
       html += `</div></div><span class="sup-expand-icon">▼</span></div>`;
+    } else if(item.type === 'water') {
+      const storedWater = getDayLog(todayStr()).water || 0;
+      const isDone = storedWater >= item.waterTarget;
+      html += `<div class="check-item${isDone ? ' done' : ''}" onclick="toggleWaterExpand(this,'${item.id}',${item.waterTarget})" data-id="${item.id}" data-water-target="${item.waterTarget}">
+        <div class="checkbox"><span class="checkbox-tick">✓</span></div>
+        <div class="item-content">
+          <div class="item-title">${label}</div>
+          <div class="item-sub">${sub}</div>
+          <div class="water-expand" id="waterExpand-${item.id}" style="display:none;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
+            <div style="display:flex;align-items:center;gap:8px">
+              <button onclick="event.stopPropagation();adjustWater('${item.id}',${item.waterTarget},-0.25)" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);width:32px;height:32px;border-radius:6px;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center">−</button>
+              <input type="number" id="waterVal-${item.id}" step="0.25" min="0" max="10" value="${storedWater||0}" onclick="event.stopPropagation()" oninput="event.stopPropagation();onWaterInput('${item.id}',${item.waterTarget},this.value)" style="width:60px;text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.9rem">
+              <button onclick="event.stopPropagation();adjustWater('${item.id}',${item.waterTarget},0.25)" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);width:32px;height:32px;border-radius:6px;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center">+</button>
+              <span style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--muted)">/ ${item.waterTarget}L</span>
+            </div>
+          </div>
+        </div>
+      </div>`;
     } else {
       html += `<div class="check-item" onclick="toggle(this)" data-id="${item.id}"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">${label}</div><div class="item-sub">${sub}</div></div></div>`;
     }
@@ -4048,6 +4066,15 @@ function loadChecklist() {
       item.classList.toggle('done', !!checks[item.dataset.id]);
     }
   });
+  // Restore water input values and card states from dayLogs.water
+  document.querySelectorAll('.check-item[data-water-target]').forEach(card => {
+    const itemId = card.dataset.id;
+    const target = parseFloat(card.dataset.waterTarget);
+    const storedWater = log.water || 0;
+    const input = document.getElementById('waterVal-' + itemId);
+    if(input) input.value = storedWater;
+    card.classList.toggle('done', storedWater >= target);
+  });
   updateProgress();
 }
 
@@ -4104,6 +4131,8 @@ function updateSupCount(parentId, done, total) {
 // Flips its done state, saves all checks to storage, updates the progress bar,
 // and fires DAY_SAVED so the calendar cell color updates too.
 function toggle(el) {
+  // Water items are controlled by the water input, not manual toggle
+  if(el.dataset.waterTarget) return;
   el.classList.toggle('done');
   const log = getDayLog(todayStr());
   const checks = Object.assign({}, log.checks||{});
@@ -4119,6 +4148,57 @@ function toggle(el) {
   saveDayLogField(todayStr(), { checks });
   updateProgress();
   dispatch('DAY_SAVED');
+}
+
+// ─── WATER TRACKING ────────────────────────────────────────────────────────
+// Water checklist items expand inline with a liter input + ±0.25L buttons.
+// Saves to dayLogs[today].water and auto-ticks the card when target is met.
+
+function toggleWaterExpand(el, itemId, target) {
+  const expand = document.getElementById('waterExpand-' + itemId);
+  if(!expand) return;
+  const isVisible = expand.style.display !== 'none';
+  expand.style.display = isVisible ? 'none' : 'block';
+  if(!isVisible) {
+    const input = document.getElementById('waterVal-' + itemId);
+    if(input) setTimeout(() => input.focus(), 100);
+  }
+}
+
+function onWaterInput(itemId, target, val) {
+  const liters = parseFloat(val) || 0;
+  saveDayLogField(todayStr(), { water: liters });
+  updateWaterCardState(itemId, target, liters);
+  dispatch('DAY_SAVED');
+}
+
+function adjustWater(itemId, target, delta) {
+  const input = document.getElementById('waterVal-' + itemId);
+  if(!input) return;
+  const current = parseFloat(input.value) || 0;
+  const newVal = Math.max(0, Math.min(10, +(current + delta).toFixed(2)));
+  input.value = newVal;
+  onWaterInput(itemId, target, newVal);
+}
+
+function updateWaterCardState(itemId, target, liters) {
+  const card = document.querySelector(`.check-item[data-id="${itemId}"]`);
+  if(!card) return;
+  const isDone = liters >= target;
+  card.classList.toggle('done', isDone);
+  // Update the checks object so progress bar and calendar reflect it
+  const log = getDayLog(todayStr());
+  const checks = Object.assign({}, log.checks||{});
+  document.querySelectorAll('.check-item').forEach(item => {
+    checks[item.dataset.id] = item.classList.contains('done');
+  });
+  // Preserve sub-item states
+  document.querySelectorAll('.check-item.has-subitems').forEach(item=>{
+    const panel = item.querySelector('.sup-panel');
+    if(panel) panel.querySelectorAll('.sup-item').forEach(si => { checks[si.dataset.sid] = si.classList.contains('done'); });
+  });
+  saveDayLogField(todayStr(), { checks });
+  updateProgress();
 }
 
 // resetToday: clears all checklist ticks for today and saves the cleared state
