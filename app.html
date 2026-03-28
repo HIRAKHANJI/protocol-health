@@ -1243,7 +1243,7 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '4.0.0';
+const APP_VERSION = '4.0.1';
 const APP_VERSION_MSG = 'Calorie ceiling auto-tracks from food log. Workout items auto-update from WORKOUTS tab. Radar CHECKLIST axis now includes exercise completion.';
 
 // Static lookup arrays used throughout rendering
@@ -3982,23 +3982,31 @@ function renderTodayChecklist() {
       }
       html += `<div class="check-item auto-status ${calState}" data-id="${item.id}" data-auto="cal"><div class="checkbox"><span class="checkbox-tick">${calState==='fail'?'✗':'✓'}</span></div><div class="item-content"><div class="item-title">${label}</div><div class="auto-val">${calText}</div></div></div>`;
     } else if(AUTO_WORKOUT_IDS.includes(item.id)) {
-      // Auto workout items — reads workoutChecks from storage, not clickable
+      // Auto workout items — reads today-filtered counts from storage, not clickable
       const wLog = getDayLog(todayStr());
-      const wChecks = wLog.workoutChecks || {};
-      const wTotal = Object.keys(wChecks).length;
-      const wDone = Object.values(wChecks).filter(Boolean).length;
-      let wState = 'pending', wText = 'Open WORKOUTS tab to track';
-      if(wTotal > 0) {
-        wState = wDone === wTotal ? 'done' : (wDone > 0 ? 'partial' : 'pending');
-        wText = wDone + '/' + wTotal + ' exercises' + (wDone === wTotal ? ' — complete' : '');
-      }
-      const isDone = wState === 'done';
+      const wTotal = wLog.workoutTodayTotal || 0;
+      const wDone = wLog.workoutTodayDone || 0;
+      let wText = 'Open WORKOUTS tab to track';
+      if(wTotal > 0) wText = wDone + '/' + wTotal + ' exercises' + (wDone === wTotal ? ' — complete' : '');
+      const isDone = wTotal > 0 && wDone === wTotal;
       html += `<div class="check-item auto-status ${isDone ? 'done' : ''}" data-id="${item.id}" data-auto="workout"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">${label}</div><div class="auto-val">${wText}</div></div></div>`;
     } else {
       html += `<div class="check-item" onclick="toggle(this)" data-id="${item.id}"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">${label}</div><div class="item-sub">${sub}</div></div></div>`;
     }
   });
   if(currentGroup) html += '</div>';
+  // If no workout auto-items were rendered (e.g. fast/light day checklists), inject a WORKOUT section
+  const hasWorkoutItems = items.some(i => AUTO_WORKOUT_IDS.includes(i.id));
+  if(!hasWorkoutItems) {
+    const wLog = getDayLog(todayStr());
+    const wTotal = wLog.workoutTodayTotal || 0;
+    const wDone = wLog.workoutTodayDone || 0;
+    let wText = 'Open WORKOUTS tab to track';
+    if(wTotal > 0) wText = wDone + '/' + wTotal + ' exercises' + (wDone === wTotal ? ' — complete' : '');
+    const isDone = wTotal > 0 && wDone === wTotal;
+    html += `<div class="checklist-group"><div class="group-header"><span class="group-tag tag-evening">WORKOUT</span><span class="group-time">See WORKOUTS tab</span></div>`;
+    html += `<div class="check-item auto-status ${isDone ? 'done' : ''}" data-id="_workout" data-auto="workout"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">Today's training session</div><div class="auto-val">${wText}</div></div></div></div>`;
+  }
   container.innerHTML = html;
   loadChecklist();
 }
@@ -4299,12 +4307,11 @@ function refreshAutoItems() {
     const valEl = el.querySelector('.auto-val');
     if(valEl) valEl.textContent = calText;
   });
-  // Refresh workout items
+  // Refresh workout items (use today-filtered counts)
   document.querySelectorAll('.check-item[data-auto="workout"]').forEach(el => {
     const wLog = getDayLog(todayStr());
-    const wChecks = wLog.workoutChecks || {};
-    const wTotal = Object.keys(wChecks).length;
-    const wDone = Object.values(wChecks).filter(Boolean).length;
+    const wTotal = wLog.workoutTodayTotal || 0;
+    const wDone = wLog.workoutTodayDone || 0;
     let wText = 'Open WORKOUTS tab to track';
     const isDone = wTotal > 0 && wDone === wTotal;
     if(wTotal > 0) wText = wDone + '/' + wTotal + ' exercises' + (isDone ? ' — complete' : '');
@@ -5051,16 +5058,26 @@ function stretchRow(name, detail, duration) {
 // Each exercise row has a checkbox. States stored in dayLogs[today].workoutChecks.
 
 function toggleWorkoutEx(el) {
-  // Don't toggle if level badge was clicked (stopPropagation handles this but belt+suspenders)
   el.classList.toggle('wex-done');
   const today = todayStr();
-  const log = getDayLog(today);
-  const wChecks = Object.assign({}, log.workoutChecks || {});
-  document.querySelectorAll('.wex-row').forEach(row => {
-    const wid = row.dataset.wid;
-    if(wid) wChecks[wid] = row.classList.contains('wex-done');
+  const todayDay = DAYS_SHORT[new Date().getDay()];
+  // Only save exercises from today's cards (not all 7 days' worth)
+  const wChecks = {};
+  let todayTotal = 0, todayDone = 0;
+  document.querySelectorAll('.workout-card').forEach(card => {
+    const daysAttr = card.dataset.days;
+    if(!daysAttr || daysAttr === 'DAILY' || daysAttr.split(',').includes(todayDay)) {
+      card.querySelectorAll('.wex-row').forEach(row => {
+        const wid = row.dataset.wid;
+        if(wid) {
+          wChecks[wid] = row.classList.contains('wex-done');
+          todayTotal++;
+          if(row.classList.contains('wex-done')) todayDone++;
+        }
+      });
+    }
   });
-  saveDayLogField(today, { workoutChecks: wChecks });
+  saveDayLogField(today, { workoutChecks: wChecks, workoutTodayTotal: todayTotal, workoutTodayDone: todayDone });
   updateWorkoutProgress();
   dispatch('WORKOUT_CHECKED');
 }
@@ -5088,6 +5105,8 @@ function updateWorkoutProgress() {
       });
     }
   });
+  // Persist today's filtered counts so TODAY tab auto-items can read them
+  saveDayLogField(todayStr(), { workoutTodayTotal: total, workoutTodayDone: done });
   if(total === 0) { container.innerHTML = ''; return; }
   const pct = Math.round((done / total) * 100);
   container.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span style="font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--muted);letter-spacing:1px">TODAY'S EXERCISES</span><span style="font-family:'DM Mono',monospace;font-size:0.62rem;color:${pct===100?'var(--accent)':'var(--muted)'}">${done}/${total} ${pct===100?'COMPLETE':''}</span></div><div style="height:3px;background:var(--border);border-radius:2px;overflow:hidden"><div style="height:100%;background:${pct===100?'var(--accent)':'var(--accent2)'};width:${pct}%;transition:width 0.3s"></div></div>`;
