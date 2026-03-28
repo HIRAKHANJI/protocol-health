@@ -4,6 +4,16 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 4.0.1 — 2026-03-28
+
+**Scope:** Patch (3 bug fixes for workout auto-items)
+
+- **Exercise count fixed** — `toggleWorkoutEx()` now only saves exercises from today's workout cards (filtered by `data-days`), not all 7 days' worth. Stores `workoutTodayTotal` and `workoutTodayDone` fields. Fixes the "10/112 exercises" display bug.
+- **Fast/light day workout section** — When `checklistFast` or `checklistLight` doesn't contain workout items (m2/m3/e1/e2/e3), a WORKOUT group is injected automatically with a single "Today's training session" auto-status indicator. Fixes workout items missing on fast days.
+- **Auto-workout items read filtered counts** — Both `renderTodayChecklist()` and `refreshAutoItems()` now read `workoutTodayTotal`/`workoutTodayDone` instead of counting all keys in `workoutChecks`. Fixes exercise count showing wrong numbers.
+
+---
+
 ## Version 4.0.0 — 2026-03-28
 
 **Scope:** Major (version rollover from 3.10.0 — auto-status checklist items + radar workout integration)
