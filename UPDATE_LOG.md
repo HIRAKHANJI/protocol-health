@@ -4,6 +4,36 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 4.0.0 — 2026-03-28
+
+**Scope:** Major (version rollover from 3.10.0 — auto-status checklist items + radar workout integration)
+**Banner:** "Calorie ceiling auto-tracks from food log. Workout items auto-update from WORKOUTS tab. Radar CHECKLIST axis now includes exercise completion."
+
+### Issue 1: Calorie ceiling auto-tracks from food log
+- **`f2` items across all 5 plans** tagged with `type:'auto-cal'`. No longer a manual checkbox.
+- **Rendered as status indicator** — shows live "850 / 1000 cal — under ceiling" or "1150 / 1000 cal — over ceiling" with tick/cross icon. Non-clickable (`cursor:default`).
+- **Bulk-aware** — BULK plan shows "target hit" when eating above ceiling (surplus required). MAINTENANCE shows "on target" within ±200 cal.
+- **Auto-refreshes** on `FOOD_LOGGED` dispatch via new `refreshAutoItems()` function.
+- **CSS** — `.auto-status`, `.auto-status.done`, `.auto-status.fail` classes with `.auto-val` for the status text.
+
+### Issue 2: Workout items auto-update from WORKOUTS tab
+- **Items `m2`, `m3`, `e1`, `e2`, `e3`** (mobility, morning workout, evening session, stretch) detected by `AUTO_WORKOUT_IDS` constant. No longer manual checkboxes.
+- **Rendered as status indicator** — shows "5/8 exercises — complete" or "Open WORKOUTS tab to track". Non-clickable.
+- **Auto-refreshes** on `WORKOUT_CHECKED` dispatch via `refreshAutoItems()`.
+- **All plans covered** — the detection is by item ID, works regardless of plan-specific label text.
+
+### Issue 2b: Radar CHECKLIST axis includes workout exercises
+- **`computeRadarMetrics()` CHECKLIST axis** now blends regular `dayLogs[date].checks` with `dayLogs[date].workoutChecks` for a unified completion score.
+- **Effect** — checking exercises on the WORKOUTS tab directly improves the radar CHECKLIST score, not just the standalone workout progress bar.
+
+### Infrastructure
+- **`syncAutoStatusChecks()`** — persists auto-derived done/fail states into `checks` object so calendar and radar see them.
+- **`refreshAutoItems()`** — lightweight re-render of only auto-status items without full checklist rebuild.
+- **`autoItems` dispatch target** added to `FOOD_LOGGED` and `WORKOUT_CHECKED` events.
+- **`toggle()` guarded** — auto-status items (`data-auto`) skip manual toggle, same as water items.
+
+---
+
 ## Version 3.10.0 — 2026-03-26
 
 **Scope:** Minor (Water tracking inline input on TODAY tab)
