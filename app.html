@@ -1243,8 +1243,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '4.0.1';
-const APP_VERSION_MSG = 'Calorie ceiling auto-tracks from food log. Workout items auto-update from WORKOUTS tab. Radar CHECKLIST axis now includes exercise completion.';
+const APP_VERSION = '4.0.2';
+const APP_VERSION_MSG = 'Fixed zinc schedule: removed consecutive Sat\u2192Sun dosing. Now Tue/Thu/Sat only (21.4mg/day avg).';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -2330,7 +2330,7 @@ const PLANS = {
         subItems: [
           { id:'s1_a', name:'Osteocare', dose:'2 tabs', when:'With breakfast' },
           { id:'s1_b', name:'D3+K2', dose:'1 tab', when:'With MCT gel for absorption' },
-          { id:'s1_c', name:'Zinc 50mg', dose:'1 tab', when:'Alternate days only', days:[0,2,4,6] },
+          { id:'s1_c', name:'Zinc 50mg', dose:'1 tab', when:'Tue/Thu/Sat only', days:[2,4,6] },
           { id:'s1_d', name:'MCT gel', dose:'1 gel', when:'Fat carrier for D3' }
         ]
       },
@@ -2347,7 +2347,7 @@ const PLANS = {
       { id:'sf1', group:'SUPPLEMENTS', label:'Morning supplements taken', sub:'Tap to expand',
         subItems: [
           { id:'sf1_a', name:'D3+K2', dose:'1 tab', when:'With MCT gel on waking' },
-          { id:'sf1_b', name:'Zinc 50mg', dose:'1 tab', when:'Fast days: Sun/Sat only', days:[0,6] },
+          { id:'sf1_b', name:'Zinc 50mg', dose:'1 tab', when:'Sat only — not Sun', days:[6] },
           { id:'sf1_c', name:'MCT gel', dose:'2 gels', when:'Pre-training' }
         ]
       },
@@ -2618,11 +2618,11 @@ const PLANS = {
         const _dow = new Date().getDay();
         const _dt = getDayType(todayStr());
         const _isFast = _dt === 'fast';
-        const _zincEating = [0,2,4,6].includes(_dow);
-        const _zincFast = [0,6].includes(_dow);
+        const _zincEating = [2,4,6].includes(_dow);
+        const _zincFast = [6].includes(_dow);
         const _isZincDay = _isFast ? _zincFast : _zincEating;
         const _dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-        const _nextZinc = (()=>{ const zd=[0,2,4,6]; const i=zd.findIndex(d=>d>_dow); return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][i>=0?zd[i]:zd[0]]; })();
+        const _nextZinc = (()=>{ const zd=[2,4,6]; const i=zd.findIndex(d=>d>_dow); return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][i>=0?zd[i]:zd[0]]; })();
 
         let cards = '';
         // === MORNING STACK ===
@@ -2654,12 +2654,12 @@ const PLANS = {
         // === ZINC STATUS ===
         if(_isZincDay) {
           cards += ruleCard('ZINC \u2014 TODAY IS A ZINC DAY',
-            '50mg with morning stack at ' + (_isFast ? _wkFmt : _ews) + '. Alternate-day schedule = 28.6mg/day avg (under 40mg NIH limit).',
+            '50mg with morning stack at ' + (_isFast ? _wkFmt : _ews) + '. 3 days/week (Tue/Thu/Sat) = 21.4mg/day avg (under 40mg NIH limit).',
             'Daily dosing depletes copper \u2192 anemia risk. Alternate-day keeps you safe.',
             '#82e0aa');
         } else {
           cards += ruleCard('ZINC \u2014 NO ZINC TODAY',
-            'Next zinc day: ' + _nextZinc + '. 50mg/day exceeds NIH upper limit (40mg). Alternate-day = 28.6mg avg.',
+            'Next zinc day: ' + _nextZinc + '. 3 days/week (Tue/Thu/Sat) = 21.4mg/day avg. Under 40mg NIH limit.',
             'Daily dosing depletes copper \u2192 anemia risk.',
             '#666');
         }
@@ -2707,9 +2707,9 @@ const PLANS = {
         const _preMin3 = _em3-20<0 ? _em3+40 : _em3-20;
         const _preH3 = ((_em3-20<0 ? _eh3-1 : _eh3)+24)%24;
         const _preTime3 = formatTime(String(_preH3).padStart(2,'0')+':'+String(_preMin3).padStart(2,'0'));
-        return ruleCard('EATING DAY STACK','At ' + _ews2 + ' with breakfast: Osteocare 2 tabs \u00b7 D3+K2 1 tab \u00b7 MCT 1 gel \u00b7 Zinc 50mg (Sun/Tue/Thu/Sat only)','D3+K2 needs dietary fat for absorption \u2014 meal provides it.','#666')
-        + ruleCard('FAST DAY STACK','At ' + _wkFmt2 + ' on waking: D3+K2 1 tab + MCT gel (fat carrier) \u00b7 Zinc (Sun/Sat only) \u00b7 2 MCT gels pre-training (~' + _preTime3 + ')','No Osteocare on fast days \u2014 calcium needs food for full absorption.','#666')
-        + ruleCard('ZINC SCHEDULE','Sun \u00b7 Tue \u00b7 Thu \u00b7 Sat. Never daily. 50mg/day exceeds NIH upper limit (40mg). Alternate-day = 28.6mg avg.','Daily dosing depletes copper \u2192 anemia risk.','#666')
+        return ruleCard('EATING DAY STACK','At ' + _ews2 + ' with breakfast: Osteocare 2 tabs \u00b7 D3+K2 1 tab \u00b7 MCT 1 gel \u00b7 Zinc 50mg (Tue/Thu/Sat only)','D3+K2 needs dietary fat for absorption \u2014 meal provides it.','#666')
+        + ruleCard('FAST DAY STACK','At ' + _wkFmt2 + ' on waking: D3+K2 1 tab + MCT gel (fat carrier) \u00b7 Zinc (Sat only \u2014 not Sun) \u00b7 2 MCT gels pre-training (~' + _preTime3 + ')','No Osteocare on fast days \u2014 calcium needs food for full absorption.','#666')
+        + ruleCard('ZINC SCHEDULE','Tue \u00b7 Thu \u00b7 Sat. 3 days/week, never consecutive. 150mg/week = 21.4mg/day avg (under 40mg NIH limit).','Daily dosing depletes copper \u2192 anemia risk. Sat\u2192Sun consecutive was removed for safety.','#666')
         + ruleCard('OMEGA-3','3 caps with largest meal on eating days. 1,485mg EPA + 990mg DHA = 2,475mg.','Skip on fast days \u2014 effects are chronic not acute.','#666')
         + ruleCard('MAGNESIUM','1 serving before bed, all 7 days. ~67.6mg elemental Mg (Glycinate + Malate).','Glycinate targets sleep/NMDA. Malate supports Krebs cycle.','#666')
         + ruleCard('ELECTROLYTES','Fast days only (Sun/Wed/Sat): Tab 1 mid-morning (~' + _midR3 + ') \u00b7 Tab 2 pre-evening (~' + _preTime3 + '). 99mg potassium each.','Prevents fasted session palpitations, cramps, headaches.','#666');
@@ -3839,15 +3839,15 @@ function getDayType(dateStr) {
 
 // resolveSupplementSub: returns day-aware supplement sub-text with exact times and doses.
 // Reads user settings for wake time, eating window, evening session to compute pill timing.
-// Zinc is EOD (Sun/Tue/Thu/Sat on eating days, Sun/Sat on fast days).
-// Schedule drives which days are fast → which supplement stack applies.
+// Zinc is 3 days/week (Tue/Thu/Sat on eating days, Sat only on fast days).
+// Sunday excluded to prevent consecutive Sat→Sun dosing (copper absorption risk).
 function resolveSupplementSub(itemId, originalSub, dayOfWeek, dayType, s) {
   if(!s) s = getSettings();
   const plan = getActivePlan();
   // Only apply day-aware logic to AGRO plan — other plans don't have detailed supplement protocol
   if(plan !== PLANS.agro) return originalSub;
-  const zincEatingDays = [0, 2, 4, 6]; // Sun, Tue, Thu, Sat
-  const zincFastDays = [0, 6]; // Sun, Sat
+  const zincEatingDays = [2, 4, 6]; // Tue, Thu, Sat
+  const zincFastDays = [6]; // Sat only (not Sun — prevents consecutive Sat→Sun)
   const ewStart = formatTime(getPlanTime(s, 'eatingWindowStart') || '11:00');
   const wakeRaw = getPlanTime(s, 'wakeTime') || '05:30';
   const [wh] = wakeRaw.split(':').map(Number);

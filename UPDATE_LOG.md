@@ -4,6 +4,16 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 4.0.2 — 2026-03-29
+
+**Scope:** Patch (Safety fix — zinc consecutive-day dosing)
+
+- **Zinc schedule corrected** — Removed Sunday from zinc days to prevent consecutive Sat→Sun dosing (100mg in 48 hours blocks copper absorption). New schedule: Tue/Thu/Sat only (3 days/week, 150mg/week, 21.4mg/day avg — well under 40mg NIH UL).
+- **8 code locations updated** — `checklistNormal` s1 subItems (`days:[2,4,6]`), `checklistFast` sf1 subItems (`days:[6]`), `nutritionContent()` zinc arrays and status cards, `rulesContent()` supplement stack cards and zinc schedule card, `resolveSupplementSub()` zinc day arrays and comment.
+- **All zinc references verified** — no remaining "Sun" as a zinc day, all averages updated to 21.4mg/day, all schedules say "Tue/Thu/Sat".
+
+---
+
 ## Version 4.0.1 — 2026-03-28
 
 **Scope:** Patch (3 bug fixes for workout auto-items)
