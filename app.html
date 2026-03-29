@@ -1243,8 +1243,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '4.0.3';
-const APP_VERSION_MSG = 'Fast day supplements restructured: MCT split into morning + pre-training. Electrolytes paired with their time-of-day stacks.';
+const APP_VERSION = '4.0.4';
+const APP_VERSION_MSG = 'Fixed orphaned checklist items causing false partial completion. Added migration to clean up ghost check IDs from version transitions.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -2352,10 +2352,10 @@ const PLANS = {
           { id:'sf1_d', name:'Electrolyte tablet', dose:'99mg potassium', when:'Mid-morning (9–10am)' }
         ]
       },
-      { id:'sf3', group:'SUPPLEMENTS', label:'Pre-training supplements', sub:'Tap to expand',
+      { id:'wf2', group:'SUPPLEMENTS', label:'Pre-training supplements', sub:'Tap to expand',
         subItems: [
-          { id:'sf3_a', name:'MCT gel', dose:'1 gel', when:'Pre-training (~20 min before)' },
-          { id:'sf3_b', name:'Electrolyte tablet', dose:'99mg potassium', when:'Pre-training — prevents palpitations during fasted work' }
+          { id:'wf2_a', name:'MCT gel', dose:'1 gel', when:'Pre-training (~20 min before)' },
+          { id:'wf3', name:'Electrolyte tablet', dose:'99mg potassium', when:'Pre-training — prevents palpitations during fasted work' }
         ]
       },
       { id:'sf2', group:'SUPPLEMENTS', label:'Magnesium before bed', sub:'1 serving (~67.6mg elemental). Every night including fast days.' }
@@ -4101,6 +4101,71 @@ function saveDayLogField(dateStr, fields) {
   ss(SK.dayLogs, all);
 }
 
+// getValidCheckCompletion: counts only check IDs that exist in the current checklist definition.
+// Prevents orphaned IDs (from version transitions) from dragging down completion scores.
+function getValidCheckCompletion(dateStr) {
+  const log = getDayLog(dateStr);
+  const checks = log.checks || {};
+  const plan = getActivePlan();
+  if(!plan) return { done:0, total:0, pct:0 };
+
+  const isFast = !!(gs(SK.fastDays)||{})[dateStr];
+  const isLight = !!(gs(SK.lightDays)||{})[dateStr];
+  const checklist = isFast ? (plan.checklistFast||[]) : isLight ? (plan.checklistLight||plan.checklistNormal||[]) : (plan.checklistNormal||[]);
+
+  const validIds = new Set();
+  checklist.forEach(item => {
+    validIds.add(item.id);
+    if(item.subItems) item.subItems.forEach(sub => validIds.add(sub.id));
+  });
+  validIds.add('_workout');
+
+  const validChecks = Object.entries(checks).filter(([id]) => validIds.has(id));
+  const done = validChecks.filter(([,v]) => v).length;
+  const total = validChecks.length;
+  return { done, total, pct: total > 0 ? Math.round((done/total)*100) : 0 };
+}
+
+// migrateOrphanedChecks: one-time cleanup of check IDs that no longer exist in the current
+// checklist definition. Runs on app init. Idempotent — safe to run multiple times.
+function migrateOrphanedChecks() {
+  const plan = getActivePlan();
+  if(!plan) return;
+
+  const dayLogs = gs(SK.dayLogs) || {};
+  const fastDays = gs(SK.fastDays) || {};
+  const lightDays = gs(SK.lightDays) || {};
+  let changed = false;
+
+  Object.keys(dayLogs).forEach(dateStr => {
+    const log = dayLogs[dateStr];
+    const checks = log.checks;
+    if(!checks || Object.keys(checks).length === 0) return;
+
+    const isFast = !!fastDays[dateStr];
+    const isLight = !!lightDays[dateStr];
+    const checklist = isFast ? (plan.checklistFast||[]) : isLight ? (plan.checklistLight||plan.checklistNormal||[]) : (plan.checklistNormal||[]);
+
+    const validIds = new Set();
+    checklist.forEach(item => {
+      validIds.add(item.id);
+      if(item.subItems) item.subItems.forEach(sub => validIds.add(sub.id));
+    });
+    validIds.add('_workout');
+
+    Object.keys(checks).forEach(checkId => {
+      if(!validIds.has(checkId)) {
+        delete checks[checkId];
+        changed = true;
+      }
+    });
+  });
+
+  if(changed) {
+    ss(SK.dayLogs, dayLogs);
+  }
+}
+
 // loadChecklist: reads today's checks from storage and applies done/undone CSS to each item
 function loadChecklist() {
   const log = getDayLog(todayStr());
@@ -4644,12 +4709,10 @@ function computeRadarMetrics(days) {
     if (!isTracked(ds)) return;
     const log = dayLogs[ds];
     let dayChecked = 0, dayTotal = 0;
-    // Regular checklist checks
-    if (log && log.checks) {
-      const vals = Object.values(log.checks);
-      dayChecked += vals.filter(Boolean).length;
-      dayTotal += vals.length;
-    }
+    // Regular checklist checks (filtered to valid IDs only — prevents orphaned ghosts)
+    const vc = getValidCheckCompletion(ds);
+    dayChecked += vc.done;
+    dayTotal += vc.total;
     // Workout exercise checks (from WORKOUTS tab)
     if (log && log.workoutChecks) {
       const wVals = Object.values(log.workoutChecks);
@@ -5206,11 +5269,10 @@ function renderCalendar() {
       // Only show done (green) if all items are checked, to give positive feedback.
       // Otherwise show no compliance color — the day is still ongoing.
       if(log) {
-        const checks = Object.values(log.checks||{}).filter(Boolean).length;
-        const total  = Object.keys(log.checks||{}).length;
+        const vc = getValidCheckCompletion(dateStr);
         if(isFast)  { cls+=' cal-fast'; fasts++; }
         else if(isLight){ cls+=' cal-light'; lights++; }
-        else if(checks > 0 && checks === total && total > 0){ cls+=' cal-done'; done++; }
+        else if(vc.done > 0 && vc.done === vc.total && vc.total > 0){ cls+=' cal-done'; done++; }
         // Partial or zero checks on today: no color — day is in progress
       } else {
         // No log at all yet today — no color
@@ -5222,27 +5284,24 @@ function renderCalendar() {
       // Past days — judge retroactively
       if(isFast){
         if(log){
-          const checks = Object.values(log.checks||{}).filter(Boolean).length;
-          const total = Object.keys(log.checks||{}).length;
-          if(checks===total&&total>0){cls+=' cal-fast'; fasts++;}
-          else if(checks>0){cls+=' cal-partial';partial++;}
+          const vc = getValidCheckCompletion(dateStr);
+          if(vc.done===vc.total&&vc.total>0){cls+=' cal-fast'; fasts++;}
+          else if(vc.done>0){cls+=' cal-partial';partial++;}
           else{cls+=' cal-fast'; fasts++;}
         } else {cls+=' cal-fast'; fasts++;}
       }
       else if(isLight){
         if(log){
-          const checks = Object.values(log.checks||{}).filter(Boolean).length;
-          const total = Object.keys(log.checks||{}).length;
-          if(checks===total&&total>0){cls+=' cal-light'; lights++;}
-          else if(checks>0){cls+=' cal-partial';partial++;}
+          const vc = getValidCheckCompletion(dateStr);
+          if(vc.done===vc.total&&vc.total>0){cls+=' cal-light'; lights++;}
+          else if(vc.done>0){cls+=' cal-partial';partial++;}
           else{cls+=' cal-light'; lights++;}
         } else {cls+=' cal-light'; lights++;}
       }
       else if(log){
-        const checks = Object.values(log.checks||{}).filter(Boolean).length;
-        const total = Object.keys(log.checks||{}).length;
-        if(checks>0&&checks<total){cls+=' cal-partial';partial++;}
-        else if(checks===total&&total>0){cls+=' cal-done';done++;}
+        const vc = getValidCheckCompletion(dateStr);
+        if(vc.done>0&&vc.done<vc.total){cls+=' cal-partial';partial++;}
+        else if(vc.done===vc.total&&vc.total>0){cls+=' cal-done';done++;}
         else if(isPlanDay){cls+=' cal-missed';missed++;}
         // No log + not a plan day = no colour. No expectation, no failure.
       } else if(isPlanDay){cls+=' cal-missed';missed++;}
@@ -7689,6 +7748,7 @@ document.getElementById('settingsOverlay').addEventListener('click',e=>{if(e.tar
   }
 
   applyPlanUI(s.plan||'default');
+  migrateOrphanedChecks();
   updateFastUI();
   updateTodayTab();
   loadChecklist();
