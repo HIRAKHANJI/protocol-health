@@ -4,6 +4,17 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 4.0.3 — 2026-03-29
+
+**Scope:** Patch (AGRO fast day supplement checklist restructure)
+
+- **MCT gel split into two items** — Morning stack (`sf1`) now has 1 MCT gel (fat carrier for D3). New pre-training stack (`sf3`) has 1 MCT gel (pre-training energy). Previously both were lumped as "2 gels" in the morning stack.
+- **Electrolytes paired by time of day** — Morning electrolyte (`sf1_d`) moved into the morning stack expandable panel. Pre-training electrolyte (`sf3_b`) moved into the new pre-training stack expandable panel. Previously both were standalone items (`wf2`, `wf3`).
+- **New pre-training expandable item** — `sf3` with subItems `sf3_a` (MCT gel) and `sf3_b` (electrolyte). Same expand/collapse behavior as morning stack.
+- **Old standalone electrolyte items removed** — `wf2` and `wf3` replaced by sub-items inside the morning and pre-training stacks. Existing check states for `wf2`/`wf3` in localStorage are orphaned (no data loss, just no longer displayed).
+
+---
+
 ## Version 4.0.2 — 2026-03-29
 
 **Scope:** Patch (Safety fix — zinc consecutive-day dosing)
