@@ -1243,8 +1243,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '4.0.2';
-const APP_VERSION_MSG = 'Fixed zinc schedule: removed consecutive Sat\u2192Sun dosing. Now Tue/Thu/Sat only (21.4mg/day avg).';
+const APP_VERSION = '4.0.3';
+const APP_VERSION_MSG = 'Fast day supplements restructured: MCT split into morning + pre-training. Electrolytes paired with their time-of-day stacks.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -2344,15 +2344,20 @@ const PLANS = {
       { id:'wf5', group:'FAST', label:'3.5L+ water total today', sub:'Sip constantly. Don\'t chug all at once.', type:'water', waterTarget:3.5 },
       { id:'wf6', group:'FAST', label:'No food consumed today', sub:'Fast is unbroken. If you break it \u2014 log it honestly.' },
       { id:'wf7', group:'FAST', label:'Fast day intensity: 70-80% only', sub:'Training fasted is fine. Don\'t push 100% on zero calories.' },
-      { id:'sf1', group:'SUPPLEMENTS', label:'Morning supplements taken', sub:'Tap to expand',
+      { id:'sf1', group:'SUPPLEMENTS', label:'Morning supplements', sub:'Tap to expand',
         subItems: [
           { id:'sf1_a', name:'D3+K2', dose:'1 tab', when:'With MCT gel on waking' },
           { id:'sf1_b', name:'Zinc 50mg', dose:'1 tab', when:'Sat only — not Sun', days:[6] },
-          { id:'sf1_c', name:'MCT gel', dose:'2 gels', when:'Pre-training' }
+          { id:'sf1_c', name:'MCT gel', dose:'1 gel', when:'Morning — fat carrier for D3' },
+          { id:'sf1_d', name:'Electrolyte tablet', dose:'99mg potassium', when:'Mid-morning (9–10am)' }
         ]
       },
-      { id:'wf2', group:'SUPPLEMENTS', label:'Electrolyte tablet mid-morning (9-10am)', sub:'99mg potassium. First of 2 daily doses.' },
-      { id:'wf3', group:'SUPPLEMENTS', label:'Electrolyte tablet pre-evening (20 min before training)', sub:'99mg potassium. Second dose. Prevents palpitations during fasted work.' },
+      { id:'sf3', group:'SUPPLEMENTS', label:'Pre-training supplements', sub:'Tap to expand',
+        subItems: [
+          { id:'sf3_a', name:'MCT gel', dose:'1 gel', when:'Pre-training (~20 min before)' },
+          { id:'sf3_b', name:'Electrolyte tablet', dose:'99mg potassium', when:'Pre-training — prevents palpitations during fasted work' }
+        ]
+      },
       { id:'sf2', group:'SUPPLEMENTS', label:'Magnesium before bed', sub:'1 serving (~67.6mg elemental). Every night including fast days.' }
     ],
 
