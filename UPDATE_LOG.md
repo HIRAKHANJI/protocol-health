@@ -4,6 +4,18 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 4.0.4 — 2026-03-29
+
+**Scope:** Patch (Fix orphaned checklist IDs + restore electrolyte IDs)
+
+- **Migration on init** — `migrateOrphanedChecks()` runs once on app startup. Compares each day's stored check IDs against the current checklist definition. Deletes orphaned IDs (e.g., old `sf3`, `sf3_a`, `sf3_b`) that no longer exist in any checklist array. Idempotent.
+- **`getValidCheckCompletion()` helper** — New function that counts only check IDs that exist in the current checklist. Used by calendar day classification and radar CHECKLIST axis to prevent orphaned IDs from dragging down scores.
+- **Calendar scoring fixed** — All 5 check-counting blocks in `renderCalendar()` (today, past fast, past light, past normal) now use `getValidCheckCompletion()` instead of raw `Object.values(log.checks)`.
+- **Radar CHECKLIST axis fixed** — `computeRadarMetrics()` checklist scoring now uses `getValidCheckCompletion()` for filtered counts.
+- **Electrolyte IDs restored** — Pre-training supplement parent changed from `sf3` to `wf2`. Sub-items changed from `sf3_a`/`sf3_b` to `wf2_a`/`wf3`. Matches original electrolyte IDs to preserve existing localStorage check states.
+
+---
+
 ## Version 4.0.3 — 2026-03-29
 
 **Scope:** Patch (AGRO fast day supplement checklist restructure)
