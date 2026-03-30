@@ -494,7 +494,7 @@ The app has two independent version numbers that serve different purposes:
 | **+0.1.0** (minor) | A new feature, a meaningful UI change, or 4+ bug fixes bundled together | Yes | Added streak counter, redesigned settings panel, new checklist group |
 | **+1.0.0** (major) | New plan added, major rework of a core system, or something that changes how you use the app | Yes | New combat training plan, schedule system rewrite, new tab added |
 
-**Current version:** `3.2.1`
+**Current version:** `4.1.0`
 
 > **Self-Update Rule:** Whenever `APP_VERSION` is bumped in `app.html`, also update ALL version references in this file (`CLAUDE.md`) to match — including this line and the Quick Reference section below. Never leave stale version numbers in project documentation.
 
@@ -511,7 +511,7 @@ The app has two independent version numbers that serve different purposes:
 When making changes, update these two lines near the top of the script in `app.html`:
 
 ```javascript
-const APP_VERSION = '3.2.1';                         // ← bump according to rules above
+const APP_VERSION = '4.1.0';                         // ← bump according to rules above
 const APP_VERSION_MSG = 'Description of changes.';    // ← short description of what changed
 ```
 
@@ -560,7 +560,7 @@ Data writes:  always end with dispatch("EVENT_NAME")
 Dialogs:      showConfirm(), showAlert() — never native confirm/alert
 Dates:        dateToStr(d), strToDate(s), todayStr() — never toISOString()
 Cache:        sw.js CACHE_NAME = "protocol-health-v11" — bump on every significant push
-App version:  APP_VERSION = "3.2.1" — bump on notable updates (see Section 12)
+App version:  APP_VERSION = "4.1.0" — bump on notable updates (see Section 12)
 Update log:   UPDATE_LOG.md — every version bump must be documented here
 ```
 
@@ -628,7 +628,7 @@ Before writing ANY supplement dose into app content:
 | MCT Oil | 30g max acute | GI distress |
 
 ### ZINC COPPER INTERACTION (CRITICAL)
-Chronic zinc >40mg/day blocks copper absorption → copper deficiency. Current protocol: 50mg × 4 alternate days/week = 28.6mg/day average. DO NOT change zinc to daily dosing without flagging this risk.
+Chronic zinc >40mg/day blocks copper absorption → copper deficiency. Current protocol: 50mg × 3 days/week (Mon/Wed/Fri) = 21.4mg/day average. True alternate-day spacing, no consecutive dosing, no coverage gaps. DO NOT change zinc to daily dosing without flagging this risk.
 
 ### Push:Pull Ratio (HARD RULE)
 Protocol Health must NEVER generate a training plan with push:pull ratio > 1:1. Default for AGRO CUT: pull-dominant (5:7). Source: Cools 2016 + Prinold 2016

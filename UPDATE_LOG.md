@@ -4,6 +4,38 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 4.1.1 — 2026-03-30
+
+**Scope:** Patch (Zinc schedule corrected to true alternate days)
+
+- **Zinc schedule changed from Tue/Thu/Sat to Mon/Wed/Fri** — The previous Tue/Thu/Sat schedule left Monday completely uncovered (Saturday's dose covers Sat+Sun, but Tuesday is 3 days away, leaving Monday with no zinc coverage). New Mon/Wed/Fri schedule provides true alternate-day coverage with no gaps:
+  - Mon (eating day): zinc → covers Mon + Tue
+  - Wed (fast day): zinc → covers Wed + Thu
+  - Fri (eating day): zinc → covers Fri + Sat
+  - Sun: covered by Friday (2 days, within range)
+- **No consecutive dosing** — Mon→Wed = 2 day gap, Wed→Fri = 2 day gap, Fri→Mon = 3 day gap. All safe.
+- **Same weekly total** — 3 × 50mg = 150mg/week = 21.4mg/day avg (under 40mg NIH UL).
+- **9 code locations updated** — `s1_c` subItems days `[1,5]`, `sf1_b` subItems days `[3]`, `resolveSupplementSub()` arrays, `nutritionContent()` zinc arrays + next-zinc calc + status cards, `rulesContent()` stack cards + schedule card.
+- **Fast day zinc on Wednesday** — Previously no zinc on any fast day (Sat removed, Sun removed). Now Wednesday (fast day) is a zinc day, with zinc appearing in the fast day supplement checklist.
+
+---
+
+## Version 4.1.0 — 2026-03-30
+
+**Scope:** Minor (6 bug fixes — checklist state management, workout threshold, radar scoring, day modal)
+**Banner:** "Workout items tick at 80% completion (not all-or-nothing). Fixed stale state bugs in checklist saving. Radar light day scoring fixed."
+
+- **BUG 1: Workout auto-items no longer all-or-nothing** — Items m2/m3/e1/e2/e3 and the injected `_workout` item now tick as done at ≥80% exercise completion (was 100%). Doing 7/8 exercises checks off the item. Shows "— good" label at ≥80%, "— complete" at 100%.
+- **BUG 2: loadChecklist guards auto-status items** — The generic `else` branch now skips items with `data-water-target` or `data-auto` attributes instead of overwriting their computed state from stale `checks[id]` values.
+- **BUG 3: saveAllChecks() helper replaces inline check-saving** — New centralized function properly handles all item types (regular, sub-items, water, auto-status). Used by `toggle()`, `toggleSupItem()`, and `updateWaterCardState()`. Prevents stale auto-status states from being saved.
+- **BUG 4: Day modal handles all item types** — Past day checklist now renders water items (shows L vs target), auto-cal items (shows cal vs ceiling with tick/cross), and auto-workout items (shows exercise count) correctly instead of using stale `checks[id]`. Non-toggleable in modal (read-only status).
+- **BUG 5: resetToday preserves auto-status** — Reset now only clears manual items and sub-items. Calls `refreshAutoItems()` to recompute cal/workout states, then `saveAllChecks()` to persist correctly. Auto-items no longer show false negatives after reset.
+- **BUG 6: Radar light day scoring fixed** — Light days only count toward `fastScheduled` if actually marked in `lightDaysMap`. Previously, untracked scheduled light days counted as failures (0% completion), inconsistent with fast day logic where unmarked days are simply not scored.
+- **BUG 7 (no-fix): Food modal stays open** — Confirmed intentional: users log multiple items in sequence, form clears for next entry while entries list updates live.
+- **DOC: index.html footer version updated** — Was stuck at v3.7.0, now shows v4.1.0.
+
+---
+
 ## Version 4.0.4 — 2026-03-29
 
 **Scope:** Patch (Fix orphaned checklist IDs + restore electrolyte IDs)
