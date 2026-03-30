@@ -4,6 +4,35 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 4.2.0 — 2026-03-30
+
+**Scope:** Minor (IndexedDB persistence mirror + backup reminder + storage health)
+**Banner:** "Data persistence: IndexedDB mirror auto-recovers if localStorage is wiped. Backup reminder after 7 days. Storage health in settings."
+
+### IndexedDB Mirror — Automatic Data Recovery
+- **Every `ss()` write** now mirrors data to IndexedDB via `idbPut()`. IndexedDB is stored at a different iOS filesystem path than localStorage — a partial eviction may clear one but not the other.
+- **On app init** — if localStorage is empty but IndexedDB has data, `idbAutoRestore()` silently restores all keys before the UI renders. User never sees it happen.
+- **Background full sync** — `idbSyncAll()` runs 2 seconds after init to ensure the mirror is complete.
+- **Functions added:** `openIDB()`, `idbPut()`, `idbGet()`, `idbGetAll()`, `idbSyncAll()`, `idbAutoRestore()`.
+- **Constants:** `IDB_NAME = 'protocol-health-mirror'`, `IDB_STORE = 'kvstore'`, `IDB_VERSION = 1`.
+
+### Backup Reminder Banner
+- **`checkBackupReminder()`** — shows a slide-down banner if 7+ days since last backup and user has 3+ days of data.
+- **Banner shows:** "Last backup was X days ago" or "You've never backed up" with BACKUP and LATER buttons.
+- **BACKUP button** — dismisses banner and triggers `backupData()`.
+- **Timestamp tracking** — `ph_last_backup_ts` saved to localStorage on every successful backup.
+
+### Storage Health Display
+- **`renderStorageHealth()`** — shows in Data Management section when settings open.
+- **Displays:** localStorage usage (KB), IndexedDB mirror status, persistent storage grant status, last backup age, total origin storage quota/usage (via `navigator.storage.estimate()`).
+
+### Init Flow Change
+- **`runInit()`** extracted from IIFE — reusable after async IDB restore.
+- **Init sequence:** check localStorage → if empty, attempt IDB restore → then `runInit()`.
+- **`checkBackupReminder()`** called at end of init.
+
+---
+
 ## Version 4.1.1 — 2026-03-30
 
 **Scope:** Patch (Zinc schedule corrected to true alternate days)
