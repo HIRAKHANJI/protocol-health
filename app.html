@@ -1366,8 +1366,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '4.2.0';
-const APP_VERSION_MSG = 'Data persistence: IndexedDB mirror auto-recovers if localStorage is wiped. Backup reminder after 7 days. Storage health in settings.';
+const APP_VERSION = '4.3.0';
+const APP_VERSION_MSG = 'Workout checklist in day modal: tap any day on MONTHS, hit See Workout Checklist to check off exercises for that day.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -5616,15 +5616,17 @@ function openDayModal(dateStr, dt) {
       html += `</div></div>`;
     }
 
-    // Workout completion for this day
+    // Workout checklist for this day — expandable with all exercises
     const dayWChecks = log.workoutChecks || {};
-    const wxEntries = Object.entries(dayWChecks);
-    const wxDone = wxEntries.filter(([,v]) => v === true).length;
-    const wxTotal = wxEntries.length;
-    if(wxTotal > 0) {
-      const wxPct = Math.round((wxDone / wxTotal) * 100);
-      html += `<div class="field-group"><label class="field-label">Workout Completion</label><div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:'DM Mono',monospace;font-size:0.68rem;color:${wxPct===100?'var(--accent)':'var(--muted)'};line-height:1.8">${wxDone}/${wxTotal} exercises completed (${wxPct}%)</div></div>`;
-    }
+    const wxDone = Object.values(dayWChecks).filter(Boolean).length;
+    const wxTotal = Object.keys(dayWChecks).length;
+    const wxSummary = wxTotal > 0 ? `${wxDone}/${wxTotal} exercises done` : 'No exercises tracked';
+    html += `<div class="field-group"><label class="field-label">Workout</label>`;
+    html += `<button id="mWorkoutBtn" onclick="toggleModalWorkoutChecklist('${dateStr}')" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:all 0.15s">
+      <span style="font-family:'DM Mono',monospace;font-size:0.68rem;color:${wxTotal>0&&wxDone===wxTotal?'var(--accent)':'var(--muted)'}">${wxSummary}</span>
+      <span style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--accent);letter-spacing:1px">SEE WORKOUT CHECKLIST</span>
+    </button>`;
+    html += `<div id="mWorkoutPanel" style="display:none;margin-top:8px"></div></div>`;
 
     // Food log for this day
     const dayFoodData = getDayCalories(dateStr);
@@ -5730,6 +5732,128 @@ function toggleModalSupItem(el, dateStr, subId, parentId) {
   if(parentCb) parentCb.textContent = allDone ? '✓' : '';
   saveDayLogField(dateStr, { checks });
   dispatch('DAY_SAVED');
+}
+
+// ─── MODAL WORKOUT CHECKLIST ─────────────────────────────────────────────────
+// Renders all exercises for a specific date's day-of-week inside the day modal.
+// Uses a hidden container to run workoutContent() and extract exercise rows.
+
+function toggleModalWorkoutChecklist(dateStr) {
+  const panel = document.getElementById('mWorkoutPanel');
+  if(!panel) return;
+  // If already open, close it
+  if(panel.style.display !== 'none') {
+    panel.style.display = 'none';
+    const btn = document.getElementById('mWorkoutBtn');
+    if(btn) btn.querySelector('span:last-child').textContent = 'SEE WORKOUT CHECKLIST';
+    return;
+  }
+
+  const plan = getActivePlan();
+  const s = getSettings();
+  const targetDow = strToDate(dateStr).getDay();
+  const targetDay = DAYS_SHORT[targetDow]; // 'MON', 'TUE', etc.
+
+  // Generate all workout cards in a hidden container to extract exercises
+  const temp = document.createElement('div');
+  temp.style.display = 'none';
+  document.body.appendChild(temp);
+  _resetExRowInstances();
+  temp.innerHTML = plan.workoutContent(s);
+
+  // Read saved workout checks for this date
+  const log = getDayLog(dateStr);
+  const wChecks = Object.assign({}, log.workoutChecks || {});
+
+  let html = '';
+  let exerciseCount = 0;
+
+  temp.querySelectorAll('.workout-card').forEach(card => {
+    const daysAttr = card.dataset.days;
+    // Only show cards for this date's day-of-week
+    if(daysAttr && daysAttr !== 'DAILY' && !daysAttr.split(',').includes(targetDay)) return;
+
+    const title = card.querySelector('h3');
+    const meta = card.querySelector('.meta');
+    html += `<div style="margin-bottom:10px"><div style="font-family:'Bebas Neue',sans-serif;font-size:0.8rem;letter-spacing:1.5px;color:var(--accent);margin-bottom:4px">${title ? title.textContent : 'WORKOUT'}</div>`;
+    if(meta) html += `<div style="font-family:'DM Mono',monospace;font-size:0.5rem;color:var(--muted);margin-bottom:6px">${meta.textContent}</div>`;
+
+    card.querySelectorAll('.wex-row').forEach(row => {
+      const wid = row.dataset.wid;
+      if(!wid) return;
+      exerciseCount++;
+      const nameEl = row.querySelector('.ex-name');
+      const setsEl = row.querySelector('.ex-sets');
+      const name = nameEl ? nameEl.textContent : '';
+      const sets = setsEl ? setsEl.textContent : '';
+      const isStretch = nameEl && nameEl.style.color === 'rgb(221, 136, 255)';
+      const isDone = !!wChecks[wid];
+      html += `<div class="modal-check-item ${isDone?'done':''}" onclick="toggleModalWorkoutEx(this,'${dateStr}','${wid}')" style="padding:6px 8px;margin-bottom:3px">
+        <div class="modal-cb">${isDone?'✓':''}</div>
+        <div style="flex:1;display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:0.72rem;${isStretch?'color:#dd88ff':''}">${name}</span>
+          <span style="font-family:'DM Mono',monospace;font-size:0.6rem;color:${isStretch?'#dd88ff':'var(--accent2)'}">${sets}</span>
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+  });
+
+  // Clean up temp container
+  document.body.removeChild(temp);
+  // Reset wex counter so WORKOUTS tab still renders correctly after
+  _resetExRowInstances();
+
+  if(exerciseCount === 0) {
+    html = `<div style="padding:10px;font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--muted);text-align:center">No exercises scheduled for ${['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][targetDow]}</div>`;
+  }
+
+  panel.innerHTML = html;
+  panel.style.display = 'block';
+
+  // Update button text
+  const btn = document.getElementById('mWorkoutBtn');
+  if(btn) {
+    const doneCount = Object.values(wChecks).filter(Boolean).length;
+    btn.querySelector('span:last-child').textContent = 'HIDE WORKOUT CHECKLIST';
+  }
+}
+
+function toggleModalWorkoutEx(el, dateStr, wid) {
+  el.classList.toggle('done');
+  const cb = el.querySelector('.modal-cb');
+  const isDone = el.classList.contains('done');
+  cb.textContent = isDone ? '✓' : '';
+
+  // Update workoutChecks in storage
+  const log = getDayLog(dateStr);
+  const wChecks = Object.assign({}, log.workoutChecks || {});
+  wChecks[wid] = isDone;
+
+  // Count totals for this day
+  const panel = document.getElementById('mWorkoutPanel');
+  let total = 0, done = 0;
+  if(panel) {
+    panel.querySelectorAll('.modal-check-item').forEach(item => {
+      total++;
+      if(item.classList.contains('done')) done++;
+    });
+  }
+
+  saveDayLogField(dateStr, { workoutChecks: wChecks, workoutTodayTotal: total, workoutTodayDone: done });
+
+  // Update summary button
+  const btn = document.getElementById('mWorkoutBtn');
+  if(btn) {
+    const summarySpan = btn.querySelector('span:first-child');
+    if(summarySpan) {
+      summarySpan.textContent = `${done}/${total} exercises done`;
+      summarySpan.style.color = done === total ? 'var(--accent)' : 'var(--muted)';
+    }
+  }
+
+  dispatch('DAY_SAVED');
+  dispatch('WORKOUT_CHECKED');
 }
 
 // toggleFastDay: marks or unmarks a date as a water fast day, then re-opens the modal
