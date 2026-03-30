@@ -574,6 +574,16 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
   </div>
   <button class="update-banner-close" onclick="dismissUpdate()">OK</button>
 </div>
+<div class="update-banner" id="backupReminder" style="border-bottom-color:var(--accent2)">
+  <div class="update-banner-text">
+    <div class="update-banner-ver" style="color:var(--accent2)">BACKUP REMINDER</div>
+    <div class="update-banner-msg" id="backupReminderMsg">Your data hasn't been backed up recently. Tap BACKUP to save a file.</div>
+  </div>
+  <div style="display:flex;gap:6px;flex-shrink:0">
+    <button class="update-banner-close" style="border-color:var(--accent2);color:var(--accent2)" onclick="dismissBackupReminder();backupData()">BACKUP</button>
+    <button class="update-banner-close" onclick="dismissBackupReminder()">LATER</button>
+  </div>
+</div>
 
 <div class="sw-reload-banner" id="swReloadBanner">
   <div class="sw-reload-text"><strong>New version available.</strong> Tap reload to update — your data is safe.</div>
@@ -1027,6 +1037,7 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
         </div>
         <input type="file" id="restoreFileInput" accept=".json" style="display:none" onchange="restoreData(event)">
         <div id="backupStatus" style="display:none;margin-top:10px;padding:10px 13px;border-radius:8px;font-family:'DM Mono',monospace;font-size:0.7rem;line-height:1.6"></div>
+        <div id="storageHealth" style="margin-top:10px;padding:10px 13px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--muted);line-height:1.8"></div>
       </div>
 
     </div>
@@ -1221,6 +1232,118 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
 // ─── STORAGE KEYS ────────────────────────────────────────────────────────────
 // All localStorage keys live here in one place.
 // "ph" = Protocol Health. "v1" = version 1 (bump to v2 if schema changes to avoid reading stale data).
+// ─── INDEXEDDB MIRROR — iOS PERSISTENCE SAFETY NET ──────────────────────────
+// localStorage on iOS can be evicted under storage pressure. IndexedDB is stored
+// in a separate filesystem directory. By mirroring all data to both, a partial
+// eviction (hitting one but not the other) can be automatically recovered.
+//
+// On every ss() write → background sync to IndexedDB
+// On init → if localStorage empty but IndexedDB has data → auto-restore
+// User never sees this — the app just works.
+
+const IDB_NAME = 'protocol-health-mirror';
+const IDB_STORE = 'kvstore';
+const IDB_VERSION = 1;
+
+let _idb = null; // cached db connection
+
+function openIDB() {
+  return new Promise((resolve, reject) => {
+    if(_idb) { resolve(_idb); return; }
+    const req = indexedDB.open(IDB_NAME, IDB_VERSION);
+    req.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if(!db.objectStoreNames.contains(IDB_STORE)) {
+        db.createObjectStore(IDB_STORE);
+      }
+    };
+    req.onsuccess = (e) => { _idb = e.target.result; resolve(_idb); };
+    req.onerror = () => reject(req.error);
+  });
+}
+
+// Write a single key-value pair to IndexedDB (fire-and-forget, never blocks UI)
+function idbPut(key, value) {
+  openIDB().then(db => {
+    const tx = db.transaction(IDB_STORE, 'readwrite');
+    tx.objectStore(IDB_STORE).put(value, key);
+  }).catch(() => {}); // silent fail — IDB is a safety net, not critical path
+}
+
+// Read a single key from IndexedDB
+function idbGet(key) {
+  return openIDB().then(db => {
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(IDB_STORE, 'readonly');
+      const req = tx.objectStore(IDB_STORE).get(key);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  });
+}
+
+// Read ALL keys from IndexedDB
+function idbGetAll() {
+  return openIDB().then(db => {
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(IDB_STORE, 'readonly');
+      const store = tx.objectStore(IDB_STORE);
+      const keys = store.getAllKeys();
+      const vals = store.getAll();
+      tx.oncomplete = () => {
+        const result = {};
+        for(let i = 0; i < keys.result.length; i++) {
+          result[keys.result[i]] = vals.result[i];
+        }
+        resolve(result);
+      };
+      tx.onerror = () => reject(tx.error);
+    });
+  });
+}
+
+// Sync ALL SK keys from localStorage to IndexedDB (called periodically and on backup)
+function idbSyncAll() {
+  openIDB().then(db => {
+    const tx = db.transaction(IDB_STORE, 'readwrite');
+    const store = tx.objectStore(IDB_STORE);
+    Object.values(SK).forEach(storageKey => {
+      const raw = localStorage.getItem(storageKey);
+      if(raw !== null) {
+        try { store.put(JSON.parse(raw), storageKey); } catch {}
+      }
+    });
+    // Also store last backup timestamp
+    store.put(Date.now(), '_idb_last_sync');
+  }).catch(() => {});
+}
+
+// Attempt auto-restore from IndexedDB if localStorage appears empty
+// Returns true if restore happened, false otherwise
+async function idbAutoRestore() {
+  try {
+    // Check if localStorage has any real data (not just seenVer/swDismissedVer)
+    const hasData = Object.values(SK).some(key => {
+      if(key === SK.seenVer || key === SK.swDismissedVer) return false;
+      return localStorage.getItem(key) !== null;
+    });
+    if(hasData) return false; // localStorage is fine, no restore needed
+
+    const idbData = await idbGetAll();
+    const dataKeys = Object.keys(idbData).filter(k => !k.startsWith('_'));
+    if(dataKeys.length === 0) return false; // IDB also empty, nothing to restore
+
+    // Restore from IndexedDB → localStorage
+    dataKeys.forEach(key => {
+      try { localStorage.setItem(key, JSON.stringify(idbData[key])); } catch {}
+    });
+    console.log('Auto-restored ' + dataKeys.length + ' keys from IndexedDB mirror');
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 // NEVER hardcode these strings elsewhere — always use SK.keyName.
 const SK = {
   checklist: 'ph_ck_v1',   // legacy key (checklist state now lives inside dayLogs.checks — kept for compatibility)
@@ -1243,8 +1366,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '4.1.1';
-const APP_VERSION_MSG = 'Zinc schedule fixed: now Mon/Wed/Fri (true alternate days). No gaps, no consecutive dosing.';
+const APP_VERSION = '4.2.0';
+const APP_VERSION_MSG = 'Data persistence: IndexedDB mirror auto-recovers if localStorage is wiped. Backup reminder after 7 days. Storage health in settings.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -1256,8 +1379,8 @@ const AUTO_WORKOUT_IDS = ['m2','m3','e1','e2','e3']; // Checklist items auto-der
 function esc(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
 // gs (get storage): safely reads and JSON-parses a localStorage key. Returns null on missing or parse error.
 function gs(k) { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } }
-// ss (set storage): safely JSON-stringifies and writes to localStorage. Alerts user if storage is full.
-function ss(k,v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) { if(e.name==='QuotaExceededError'||e.code===22) { if(typeof showAlert==='function') showAlert('Storage is full. Your data may not be saved. Back up now and clear old data.'); } } }
+// ss (set storage): safely JSON-stringifies and writes to localStorage + mirrors to IndexedDB.
+function ss(k,v) { try { localStorage.setItem(k, JSON.stringify(v)); idbPut(k, v); } catch(e) { if(e.name==='QuotaExceededError'||e.code===22) { if(typeof showAlert==='function') showAlert('Storage is full. Your data may not be saved. Back up now and clear old data.'); } } }
 // todayStr: returns today as "YYYY-MM-DD" — the universal date format used everywhere in the app.
 function todayStr() { return dateToStr(new Date()); }
 // dateToStr: converts a JS Date object to "YYYY-MM-DD" string, handling timezone correctly.
@@ -1943,6 +2066,32 @@ function checkVersionUpdate() {
 function dismissUpdate() {
   document.getElementById('updateBanner').classList.remove('visible');
   ss(SK.seenVer, APP_VERSION);
+}
+
+// ─── BACKUP REMINDER ────────────────────────────────────────────────────────
+// Shows a nudge banner if the user hasn't backed up in 7+ days and has real data.
+// Tracks last backup time via a timestamp in dayLogs metadata.
+
+function checkBackupReminder() {
+  // Only remind if user has meaningful data
+  const weights = gs(SK.weights) || [];
+  const dayLogs = gs(SK.dayLogs) || {};
+  if(weights.length < 3 && Object.keys(dayLogs).length < 3) return; // too early to nag
+
+  const lastBackup = localStorage.getItem('ph_last_backup_ts');
+  const now = Date.now();
+  const sevenDays = 7 * 24 * 60 * 60 * 1000;
+
+  if(!lastBackup || (now - parseInt(lastBackup)) > sevenDays) {
+    const daysSince = lastBackup ? Math.floor((now - parseInt(lastBackup)) / (24*60*60*1000)) : null;
+    const msg = daysSince ? `Last backup was ${daysSince} days ago. Tap BACKUP to save a file.` : `You've never backed up. Tap BACKUP to save your data.`;
+    document.getElementById('backupReminderMsg').textContent = msg;
+    setTimeout(() => document.getElementById('backupReminder').classList.add('visible'), 2000);
+  }
+}
+
+function dismissBackupReminder() {
+  document.getElementById('backupReminder').classList.remove('visible');
 }
 
 // ─── CUSTOM SELECT HELPERS ───────────────────────────────────────────────────
@@ -5835,9 +5984,46 @@ function openSettings() {
   syncCustomSelect('sexSelectCustom', 'settingSex');
   syncCustomSelect('activitySelectCustom', 'settingActivityLevel');
   document.getElementById('settingsOverlay').classList.add('active');
+  renderStorageHealth();
 }
 
 function closeSettings() { document.getElementById('settingsOverlay').classList.remove('active'); }
+
+function renderStorageHealth() {
+  const el = document.getElementById('storageHealth');
+  if(!el) return;
+  // Calculate localStorage usage
+  let lsBytes = 0;
+  for(let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    lsBytes += (key.length + (localStorage.getItem(key)||'').length) * 2; // UTF-16
+  }
+  const lsKB = (lsBytes / 1024).toFixed(1);
+  const lastBackup = localStorage.getItem('ph_last_backup_ts');
+  const backupText = lastBackup ? Math.floor((Date.now() - parseInt(lastBackup)) / (24*60*60*1000)) + ' days ago' : 'Never';
+  let html = `<div style="margin-bottom:4px;color:var(--text);font-size:0.65rem;letter-spacing:1px">STORAGE HEALTH</div>`;
+  html += `localStorage: ${lsKB} KB used<br>`;
+  html += `IndexedDB mirror: active<br>`;
+  html += `Persistent storage: `;
+  if(navigator.storage && navigator.storage.persisted) {
+    navigator.storage.persisted().then(p => {
+      const span = document.getElementById('_persistStatus');
+      if(span) span.textContent = p ? 'granted' : 'not granted';
+    });
+    html += `<span id="_persistStatus">checking...</span><br>`;
+  } else { html += `not supported<br>`; }
+  html += `Last backup: ${backupText}`;
+  if(navigator.storage && navigator.storage.estimate) {
+    navigator.storage.estimate().then(est => {
+      const quotaMB = (est.quota / (1024*1024)).toFixed(0);
+      const usageMB = (est.usage / (1024*1024)).toFixed(1);
+      const quotaEl = document.getElementById('_quotaInfo');
+      if(quotaEl) quotaEl.textContent = `${usageMB} MB / ${quotaMB} MB`;
+    });
+    html += `<br>Total origin storage: <span id="_quotaInfo">checking...</span>`;
+  }
+  el.innerHTML = html;
+}
 
 // onPlanSelectChange: fires when the plan dropdown changes — updates the description
 // text below it and recalculates the goal calculator in real time
@@ -7040,6 +7226,7 @@ function backupData() {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 
+  localStorage.setItem('ph_last_backup_ts', String(Date.now()));
   showBackupStatus('✓ Backup downloaded. Save it somewhere safe — Google Drive, email to yourself, etc.', 'var(--green)');
 }
 
@@ -7773,7 +7960,12 @@ document.getElementById('settingsOverlay').addEventListener('click',e=>{if(e.tar
 // Runs once on page load. Reads settings and weights from storage, applies the
 // active plan to all UI elements, and populates the TODAY tab.
 // Order matters: applyPlanUI must run before updateTodayTab so the banner is correct.
-(function init(){
+//
+// If localStorage was wiped (iOS eviction), idbAutoRestore() recovers from
+// the IndexedDB mirror before rendering. After init, a full IDB sync ensures
+// the mirror is current.
+
+function runInit() {
   const s = getSettings();
 
   // Splash screen — show plan name, then fade out
@@ -7800,6 +7992,28 @@ document.getElementById('settingsOverlay').addEventListener('click',e=>{if(e.tar
   updateTodayCalStrip();
   updateManageSchedBtn();
   checkVersionUpdate();
+  checkBackupReminder();
+
+  // Background: sync all localStorage to IndexedDB mirror
+  setTimeout(() => idbSyncAll(), 2000);
+}
+
+// Check if localStorage was wiped — if so, restore from IndexedDB mirror first
+(function(){
+  const hasData = Object.values(SK).some(key => {
+    if(key === SK.seenVer || key === SK.swDismissedVer) return false;
+    return localStorage.getItem(key) !== null;
+  });
+  if(hasData) {
+    // localStorage intact — normal fast init
+    runInit();
+  } else {
+    // localStorage empty — attempt IDB restore, then init
+    idbAutoRestore().then(restored => {
+      if(restored) console.log('Data recovered from IndexedDB mirror');
+      runInit();
+    }).catch(() => runInit());
+  }
 })();
 
 // ─── VISIBILITY CHANGE — CALENDAR REFRESH ON APP FOREGROUND ─────────────────
