@@ -4,6 +4,21 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 4.3.0 — 2026-03-30
+
+**Scope:** Minor (Workout checklist in MONTHS day modal)
+**Banner:** "Workout checklist in day modal: tap any day on MONTHS, hit See Workout Checklist to check off exercises for that day."
+
+- **"See Workout Checklist" button** in day modal — tap any day on the MONTHS calendar, the modal now has a button below the workout summary. Tapping it expands a full interactive checklist of all exercises scheduled for that day's day-of-week.
+- **Exercise generation** — uses a hidden temp container to run the plan's `workoutContent()`, filters cards by the target date's day-of-week (via `data-days` attribute matching `DAYS_SHORT`), extracts all `.wex-row` elements with their names, sets, and stretch styling.
+- **Interactive checkboxes** — each exercise has a tappable checkbox. Checking/unchecking saves to `dayLogs[date].workoutChecks` via `toggleModalWorkoutEx()`. Also saves `workoutTodayTotal` and `workoutTodayDone` counts.
+- **Live summary update** — the summary button text updates in real-time as exercises are checked ("5/8 exercises done").
+- **Dispatches** — fires both `DAY_SAVED` (calendar recolors) and `WORKOUT_CHECKED` (TODAY tab auto-workout items refresh, radar updates).
+- **Toggle behavior** — button switches between "SEE WORKOUT CHECKLIST" and "HIDE WORKOUT CHECKLIST".
+- **Works for any date** — past, present, or future. Can retroactively check off workouts you forgot to track.
+
+---
+
 ## Version 4.2.0 — 2026-03-30
 
 **Scope:** Minor (IndexedDB persistence mirror + backup reminder + storage health)
