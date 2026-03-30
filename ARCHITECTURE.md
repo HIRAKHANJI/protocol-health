@@ -91,6 +91,7 @@ flowchart LR
         W9["removeSchedule()"]
         W10["addFoodEntry()"]
         W11["setExerciseLevel()"]
+        W12["toggleWorkoutEx()"]
     end
 
     subgraph DISPATCH["dispatch()"]
@@ -109,6 +110,7 @@ flowchart LR
         U9["updateManageSchedBtn()"]
         U10["updateTodayCalStrip()"]
         U11["renderRadar()"]
+        U12["refreshAutoItems()"]
     end
 
     W1 -->|"WEIGHT_LOGGED"| D
@@ -122,8 +124,9 @@ flowchart LR
     W9 -->|"SCHEDULE_REMOVED"| D
     W10 -->|"FOOD_LOGGED"| D
     W11 -->|"EXERCISE_LEVEL_CHANGED"| D
+    W12 -->|"WORKOUT_CHECKED"| D
 
-    D --> U1 & U2 & U3 & U4 & U5 & U6 & U7 & U8 & U9 & U10 & U11
+    D --> U1 & U2 & U3 & U4 & U5 & U6 & U7 & U8 & U9 & U10 & U11 & U12
 
     style DISPATCH fill:#c8f542,stroke:#000,color:#000
     style DATA_WRITES fill:#1a1a2e,stroke:#f5a623,color:#e8e8e8
@@ -140,9 +143,11 @@ graph LR
     PC["PLAN_CHANGED"] --> PC1["allTabs"] & PC2["checklist"] & PC3["durationBar"] & PC4["projection"] & PC5["calendar"]
     CC["CALORIES_CHANGED"] --> CC1["projection"] & CC2["durationBar"] & CC3["nutritionMacros"]
     SS["SCHEDULE_SET"] --> SS1["durationBar"] & SS2["calendarHighlights"] & SS3["manageSchedBtn"]
-    FL["FOOD_LOGGED"] --> FL1["projection"] & FL2["goalBar"] & FL3["recentNotes"] & FL4["todayCalStrip"] & FL5["nutritionMacros"] & FL6["radar"]
+    FL["FOOD_LOGGED"] --> FL1["projection"] & FL2["goalBar"] & FL3["recentNotes"] & FL4["todayCalStrip"] & FL5["nutritionMacros"] & FL6["radar"] & FL7["autoItems"]
+    WC["WORKOUT_CHECKED"] --> WC1["recentNotes"] & WC2["autoItems"]
 
     style WL fill:#f5a623,stroke:#000,color:#000
+    style WC fill:#f5a623,stroke:#000,color:#000
     style DS fill:#f5a623,stroke:#000,color:#000
     style FT fill:#7b68ee,stroke:#000,color:#000
     style PC fill:#c8f542,stroke:#000,color:#000
@@ -237,6 +242,8 @@ flowchart TD
         T3A["buildWeekGrid()<br/>7-day emoji row"]
         T3B["plan.workoutContent()<br/>Collapsible workout cards"]
         T3C["Exercise Level Selector<br/>exRowWithLevel() + EXERCISE_PROGRESSIONS"]
+        T3D["Exercise Checkboxes<br/>toggleWorkoutEx() + wex-row"]
+        T3E["Workout Progress Bar<br/>updateWorkoutProgress()"]
     end
 
     subgraph T4["NUTRITION"]
@@ -253,7 +260,7 @@ flowchart TD
         T6A["Weight Input + History<br/>logWeight() + renderWeights()"]
         T6B["Goal Bar<br/>updateGoalBar() → % to target"]
         T6C["Projection<br/>updateProjection() → Sunday forecast"]
-        T6D["Recent Notes<br/>renderRecentNotes()"]
+        T6D["Recent Notes<br/>renderRecentNotes()<br/>Show Note toggle"]
         T6E["Radar Chart<br/>renderRadar() → 7-axis spider"]
         T6F["Backup / Restore<br/>backupData() + restoreData()"]
         T6G["Text Export<br/>Date range → plain text"]
@@ -311,6 +318,99 @@ flowchart TD
     style RENDER fill:#c8f542,stroke:#000,color:#000
     style DISPATCH fill:#f5a623,stroke:#000,color:#000
 ```
+
+### Checklist Item Types (v4.0+)
+
+The checklist system supports 5 distinct item types, each with different rendering and behavior:
+
+| Type | Detection | Tappable? | State Source | Examples |
+|------|-----------|-----------|-------------|----------|
+| **Normal** | No special fields | Yes (toggle) | `checks[id]` in dayLogs | Wake & water, sleep, no liquid calories |
+| **Sub-items** | `item.subItems[]` | Expand panel | Sub-item completion | Morning supplements (sf1), Pre-training (wf2) |
+| **Water** | `item.type === 'water'` | Expand input | `dayLogs[date].water` vs `item.waterTarget` | 3L+ water (f4), 3.5L+ water (wf5) |
+| **Auto-cal** | `item.type === 'auto-cal'` | No (read-only) | `getDayCalories()` vs ceiling | Stayed under calorie ceiling (f2) |
+| **Auto-workout** | `AUTO_WORKOUT_IDS.includes(id)` | No (read-only) | `workoutTodayDone/Total` | Mobility (m2), Morning workout (m3), Evening session (e1/e2), Stretch (e3) |
+
+#### Auto-Workout Threshold
+Auto-workout items tick as done at **≥80% exercise completion** (not 100%). This allows 1-2 missed exercises without failing all workout items. The threshold is applied in `renderTodayChecklist()`, the injected fast-day workout section, and `refreshAutoItems()`.
+
+#### saveAllChecks() — Centralized State Saving
+All check-saving functions (`toggle()`, `toggleSupItem()`, `updateWaterCardState()`) use `saveAllChecks()` which properly handles each item type:
+- Regular items: saves DOM done state
+- Sub-items: saves parent + children
+- Water items: saves DOM done state (set by water input)
+- Auto-status items: saves DOM done state (set by refreshAutoItems)
+
+#### syncAutoStatusChecks() vs refreshAutoItems()
+- `syncAutoStatusChecks()`: reads DOM state of auto items and persists to checks — lightweight, called after loadChecklist
+- `refreshAutoItems()`: re-derives auto item states from data sources (food log, workout counts) and updates DOM — heavier, called on FOOD_LOGGED and WORKOUT_CHECKED dispatch
+
+#### getValidCheckCompletion(dateStr)
+Filters check IDs to only those in the current checklist definition. Prevents orphaned IDs from version transitions from affecting calendar scoring or radar. Used by `renderCalendar()` and `computeRadarMetrics()`.
+
+#### migrateOrphanedChecks()
+Runs on init. Scans all dayLogs, deletes check IDs not in current checklist definition. One-time cleanup, idempotent.
+
+---
+
+## 6b. Workout Exercise Checklist (v3.9+)
+
+Each exercise row (`exRow`, `exRowWithLevel`, `stretchRow`) has a tappable checkbox. States stored in `dayLogs[date].workoutChecks` and `workoutTodayTotal`/`workoutTodayDone`.
+
+### Data Flow
+1. User taps exercise on WORKOUTS tab → `toggleWorkoutEx()`
+2. Only today's card exercises saved (filtered by `data-days` attribute)
+3. `workoutTodayTotal` and `workoutTodayDone` persisted for TODAY tab auto-items
+4. `dispatch('WORKOUT_CHECKED')` → refreshes auto-items on TODAY tab
+
+### Key Functions
+- `toggleWorkoutEx()` — toggle + save today's exercises only
+- `loadWorkoutChecks()` — restore states on tab switch
+- `updateWorkoutProgress()` — render progress bar, persist counts
+- `_wexCounter` — deterministic IDs reset via `_resetExRowInstances()`
+
+---
+
+## 6c. Supplement Sub-Items (v3.9+)
+
+Checklist items with `subItems[]` array render as expandable panels with individual checkboxes.
+
+### Structure
+```javascript
+{ id:'sf1', group:'SUPPLEMENTS', label:'Morning supplements', subItems: [
+  { id:'sf1_a', name:'D3+K2', dose:'1 tab', when:'With MCT gel on waking' },
+  { id:'sf1_b', name:'Zinc 50mg', dose:'1 tab', when:'Sat only', days:[6] }
+]}
+```
+
+### Key Functions
+- `toggleSupExpand()` — expand/collapse panel
+- `toggleSupItem()` — toggle sub-item, update parent (done/partial/empty)
+- `updateSupCount()` — update "X/Y" display
+
+### Day Filtering
+Sub-items with `days[]` array only render on specified days of week.
+
+---
+
+## 6d. Water Tracking (v3.10+)
+
+Water checklist items expand inline with a liter input and ±0.25L buttons.
+
+### Data Flow
+1. User taps water card → `toggleWaterExpand()` shows input
+2. User enters value or taps ±buttons → `onWaterInput()` / `adjustWater()`
+3. Saves to `dayLogs[date].water`
+4. Card auto-ticks when value ≥ `item.waterTarget`
+5. `dispatch('DAY_SAVED')` updates calendar
+
+### Plan Targets
+| Plan | Normal | Fast | Light |
+|------|--------|------|-------|
+| DEFAULT/AGRO | 3.0L | 3.5L | — |
+| CUT | 2.5L | 3.5L | — |
+| BULK | 2.5L | 3.5L | 2.5L |
+| MAINTENANCE | 2.0L | 3.5L | 2.0L |
 
 ---
 
@@ -663,11 +763,11 @@ flowchart TD
     WINDOW["7D or 30D toggle<br/>setRadarWindow()"] --> COMPUTE["computeRadarMetrics(days)"]
 
     subgraph COMPUTE["7 Performance Axes"]
-        AX1["CHECKLIST<br/>Avg % completion"]
-        AX2["CALORIES<br/>% eating days ≤ ceiling"]
-        AX3["FASTING<br/>% scheduled fasts observed"]
+        AX1["CHECKLIST<br/>Blends checks + workoutChecks<br/>Uses getValidCheckCompletion()"]
+        AX2["CALORIES<br/>Proportional scoring<br/>ceiling/actual ratio"]
+        AX3["FASTING<br/>Today excluded<br/>Checklist-weighted scoring<br/>Light days only if marked"]
         AX4["WATER<br/>Avg liters / 3L target"]
-        AX5["WEIGHT TREND<br/>≥0.15kg/day=100%, 0=50%"]
+        AX5["WEIGHT TREND<br/>Dampened when &lt;7 points"]
         AX6["GOAL<br/>(start-current)/(start-target)"]
         AX7["CONSISTENCY<br/>% days with any logged data"]
     end
@@ -713,6 +813,8 @@ flowchart TD
         DM5["Notes textarea"]
         DM6["Fast day toggle"]
         DM7["Food log display<br/>+ add food button"]
+        DM8["Workout Completion<br/>X/Y exercises"]
+        DM9["Supplement Sub-Items<br/>Expandable per-pill toggles"]
     end
 
     DM1 -->|"save"| DISPATCH1["dispatch('DAY_SAVED')"]
@@ -900,3 +1002,47 @@ flowchart LR
     style DROPDOWNS fill:#1a1a2e,stroke:#f5a623,color:#e8e8e8
     style DATES fill:#1a1a2e,stroke:#c8f542,color:#e8e8e8
 ```
+
+---
+
+## 19. Checklist Item Types (v4.0+)
+
+| Type | Detection | Tappable? | State Source |
+|------|-----------|-----------|-------------|
+| **Normal** | No special fields | Yes (toggle) | `checks[id]` in dayLogs |
+| **Sub-items** | `item.subItems[]` | Expand panel | Sub-item completion |
+| **Water** | `item.type === 'water'` | Expand input | `dayLogs[date].water` vs `item.waterTarget` |
+| **Auto-cal** | `item.type === 'auto-cal'` | No (read-only) | `getDayCalories()` vs ceiling |
+| **Auto-workout** | `AUTO_WORKOUT_IDS` | No (read-only) | `workoutTodayDone/Total` (≥80% = done) |
+
+### Key Functions
+- **`saveAllChecks()`** — centralized state saving, respects all item types
+- **`refreshAutoItems()`** — re-derives auto states from data (food log, workout counts)
+- **`syncAutoStatusChecks()`** — lightweight DOM-to-storage sync
+- **`getValidCheckCompletion(dateStr)`** — filters orphaned check IDs
+- **`migrateOrphanedChecks()`** — init-time cleanup of stale IDs
+
+---
+
+## 20. Workout Exercise Checklist (v3.9+)
+
+Each `exRow`/`exRowWithLevel`/`stretchRow` has a checkbox. Only today's card exercises saved (filtered by `data-days`). Stores `workoutTodayTotal`/`workoutTodayDone` for TODAY tab auto-items. `dispatch('WORKOUT_CHECKED')` triggers `refreshAutoItems()`.
+
+---
+
+## 21. Supplement Sub-Items (v3.9+)
+
+Items with `subItems[]` render as expandable panels. Sub-items with `days[]` filter by day-of-week. Parent state: empty/partial/done. Functions: `toggleSupExpand()`, `toggleSupItem()`, `updateSupCount()`.
+
+---
+
+## 22. Water Tracking (v3.10+)
+
+Water items expand with ±0.25L buttons. Saves to `dayLogs[date].water`. Auto-ticks at target. Targets: DEFAULT/AGRO 3.0L normal/3.5L fast, CUT 2.5L, BULK 2.5L+light, MAINT 2.0L+light.
+
+---
+
+## 23. Auto-Status Items (v4.0+)
+
+**Auto-cal (f2):** reads food log vs ceiling. Cut=under, Bulk=at/above, Maint=±200.
+**Auto-workout (m2,m3,e1,e2,e3):** reads workout counts, done at ≥80%. On fast/light days without these IDs, a WORKOUT group with `_workout` item is injected.

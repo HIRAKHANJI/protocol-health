@@ -1243,8 +1243,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '4.0.4';
-const APP_VERSION_MSG = 'Fixed orphaned checklist items causing false partial completion. Added migration to clean up ghost check IDs from version transitions.';
+const APP_VERSION = '4.1.0';
+const APP_VERSION_MSG = 'Workout items tick at 80% completion (not all-or-nothing). Fixed stale state bugs in checklist saving. Radar light day scoring fixed.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -3988,12 +3988,14 @@ function renderTodayChecklist() {
       html += `<div class="check-item auto-status ${calState}" data-id="${item.id}" data-auto="cal"><div class="checkbox"><span class="checkbox-tick">${calState==='fail'?'✗':'✓'}</span></div><div class="item-content"><div class="item-title">${label}</div><div class="auto-val">${calText}</div></div></div>`;
     } else if(AUTO_WORKOUT_IDS.includes(item.id)) {
       // Auto workout items — reads today-filtered counts from storage, not clickable
+      // Done at ≥80% completion (allows 1-2 misses without failing all items)
       const wLog = getDayLog(todayStr());
       const wTotal = wLog.workoutTodayTotal || 0;
       const wDone = wLog.workoutTodayDone || 0;
+      const wPct = wTotal > 0 ? wDone / wTotal : 0;
       let wText = 'Open WORKOUTS tab to track';
-      if(wTotal > 0) wText = wDone + '/' + wTotal + ' exercises' + (wDone === wTotal ? ' — complete' : '');
-      const isDone = wTotal > 0 && wDone === wTotal;
+      if(wTotal > 0) wText = wDone + '/' + wTotal + ' exercises' + (wDone === wTotal ? ' — complete' : wPct >= 0.8 ? ' — good' : '');
+      const isDone = wTotal > 0 && wPct >= 0.8;
       html += `<div class="check-item auto-status ${isDone ? 'done' : ''}" data-id="${item.id}" data-auto="workout"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">${label}</div><div class="auto-val">${wText}</div></div></div>`;
     } else {
       html += `<div class="check-item" onclick="toggle(this)" data-id="${item.id}"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">${label}</div><div class="item-sub">${sub}</div></div></div>`;
@@ -4006,9 +4008,10 @@ function renderTodayChecklist() {
     const wLog = getDayLog(todayStr());
     const wTotal = wLog.workoutTodayTotal || 0;
     const wDone = wLog.workoutTodayDone || 0;
+    const wPct = wTotal > 0 ? wDone / wTotal : 0;
     let wText = 'Open WORKOUTS tab to track';
-    if(wTotal > 0) wText = wDone + '/' + wTotal + ' exercises' + (wDone === wTotal ? ' — complete' : '');
-    const isDone = wTotal > 0 && wDone === wTotal;
+    if(wTotal > 0) wText = wDone + '/' + wTotal + ' exercises' + (wDone === wTotal ? ' — complete' : wPct >= 0.8 ? ' — good' : '');
+    const isDone = wTotal > 0 && wPct >= 0.8;
     html += `<div class="checklist-group"><div class="group-header"><span class="group-tag tag-evening">WORKOUT</span><span class="group-time">See WORKOUTS tab</span></div>`;
     html += `<div class="check-item auto-status ${isDone ? 'done' : ''}" data-id="_workout" data-auto="workout"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">Today's training session</div><div class="auto-val">${wText}</div></div></div></div>`;
   }
@@ -4190,7 +4193,8 @@ function loadChecklist() {
         // Update count display
         updateSupCount(item.dataset.id, subDone, subTotal);
       }
-    } else {
+    } else if(!item.dataset.waterTarget && !item.dataset.auto) {
+      // Regular toggleable items only — skip water and auto-status
       item.classList.toggle('done', !!checks[item.dataset.id]);
     }
   });
@@ -4233,18 +4237,8 @@ function toggleSupItem(el, parentId) {
   else if(subDone > 0) parentEl.classList.add('partial');
   // Update count
   updateSupCount(parentId, subDone, subTotal);
-  // Save all checks including sub-items
-  const log = getDayLog(todayStr());
-  const checks = Object.assign({}, log.checks||{});
-  // Save sub-item states
-  subs.forEach(si => { checks[si.dataset.sid] = si.classList.contains('done'); });
-  // Save parent state (true only if all sub-items done)
-  checks[parentId] = (subDone === subTotal && subTotal > 0);
-  // Also save all other regular check-items
-  document.querySelectorAll('.check-item:not(.has-subitems)').forEach(item => {
-    checks[item.dataset.id] = item.classList.contains('done');
-  });
-  saveDayLogField(todayStr(), { checks });
+  // Save all checks properly (respects item types)
+  saveAllChecks();
   updateProgress();
   dispatch('DAY_SAVED');
 }
@@ -4264,18 +4258,7 @@ function toggle(el) {
   // Water and auto-status items are not manually toggleable
   if(el.dataset.waterTarget || el.dataset.auto) return;
   el.classList.toggle('done');
-  const log = getDayLog(todayStr());
-  const checks = Object.assign({}, log.checks||{});
-  document.querySelectorAll('.check-item:not(.has-subitems)').forEach(item=>{
-    checks[item.dataset.id] = item.classList.contains('done');
-  });
-  // Preserve sub-item states for has-subitems parents
-  document.querySelectorAll('.check-item.has-subitems').forEach(item=>{
-    checks[item.dataset.id] = item.classList.contains('done');
-    const panel = item.querySelector('.sup-panel');
-    if(panel) panel.querySelectorAll('.sup-item').forEach(si => { checks[si.dataset.sid] = si.classList.contains('done'); });
-  });
-  saveDayLogField(todayStr(), { checks });
+  saveAllChecks();
   updateProgress();
   dispatch('DAY_SAVED');
 }
@@ -4316,19 +4299,36 @@ function updateWaterCardState(itemId, target, liters) {
   if(!card) return;
   const isDone = liters >= target;
   card.classList.toggle('done', isDone);
-  // Update the checks object so progress bar and calendar reflect it
+  saveAllChecks();
+  updateProgress();
+}
+
+// saveAllChecks: properly saves all checklist states, respecting item types.
+// Skips auto-status items (cal/workout) — those are synced separately via syncAutoStatusChecks.
+// Handles: regular items, sub-items, water items, auto-status items.
+function saveAllChecks() {
   const log = getDayLog(todayStr());
-  const checks = Object.assign({}, log.checks||{});
-  document.querySelectorAll('.check-item').forEach(item => {
+  const checks = Object.assign({}, log.checks || {});
+  // Regular items (not sub-items parents, not water, not auto-status)
+  document.querySelectorAll('.check-item:not(.has-subitems)').forEach(item => {
+    if(item.dataset.waterTarget || item.dataset.auto) return; // skip computed items
     checks[item.dataset.id] = item.classList.contains('done');
   });
-  // Preserve sub-item states
-  document.querySelectorAll('.check-item.has-subitems').forEach(item=>{
+  // Sub-items parents + their children
+  document.querySelectorAll('.check-item.has-subitems').forEach(item => {
+    checks[item.dataset.id] = item.classList.contains('done');
     const panel = item.querySelector('.sup-panel');
     if(panel) panel.querySelectorAll('.sup-item').forEach(si => { checks[si.dataset.sid] = si.classList.contains('done'); });
   });
+  // Water items — done state from DOM (set by water input logic)
+  document.querySelectorAll('.check-item[data-water-target]').forEach(item => {
+    checks[item.dataset.id] = item.classList.contains('done');
+  });
+  // Auto-status items — sync from DOM (set by refreshAutoItems)
+  document.querySelectorAll('.check-item[data-auto]').forEach(item => {
+    checks[item.dataset.id] = item.classList.contains('done');
+  });
   saveDayLogField(todayStr(), { checks });
-  updateProgress();
 }
 
 // syncAutoStatusChecks: persists auto-derived states (cal ceiling + workout) into checks
@@ -4377,14 +4377,15 @@ function refreshAutoItems() {
     const valEl = el.querySelector('.auto-val');
     if(valEl) valEl.textContent = calText;
   });
-  // Refresh workout items (use today-filtered counts)
+  // Refresh workout items (use today-filtered counts, ≥80% = done)
   document.querySelectorAll('.check-item[data-auto="workout"]').forEach(el => {
     const wLog = getDayLog(todayStr());
     const wTotal = wLog.workoutTodayTotal || 0;
     const wDone = wLog.workoutTodayDone || 0;
+    const wPct = wTotal > 0 ? wDone / wTotal : 0;
     let wText = 'Open WORKOUTS tab to track';
-    const isDone = wTotal > 0 && wDone === wTotal;
-    if(wTotal > 0) wText = wDone + '/' + wTotal + ' exercises' + (isDone ? ' — complete' : '');
+    const isDone = wTotal > 0 && wPct >= 0.8;
+    if(wTotal > 0) wText = wDone + '/' + wTotal + ' exercises' + (wDone === wTotal ? ' — complete' : wPct >= 0.8 ? ' — good' : '');
     el.classList.toggle('done', isDone);
     const valEl = el.querySelector('.auto-val');
     if(valEl) valEl.textContent = wText;
@@ -4396,11 +4397,16 @@ function refreshAutoItems() {
 // resetToday: clears all checklist ticks for today and saves the cleared state
 function resetToday() {
   showConfirm('RESET CHECKLIST', 'Clear all checked items for today?', () => {
-    document.querySelectorAll('.check-item').forEach(i=>i.classList.remove('done'));
-    const log = getDayLog(todayStr());
-    const checks = Object.assign({}, log.checks||{});
-    document.querySelectorAll('.check-item').forEach(item=>{ checks[item.dataset.id] = false; });
-    saveDayLogField(todayStr(), { checks });
+    // Clear all manual items
+    document.querySelectorAll('.check-item').forEach(i => {
+      if(!i.dataset.auto) i.classList.remove('done','partial');
+    });
+    // Clear sub-item states
+    document.querySelectorAll('.sup-item').forEach(i => i.classList.remove('done'));
+    // Recompute auto-status items (cal + workout) — they shouldn't be reset
+    refreshAutoItems();
+    // Save all states properly
+    saveAllChecks();
     updateProgress();
     dispatch('DAY_SAVED');
   }, { yesLabel:'RESET', danger:true });
@@ -4782,8 +4788,9 @@ function computeRadarMetrics(days) {
       }
     } else if (lightDow.includes(dow)) {
       if (ds === todayDateStr) return; // Today is in-progress — don't score
-      fastScheduled++;
+      // Only count light days that are actually marked (consistent with fast day logic)
       if (lightDaysMap[ds]) {
+        fastScheduled++;
         const dc = getDayCalories(ds);
         const lightCeil = Math.round((s.tdee || 2600) * 0.6);
         if (!dc.hasData || dc.total <= lightCeil) fastCompleted++;
@@ -5418,6 +5425,38 @@ function openDayModal(dateStr, dt) {
             html += `<div class="sup-item ${siDone?'done':''}" onclick="toggleModalSupItem(this,'${dateStr}','${si.id}','${item.id}')" style="margin-left:26px"><div class="sup-cb"><span class="sup-tick">✓</span></div><div><div class="sup-name">${si.name} <span class="sup-dose">${si.dose}</span></div><div class="sup-when">${si.when}</div></div></div>`;
           });
           html += `</div>`;
+        } else if(item.type === 'water') {
+          // Water item — show done based on stored water vs target
+          const _waterDone = (log.water || 0) >= (item.waterTarget || 0);
+          html += `<div class="modal-check-item ${_waterDone?'done':''}" style="cursor:default">
+            <div class="modal-cb">${_waterDone?'✓':''}</div>
+            <div><div class="m-title">${_r.label}</div><div class="m-sub">${(log.water||0)}L / ${item.waterTarget}L</div></div>
+          </div>`;
+        } else if(item.type === 'auto-cal') {
+          // Auto calorie — show done based on food log vs ceiling
+          const _dc = getDayCalories(dateStr);
+          const _ceil = _modalS.calories || 1500;
+          const _plan = getActivePlan();
+          let _calDone = false;
+          if(_dc.hasData) {
+            if(_plan.goalMode==='bulk') _calDone = _dc.total >= _ceil;
+            else if(_plan.goalMode==='maintenance') _calDone = Math.abs(_dc.total - _ceil) <= 200;
+            else _calDone = _dc.total <= _ceil;
+          }
+          html += `<div class="modal-check-item ${_calDone?'done':''}" style="cursor:default">
+            <div class="modal-cb">${_calDone?'✓':(!_dc.hasData?'':'✗')}</div>
+            <div><div class="m-title">${_r.label}</div><div class="m-sub">${_dc.hasData ? _dc.total+' / '+_ceil+' cal' : 'No food logged'}</div></div>
+          </div>`;
+        } else if(AUTO_WORKOUT_IDS.includes(item.id)) {
+          // Auto workout — show done based on workout checks
+          const _wc = log.workoutChecks || {};
+          const _wt = Object.keys(_wc).length;
+          const _wd = Object.values(_wc).filter(Boolean).length;
+          const _wpct = _wt > 0 ? _wd / _wt : 0;
+          html += `<div class="modal-check-item ${_wpct >= 0.8 && _wt > 0?'done':''}" style="cursor:default">
+            <div class="modal-cb">${_wpct >= 0.8 && _wt > 0?'✓':''}</div>
+            <div><div class="m-title">${_r.label}</div><div class="m-sub">${_wt > 0 ? _wd+'/'+_wt+' exercises' : 'No workout data'}</div></div>
+          </div>`;
         } else {
           html += `<div class="modal-check-item ${done?'done':''}" onclick="toggleModalCheck(this,'${dateStr}','${item.id}')">
             <div class="modal-cb">${done?'✓':''}</div>
