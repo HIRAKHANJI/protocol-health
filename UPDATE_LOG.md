@@ -4,6 +4,22 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 4.1.1 — 2026-03-30
+
+**Scope:** Patch (Zinc schedule corrected to true alternate days)
+
+- **Zinc schedule changed from Tue/Thu/Sat to Mon/Wed/Fri** — The previous Tue/Thu/Sat schedule left Monday completely uncovered (Saturday's dose covers Sat+Sun, but Tuesday is 3 days away, leaving Monday with no zinc coverage). New Mon/Wed/Fri schedule provides true alternate-day coverage with no gaps:
+  - Mon (eating day): zinc → covers Mon + Tue
+  - Wed (fast day): zinc → covers Wed + Thu
+  - Fri (eating day): zinc → covers Fri + Sat
+  - Sun: covered by Friday (2 days, within range)
+- **No consecutive dosing** — Mon→Wed = 2 day gap, Wed→Fri = 2 day gap, Fri→Mon = 3 day gap. All safe.
+- **Same weekly total** — 3 × 50mg = 150mg/week = 21.4mg/day avg (under 40mg NIH UL).
+- **9 code locations updated** — `s1_c` subItems days `[1,5]`, `sf1_b` subItems days `[3]`, `resolveSupplementSub()` arrays, `nutritionContent()` zinc arrays + next-zinc calc + status cards, `rulesContent()` stack cards + schedule card.
+- **Fast day zinc on Wednesday** — Previously no zinc on any fast day (Sat removed, Sun removed). Now Wednesday (fast day) is a zinc day, with zinc appearing in the fast day supplement checklist.
+
+---
+
 ## Version 4.1.0 — 2026-03-30
 
 **Scope:** Minor (6 bug fixes — checklist state management, workout threshold, radar scoring, day modal)

@@ -628,7 +628,7 @@ Before writing ANY supplement dose into app content:
 | MCT Oil | 30g max acute | GI distress |
 
 ### ZINC COPPER INTERACTION (CRITICAL)
-Chronic zinc >40mg/day blocks copper absorption → copper deficiency. Current protocol: 50mg × 4 alternate days/week = 28.6mg/day average. DO NOT change zinc to daily dosing without flagging this risk.
+Chronic zinc >40mg/day blocks copper absorption → copper deficiency. Current protocol: 50mg × 3 days/week (Mon/Wed/Fri) = 21.4mg/day average. True alternate-day spacing, no consecutive dosing, no coverage gaps. DO NOT change zinc to daily dosing without flagging this risk.
 
 ### Push:Pull Ratio (HARD RULE)
 Protocol Health must NEVER generate a training plan with push:pull ratio > 1:1. Default for AGRO CUT: pull-dominant (5:7). Source: Cools 2016 + Prinold 2016
