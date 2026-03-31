@@ -4,6 +4,21 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 4.4.0 — 2026-03-31
+
+**Scope:** Minor (Per-session workout tracking — morning and evening items tick independently)
+**Banner:** "Workout items now track per-session: morning exercises tick morning items, evening exercises tick evening items. No more all-or-nothing."
+
+- **Per-session workout tracking** — Workout auto-items (m2/m3, e1/e2/e3) now track INDEPENDENTLY. Morning items (m2 mobility, m3 morning workout) tick when morning session exercises are ≥80% done. Evening items (e1/e2 evening session, e3 stretch) tick when evening session exercises are ≥80% done. Previously all items shared ONE global count and ticked/unticked together.
+- **`classifyWorkoutCard()`** — classifies workout cards by title: "MORNING"/"ACTIVATION" → morning session, "REST"/"WALK" → rest (skipped), everything else → evening session.
+- **`WORKOUT_ITEM_SESSION` map** — `{ m2:'morning', m3:'morning', e1:'evening', e2:'evening', e3:'evening' }`.
+- **`workoutSessions` storage field** — `{ morning: { total, done }, evening: { total, done } }` saved alongside `workoutChecks` in dayLogs. Computed by `toggleWorkoutEx()`, `updateWorkoutProgress()`, and `toggleModalWorkoutEx()`.
+- **Fallback for single-session plans** — CUT/BULK/MAINTENANCE plans have no "MORNING" cards. Morning items (m2/m3) fall back to the evening session counts so they still work.
+- **Day modal workout checklist** — `toggleModalWorkoutEx()` now computes per-session data from `data-session` attribute on each exercise item. Modal exercises tagged with session type during `toggleModalWorkoutChecklist()`.
+- **Fast-day injected `_workout` item** — still uses global totals (single consolidated item).
+
+---
+
 ## Version 4.3.0 — 2026-03-30
 
 **Scope:** Minor (Workout checklist in MONTHS day modal)

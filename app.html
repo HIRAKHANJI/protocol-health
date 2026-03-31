@@ -1366,13 +1366,25 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '4.3.0';
-const APP_VERSION_MSG = 'Workout checklist in day modal: tap any day on MONTHS, hit See Workout Checklist to check off exercises for that day.';
+const APP_VERSION = '4.4.0';
+const APP_VERSION_MSG = 'Workout items now track per-session: morning exercises tick morning items, evening exercises tick evening items. No more all-or-nothing.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const DAYS_SHORT = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
 const AUTO_WORKOUT_IDS = ['m2','m3','e1','e2','e3']; // Checklist items auto-derived from workout tab
+
+// Map each auto-workout item to a session type. Items tick when their session's exercises are ≥80% done.
+const WORKOUT_ITEM_SESSION = { m2:'morning', m3:'morning', e1:'evening', e2:'evening', e3:'evening' };
+
+// Classify a workout card's session type from its title text
+function classifyWorkoutCard(card) {
+  const title = (card.querySelector('h3')?.textContent || '').toUpperCase();
+  if(title.includes('MORNING') || title.includes('ACTIVATION')) return 'morning';
+  if(title.includes('REST') || title.includes('WALK')) return 'rest';
+  if(title.includes('NECK')) return 'daily';
+  return 'evening'; // everything else: evening, push, pull, lower, full body, run, skill, conditioning
+}
 
 // ─── UTILS ───────────────────────────────────────────────────────────────────
 // esc: escapes HTML special characters to prevent XSS when inserting user data via innerHTML
@@ -4136,15 +4148,16 @@ function renderTodayChecklist() {
       }
       html += `<div class="check-item auto-status ${calState}" data-id="${item.id}" data-auto="cal"><div class="checkbox"><span class="checkbox-tick">${calState==='fail'?'✗':'✓'}</span></div><div class="item-content"><div class="item-title">${label}</div><div class="auto-val">${calText}</div></div></div>`;
     } else if(AUTO_WORKOUT_IDS.includes(item.id)) {
-      // Auto workout items — reads today-filtered counts from storage, not clickable
-      // Done at ≥80% completion (allows 1-2 misses without failing all items)
+      // Auto workout items — reads PER-SESSION counts (morning/evening), not global total
       const wLog = getDayLog(todayStr());
-      const wTotal = wLog.workoutTodayTotal || 0;
-      const wDone = wLog.workoutTodayDone || 0;
-      const wPct = wTotal > 0 ? wDone / wTotal : 0;
+      const sessions = wLog.workoutSessions || {};
+      const sessionType = WORKOUT_ITEM_SESSION[item.id] || 'evening';
+      // If plan has no morning cards, fall back to evening for morning items
+      const sess = sessions[sessionType] || (sessionType === 'morning' ? sessions['evening'] : null) || { total:0, done:0 };
+      const sPct = sess.total > 0 ? sess.done / sess.total : 0;
       let wText = 'Open WORKOUTS tab to track';
-      if(wTotal > 0) wText = wDone + '/' + wTotal + ' exercises' + (wDone === wTotal ? ' — complete' : wPct >= 0.8 ? ' — good' : '');
-      const isDone = wTotal > 0 && wPct >= 0.8;
+      if(sess.total > 0) wText = sess.done + '/' + sess.total + ' exercises' + (sess.done === sess.total ? ' — complete' : sPct >= 0.8 ? ' — good' : '');
+      const isDone = sess.total > 0 && sPct >= 0.8;
       html += `<div class="check-item auto-status ${isDone ? 'done' : ''}" data-id="${item.id}" data-auto="workout"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">${label}</div><div class="auto-val">${wText}</div></div></div>`;
     } else {
       html += `<div class="check-item" onclick="toggle(this)" data-id="${item.id}"><div class="checkbox"><span class="checkbox-tick">✓</span></div><div class="item-content"><div class="item-title">${label}</div><div class="item-sub">${sub}</div></div></div>`;
@@ -4526,15 +4539,31 @@ function refreshAutoItems() {
     const valEl = el.querySelector('.auto-val');
     if(valEl) valEl.textContent = calText;
   });
-  // Refresh workout items (use today-filtered counts, ≥80% = done)
+  // Refresh workout items (per-session: morning/evening tracked independently)
+  const _wLog = getDayLog(todayStr());
+  const _sessions = _wLog.workoutSessions || {};
   document.querySelectorAll('.check-item[data-auto="workout"]').forEach(el => {
-    const wLog = getDayLog(todayStr());
-    const wTotal = wLog.workoutTodayTotal || 0;
-    const wDone = wLog.workoutTodayDone || 0;
-    const wPct = wTotal > 0 ? wDone / wTotal : 0;
+    const itemId = el.dataset.id;
+    const sessionType = WORKOUT_ITEM_SESSION[itemId] || 'evening';
+    // _workout (fast day injected item) uses global counts
+    if(itemId === '_workout') {
+      const wTotal = _wLog.workoutTodayTotal || 0;
+      const wDone = _wLog.workoutTodayDone || 0;
+      const wPct = wTotal > 0 ? wDone / wTotal : 0;
+      let wText = 'Open WORKOUTS tab to track';
+      const isDone = wTotal > 0 && wPct >= 0.8;
+      if(wTotal > 0) wText = wDone + '/' + wTotal + ' exercises' + (wDone === wTotal ? ' — complete' : wPct >= 0.8 ? ' — good' : '');
+      el.classList.toggle('done', isDone);
+      const valEl = el.querySelector('.auto-val');
+      if(valEl) valEl.textContent = wText;
+      return;
+    }
+    // Per-session items (m2/m3 → morning, e1/e2/e3 → evening)
+    const sess = _sessions[sessionType] || (sessionType === 'morning' ? _sessions['evening'] : null) || { total:0, done:0 };
+    const sPct = sess.total > 0 ? sess.done / sess.total : 0;
     let wText = 'Open WORKOUTS tab to track';
-    const isDone = wTotal > 0 && wPct >= 0.8;
-    if(wTotal > 0) wText = wDone + '/' + wTotal + ' exercises' + (wDone === wTotal ? ' — complete' : wPct >= 0.8 ? ' — good' : '');
+    const isDone = sess.total > 0 && sPct >= 0.8;
+    if(sess.total > 0) wText = sess.done + '/' + sess.total + ' exercises' + (sess.done === sess.total ? ' — complete' : sPct >= 0.8 ? ' — good' : '');
     el.classList.toggle('done', isDone);
     const valEl = el.querySelector('.auto-val');
     if(valEl) valEl.textContent = wText;
@@ -5285,23 +5314,30 @@ function toggleWorkoutEx(el) {
   el.classList.toggle('wex-done');
   const today = todayStr();
   const todayDay = DAYS_SHORT[new Date().getDay()];
-  // Only save exercises from today's cards (not all 7 days' worth)
+  // Save exercises from today's cards with per-session counts
   const wChecks = {};
   let todayTotal = 0, todayDone = 0;
+  const sessions = {}; // { morning: { total, done }, evening: { total, done } }
   document.querySelectorAll('.workout-card').forEach(card => {
     const daysAttr = card.dataset.days;
     if(!daysAttr || daysAttr === 'DAILY' || daysAttr.split(',').includes(todayDay)) {
+      const session = classifyWorkoutCard(card);
+      if(session === 'rest') return;
+      if(!sessions[session]) sessions[session] = { total:0, done:0 };
       card.querySelectorAll('.wex-row').forEach(row => {
         const wid = row.dataset.wid;
         if(wid) {
-          wChecks[wid] = row.classList.contains('wex-done');
+          const done = row.classList.contains('wex-done');
+          wChecks[wid] = done;
           todayTotal++;
-          if(row.classList.contains('wex-done')) todayDone++;
+          if(done) todayDone++;
+          sessions[session].total++;
+          if(done) sessions[session].done++;
         }
       });
     }
   });
-  saveDayLogField(today, { workoutChecks: wChecks, workoutTodayTotal: todayTotal, workoutTodayDone: todayDone });
+  saveDayLogField(today, { workoutChecks: wChecks, workoutTodayTotal: todayTotal, workoutTodayDone: todayDone, workoutSessions: sessions });
   updateWorkoutProgress();
   dispatch('WORKOUT_CHECKED');
 }
@@ -5321,16 +5357,21 @@ function updateWorkoutProgress() {
   if(!container) return;
   const todayDay = DAYS_SHORT[new Date().getDay()];
   let total = 0, done = 0;
+  const sessions = {};
   document.querySelectorAll('.workout-card').forEach(card => {
     const daysAttr = card.dataset.days;
     if(!daysAttr || daysAttr === 'DAILY' || daysAttr.split(',').includes(todayDay)) {
+      const session = classifyWorkoutCard(card);
+      if(session === 'rest') return;
+      if(!sessions[session]) sessions[session] = { total:0, done:0 };
       card.querySelectorAll('.wex-row').forEach(row => {
         total++; if(row.classList.contains('wex-done')) done++;
+        sessions[session].total++;
+        if(row.classList.contains('wex-done')) sessions[session].done++;
       });
     }
   });
-  // Persist today's filtered counts so TODAY tab auto-items can read them
-  saveDayLogField(todayStr(), { workoutTodayTotal: total, workoutTodayDone: done });
+  saveDayLogField(todayStr(), { workoutTodayTotal: total, workoutTodayDone: done, workoutSessions: sessions });
   if(total === 0) { container.innerHTML = ''; return; }
   const pct = Math.round((done / total) * 100);
   container.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span style="font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--muted);letter-spacing:1px">TODAY'S EXERCISES</span><span style="font-family:'DM Mono',monospace;font-size:0.62rem;color:${pct===100?'var(--accent)':'var(--muted)'}">${done}/${total} ${pct===100?'COMPLETE':''}</span></div><div style="height:3px;background:var(--border);border-radius:2px;overflow:hidden"><div style="height:100%;background:${pct===100?'var(--accent)':'var(--accent2)'};width:${pct}%;transition:width 0.3s"></div></div>`;
@@ -5597,14 +5638,15 @@ function openDayModal(dateStr, dt) {
             <div><div class="m-title">${_r.label}</div><div class="m-sub">${_dc.hasData ? _dc.total+' / '+_ceil+' cal' : 'No food logged'}</div></div>
           </div>`;
         } else if(AUTO_WORKOUT_IDS.includes(item.id)) {
-          // Auto workout — show done based on workout checks
-          const _wc = log.workoutChecks || {};
-          const _wt = Object.keys(_wc).length;
-          const _wd = Object.values(_wc).filter(Boolean).length;
-          const _wpct = _wt > 0 ? _wd / _wt : 0;
-          html += `<div class="modal-check-item ${_wpct >= 0.8 && _wt > 0?'done':''}" style="cursor:default">
-            <div class="modal-cb">${_wpct >= 0.8 && _wt > 0?'✓':''}</div>
-            <div><div class="m-title">${_r.label}</div><div class="m-sub">${_wt > 0 ? _wd+'/'+_wt+' exercises' : 'No workout data'}</div></div>
+          // Auto workout — per-session counts
+          const _mSessions = log.workoutSessions || {};
+          const _mSessType = WORKOUT_ITEM_SESSION[item.id] || 'evening';
+          const _mSess = _mSessions[_mSessType] || (_mSessType === 'morning' ? _mSessions['evening'] : null) || { total:0, done:0 };
+          const _mPct = _mSess.total > 0 ? _mSess.done / _mSess.total : 0;
+          const _mIsDone = _mSess.total > 0 && _mPct >= 0.8;
+          html += `<div class="modal-check-item ${_mIsDone?'done':''}" style="cursor:default">
+            <div class="modal-cb">${_mIsDone?'✓':''}</div>
+            <div><div class="m-title">${_r.label}</div><div class="m-sub">${_mSess.total > 0 ? _mSess.done+'/'+_mSess.total+' exercises' : 'No workout data'}</div></div>
           </div>`;
         } else {
           html += `<div class="modal-check-item ${done?'done':''}" onclick="toggleModalCheck(this,'${dateStr}','${item.id}')">
@@ -5778,6 +5820,8 @@ function toggleModalWorkoutChecklist(dateStr) {
     html += `<div style="margin-bottom:10px"><div style="font-family:'Bebas Neue',sans-serif;font-size:0.8rem;letter-spacing:1.5px;color:var(--accent);margin-bottom:4px">${title ? title.textContent : 'WORKOUT'}</div>`;
     if(meta) html += `<div style="font-family:'DM Mono',monospace;font-size:0.5rem;color:var(--muted);margin-bottom:6px">${meta.textContent}</div>`;
 
+    const cardSession = classifyWorkoutCard(card);
+    if(cardSession === 'rest') return;
     card.querySelectorAll('.wex-row').forEach(row => {
       const wid = row.dataset.wid;
       if(!wid) return;
@@ -5788,7 +5832,7 @@ function toggleModalWorkoutChecklist(dateStr) {
       const sets = setsEl ? setsEl.textContent : '';
       const isStretch = nameEl && nameEl.style.color === 'rgb(221, 136, 255)';
       const isDone = !!wChecks[wid];
-      html += `<div class="modal-check-item ${isDone?'done':''}" onclick="toggleModalWorkoutEx(this,'${dateStr}','${wid}')" style="padding:6px 8px;margin-bottom:3px">
+      html += `<div class="modal-check-item ${isDone?'done':''}" data-session="${cardSession}" onclick="toggleModalWorkoutEx(this,'${dateStr}','${wid}')" style="padding:6px 8px;margin-bottom:3px">
         <div class="modal-cb">${isDone?'✓':''}</div>
         <div style="flex:1;display:flex;justify-content:space-between;align-items:center">
           <span style="font-size:0.72rem;${isStretch?'color:#dd88ff':''}">${name}</span>
@@ -5830,17 +5874,24 @@ function toggleModalWorkoutEx(el, dateStr, wid) {
   const wChecks = Object.assign({}, log.workoutChecks || {});
   wChecks[wid] = isDone;
 
-  // Count totals for this day
+  // Count totals and per-session data
   const panel = document.getElementById('mWorkoutPanel');
   let total = 0, done = 0;
+  const sessions = {};
   if(panel) {
     panel.querySelectorAll('.modal-check-item').forEach(item => {
       total++;
       if(item.classList.contains('done')) done++;
+      const sess = item.dataset.session;
+      if(sess) {
+        if(!sessions[sess]) sessions[sess] = { total:0, done:0 };
+        sessions[sess].total++;
+        if(item.classList.contains('done')) sessions[sess].done++;
+      }
     });
   }
 
-  saveDayLogField(dateStr, { workoutChecks: wChecks, workoutTodayTotal: total, workoutTodayDone: done });
+  saveDayLogField(dateStr, { workoutChecks: wChecks, workoutTodayTotal: total, workoutTodayDone: done, workoutSessions: sessions });
 
   // Update summary button
   const btn = document.getElementById('mWorkoutBtn');
