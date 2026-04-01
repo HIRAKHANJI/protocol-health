@@ -4,6 +4,20 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 4.5.1 — 2026-04-01
+
+**Scope:** Patch (Calorie card severe overshoot now counts toward day completion)
+
+- **Calorie card counts toward completion** — The info card (f2) is NOT a checkbox but its pass/fail state IS written to checks and counted by `updateProgress()`, `getValidCheckCompletion()`, calendar scoring, and radar CHECKLIST axis. Under ceiling or mildly over (≤50%) = pass. Severely over (>50%) = fail, making the day partial.
+- **`updateProgress()` bug fixed** — Was counting all `.check-item` elements uniformly. Now reads `data-cal-pass` attribute for info items to determine pass/fail instead of checking `.done` class.
+- **`saveAllChecks()` persists f2** — Info items saved to checks with `calPass` boolean from `data-cal-pass` attribute.
+- **`refreshAutoItems()` persists f2** — When food is logged, f2 pass/fail is immediately written to checks so calendar and radar update in real-time.
+- **`getValidCheckCompletion()` includes f2** — Reverted the info-item exclusion. f2 is now a valid check ID that participates in completion scoring.
+- **`migrateOrphanedChecks()` keeps f2** — No longer deletes f2 from historical checks. Info items are included in the valid ID set.
+- **Day modal shows severity** — Past day info cards show ✗ icon on severe overshoot, ✓ on under ceiling.
+
+---
+
 ## Version 4.5.0 — 2026-04-01
 
 **Scope:** Minor (Calorie ceiling info card + orphan migration enhancement)
