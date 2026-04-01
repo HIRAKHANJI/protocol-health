@@ -1357,7 +1357,8 @@ const SK = {
   foodLib:   'ph_fb_v1',   // array of { name, lastCalories, useCount } — sorted by useCount desc
   exLevels:  'ph_ex_v1',   // object keyed by dateStr — each value: { groupId: levelIndex, ... }
   lightDays: 'ph_ld_v1',   // object keyed by dateStr — value: true if that day is a light eating day
-  swDismissedVer: 'ph_sw_v1' // string — last SW cache version the user dismissed the reload banner for
+  swDismissedVer: 'ph_sw_v1', // string — last SW cache version the user dismissed the reload banner for
+  backupTs: 'ph_bts_v1' // number — timestamp of last backup (for reminder banner)
 };
 
 // ─── APP VERSION ─────────────────────────────────────────────────────────────
@@ -1366,8 +1367,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '4.5.0';
-const APP_VERSION_MSG = 'Calorie ceiling is now an info card (no longer affects checklist completion). Orphaned check IDs cleaned from version transitions.';
+const APP_VERSION = '4.5.2';
+const APP_VERSION_MSG = 'Fixed loadChecklist info item processing. Migrated backup timestamp to SK storage system for IndexedDB mirroring.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -2090,7 +2091,7 @@ function checkBackupReminder() {
   const dayLogs = gs(SK.dayLogs) || {};
   if(weights.length < 3 && Object.keys(dayLogs).length < 3) return; // too early to nag
 
-  const lastBackup = localStorage.getItem('ph_last_backup_ts');
+  const lastBackup = gs(SK.backupTs);
   const now = Date.now();
   const sevenDays = 7 * 24 * 60 * 60 * 1000;
 
@@ -4126,11 +4127,12 @@ function renderTodayChecklist() {
         </div>
       </div>`;
     } else if(item.type === 'info') {
-      // Info card — auto-colored calorie status, NOT a checkbox, NOT counted in completion
+      // Info card — auto-colored calorie status, no checkbox, but COUNTS toward completion
+      // Under ceiling or mildly over (≤50%): passes. Severely over (>50%): fails the day.
       const dc = getDayCalories(todayStr());
       const ceiling = s.calories || 1500;
       const actual = dc.total || 0;
-      let cardBg = 'var(--surface)', statusText = `0 / ${ceiling} cal`;
+      let cardBg = 'var(--surface)', statusText = `0 / ${ceiling} cal`, calPass = true;
       if(dc.hasData) {
         if(actual <= ceiling) {
           cardBg = 'rgba(76,175,80,0.15)';
@@ -4141,9 +4143,10 @@ function renderTodayChecklist() {
         } else {
           cardBg = 'rgba(244,67,54,0.15)';
           statusText = `${actual} / ${ceiling} cal \u00b7 ${actual - ceiling} over`;
+          calPass = false; // severe overshoot — counts as failure
         }
       }
-      html += `<div class="check-item" style="background:${cardBg};cursor:default;opacity:0.95" data-id="${item.id}" data-type="info"><div style="width:22px"></div><div class="item-content"><div class="item-title">${label}</div><div style="font-family:'DM Mono',monospace;font-size:0.8rem;margin-top:4px;color:var(--text)" data-cal-status>${statusText}</div></div></div>`;
+      html += `<div class="check-item${calPass ? '' : ' auto-status fail'}" style="background:${cardBg};cursor:default;opacity:0.95" data-id="${item.id}" data-type="info" data-cal-pass="${calPass}"><div style="width:22px;display:flex;align-items:center;justify-content:center">${!calPass ? '<span style="color:var(--danger);font-weight:bold;font-size:12px">\u2717</span>' : (dc.hasData && actual <= ceiling ? '<span style="color:var(--accent);font-weight:bold;font-size:10px">\u2714</span>' : '')}</div><div class="item-content"><div class="item-title">${label}</div><div style="font-family:'DM Mono',monospace;font-size:0.8rem;margin-top:4px;color:var(--text)" data-cal-status>${statusText}</div></div></div>`;
     } else if(AUTO_WORKOUT_IDS.includes(item.id)) {
       // Auto workout items — reads PER-SESSION counts (morning/evening), not global total
       const wLog = getDayLog(todayStr());
@@ -4275,11 +4278,10 @@ function getValidCheckCompletion(dateStr) {
   const isLight = !!(gs(SK.lightDays)||{})[dateStr];
   const checklist = isFast ? (plan.checklistFast||[]) : isLight ? (plan.checklistLight||plan.checklistNormal||[]) : (plan.checklistNormal||[]);
 
-  // Build valid IDs, excluding info-type items (they don't count toward completion)
+  // Build valid IDs — info items (f2 calorie card) ARE counted toward completion
+  // (severe overshoot >50% over ceiling = fail, otherwise pass)
   const validIds = new Set();
-  const infoIds = new Set();
   checklist.forEach(item => {
-    if(item.type === 'info') { infoIds.add(item.id); return; }
     validIds.add(item.id);
     if(item.subItems) item.subItems.forEach(sub => validIds.add(sub.id));
   });
@@ -4293,8 +4295,7 @@ function getValidCheckCompletion(dateStr) {
 
 // migrateOrphanedChecks: cleanup of check IDs that no longer exist in the current
 // checklist definition. Runs on app init. Idempotent — safe to run multiple times.
-// Also removes f2 (calorie ceiling info card) from all historical checks since it's
-// no longer a checkbox and shouldn't count toward completion.
+// Info items (f2 calorie card) ARE kept in checks — they track pass/fail for completion.
 function migrateOrphanedChecks() {
   const plan = getActivePlan();
   if(!plan) return;
@@ -4303,11 +4304,6 @@ function migrateOrphanedChecks() {
   const fastDays = gs(SK.fastDays) || {};
   const lightDays = gs(SK.lightDays) || {};
   let changed = false;
-
-  // Build set of info-type item IDs (should never be in checks)
-  const allChecklists = [plan.checklistNormal||[], plan.checklistFast||[], plan.checklistLight||[]];
-  const infoIds = new Set();
-  allChecklists.forEach(cl => cl.forEach(item => { if(item.type === 'info') infoIds.add(item.id); }));
 
   Object.keys(dayLogs).forEach(dateStr => {
     const log = dayLogs[dateStr];
@@ -4320,7 +4316,6 @@ function migrateOrphanedChecks() {
 
     const validIds = new Set();
     checklist.forEach(item => {
-      if(item.type === 'info') return; // info items are not checkboxes
       validIds.add(item.id);
       if(item.subItems) item.subItems.forEach(sub => validIds.add(sub.id));
     });
@@ -4329,8 +4324,6 @@ function migrateOrphanedChecks() {
     Object.keys(checks).forEach(checkId => {
       // Whitelist wex* IDs (workout exercise checks)
       if(checkId.startsWith('wex')) return;
-      // Remove info-type items (f2) from checks
-      if(infoIds.has(checkId)) { delete checks[checkId]; changed = true; return; }
       // Remove orphaned IDs not in current checklist
       if(!validIds.has(checkId)) { delete checks[checkId]; changed = true; }
     });
@@ -4365,7 +4358,7 @@ function loadChecklist() {
         // Update count display
         updateSupCount(item.dataset.id, subDone, subTotal);
       }
-    } else if(!item.dataset.waterTarget && !item.dataset.auto) {
+    } else if(!item.dataset.waterTarget && !item.dataset.auto && item.dataset.type !== 'info') {
       // Regular toggleable items only — skip water and auto-status
       item.classList.toggle('done', !!checks[item.dataset.id]);
     }
@@ -4481,9 +4474,14 @@ function updateWaterCardState(itemId, target, liters) {
 function saveAllChecks() {
   const log = getDayLog(todayStr());
   const checks = Object.assign({}, log.checks || {});
-  // Regular items (not sub-items parents, not water, not auto-status, not info)
+  // Regular items (not sub-items parents, not water, not auto-status)
   document.querySelectorAll('.check-item:not(.has-subitems)').forEach(item => {
-    if(item.dataset.waterTarget || item.dataset.auto || item.dataset.type === 'info') return;
+    if(item.dataset.waterTarget || item.dataset.auto) return;
+    // Info items (calorie card): pass/fail based on data-cal-pass attribute
+    if(item.dataset.type === 'info') {
+      checks[item.dataset.id] = item.dataset.calPass === 'true';
+      return;
+    }
     checks[item.dataset.id] = item.classList.contains('done');
   });
   // Sub-items parents + their children
@@ -4523,11 +4521,11 @@ function refreshAutoItems() {
   const s = getSettings();
   const cal = s.calories || 1500;
   const plan = getActivePlan();
-  // Refresh calorie info card (not a checkbox — just update the display)
+  // Refresh calorie info card — update display AND pass/fail state
   document.querySelectorAll('.check-item[data-type="info"]').forEach(el => {
     const dc = getDayCalories(todayStr());
     const actual = dc.total || 0;
-    let cardBg = 'var(--surface)', statusText = `0 / ${cal} cal`;
+    let cardBg = 'var(--surface)', statusText = `0 / ${cal} cal`, calPass = true;
     if(dc.hasData) {
       if(actual <= cal) {
         cardBg = 'rgba(76,175,80,0.15)';
@@ -4538,11 +4536,23 @@ function refreshAutoItems() {
       } else {
         cardBg = 'rgba(244,67,54,0.15)';
         statusText = `${actual} / ${cal} cal \u00b7 ${actual - cal} over`;
+        calPass = false;
       }
     }
     el.style.background = cardBg;
+    el.dataset.calPass = String(calPass);
+    el.classList.toggle('fail', !calPass);
+    // Update icon
+    const iconEl = el.querySelector('div:first-child');
+    if(iconEl && iconEl.style.width === '22px') {
+      iconEl.innerHTML = !calPass ? '<span style="color:var(--danger);font-weight:bold;font-size:12px">\u2717</span>' : (dc.hasData && actual <= cal ? '<span style="color:var(--accent);font-weight:bold;font-size:10px">\u2714</span>' : '');
+    }
     const valEl = el.querySelector('[data-cal-status]');
     if(valEl) valEl.textContent = statusText;
+    // Persist f2 pass/fail to checks so calendar and radar see it
+    const checks = Object.assign({}, getDayLog(todayStr()).checks || {});
+    checks[el.dataset.id] = calPass;
+    saveDayLogField(todayStr(), { checks });
   });
   // Refresh workout items (per-session: morning/evening tracked independently)
   const _wLog = getDayLog(todayStr());
@@ -4601,7 +4611,13 @@ function updateProgress() {
   document.querySelectorAll('.check-item').forEach(item=>{
     const grp = item.closest('.checklist-group');
     if(grp && grp.style.display==='none') return;
-    total++; if(item.classList.contains('done')) done++;
+    total++;
+    // Info items (calorie card): count as done if not severely over ceiling
+    if(item.dataset.type === 'info') {
+      if(item.dataset.calPass === 'true') done++;
+    } else {
+      if(item.classList.contains('done')) done++;
+    }
   });
   const pct = total ? Math.round((done/total)*100) : 0;
   document.getElementById('todayPct').textContent = pct+'%';
@@ -5628,18 +5644,18 @@ function openDayModal(dateStr, dt) {
             <div><div class="m-title">${_r.label}</div><div class="m-sub">${(log.water||0)}L / ${item.waterTarget}L</div></div>
           </div>`;
         } else if(item.type === 'info') {
-          // Info card — calorie status display (not a checkbox, not counted in completion)
+          // Info card — calorie status. Severe overshoot (>50%) counts as failure.
           const _dc = getDayCalories(dateStr);
           const _ceil = _modalS.calories || 1500;
           const _act = _dc.total || 0;
-          let _infoBg = 'var(--surface)', _infoText = '0 / ' + _ceil + ' cal';
+          let _infoBg = 'var(--surface)', _infoText = '0 / ' + _ceil + ' cal', _calFail = false;
           if(_dc.hasData) {
             if(_act <= _ceil) { _infoBg = 'rgba(76,175,80,0.15)'; _infoText = _act + ' / ' + _ceil + ' cal \u2714'; }
             else if(_act <= _ceil * 1.5) { _infoBg = 'rgba(255,152,0,0.15)'; _infoText = _act + ' / ' + _ceil + ' cal \u00b7 ' + (_act-_ceil) + ' over'; }
-            else { _infoBg = 'rgba(244,67,54,0.15)'; _infoText = _act + ' / ' + _ceil + ' cal \u00b7 ' + (_act-_ceil) + ' over'; }
+            else { _infoBg = 'rgba(244,67,54,0.15)'; _infoText = _act + ' / ' + _ceil + ' cal \u00b7 ' + (_act-_ceil) + ' over'; _calFail = true; }
           }
           html += `<div class="modal-check-item" style="background:${_infoBg};cursor:default">
-            <div style="width:22px"></div>
+            <div style="width:22px;display:flex;align-items:center;justify-content:center">${_calFail ? '<span style="color:var(--danger);font-weight:bold;font-size:12px">\u2717</span>' : (_dc.hasData && _act <= _ceil ? '<span style="color:var(--accent);font-weight:bold;font-size:10px">\u2714</span>' : '')}</div>
             <div><div class="m-title">${_r.label}</div><div style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text)">${_infoText}</div></div>
           </div>`;
         } else if(AUTO_WORKOUT_IDS.includes(item.id)) {
@@ -6179,7 +6195,7 @@ function renderStorageHealth() {
     lsBytes += (key.length + (localStorage.getItem(key)||'').length) * 2; // UTF-16
   }
   const lsKB = (lsBytes / 1024).toFixed(1);
-  const lastBackup = localStorage.getItem('ph_last_backup_ts');
+  const lastBackup = gs(SK.backupTs);
   const backupText = lastBackup ? Math.floor((Date.now() - parseInt(lastBackup)) / (24*60*60*1000)) + ' days ago' : 'Never';
   let html = `<div style="margin-bottom:4px;color:var(--text);font-size:0.65rem;letter-spacing:1px">STORAGE HEALTH</div>`;
   html += `localStorage: ${lsKB} KB used<br>`;
@@ -7406,7 +7422,7 @@ function backupData() {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 
-  localStorage.setItem('ph_last_backup_ts', String(Date.now()));
+  ss(SK.backupTs, String(Date.now()));
   showBackupStatus('✓ Backup downloaded. Save it somewhere safe — Google Drive, email to yourself, etc.', 'var(--green)');
 }
 
