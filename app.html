@@ -1367,8 +1367,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '4.5.2';
-const APP_VERSION_MSG = 'Fixed loadChecklist info item processing. Migrated backup timestamp to SK storage system for IndexedDB mirroring.';
+const APP_VERSION = '4.5.3';
+const APP_VERSION_MSG = 'Migration fixes stale workout/water/calorie checks from pre-v4.4 data. Historical days now show correct completion.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -4326,6 +4326,45 @@ function migrateOrphanedChecks() {
       if(checkId.startsWith('wex')) return;
       // Remove orphaned IDs not in current checklist
       if(!validIds.has(checkId)) { delete checks[checkId]; changed = true; }
+    });
+
+    // Fix stale workout auto-items: if workoutSessions shows completion but checks say false
+    const sessions = log.workoutSessions || {};
+    AUTO_WORKOUT_IDS.forEach(itemId => {
+      if(!(itemId in checks)) return; // not in this day's checks
+      const sessType = WORKOUT_ITEM_SESSION[itemId] || 'evening';
+      const sess = sessions[sessType] || (sessType === 'morning' ? sessions['evening'] : null);
+      if(sess && sess.total > 0) {
+        const pct = sess.done / sess.total;
+        const shouldBeDone = pct >= 0.8;
+        if(checks[itemId] !== shouldBeDone) { checks[itemId] = shouldBeDone; changed = true; }
+      }
+    });
+    // Fix _workout item from global counts
+    if('_workout' in checks && log.workoutTodayTotal > 0) {
+      const globalPct = (log.workoutTodayDone || 0) / log.workoutTodayTotal;
+      const shouldBeDone = globalPct >= 0.8;
+      if(checks['_workout'] !== shouldBeDone) { checks['_workout'] = shouldBeDone; changed = true; }
+    }
+
+    // Fix stale water items: if dayLogs.water meets target but checks say false
+    checklist.forEach(item => {
+      if(item.type === 'water' && item.waterTarget && (item.id in checks)) {
+        const waterVal = log.water || 0;
+        const shouldBeDone = waterVal >= item.waterTarget;
+        if(checks[item.id] !== shouldBeDone) { checks[item.id] = shouldBeDone; changed = true; }
+      }
+    });
+
+    // Fix stale calorie info items: compute pass/fail from food log
+    checklist.forEach(item => {
+      if(item.type === 'info' && (item.id in checks)) {
+        const fl = (gs(SK.foodLog) || {})[dateStr] || [];
+        const calTotal = fl.reduce((sum, e) => sum + (e.calories || 0), 0);
+        const ceiling = (gs(SK.settings) || {}).calories || 1500;
+        const calPass = !fl.length || calTotal <= ceiling * 1.5;
+        if(checks[item.id] !== calPass) { checks[item.id] = calPass; changed = true; }
+      }
     });
   });
 

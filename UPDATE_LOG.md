@@ -4,6 +4,18 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 4.5.3 — 2026-04-01
+
+**Scope:** Patch (Migration corrects stale historical workout/water/calorie checks)
+
+- **Stale workout auto-items fixed** — `migrateOrphanedChecks()` now detects days where `workoutSessions` shows completion (≥80% per session) but the checks for m2/m3/e1/e2/e3 are `false`. Corrects them to `true`. Also fixes `_workout` item from global counts.
+- **Stale water items fixed** — If `dayLogs[date].water` meets the plan's water target but `checks[waterItemId]` is `false`, corrects it to `true`.
+- **Stale calorie info items fixed** — Recomputes f2 pass/fail from actual food log data for each historical day. If calories ≤ ceiling×1.5, f2 = true (pass). Over 150% = false (fail).
+- **Root cause:** These items were saved as `false` by versions before v4.4.0 which didn't have auto-workout per-session tracking, water input syncing, or info card logic. The `checks` object retained stale values that `getValidCheckCompletion()` counted as failures.
+- **Affected days:** Any eating day where all workouts were done but the pre-v4.4 code wrote m2/m3/e1/e2/e3 as false. March 30 is the primary example.
+
+---
+
 ## Version 4.5.2 — 2026-04-01
 
 **Scope:** Patch (Audit warning fixes — loadChecklist guard + backup timestamp migration)
