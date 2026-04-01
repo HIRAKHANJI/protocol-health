@@ -1366,8 +1366,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '4.4.0';
-const APP_VERSION_MSG = 'Workout items now track per-session: morning exercises tick morning items, evening exercises tick evening items. No more all-or-nothing.';
+const APP_VERSION = '4.5.0';
+const APP_VERSION_MSG = 'Calorie ceiling is now an info card (no longer affects checklist completion). Orphaned check IDs cleaned from version transitions.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -2287,7 +2287,7 @@ const PLANS = {
       { id:'m3', group:'MORNING', label:'Morning workout (20 min)', sub:'Morning A/B — see WORKOUTS tab' },
       { id:'m4', group:'MORNING', label:'Log morning weight in TRACK tab', sub:'Weigh first thing after waking, before food.' },
       { id:'f1', group:'EATING', label:'Protein in first meal (60-70g)', sub:'Eggs · chicken · tuna · lentils. Anchor here first.' },
-      { id:'f2', group:'EATING', label:'Stayed under calorie ceiling', sub:'Hard ceiling. Never more.', type:'auto-cal' },
+      { id:'f2', group:'EATING', label:'Stayed under calorie ceiling', sub:'Hard ceiling. Never more.', type:'info' },
       { id:'f3', group:'EATING', label:'Last meal before 6PM', sub:'12+ hour overnight fast every day.' },
       { id:'f4', group:'EATING', label:'3L+ water across the day', sub:'500ml wake · 500ml pre-meal · sip continuously', type:'water', waterTarget:3.0 },
       { id:'f5', group:'EATING', label:'No liquid calories', sub:'Water · black coffee · plain green tea only.' },
@@ -2480,7 +2480,7 @@ const PLANS = {
       { id:'m3', group:'MORNING', label:'Morning workout (20 min)', sub:'Morning A (Push+Pull) or B (Lower+Hinge) \u2014 see WORKOUTS tab' },
       { id:'m4', group:'MORNING', label:'Log morning weight in TRACK tab', sub:'Weigh first thing after waking, before food.' },
       { id:'f1', group:'EATING', label:'Protein in first meal (60-70g)', sub:'Eggs \u00b7 chicken \u00b7 tuna \u00b7 lentils \u00b7 Greek yogurt. Anchor protein first.' },
-      { id:'f2', group:'EATING', label:'Stayed under calorie ceiling', sub:'Hard ceiling. Never more. Log in FOOD LOG.', type:'auto-cal' },
+      { id:'f2', group:'EATING', label:'Stayed under calorie ceiling', sub:'Hard ceiling. Never more. Log in FOOD LOG.', type:'info' },
       { id:'f3', group:'EATING', label:'Last meal before 6PM', sub:'16+ hour overnight fast every day.' },
       { id:'f4', group:'EATING', label:'3L+ water across the day', sub:'500ml wake \u00b7 500ml pre-meal \u00b7 sip continuously', type:'water', waterTarget:3.0 },
       { id:'f5', group:'EATING', label:'No liquid calories', sub:'Water \u00b7 black coffee \u00b7 plain green tea only.' },
@@ -3066,7 +3066,7 @@ PLANS.cut = {
     { id:'m3', group:'MORNING', label:'Training session (if training day)', sub:'See WORKOUTS tab for today\'s session' },
     { id:'m4', group:'MORNING', label:'Log morning weight in TRACK tab', sub:'Weigh first thing after waking, before food.' },
     { id:'f1', group:'EATING', label:'Hit protein target', sub:'1.6g/kg minimum. Protein anchors every meal.' },
-    { id:'f2', group:'EATING', label:'Stayed under calorie ceiling', sub:'400–600 cal below TDEE. Hard ceiling.', type:'auto-cal' },
+    { id:'f2', group:'EATING', label:'Stayed under calorie ceiling', sub:'400–600 cal below TDEE. Hard ceiling.', type:'info' },
     { id:'f3', group:'EATING', label:'No liquid calories', sub:'Water · black coffee · plain tea only.' },
     { id:'f4', group:'EATING', label:'2.5L+ water across the day', sub:'500ml wake · 500ml pre-meal · sip continuously', type:'water', waterTarget:2.5 },
     { id:'e1', group:'EVENING', label:'Evening session (if training day)', sub:'See WORKOUTS tab for today\'s session' },
@@ -3302,7 +3302,7 @@ PLANS.bulk = {
     { id:'m3', group:'MORNING', label:'Training session (if training day)', sub:'See WORKOUTS tab for today\'s session' },
     { id:'m4', group:'MORNING', label:'Log morning weight (weekly minimum)', sub:'Track weekly trend. Aim 0.25\u20130.5% bodyweight/week gain.' },
     { id:'f1', group:'EATING', label:'Hit protein target (1.6\u20132.2g/kg)', sub:'Distribute across 3\u20135 meals. 30\u201350g per meal. Protein density first.' },
-    { id:'f2', group:'EATING', label:'Hit calorie ceiling (eat in surplus)', sub:'10\u201320% above TDEE. You MUST eat enough \u2014 under-eating wastes training stimulus.', type:'auto-cal' },
+    { id:'f2', group:'EATING', label:'Hit calorie ceiling (eat in surplus)', sub:'10\u201320% above TDEE. You MUST eat enough \u2014 under-eating wastes training stimulus.', type:'info' },
     { id:'f3', group:'EATING', label:'Hit carb target around training', sub:'Carbs 1\u20132 hours pre-training + within 60 min post-training. \u22653\u20135g/kg/day.' },
     { id:'f4', group:'EATING', label:'Pre-training meal (1\u20132 hours before)', sub:'30\u201340g protein + 40\u201360g carbs. Fuels the session and starts MPS.' },
     { id:'f5', group:'EATING', label:'Post-training protein within 60 min', sub:'30\u201340g protein + carbs. Maximises muscle protein synthesis window.' },
@@ -3652,7 +3652,7 @@ PLANS.maintenance = {
     { id:'m3', group:'MORNING', label:'Training session (if training day)', sub:'See WORKOUTS tab for today\'s session' },
     { id:'m4', group:'MORNING', label:'Log weight (weekly minimum)', sub:'Track weekly trend. Weight should be stable ±1.5kg.' },
     { id:'f1', group:'EATING', label:'Hit protein target', sub:'1.2–1.6g/kg. Protein in every meal.' },
-    { id:'f2', group:'EATING', label:'Stay near calorie ceiling (±200 cal)', sub:'At TDEE. Small daily variance is fine.', type:'auto-cal' },
+    { id:'f2', group:'EATING', label:'Stay near calorie ceiling (±200 cal)', sub:'At TDEE. Small daily variance is fine.', type:'info' },
     { id:'f3', group:'EATING', label:'2L+ water across the day', sub:'Sip continuously throughout the day.', type:'water', waterTarget:2.0 },
     { id:'e1', group:'EVENING', label:'Evening session or mobility work', sub:'See WORKOUTS tab. Mobility on rest days.' },
     { id:'n2', group:'NIGHT', label:'Sleep before midnight', sub:'Consistency matters more than duration.' }
@@ -4125,28 +4125,25 @@ function renderTodayChecklist() {
           </div>
         </div>
       </div>`;
-    } else if(item.type === 'auto-cal') {
-      // Auto calorie ceiling — reads food log, not clickable
+    } else if(item.type === 'info') {
+      // Info card — auto-colored calorie status, NOT a checkbox, NOT counted in completion
       const dc = getDayCalories(todayStr());
       const ceiling = s.calories || 1500;
-      const plan = getActivePlan();
-      const isBulk = plan.goalMode === 'bulk';
-      const isMaint = plan.goalMode === 'maintenance';
-      let calState = 'pending'; // no data yet
-      let calText = 'No food logged yet';
+      const actual = dc.total || 0;
+      let cardBg = 'var(--surface)', statusText = `0 / ${ceiling} cal`;
       if(dc.hasData) {
-        if(isBulk) {
-          calState = dc.total >= ceiling ? 'done' : 'fail';
-          calText = dc.total + ' / ' + ceiling + ' cal' + (calState === 'done' ? ' — target hit' : ' — eat more');
-        } else if(isMaint) {
-          calState = Math.abs(dc.total - ceiling) <= 200 ? 'done' : 'fail';
-          calText = dc.total + ' / ' + ceiling + ' cal' + (calState === 'done' ? ' — on target' : (dc.total > ceiling + 200 ? ' — over' : ' — under'));
+        if(actual <= ceiling) {
+          cardBg = 'rgba(76,175,80,0.15)';
+          statusText = `${actual} / ${ceiling} cal \u2714`;
+        } else if(actual <= ceiling * 1.5) {
+          cardBg = 'rgba(255,152,0,0.15)';
+          statusText = `${actual} / ${ceiling} cal \u00b7 ${actual - ceiling} over`;
         } else {
-          calState = dc.total <= ceiling ? 'done' : 'fail';
-          calText = dc.total + ' / ' + ceiling + ' cal' + (calState === 'done' ? ' — under ceiling' : ' — over ceiling');
+          cardBg = 'rgba(244,67,54,0.15)';
+          statusText = `${actual} / ${ceiling} cal \u00b7 ${actual - ceiling} over`;
         }
       }
-      html += `<div class="check-item auto-status ${calState}" data-id="${item.id}" data-auto="cal"><div class="checkbox"><span class="checkbox-tick">${calState==='fail'?'✗':'✓'}</span></div><div class="item-content"><div class="item-title">${label}</div><div class="auto-val">${calText}</div></div></div>`;
+      html += `<div class="check-item" style="background:${cardBg};cursor:default;opacity:0.95" data-id="${item.id}" data-type="info"><div style="width:22px"></div><div class="item-content"><div class="item-title">${label}</div><div style="font-family:'DM Mono',monospace;font-size:0.8rem;margin-top:4px;color:var(--text)" data-cal-status>${statusText}</div></div></div>`;
     } else if(AUTO_WORKOUT_IDS.includes(item.id)) {
       // Auto workout items — reads PER-SESSION counts (morning/evening), not global total
       const wLog = getDayLog(todayStr());
@@ -4278,8 +4275,11 @@ function getValidCheckCompletion(dateStr) {
   const isLight = !!(gs(SK.lightDays)||{})[dateStr];
   const checklist = isFast ? (plan.checklistFast||[]) : isLight ? (plan.checklistLight||plan.checklistNormal||[]) : (plan.checklistNormal||[]);
 
+  // Build valid IDs, excluding info-type items (they don't count toward completion)
   const validIds = new Set();
+  const infoIds = new Set();
   checklist.forEach(item => {
+    if(item.type === 'info') { infoIds.add(item.id); return; }
     validIds.add(item.id);
     if(item.subItems) item.subItems.forEach(sub => validIds.add(sub.id));
   });
@@ -4291,8 +4291,10 @@ function getValidCheckCompletion(dateStr) {
   return { done, total, pct: total > 0 ? Math.round((done/total)*100) : 0 };
 }
 
-// migrateOrphanedChecks: one-time cleanup of check IDs that no longer exist in the current
+// migrateOrphanedChecks: cleanup of check IDs that no longer exist in the current
 // checklist definition. Runs on app init. Idempotent — safe to run multiple times.
+// Also removes f2 (calorie ceiling info card) from all historical checks since it's
+// no longer a checkbox and shouldn't count toward completion.
 function migrateOrphanedChecks() {
   const plan = getActivePlan();
   if(!plan) return;
@@ -4301,6 +4303,11 @@ function migrateOrphanedChecks() {
   const fastDays = gs(SK.fastDays) || {};
   const lightDays = gs(SK.lightDays) || {};
   let changed = false;
+
+  // Build set of info-type item IDs (should never be in checks)
+  const allChecklists = [plan.checklistNormal||[], plan.checklistFast||[], plan.checklistLight||[]];
+  const infoIds = new Set();
+  allChecklists.forEach(cl => cl.forEach(item => { if(item.type === 'info') infoIds.add(item.id); }));
 
   Object.keys(dayLogs).forEach(dateStr => {
     const log = dayLogs[dateStr];
@@ -4313,16 +4320,19 @@ function migrateOrphanedChecks() {
 
     const validIds = new Set();
     checklist.forEach(item => {
+      if(item.type === 'info') return; // info items are not checkboxes
       validIds.add(item.id);
       if(item.subItems) item.subItems.forEach(sub => validIds.add(sub.id));
     });
     validIds.add('_workout');
 
     Object.keys(checks).forEach(checkId => {
-      if(!validIds.has(checkId)) {
-        delete checks[checkId];
-        changed = true;
-      }
+      // Whitelist wex* IDs (workout exercise checks)
+      if(checkId.startsWith('wex')) return;
+      // Remove info-type items (f2) from checks
+      if(infoIds.has(checkId)) { delete checks[checkId]; changed = true; return; }
+      // Remove orphaned IDs not in current checklist
+      if(!validIds.has(checkId)) { delete checks[checkId]; changed = true; }
     });
   });
 
@@ -4417,8 +4427,8 @@ function updateSupCount(parentId, done, total) {
 // Flips its done state, saves all checks to storage, updates the progress bar,
 // and fires DAY_SAVED so the calendar cell color updates too.
 function toggle(el) {
-  // Water and auto-status items are not manually toggleable
-  if(el.dataset.waterTarget || el.dataset.auto) return;
+  // Water, auto-status, and info items are not manually toggleable
+  if(el.dataset.waterTarget || el.dataset.auto || el.dataset.type === 'info') return;
   el.classList.toggle('done');
   saveAllChecks();
   updateProgress();
@@ -4471,9 +4481,9 @@ function updateWaterCardState(itemId, target, liters) {
 function saveAllChecks() {
   const log = getDayLog(todayStr());
   const checks = Object.assign({}, log.checks || {});
-  // Regular items (not sub-items parents, not water, not auto-status)
+  // Regular items (not sub-items parents, not water, not auto-status, not info)
   document.querySelectorAll('.check-item:not(.has-subitems)').forEach(item => {
-    if(item.dataset.waterTarget || item.dataset.auto) return; // skip computed items
+    if(item.dataset.waterTarget || item.dataset.auto || item.dataset.type === 'info') return;
     checks[item.dataset.id] = item.classList.contains('done');
   });
   // Sub-items parents + their children
@@ -4513,31 +4523,26 @@ function refreshAutoItems() {
   const s = getSettings();
   const cal = s.calories || 1500;
   const plan = getActivePlan();
-  // Refresh calorie ceiling items
-  document.querySelectorAll('.check-item[data-auto="cal"]').forEach(el => {
+  // Refresh calorie info card (not a checkbox — just update the display)
+  document.querySelectorAll('.check-item[data-type="info"]').forEach(el => {
     const dc = getDayCalories(todayStr());
-    const isBulk = plan.goalMode === 'bulk';
-    const isMaint = plan.goalMode === 'maintenance';
-    let calState = 'pending', calText = 'No food logged yet';
+    const actual = dc.total || 0;
+    let cardBg = 'var(--surface)', statusText = `0 / ${cal} cal`;
     if(dc.hasData) {
-      if(isBulk) {
-        calState = dc.total >= cal ? 'done' : 'fail';
-        calText = dc.total + ' / ' + cal + ' cal' + (calState === 'done' ? ' — target hit' : ' — eat more');
-      } else if(isMaint) {
-        calState = Math.abs(dc.total - cal) <= 200 ? 'done' : 'fail';
-        calText = dc.total + ' / ' + cal + ' cal' + (calState === 'done' ? ' — on target' : (dc.total > cal + 200 ? ' — over' : ' — under'));
+      if(actual <= cal) {
+        cardBg = 'rgba(76,175,80,0.15)';
+        statusText = `${actual} / ${cal} cal \u2714`;
+      } else if(actual <= cal * 1.5) {
+        cardBg = 'rgba(255,152,0,0.15)';
+        statusText = `${actual} / ${cal} cal \u00b7 ${actual - cal} over`;
       } else {
-        calState = dc.total <= cal ? 'done' : 'fail';
-        calText = dc.total + ' / ' + cal + ' cal' + (calState === 'done' ? ' — under ceiling' : ' — over ceiling');
+        cardBg = 'rgba(244,67,54,0.15)';
+        statusText = `${actual} / ${cal} cal \u00b7 ${actual - cal} over`;
       }
     }
-    el.classList.remove('done','fail');
-    if(calState === 'done') el.classList.add('done');
-    else if(calState === 'fail') el.classList.add('fail');
-    const tick = el.querySelector('.checkbox-tick');
-    if(tick) tick.textContent = calState === 'fail' ? '✗' : '✓';
-    const valEl = el.querySelector('.auto-val');
-    if(valEl) valEl.textContent = calText;
+    el.style.background = cardBg;
+    const valEl = el.querySelector('[data-cal-status]');
+    if(valEl) valEl.textContent = statusText;
   });
   // Refresh workout items (per-session: morning/evening tracked independently)
   const _wLog = getDayLog(todayStr());
@@ -5622,20 +5627,20 @@ function openDayModal(dateStr, dt) {
             <div class="modal-cb">${_waterDone?'✓':''}</div>
             <div><div class="m-title">${_r.label}</div><div class="m-sub">${(log.water||0)}L / ${item.waterTarget}L</div></div>
           </div>`;
-        } else if(item.type === 'auto-cal') {
-          // Auto calorie — show done based on food log vs ceiling
+        } else if(item.type === 'info') {
+          // Info card — calorie status display (not a checkbox, not counted in completion)
           const _dc = getDayCalories(dateStr);
           const _ceil = _modalS.calories || 1500;
-          const _plan = getActivePlan();
-          let _calDone = false;
+          const _act = _dc.total || 0;
+          let _infoBg = 'var(--surface)', _infoText = '0 / ' + _ceil + ' cal';
           if(_dc.hasData) {
-            if(_plan.goalMode==='bulk') _calDone = _dc.total >= _ceil;
-            else if(_plan.goalMode==='maintenance') _calDone = Math.abs(_dc.total - _ceil) <= 200;
-            else _calDone = _dc.total <= _ceil;
+            if(_act <= _ceil) { _infoBg = 'rgba(76,175,80,0.15)'; _infoText = _act + ' / ' + _ceil + ' cal \u2714'; }
+            else if(_act <= _ceil * 1.5) { _infoBg = 'rgba(255,152,0,0.15)'; _infoText = _act + ' / ' + _ceil + ' cal \u00b7 ' + (_act-_ceil) + ' over'; }
+            else { _infoBg = 'rgba(244,67,54,0.15)'; _infoText = _act + ' / ' + _ceil + ' cal \u00b7 ' + (_act-_ceil) + ' over'; }
           }
-          html += `<div class="modal-check-item ${_calDone?'done':''}" style="cursor:default">
-            <div class="modal-cb">${_calDone?'✓':(!_dc.hasData?'':'✗')}</div>
-            <div><div class="m-title">${_r.label}</div><div class="m-sub">${_dc.hasData ? _dc.total+' / '+_ceil+' cal' : 'No food logged'}</div></div>
+          html += `<div class="modal-check-item" style="background:${_infoBg};cursor:default">
+            <div style="width:22px"></div>
+            <div><div class="m-title">${_r.label}</div><div style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text)">${_infoText}</div></div>
           </div>`;
         } else if(AUTO_WORKOUT_IDS.includes(item.id)) {
           // Auto workout — per-session counts

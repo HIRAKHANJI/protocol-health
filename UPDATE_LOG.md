@@ -4,6 +4,27 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 4.5.0 — 2026-04-01
+
+**Scope:** Minor (Calorie ceiling info card + orphan migration enhancement)
+**Banner:** "Calorie ceiling is now an info card (no longer affects checklist completion). Orphaned check IDs cleaned from version transitions."
+
+### Calorie Ceiling → Info Card
+- **`f2` items across all 5 plans** changed from `type:'auto-cal'` to `type:'info'`. No longer a checkbox or auto-status item — now a read-only colored info card.
+- **Rendering** — shows `actual / ceiling cal` with green background (under), orange (1–50% over), or red (50%+ over). No checkbox circle, not clickable (`cursor:default`).
+- **Excluded from completion** — `getValidCheckCompletion()` now skips `type:'info'` items. They don't count toward checklist percentage, calendar day color, or radar CHECKLIST axis.
+- **`saveAllChecks()` skips info items** — `data-type="info"` items are not written to `checks` object.
+- **`toggle()` skips info items** — early return guard added.
+- **`refreshAutoItems()` updated** — calorie section now updates the info card's background color and status text instead of toggling done/fail classes.
+- **Day modal** — past days show the info card with correct color based on food log data for that date.
+
+### Migration Enhancement
+- **`migrateOrphanedChecks()` now removes `f2`** from all historical `checks` objects. Days that were orange because of `f2=false` will recalculate as green.
+- **Whitelists `wex*` IDs** — workout exercise check IDs (`wex0`, `wex1`, etc.) are no longer deleted by the migration.
+- **Info-type items excluded from valid ID set** — items with `type:'info'` are never considered valid check IDs.
+
+---
+
 ## Version 4.4.0 — 2026-03-31
 
 **Scope:** Minor (Per-session workout tracking — morning and evening items tick independently)
