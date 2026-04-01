@@ -4,6 +4,16 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 4.5.2 — 2026-04-01
+
+**Scope:** Patch (Audit warning fixes — loadChecklist guard + backup timestamp migration)
+
+- **loadChecklist() info guard** — Added `item.dataset.type !== 'info'` to the else branch condition. Info items no longer get `.done` class toggled during checklist load, preventing CSS conflict with their dynamic background color.
+- **Backup timestamp migrated to SK** — Added `SK.backupTs = 'ph_bts_v1'` to the storage key registry. All 3 raw `localStorage.getItem/setItem('ph_last_backup_ts')` calls replaced with `gs(SK.backupTs)` / `ss(SK.backupTs)`. Backup timestamp is now included in backup exports, restored from backup files, and mirrored to IndexedDB.
+- **BUG 1 (updateProgress) was already fixed** in v4.5.1 — info items are counted via `data-cal-pass` attribute, not excluded. Severe overshoot (>50% over ceiling) correctly fails the day per user requirement.
+
+---
+
 ## Version 4.5.1 — 2026-04-01
 
 **Scope:** Patch (Calorie card severe overshoot now counts toward day completion)

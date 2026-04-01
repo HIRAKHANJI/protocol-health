@@ -1357,7 +1357,8 @@ const SK = {
   foodLib:   'ph_fb_v1',   // array of { name, lastCalories, useCount } — sorted by useCount desc
   exLevels:  'ph_ex_v1',   // object keyed by dateStr — each value: { groupId: levelIndex, ... }
   lightDays: 'ph_ld_v1',   // object keyed by dateStr — value: true if that day is a light eating day
-  swDismissedVer: 'ph_sw_v1' // string — last SW cache version the user dismissed the reload banner for
+  swDismissedVer: 'ph_sw_v1', // string — last SW cache version the user dismissed the reload banner for
+  backupTs: 'ph_bts_v1' // number — timestamp of last backup (for reminder banner)
 };
 
 // ─── APP VERSION ─────────────────────────────────────────────────────────────
@@ -1366,8 +1367,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '4.5.1';
-const APP_VERSION_MSG = 'Calorie card: no checkbox but severe overshoot (>50% over ceiling) fails the day. Progress bar and calendar now track calorie discipline correctly.';
+const APP_VERSION = '4.5.2';
+const APP_VERSION_MSG = 'Fixed loadChecklist info item processing. Migrated backup timestamp to SK storage system for IndexedDB mirroring.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -2090,7 +2091,7 @@ function checkBackupReminder() {
   const dayLogs = gs(SK.dayLogs) || {};
   if(weights.length < 3 && Object.keys(dayLogs).length < 3) return; // too early to nag
 
-  const lastBackup = localStorage.getItem('ph_last_backup_ts');
+  const lastBackup = gs(SK.backupTs);
   const now = Date.now();
   const sevenDays = 7 * 24 * 60 * 60 * 1000;
 
@@ -4357,7 +4358,7 @@ function loadChecklist() {
         // Update count display
         updateSupCount(item.dataset.id, subDone, subTotal);
       }
-    } else if(!item.dataset.waterTarget && !item.dataset.auto) {
+    } else if(!item.dataset.waterTarget && !item.dataset.auto && item.dataset.type !== 'info') {
       // Regular toggleable items only — skip water and auto-status
       item.classList.toggle('done', !!checks[item.dataset.id]);
     }
@@ -6194,7 +6195,7 @@ function renderStorageHealth() {
     lsBytes += (key.length + (localStorage.getItem(key)||'').length) * 2; // UTF-16
   }
   const lsKB = (lsBytes / 1024).toFixed(1);
-  const lastBackup = localStorage.getItem('ph_last_backup_ts');
+  const lastBackup = gs(SK.backupTs);
   const backupText = lastBackup ? Math.floor((Date.now() - parseInt(lastBackup)) / (24*60*60*1000)) + ' days ago' : 'Never';
   let html = `<div style="margin-bottom:4px;color:var(--text);font-size:0.65rem;letter-spacing:1px">STORAGE HEALTH</div>`;
   html += `localStorage: ${lsKB} KB used<br>`;
@@ -7421,7 +7422,7 @@ function backupData() {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 
-  localStorage.setItem('ph_last_backup_ts', String(Date.now()));
+  ss(SK.backupTs, String(Date.now()));
   showBackupStatus('✓ Backup downloaded. Save it somewhere safe — Google Drive, email to yourself, etc.', 'var(--green)');
 }
 
