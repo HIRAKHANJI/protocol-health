@@ -4,6 +4,24 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 4.6.0 — 2026-04-05
+
+**Scope:** Minor (Calendar update bug fix + export report overhaul)
+**Banner:** "Calendar updates instantly on modal edits. Export report overhauled: date range fixed, compliance labels clarified, non-scheduled section removed, fast day status corrected, pluralization fixed."
+
+- **BUG FIX: Calendar cell color now updates immediately on modal check toggle** — `closeModal()` now calls `renderCalendar()` when the MONTHS tab is active, ensuring calendar cells reflect the latest check state the moment the modal closes. Previously, cell colors could remain stale (e.g. orange instead of green) until a tab switch or app reload.
+- **Export report date range fixed** — Default "From" date now uses schedule start date (or settings start date, or first logged date) instead of hardcoded 30 days ago. Report period accurately reflects the actual data window.
+- **Non-Scheduled Days section removed** — The confusing "Non-Scheduled Days" segment (showing days before the schedule existed) is replaced with a brief footnote if any logged days exist outside the schedule window.
+- **Compliance section overhauled** — Added day-level compliance summary (days at 100%, partial, no data). Category breakdown now uses descriptive labels ("Morning routine items" instead of "MORNING") with an explanatory subtitle. `type:'info'` items (f2 calorie ceiling card) excluded from compliance calculations.
+- **Weak spots exclude info items** — The f2 calorie ceiling info card no longer appears in weak spots. Weak spot labels now include day type context (e.g. "(fast days)") and use proper pluralization.
+- **Fast Days Completed fixed** — Only counts fast days up to today, not future scheduled ones. Displays as "6 / 6 so far (13 total in plan)" instead of the misleading "6 / 13 scheduled".
+- **Broken Fast Days labeled correctly** — "Fast Days (food logged)" renamed to "Broken Fast Days" with explanatory note. Status shows "Fast broken" instead of incorrect "On track" for any food consumed on fast days.
+- **Section descriptions added** — Summary, Compliance, Nutrition (eating days), Weight Trend, Notes, and Daily Log sections now include one-line descriptions explaining what they show.
+- **Daily Log legend added** — Status column now has a legend: Full = 100%, Good = 70–99%, Partial = 50–69%, Low = below 50%. Threshold for "Good" corrected from 75% to 70% to match.
+- **Pluralization fixed** — All day count displays use proper singular/plural ("1 day" not "1 days") throughout the report.
+
+---
+
 ## Version 4.5.3 — 2026-04-01
 
 **Scope:** Patch (Migration corrects stale historical workout/water/calorie checks)
