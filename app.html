@@ -605,7 +605,7 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
   </div>
 </div>
 
-<div class="plan-badge" id="planBadge">DEFAULT PROTOCOL</div>
+<div class="plan-badge" id="planBadge">LITE PROTOCOL</div>
 
 <div class="tabs">
   <button class="tab active" onclick="switchTab('today',this)">TODAY</button>
@@ -653,7 +653,7 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
   <div id="activePlanBanner" style="border-radius:8px;padding:10px 13px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;border:1px solid var(--border);">
     <div>
       <div style="font-family:'DM Mono',monospace;font-size:0.52rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:3px;">ACTIVE PLAN</div>
-      <div id="activePlanName" style="font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;">DEFAULT PROTOCOL</div>
+      <div id="activePlanName" style="font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:2px;">LITE PROTOCOL</div>
     </div>
     <div style="text-align:right">
       <div style="font-family:'DM Mono',monospace;font-size:0.52rem;letter-spacing:1px;color:var(--muted);margin-bottom:3px;">CAL CEILING</div>
@@ -862,16 +862,16 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
       <div class="settings-section">
         <div class="settings-section-title">Training Plan</div>
         <select class="plan-select" id="planSelect" onchange="onPlanSelectChange()">
-          <option value="default">DEFAULT PROTOCOL</option>
+          <option value="default">LITE PROTOCOL</option>
           <option value="cut">DEFAULT CUT</option>
           <option value="bulk">DEFAULT BULK</option>
           <option value="maintenance">DEFAULT MAINTENANCE</option>
           <option value="agro">AGRO CUT CALISTHENICS PLAN</option>
         </select>
         <div class="custom-select" id="planSelectCustom">
-          <div class="custom-select-trigger" id="planSelectTrigger" onclick="toggleCustomSelect('planSelectCustom')">DEFAULT PROTOCOL</div>
+          <div class="custom-select-trigger" id="planSelectTrigger" onclick="toggleCustomSelect('planSelectCustom')">LITE PROTOCOL</div>
           <div class="custom-select-dropdown">
-            <div class="custom-select-option selected" data-value="default" onclick="selectCustomOption('planSelectCustom','planSelect',this)">DEFAULT PROTOCOL</div>
+            <div class="custom-select-option selected" data-value="default" onclick="selectCustomOption('planSelectCustom','planSelect',this)">LITE PROTOCOL</div>
             <div class="custom-select-option" data-value="cut" onclick="selectCustomOption('planSelectCustom','planSelect',this)">DEFAULT CUT</div>
             <div class="custom-select-option" data-value="bulk" onclick="selectCustomOption('planSelectCustom','planSelect',this)">DEFAULT BULK</div>
             <div class="custom-select-option" data-value="maintenance" onclick="selectCustomOption('planSelectCustom','planSelect',this)">DEFAULT MAINTENANCE</div>
@@ -879,7 +879,7 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
           </div>
         </div>
         <div class="plan-description" id="planDescription">
-          General daily checklist with bodyweight workouts, basic nutrition rules, and water fast day support. No fixed duration — runs indefinitely until you switch plans.
+          Gentle protocol for all ages. Chair exercises, tai chi, yoga, Pilates. Sustainable nutrition with optional supplement tracking. Water fast day support.
         </div>
         <button class="confirm-plan-btn" onclick="confirmPlan()">CONFIRM PLAN</button>
       </div>
@@ -1025,6 +1025,16 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
         </div>
         <button class="schedule-btn" id="scheduleBtn" onclick="promptSchedule('exact')">ADD TO SCHEDULE</button>
         <button class="schedule-btn" id="scheduleBtnReal" onclick="promptSchedule('realistic')" style="display:none;background:transparent;border:1px solid var(--accent2);color:var(--accent2)">ADD REALISTIC TO SCHEDULE</button>
+      </div>
+
+      <!-- SUPPLEMENTS -->
+      <div class="settings-section">
+        <div class="settings-section-title">Supplements</div>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" id="settingSupplements" style="width:16px;height:16px;accent-color:var(--accent)">
+          <span style="font-size:0.75rem;color:var(--muted)">Enable supplement tracking in daily checklist</span>
+        </label>
+        <p style="font-size:0.62rem;color:var(--muted);margin:6px 0 0;line-height:1.5">When disabled, supplement items won't appear in your checklist and won't affect day completion scores.</p>
       </div>
 
       <!-- DATA MANAGEMENT -->
@@ -1367,8 +1377,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '4.6.0';
-const APP_VERSION_MSG = 'Calendar updates instantly on modal edits. Export report overhauled: date range fixed, compliance labels clarified, non-scheduled section removed, fast day status corrected, pluralization fixed.';
+const APP_VERSION = '5.0.0';
+const APP_VERSION_MSG = 'Lite Protocol: gentle workouts for all ages. Supplement tracking now optional in Settings.';
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -1405,7 +1415,7 @@ function strToDate(s) { const [y,m,d]=s.split('-').map(Number); return new Date(
 // getSettings: always returns a full settings object with defaults. Never returns null.
 // Add any new settings fields here with a default value.
 function getSettings() {
-  const defaults = { plan:'default', currentKg:null, targetKg:null, calories:null, tdee:2600, risk:'aggressive', startDate:null, age:null, height:null, sex:'male', activityLevel:'1.55', name:'', wakeTime:null, lastMealTime:null, eveningSessionTime:null, eatingWindowStart:null };
+  const defaults = { plan:'default', currentKg:null, targetKg:null, calories:null, tdee:2600, risk:'aggressive', startDate:null, age:null, height:null, sex:'male', activityLevel:'1.55', name:'', wakeTime:null, lastMealTime:null, eveningSessionTime:null, eatingWindowStart:null, supplementsEnabled:true };
   const saved = gs(SK.settings);
   if(!saved) return defaults;
   return Object.assign({}, defaults, saved);
@@ -2225,85 +2235,99 @@ function dispatch(event) {
 const PLANS = {
 
   // ─────────────────────────────────────────────────────────────────────────
-  // DEFAULT PROTOCOL
+  // LITE PROTOCOL (plan key: 'default' — preserved for backward compat with existing localStorage)
   // ─────────────────────────────────────────────────────────────────────────
   default: {
-    name: 'DEFAULT PROTOCOL',
+    name: 'LITE PROTOCOL',
     goalMode: 'cut',
     tdee: 2600,
     fastDaysPerWeek: 3,
-    badge: 'DEFAULT PROTOCOL',
+    badge: 'LITE PROTOCOL',
     badgeClass: '',
     descClass: '',
-    subtitle: 'No gym. No excuses. No loop.',
+    subtitle: 'Gentle. Sustainable. For every body.',
     bannerColor: 'var(--text)',
     bannerBg: 'var(--surface)',
     bannerBorder: 'var(--border)',
     fastDaysDow: [0, 3, 6], // Sun/Wed/Sat
     lightDaysPerWeek: 0,
     lightDaysDow: [],
-    macroSplit: { base:[50,30,20], rest:[58,22,20], preFast:[46,34,20], stall:[56,24,20], satiety:[58,22,20] },
-    proteinFloorMultiplier: 1.3,
+    macroSplit: { base:[30,45,25], rest:[35,40,25], preFast:[30,45,25], stall:[35,40,25], satiety:[35,40,25] },
+    proteinFloorMultiplier: 1.0,
 
     // Default timing values — used when user hasn't set custom times in Settings
     defaultTimes: { wakeTime:'05:30', lastMealTime:'18:00', eveningSessionTime:'17:00', eatingWindowStart:'11:00' },
 
     // Week icons for workout grid
-    weekIcons: {0:'🚶',1:'💪',2:'🦵',3:'💪',4:'🦵',5:'💪',6:'🦵'},
+    weekIcons: {0:'🚶',1:'🚶',2:'🧘',3:'🚶',4:'🧘',5:'🚶',6:'🧘'},
 
     // Day-of-week sub-texts for TODAY checklist items
     morningSub: {
-      0:'SUNDAY — Rest day. Light walk or stretch only.',
-      1:'MONDAY — Morning A: Push + Core · Push-ups · Plank · Mountain climbers · Dead bug',
-      2:'TUESDAY — Morning B: Lower + Mobility · Squat · Reverse lunge · Glute bridge · World\'s greatest stretch',
-      3:'WEDNESDAY — Morning A: Push + Core · Push-ups · Plank · Mountain climbers',
-      4:'THURSDAY — Morning B: Lower + Mobility · Squat · Lunge · Glute bridge',
-      5:'FRIDAY — Morning A: Push + Core · Push-ups · Plank · Mountain climbers',
-      6:'SATURDAY — Morning B: Lower + Mobility · Squat · Lunge · World\'s greatest stretch'
+      0:'SUNDAY — Rest day. Gentle 15-min walk if desired.',
+      1:'MONDAY — Walk 15\u201320 min + Chair Strength A (Upper Body). Seated arm raises, bicep curls, shoulder press, rows.',
+      2:'TUESDAY — Tai Chi Flow (Yang style 8-form). Balance, weight transfer, breathing. 25\u201330 min.',
+      3:'WEDNESDAY — Walk 15\u201320 min + Chair Strength B (Lower Body). Leg extensions, sit-to-stand, heel raises.',
+      4:'THURSDAY — Gentle Yoga (seated + standing). Cat-cow, side stretch, tree pose, breathing. 25\u201330 min.',
+      5:'FRIDAY — Walk 15\u201320 min + Chair Strength C (Full Body + Isometrics). Wall push-up, chest press hold, leg hold.',
+      6:'SATURDAY — Mat Pilates Basics + Balance Practice. Pelvic tilts, bridge, heel-to-toe walk. 25\u201330 min.'
     },
     eveningSub: {
-      0:'SUNDAY — Rest day.',
-      1:'MONDAY — Evening A: Upper Body · Push-up ladder · Pike push-up · Diamond push-up · Tricep dips',
-      2:'TUESDAY — Evening B: Lower + Glutes · Jump squat · Bulgarian split squat · Wall sit · Calf raise',
-      3:'WEDNESDAY — Evening C: Core + Conditioning · Burpees · Hollow body · Bicycle crunch · Sprawl',
-      4:'THURSDAY — Evening A: Upper Body · Same as Monday',
-      5:'FRIDAY — Evening B: Lower + Glutes · Same as Tuesday',
-      6:'SATURDAY — Evening C: Core + Conditioning · Same as Wednesday'
+      0:'SUNDAY — Rest. No structured exercise.',
+      1:'MONDAY — Light stretch 5 min. Neck, shoulders, hips.',
+      2:'TUESDAY — Tai Chi session. See WORKOUTS tab.',
+      3:'WEDNESDAY — Light stretch 5 min. Lower body focus.',
+      4:'THURSDAY — Yoga session. See WORKOUTS tab.',
+      5:'FRIDAY — Light stretch 5 min. Full body.',
+      6:'SATURDAY — Pilates + balance. See WORKOUTS tab.'
     },
     stretchSub: {
-      0:'Light mobility only — cat-cow (arch/round spine on all fours), hip CARs (slow full-circle knee raises, 5 each way per hip).',
-      1:'Chest + shoulder stretch (doorframe). 5 min.',
-      2:'Pigeon + hip flexor. 5 min.',
-      3:'Full body stretch. Spine, hips, shoulders.',
-      4:'Chest + shoulder stretch. 5 min.',
-      5:'Pigeon + hip flexor. 5 min.',
-      6:'Full body stretch. 5 min.'
+      0:'Gentle mobility if desired. Cat-cow, neck rolls.',
+      1:'Neck rolls, shoulder shrugs, wrist circles. 5 min.',
+      2:'Tai Chi cooldown \u2014 standing breathing, gentle sway.',
+      3:'Seated hamstring stretch, ankle circles, calf pumps.',
+      4:'Yoga cooldown \u2014 seated meditation, deep breathing.',
+      5:'Full body seated stretch \u2014 neck, shoulders, hips, ankles.',
+      6:'Pilates cooldown \u2014 lying spinal twist, deep breathing.'
     },
 
     // Checklist items — normal day and fast day
     // These are used by both TODAY tab and day modal
     checklistNormal: [
-      { id:'m1', group:'MORNING', label:'Wake & 500ml water immediately', sub:'Before phone. Non-negotiable.' },
-      { id:'m2', group:'MORNING', label:'10 min daily mobility (CARs + neck)', sub:'CARs = Controlled Articular Rotations (slow full-circle joint movements). Hip CARs × 5 each way per hip · Cat-cow × 10 · Thoracic rotation · Wrist CARs × 10 each way · Neck nods' },
-      { id:'m3', group:'MORNING', label:'Morning workout (20 min)', sub:'Morning A/B — see WORKOUTS tab' },
-      { id:'m4', group:'MORNING', label:'Log morning weight in TRACK tab', sub:'Weigh first thing after waking, before food.' },
-      { id:'f1', group:'EATING', label:'Protein in first meal (60-70g)', sub:'Eggs · chicken · tuna · lentils. Anchor here first.' },
-      { id:'f2', group:'EATING', label:'Stayed under calorie ceiling', sub:'Hard ceiling. Never more.', type:'info' },
-      { id:'f3', group:'EATING', label:'Last meal before 6PM', sub:'12+ hour overnight fast every day.' },
-      { id:'f4', group:'EATING', label:'3L+ water across the day', sub:'500ml wake · 500ml pre-meal · sip continuously', type:'water', waterTarget:3.0 },
-      { id:'f5', group:'EATING', label:'No liquid calories', sub:'Water · black coffee · plain green tea only.' },
-      { id:'e1', group:'EVENING', label:'Change clothes on arriving home', sub:'Trigger signal. Don\'t sit down first.' },
-      { id:'e2', group:'EVENING', label:'Evening session (40–45 min)', sub:'Evening A/B/C — see WORKOUTS tab' },
-      { id:'e3', group:'EVENING', label:'Post-workout stretch protocol', sub:'See WORKOUTS tab → today\'s cooldown' },
-      { id:'n2', group:'NIGHT', label:'Sleep before midnight', sub:'Recovery is training. Don\'t skip it.' }
+      { id:'m1', group:'MORNING', label:'Glass of water on waking', sub:'200\u2013500ml. Hydrate before anything else.' },
+      { id:'m2', group:'MORNING', label:'Morning movement (walk or chair exercises)', sub:'See WORKOUTS tab for today\'s session. Start gentle.' },
+      { id:'m3', group:'MORNING', label:'Eat a protein-rich breakfast', sub:'Eggs, yogurt, or oats with nuts. Protein first.' },
+      { id:'m4', group:'MORNING', label:'Log morning weight (weekly minimum)', sub:'Same conditions: after waking, before food.' },
+      { id:'f1', group:'EATING', label:'Protein in every meal', sub:'Eggs, fish, chicken, lentils, dairy, tofu. Aim for palm-sized portion.' },
+      { id:'f2', group:'EATING', label:'Stayed near calorie target', sub:'Gentle deficit. Don\'t skip meals.', type:'info' },
+      { id:'f3', group:'EATING', label:'Vegetables at lunch and dinner', sub:'Half your plate. Any vegetable counts.' },
+      { id:'f4', group:'EATING', label:'1.5\u20132L water across the day', sub:'Sip regularly. Tea and herbal drinks count.', type:'water', waterTarget:1.5 },
+      { id:'f5', group:'EATING', label:'No sugary drinks', sub:'Water, tea, black coffee. Avoid juice, soda, sweetened drinks.' },
+      { id:'e1', group:'EVENING', label:'Afternoon or evening session (if scheduled)', sub:'Tai chi, yoga, Pilates, or balance work. See WORKOUTS tab.' },
+      { id:'e2', group:'EVENING', label:'Light stretch before bed', sub:'5 min gentle stretching. Neck, shoulders, hips.' },
+      { id:'s1', group:'SUPPLEMENTS', label:'Daily supplements taken', sub:'Tap to expand',
+        subItems: [
+          { id:'s1_a', name:'Vitamin D3', dose:'1,000\u20132,000 IU', when:'With breakfast' },
+          { id:'s1_b', name:'Omega-3', dose:'1,000mg', when:'With largest meal' },
+          { id:'s1_c', name:'Magnesium', dose:'200\u2013300mg', when:'Before bed' }
+        ]
+      },
+      { id:'n1', group:'NIGHT', label:'Wind down by 10PM', sub:'No screens 30 min before bed. Read, stretch, or breathe.' },
+      { id:'n2', group:'NIGHT', label:'Sleep 7\u20138 hours', sub:'Recovery happens during sleep. Prioritize it.' }
     ],
     checklistFast: [
-      { id:'wf1', group:'FAST', label:'500ml water + pinch salt on waking', sub:'Prevents headaches. Do this before anything else.' },
-      { id:'wf2', group:'FAST', label:'Electrolyte tablet mid-morning', sub:'Sodium + potassium. Non-negotiable on a fast.' },
-      { id:'wf3', group:'FAST', label:'Black coffee or green tea only', sub:'Appetite suppression. Zero calories. Allowed.' },
-      { id:'wf4', group:'FAST', label:'3.5L+ water total today', sub:'Sip constantly. Don\'t chug all at once.', type:'water', waterTarget:3.5 },
-      { id:'wf5', group:'FAST', label:'No food consumed today', sub:'Fast is unbroken. If you break it — log it honestly.' },
-      { id:'wf6', group:'FAST', label:'Magnesium 400mg before sleep', sub:'Prevents cramps. Sleep quality tanks on fasts without this.' }
+      { id:'wf1', group:'FAST', label:'500ml water on waking', sub:'Hydrate first.' },
+      { id:'wf2', group:'FAST', label:'Stay hydrated \u2014 2L+ water today', sub:'Sip constantly. Herbal tea allowed.', type:'water', waterTarget:2.0 },
+      { id:'wf3', group:'FAST', label:'No food today', sub:'If you feel unwell, eat something. Health first.' },
+      { id:'wf4', group:'FAST', label:'Light walk only if feeling good', sub:'No structured exercise on fast days. Listen to your body.' },
+      { id:'wf5', group:'FAST', label:'Resume normal eating tomorrow', sub:'Don\'t overeat after a fast. Normal portions.' }
+    ],
+    checklistLight: [
+      { id:'l1', group:'LIGHT', label:'Glass of water on waking', sub:'Start hydrated.' },
+      { id:'l2', group:'LIGHT', label:'Light meals only today', sub:'Soup, salad, yogurt, fruit. Eat 300\u2013500 cal below normal.' },
+      { id:'l3', group:'LIGHT', label:'Protein in every meal', sub:'Keep to 1.0g/kg minimum even on light days.' },
+      { id:'l4', group:'LIGHT', label:'Gentle walk or rest', sub:'15\u201320 min easy walk. Or complete rest. Either is fine.' },
+      { id:'l5', group:'LIGHT', label:'1.5L+ water', sub:'Herbal tea counts. Stay hydrated.', type:'water', waterTarget:1.5 },
+      { id:'l6', group:'NIGHT', label:'Early to bed', sub:'Recovery day. Sleep well.' }
     ],
 
     // Eating group tag styling
@@ -2314,111 +2338,169 @@ const PLANS = {
     // Content renderers — return HTML strings
     workoutContent() {
       return `
-      <div class="section-title">MORNING <span>ACTIVATION</span></div>
-      <p class="section-note">20 min. No equipment. Alternate A/B daily.</p>
+      <div class="section-title">WALKING + <span>CHAIR STRENGTH</span></div>
+      <p class="section-note">15\u201320 min walk + 15\u201320 min seated/standing exercises. Gentle, safe, effective.</p>
 
-      ${workoutCard('MORNING A — PUSH + PULL','20 MIN · MON/WED/FRI',
-        exRow('Jumping Jacks','Warm-up','2 min')+
-        exRow('Push-ups','Full range, chest to floor','3×10–15')+
-        exRow('Superman Hold','Face down, lift arms + chest — back activation','3×20 sec')+
-        exRow('Plank','Elbows, stay tight','3×30 sec')+
-        exRow('Dead Bug','Lower back stays glued to floor','2×8/side'),
-        stretchRow('Hip Flexor Stretch','30 sec each side','Cooldown'),
-        'MON,WED,FRI'
+      ${workoutCard('CHAIR STRENGTH A \u2014 UPPER BODY','MON \u00b7 Walk + 15\u201320 min',
+        exRow('Seated Arm Raises','Sit tall, raise arms overhead slowly','2\u00d710')+
+        exRow('Seated Bicep Curls','Light weight or water bottles','2\u00d710')+
+        exRow('Seated Shoulder Press','Press up from shoulder height','2\u00d78')+
+        exRow('Seated Row (resistance band)','Pull elbows back, squeeze shoulder blades','2\u00d710')+
+        exRow('Wrist Circles','Gentle mobility for hands and forearms','10 each way'),
+        stretchRow('Neck + Shoulder Stretch','Gentle side bends, shoulder rolls','3 min'),
+        'MON'
       )}
 
-      ${workoutCard('MORNING B — LOWER + MOBILITY','20 MIN · TUE/THU/SAT',
-        exRow('High Knees','Warm-up, 60% pace','2 min')+
-        exRow('Bodyweight Squat','Full depth','3×15')+
-        exRow('Reverse Lunge','Step back, knee hovers floor','3×10/leg')+
-        exRow('Glute Bridge','Pause at top, squeeze','3×15')+
-        exRow('World\'s Greatest Stretch','Hip, thoracic, hamstring combo','3/side×30s'),
-        stretchRow('Cat-Cow','Spine mobility cooldown','10 reps'),
-        'TUE,THU,SAT'
+      ${workoutCard('CHAIR STRENGTH B \u2014 LOWER BODY','WED \u00b7 Walk + 15\u201320 min',
+        exRow('Seated Leg Extensions','Straighten one leg at a time, hold 3 sec','2\u00d710/leg')+
+        exRow('Sit-to-Stand','Use chair, stand up fully, sit back controlled','2\u00d78')+
+        exRow('Seated Heel Raises','Both feet, slow up and down','2\u00d712')+
+        exRow('Seated Toe Raises','Lift toes off floor, hold briefly','2\u00d712')+
+        exRow('Seated Marching','Alternate lifting knees gently','2\u00d720'),
+        stretchRow('Ankle Circles + Calf Pumps','Seated, 10 each direction per ankle','3 min'),
+        'WED'
+      )}
+
+      ${workoutCard('CHAIR STRENGTH C \u2014 FULL BODY + ISOMETRICS','FRI \u00b7 Walk + 15\u201320 min',
+        exRow('Wall Push-up','Hands on wall, lean in slowly, push back','2\u00d78')+
+        exRow('Seated Chest Press Hold','Press palms together at chest, hold','3\u00d710 sec')+
+        exRow('Seated Leg Extension Hold','Straighten leg, hold at top','3\u00d710 sec/leg')+
+        exRow('Wall Sit (45\u00b0 angle)','Back against wall, slide down gently','2\u00d710\u201315 sec')+
+        exRow('Seated Arm Circles','Small circles forward then backward','10 each way'),
+        stretchRow('Full Body Seated Stretch','Neck, shoulders, hips, ankles','3 min'),
+        'FRI'
       )}
 
       <div style="height:8px"></div>
-      <div class="section-title">EVENING <span>SESSIONS</span></div>
-      <p class="section-note">40–45 min. Rotate A→B→C. Sunday = rest or walk only.</p>
+      <div class="section-title">TAI CHI \u00b7 YOGA \u00b7 <span>PILATES</span></div>
+      <p class="section-note">25\u201330 min sessions. Balance, flexibility, breathing. No impact.</p>
 
-      ${workoutCard('EVENING A — UPPER PUSH/PULL','40 MIN · MON/THU',
-        exRow('Push-up Ladder','10 down to 1','1 ladder')+
-        exRow('Inverted Row / Superman','Pull chest to table edge, or superman hold on floor','3×8–10')+
-        exRow('Pike Push-up','Shoulders','4×10')+
-        exRow('Prone Y-T-W Raises','Face down, 3 positions — rear delt + mid-trap','3×10 each')+
-        exRow('Diamond Push-up','Triceps','3×8')+
-        exRow('Scapular Push-up','Protract/retract shoulder blades — back health','3×12'),
-        stretchRow('Chest + Shoulder Stretch','Doorframe or behind-back clasp','5 min'),
-        'MON,THU'
+      ${workoutCard('TAI CHI FLOW \u2014 YANG STYLE 8-FORM','TUE \u00b7 25\u201330 min',
+        exRow('Wu Ji Stance','Stand quiet, feet shoulder-width, breathe deeply','2 min')+
+        exRow('Part the Wild Horse\u2019s Mane','Weight shift L/R with arm sweep','4 reps/side')+
+        exRow('White Crane Spreads Wings','Open arms wide, shift to one leg gently','4 reps')+
+        exRow('Brush Knee and Push','Step forward, brush knee, push palm','4 reps/side')+
+        exRow('Playing the Lute','One foot forward, hands as if holding instrument','4 reps/side')+
+        exRow('Reverse Reeling Forearm','Step back, sweep arm across body','4 reps/side')+
+        exRow('Wave Hands Like Clouds','Side step with flowing arm movements','6 reps')+
+        exRow('Closing Form','Return to Wu Ji, hands to sides, breathe','1 min'),
+        stretchRow('Standing Breathing','Deep belly breaths, gentle sway','3 min'),
+        'TUE'
       )}
 
-      ${workoutCard('EVENING B — LOWER + GLUTES','40 MIN · TUE/FRI',
-        exRow('Jump Squat','Land soft, full depth','4×10')+
-        exRow('Bulgarian Split Squat','Rear foot elevated','3×10/leg')+
-        exRow('Single-Leg Glute Bridge','Drive through heel','3×12/leg')+
-        exRow('Wall Sit','90° hold','3×45 sec')+
-        exRow('Calf Raise','Slow up, slow down','3×20'),
-        stretchRow('Pigeon Pose + Hip Flexor','60 sec each side','5 min'),
-        'TUE,FRI'
+      ${workoutCard('GENTLE YOGA \u2014 SEATED + STANDING','THU \u00b7 25\u201330 min',
+        exRow('Seated Cat-Cow','Sit on chair edge, arch and round spine','8 reps')+
+        exRow('Seated Side Stretch','One arm up, lean gently to opposite side','4/side')+
+        exRow('Seated Forward Fold','Hinge at hips, reach toward floor gently','Hold 20 sec')+
+        exRow('Seated Spinal Twist','Turn torso, hand on opposite knee','Hold 20 sec/side')+
+        exRow('Standing Tree Pose (chair)','One hand on chair back, foot on ankle','Hold 15 sec/side')+
+        exRow('Warrior I Modified','Chair for balance, gentle lunge position','Hold 15 sec/side')+
+        exRow('Standing Chest Opener','Clasp hands behind back, lift gently','Hold 15 sec')+
+        exRow('Neck Stretches','Ear to shoulder each side, gentle','Hold 15 sec/side'),
+        stretchRow('Seated Meditation','Eyes closed, deep breathing','3 min'),
+        'THU'
       )}
 
-      ${workoutCard('EVENING C — CORE + CONDITIONING','40 MIN · WED/SAT',
-        exRow('Burpee','Full extension at top','5×8')+
-        exRow('Hollow Body Hold','Arms overhead, back pressed down','4×25 sec')+
-        exRow('Bicycle Crunch','Slow and deliberate','3×20/side')+
-        exRow('V-Sit Hold','Legs up 45°, back straight','3×20 sec')+
-        exRow('Superman Hold','Posterior chain endurance — pairs with burpees','3×30 sec'),
-        stretchRow('Full Body Stretch','Spine, hips, shoulders, hamstrings','5 min'),
-        'WED,SAT'
+      ${workoutCard('MAT PILATES BASICS + BALANCE','SAT \u00b7 25\u201330 min',
+        exRow('Pelvic Tilts','Lie on back, gently tilt pelvis','2\u00d710')+
+        exRow('Bridge','Lie on back, lift hips, hold briefly','2\u00d78')+
+        exRow('Single Leg Stretch (modified)','Lie on back, alternate extending legs gently','2\u00d76/leg')+
+        exRow('Arm Circles (lying)','Arms to sides, small circles','10 each way')+
+        exRow('Spine Twist (lying)','Knees together, drop gently to each side','4/side')+
+        exRow('Hundred (modified)','Arms pump gently, breathe 5 in / 5 out','3\u00d710 breaths')+
+        exRow('Heel-to-Toe Walk','Straight line, slow and steady','2\u00d710 steps')+
+        exRow('Single-Leg Stand','Hold chair if needed, 15 sec each leg','2/side')+
+        exRow('Weight Shifts','Shift weight side to side, controlled','10 reps'),
+        stretchRow('Lying Spinal Twist + Breathing','Deep relaxation cooldown','3 min'),
+        'SAT'
+      )}
+
+      ${workoutCard('REST DAY','SUN \u00b7 Optional gentle walk',
+        exRow('Gentle Walk','15 min at comfortable pace if desired','Optional')+
+        exRow('Seated Stretching','Neck rolls, shoulder shrugs, ankle circles','5 min'),
+        stretchRow('Deep Breathing','Relax, recover, be kind to yourself','5 min'),
+        'SUN'
       )}`;
     },
 
     nutritionContent(s) {
       const cal = s.calories || 1500;
-      const macros = computeMacros(todayStr());
-      const { proteinG, carbsG, fatG, warnings: macroWarnings } = macros;
-
-      const warningHtml = macroWarnings.length ? macroWarnings.map(w =>
-        `<div style="border-left:3px solid var(--accent2);padding:6px 10px;margin-bottom:6px;border-radius:4px;background:var(--surface);font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--accent2);line-height:1.6">${w}</div>`
-      ).join('') : '';
+      const proteinG = Math.round(cal * 0.30 / 4);
+      const carbsG = Math.round(cal * 0.45 / 4);
+      const fatG = Math.round(cal * 0.25 / 9);
+      const _supOn = s.supplementsEnabled !== false;
 
       return `
-      <div class="section-title">DEFAULT <span>NUTRITION</span></div>
-      <p class="section-note">Flexible rules-based approach. Adjust calorie ceiling in Settings.</p>
+      <div class="section-title">LITE <span>NUTRITION</span></div>
+      <p class="section-note">Gentle deficit. 3 meals + snacks. Protein at every meal.</p>
       <div class="macro-grid">
-        <div class="macro-box"><div class="macro-val">${cal}</div><div class="macro-lbl">Cal ceiling</div></div>
-        <div class="macro-box"><div class="macro-val" style="color:#ff9966">${proteinG}g</div><div class="macro-lbl">Protein</div></div>
-        <div class="macro-box"><div class="macro-val" style="color:var(--accent2)">${carbsG}g</div><div class="macro-lbl">Carbs</div></div>
-        <div class="macro-box"><div class="macro-val" style="color:#88ccff">${fatG}g</div><div class="macro-lbl">Fats</div></div>
-      </div>
-      ${warningHtml}
-      <div class="rule-card">
-        <div class="rule-num">EATING WINDOW</div>
-        <div class="rule-text">${getEatingWindow(s) || '11AM–5:30PM'}. Two meals. Protein anchors every meal.</div>
+        <div class="macro-box"><div class="macro-val">${cal}</div><div class="macro-lbl">Cal target</div></div>
+        <div class="macro-box"><div class="macro-val" style="color:#ff9966">${proteinG}g</div><div class="macro-lbl">Protein (30%)</div></div>
+        <div class="macro-box"><div class="macro-val" style="color:var(--accent2)">${carbsG}g</div><div class="macro-lbl">Carbs (45%)</div></div>
+        <div class="macro-box"><div class="macro-val" style="color:#88ccff">${fatG}g</div><div class="macro-lbl">Fats (25%)</div></div>
       </div>
       <div class="rule-card">
-        <div class="rule-num">WATER</div>
-        <div class="rule-text">3L minimum daily. 500ml on waking.</div>
+        <div class="rule-num">GENTLE DEFICIT</div>
+        <div class="rule-text">300\u2013500 cal below TDEE. Aim for 0.25\u20130.5 kg/week. Sustainable, not aggressive.</div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-num">MEAL STRUCTURE</div>
+        <div class="rule-text">3 meals + 1\u20132 small snacks. Protein in every meal. Vegetables at lunch and dinner. Half your plate = veg.</div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-num">HYDRATION</div>
+        <div class="rule-text">1.5\u20132L daily. Sip regularly. Tea, herbal drinks, and water all count.</div>
       </div>
       <div class="rule-card" style="border-left-color:var(--danger)">
         <div class="rule-num">NEVER</div>
-        <div class="rule-text">Liquid calories. Juice, soda, sweetened chai, energy drinks.</div>
-      </div>`;
+        <div class="rule-text">Sugary drinks, deep-fried food, processed snacks. Water, tea, black coffee only.</div>
+      </div>
+      ${_supOn ? `
+      <div class="section-title" style="margin-top:12px">SUPPLEMENTS <span>(OPTIONAL)</span></div>
+      <p class="section-note">Consult your doctor before starting any supplements.</p>
+      <div class="rule-card">
+        <div class="rule-num">VITAMIN D3</div>
+        <div class="rule-text">1,000\u20132,000 IU/day with breakfast. Supports bones and immune function. NIH UL: 4,000 IU/day.</div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-num">OMEGA-3</div>
+        <div class="rule-text">1,000mg/day with largest meal. Supports heart and joint health. EPA + DHA combined.</div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-num">MAGNESIUM</div>
+        <div class="rule-text">200\u2013300mg/day before bed. Supports sleep and muscle recovery. NIH supplemental UL: 350mg.</div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-num">CALCIUM</div>
+        <div class="rule-text">If not getting enough from dairy/leafy greens: 500mg/day. Take separately from other minerals.</div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-num">MULTIVITAMIN</div>
+        <div class="rule-text">Optional daily multi for general coverage. Choose one formulated for your age group.</div>
+      </div>` : `
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;margin-top:12px;font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--muted);line-height:1.6;text-align:center">
+        Enable supplement tracking in Settings to see recommendations here.
+      </div>`}`;
     },
 
     rulesContent(s) {
-      const lmt = formatTime(getPlanTime(s,'lastMealTime')) || '6PM';
       return `
       <div class="section-title">EATING <span>RULES</span></div>
-      ${ruleCard('RULE 01','Protein anchors every meal.','Eggs, chicken, tuna, lentils. Protein first, then fill the rest.')}
-      ${ruleCard('RULE 02','Last meal before ' + lmt + '.','Creates 12+ hour overnight fast automatically.')}
-      ${ruleCard('RULE 03','No liquid calories.','Water, black coffee, plain tea only.')}
-      ${ruleCard('RULE 04','3 litres of water daily.','500ml on wake. 250ml before each meal.')}
-      ${ruleCard('RULE 05','High volume, low calorie.','Vegetables eat freely. Protein always. Carbs around training.')}
+      ${ruleCard('RULE 01','Protein in every meal.','Eggs, fish, chicken, lentils, dairy, tofu. Palm-sized portion minimum.')}
+      ${ruleCard('RULE 02','Vegetables at lunch and dinner.','Half your plate. Any vegetable counts \u2014 fresh, frozen, or cooked.')}
+      ${ruleCard('RULE 03','No sugary drinks.','Water, tea, black coffee only. Avoid juice, soda, and sweetened drinks.')}
+      ${ruleCard('RULE 04','1.5\u20132 litres of water daily.','Sip regularly throughout the day. Herbal tea counts.')}
+      ${ruleCard('RULE 05','Eat 3 meals and 1\u20132 small snacks.','Do not skip meals. Steady energy throughout the day.')}
+      ${ruleCard('RULE 06','Gentle calorie deficit.','300\u2013500 cal below TDEE. No crash dieting. Sustainable loss only.')}
+      <div class="section-title" style="margin-top:8px">TRAINING <span>RULES</span></div>
+      ${ruleCard('RULE 07','Move every day.','Even 15 minutes of walking counts. Something is always better than nothing.','var(--accent2)')}
+      ${ruleCard('RULE 08','Chair exercises are real exercises.','Seated strength work builds muscle and bone density. Do not underestimate it.','var(--accent2)')}
+      ${ruleCard('RULE 09','Listen to your body.','Pain means stop. Discomfort is OK, sharp pain is not. Rest when needed.','var(--accent2)')}
+      ${ruleCard('RULE 10','Balance and flexibility matter.','Tai chi, yoga, and Pilates prevent falls and maintain independence.','var(--accent2)')}
       <div class="section-title" style="margin-top:8px">DISCIPLINE <span>RULES</span></div>
-      ${ruleCard('RULE 06','Change clothes the moment you get home.','Sit down first = workout done.','var(--accent2)')}
-      ${ruleCard('RULE 07','One miss = noise. Two = pattern. Three = decision.','Minimum viable action beats zero.','var(--accent2)')}
-      ${ruleCard('RULE 08','Travel changes nothing.','20 min on a floor. Always.','var(--accent2)')}`;
+      ${ruleCard('RULE 11','One miss is nothing. Two is a pattern. Three is a choice.','Get back on track the next day. Progress, not perfection.','#88ccff')}
+      ${ruleCard('RULE 12','Sleep is non-negotiable.','7\u20138 hours. Recovery happens during sleep. Everything works better when rested.','#88ccff')}
+      ${ruleCard('RULE 13','Consult your doctor before starting.','Especially if you have existing conditions, take medications, or have not exercised recently.','#88ccff')}`;
     }
   },
 
@@ -4059,7 +4141,9 @@ function renderTodayChecklist() {
   const cal = s.calories || 1500;
   const dayType = getDayType(todayStr());
   const day = new Date().getDay();
-  const items = dayType === 'fast' ? plan.checklistFast : (dayType === 'light' && plan.checklistLight ? plan.checklistLight : plan.checklistNormal);
+  const _rawItems = dayType === 'fast' ? plan.checklistFast : (dayType === 'light' && plan.checklistLight ? plan.checklistLight : plan.checklistNormal);
+  const _supEnabled = s.supplementsEnabled !== false;
+  const items = _rawItems.filter(item => !(item.group === 'SUPPLEMENTS' && !_supEnabled));
   const container = document.getElementById('todayChecklistContainer');
   if(!container) return;
 
@@ -4276,7 +4360,9 @@ function getValidCheckCompletion(dateStr) {
 
   const isFast = !!(gs(SK.fastDays)||{})[dateStr];
   const isLight = !!(gs(SK.lightDays)||{})[dateStr];
-  const checklist = isFast ? (plan.checklistFast||[]) : isLight ? (plan.checklistLight||plan.checklistNormal||[]) : (plan.checklistNormal||[]);
+  const _rawChecklist = isFast ? (plan.checklistFast||[]) : isLight ? (plan.checklistLight||plan.checklistNormal||[]) : (plan.checklistNormal||[]);
+  const _supOn = getSettings().supplementsEnabled !== false;
+  const checklist = _rawChecklist.filter(item => !(item.group === 'SUPPLEMENTS' && !_supOn));
 
   // Build valid IDs — info items (f2 calorie card) ARE counted toward completion
   // (severe overshoot >50% over ceiling = fail, otherwise pass)
@@ -5637,17 +5723,18 @@ function openDayModal(dateStr, dt) {
 
     // Unified checklist — full items, same as TODAY tab
     const dayType = getDayType(dateStr);
+    const _modalSupEnabled = getSettings().supplementsEnabled !== false;
     if(isToday) {
       html += `<div class="field-group"><label class="field-label">Today's Checklist — tap items on TODAY tab to check off</label>
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--muted);line-height:1.8">`;
-      const items = dayType === 'fast' ? plan.checklistFast : (dayType === 'light' && plan.checklistLight ? plan.checklistLight : plan.checklistNormal);
+      const items = (dayType === 'fast' ? plan.checklistFast : (dayType === 'light' && plan.checklistLight ? plan.checklistLight : plan.checklistNormal)).filter(it => !(it.group === 'SUPPLEMENTS' && !_modalSupEnabled));
       const checks = log.checks || {};
       let doneCount = 0;
       items.forEach(item => { if(checks[item.id]) doneCount++; });
       html += `${doneCount}/${items.length} complete. Use the TODAY tab to check off items — this syncs automatically.</div></div>`;
     } else {
       // Past day — show full interactive checklist
-      const items = dayType === 'fast' ? plan.checklistFast : (dayType === 'light' && plan.checklistLight ? plan.checklistLight : plan.checklistNormal);
+      const items = (dayType === 'fast' ? plan.checklistFast : (dayType === 'light' && plan.checklistLight ? plan.checklistLight : plan.checklistNormal)).filter(it => !(it.group === 'SUPPLEMENTS' && !_modalSupEnabled));
       const checks = log.checks || {};
       let currentGroup = '';
       html += `<div class="field-group"><label class="field-label">Day Checklist</label>`;
@@ -6217,6 +6304,7 @@ function openSettings() {
   document.getElementById('settingHeight').value = s.height||'';
   document.getElementById('settingSex').value = s.sex||'male';
   document.getElementById('settingActivityLevel').value = s.activityLevel||'1.55';
+  document.getElementById('settingSupplements').checked = s.supplementsEnabled !== false;
   onPlanSelectChange();
   syncCustomSelect('planSelectCustom', 'planSelect');
   syncCustomSelect('riskSelectCustom', 'settingRisk');
@@ -6333,6 +6421,7 @@ function confirmPlan() {
   s.lastMealTime = document.getElementById('settingLastMealTime').value || null;
   s.eveningSessionTime = document.getElementById('settingEveningSessionTime').value || null;
   s.eatingWindowStart = document.getElementById('settingEatingWindowStart').value || null;
+  s.supplementsEnabled = document.getElementById('settingSupplements').checked;
   saveSettings(s);
   applyPlanUI(val);
   dispatch('PLAN_CHANGED');
@@ -8287,7 +8376,7 @@ function runInit() {
   const splashPlan = document.getElementById('splashPlan');
   if(splash) {
     const plan = PLANS[s.plan||'default'] || PLANS.default;
-    splashPlan.textContent = plan.name || 'DEFAULT PROTOCOL';
+    splashPlan.textContent = plan.name || 'LITE PROTOCOL';
     setTimeout(() => { splash.classList.add('fade-out'); }, 1750);
     setTimeout(() => { splash.remove(); }, 2250);
   }
