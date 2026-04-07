@@ -4,6 +4,23 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 5.0.0 — 2026-04-07
+
+**Scope:** Major (Lite Protocol + Supplement Toggle)
+**Banner:** "Lite Protocol: gentle workouts for all ages. Supplement tracking now optional in Settings."
+
+- **Default Protocol renamed to Lite Protocol** — Complete rewrite of the default plan. New identity: "Gentle. Sustainable. For every body." Plan key (`'default'`) unchanged for backward compatibility with existing localStorage data.
+- **New workout content** — Chair Strength A/B/C (Mon/Wed/Fri) with seated exercises, wall push-ups, and isometric holds. Tai Chi Flow (Tue), Gentle Yoga (Thu), Mat Pilates + Balance (Sat). All exercises safe for elderly and limited mobility — no push-ups, burpees, or high-impact movements.
+- **New nutrition content** — 30/45/25 macro split (protein/carbs/fat). Gentle deficit guidance (300–500 cal below TDEE, 0.25–0.5 kg/week). Supplement section (D3, Omega-3, Magnesium, Calcium, Multivitamin) with NIH safety notes, conditional on supplement toggle.
+- **New rules content** — 13 rules covering eating (6), training (4), discipline (3). Gentle and encouraging language. Includes "Consult your doctor before starting" as Rule 13.
+- **New checklists** — Normal day (15 items), fast day (5 items), light day (6 items). Supplement sub-items (D3, Omega-3, Magnesium) as expandable panel.
+- **Global supplement toggle** — New `supplementsEnabled` setting (defaults to `true`). Toggle in Settings panel controls whether SUPPLEMENTS group items render in TODAY checklist, day modal, and completion scoring. All plans affected. AGRO users unaffected — `undefined` in saved settings evaluates as `true`.
+- **Supplement filtering in completion** — `getValidCheckCompletion()`, `renderTodayChecklist()`, and `openDayModal()` all filter out SUPPLEMENTS items when disabled. Calendar cell colors, progress bars, and radar chart reflect the filtered set.
+- **Updated labels** — "LITE PROTOCOL" in header badge, settings dropdown, active plan banner, splash screen, index.html plan switcher. No visible references to "DEFAULT PROTOCOL" remain.
+- **PLANS.agro unchanged** — Not one line modified. All AGRO-specific code (resolveSupplementSub, zinc schedule, workout/nutrition/rules content) preserved byte-for-byte.
+
+---
+
 ## Version 4.6.0 — 2026-04-05
 
 **Scope:** Minor (Calendar update bug fix + export report overhaul)
