@@ -18,6 +18,12 @@ All version history for the app. Each entry records version number, date, scope,
 - **Supplement filtering in completion** — `getValidCheckCompletion()`, `renderTodayChecklist()`, and `openDayModal()` all filter out SUPPLEMENTS items when disabled. Calendar cell colors, progress bars, and radar chart reflect the filtered set.
 - **Updated labels** — "LITE PROTOCOL" in header badge, settings dropdown, active plan banner, splash screen, index.html plan switcher. No visible references to "DEFAULT PROTOCOL" remain.
 - **PLANS.agro unchanged** — Not one line modified. All AGRO-specific code (resolveSupplementSub, zinc schedule, workout/nutrition/rules content) preserved byte-for-byte.
+- **DEFAULT CUT overhauled** — New multi-modal training: Resistance 3x/week (upper/lower/full body) + HIIT 2x/week (circuits + shadowboxing + jump rope) + active recovery yoga + daily walking. 40/35/25 macro split. Supplement sub-items (creatine, D3, omega-3, magnesium). 12 rules (6 eating, 4 training, 2 discipline).
+- **DEFAULT BULK overhauled** — Tempo 3-1-2-0 on all primary compounds. Animal Flow mobility sessions. Pilates core work. Isometric finishers (push-up bottom hold, deep squat hold). 30/50/20 macro split. Per-meal protein dosing (0.40–0.55g/kg). Calorie cycling. 14 rules with science citations.
+- **DEFAULT MAINTENANCE overhauled** — Multi-modal variety: Bodyweight Resistance A/B + Cardio Rotation (4 options) + Yoga/Pilates (alternate weeks) + Animal Flow + Saturday recreation. 30/45/25 macro split. Monthly weight drift check. Skill-based progression goals. 12 rules.
+- **All plans get supplement sub-items** — Cut, Bulk, Maintenance checklists now include SUPPLEMENTS group with expandable sub-items (creatine, D3, omega-3, magnesium), controlled by the global supplement toggle.
+- **Nutrition conditional on supplement toggle** — All plans show supplement cards in NUTRITION tab only when supplementsEnabled is true. Otherwise show "Enable in Settings" message.
+- **index.html plan descriptions updated** — Cut, Bulk, Maintenance plan switcher descriptions reflect new multi-modal training content.
 
 ---
 
