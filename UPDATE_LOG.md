@@ -4,6 +4,14 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 5.0.1 — 2026-04-08
+
+**Scope:** Patch (Day modal food log macro inputs)
+
+- **Macro inputs added to MONTHS day modal food logger** — The food log input in the day modal (opened by tapping any past day on MONTHS tab) now includes Protein, Carbs, and Fat fields matching the TODAY tab's food logger. Previously only Name and Calories were available, so past-day food entries couldn't include macros.
+
+---
+
 ## Version 5.0.0 — 2026-04-07
 
 **Scope:** Major (Lite Protocol + Supplement Toggle)

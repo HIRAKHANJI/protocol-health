@@ -1377,7 +1377,7 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '5.0.0';
+const APP_VERSION = '5.0.1';
 const APP_VERSION_MSG = 'Lite Protocol: gentle workouts for all ages. Supplement tracking now optional in Settings. Cut/Bulk/Maintenance plans overhauled with science-backed multi-modal training.';
 
 // Static lookup arrays used throughout rendering
@@ -1913,7 +1913,10 @@ function addFoodFromModal(dateStr) {
   const name = document.getElementById('mFoodName')?.value;
   const cal = document.getElementById('mFoodCal')?.value;
   if(!name || !name.trim()) return;
-  addFoodEntry(dateStr, name, cal, null, null, null, '');
+  const protein = parseFloat(document.getElementById('mFoodProtein')?.value) || null;
+  const carbs = parseFloat(document.getElementById('mFoodCarbs')?.value) || null;
+  const fat = parseFloat(document.getElementById('mFoodFat')?.value) || null;
+  addFoodEntry(dateStr, name, cal, protein, carbs, fat, '');
   // Re-open the modal to refresh
   openDayModal(dateStr, strToDate(dateStr));
 }
@@ -5814,6 +5817,14 @@ function openDayModal(dateStr, dt) {
       <input class="field-input" type="text" id="mFoodName" placeholder="Food name" style="flex:2">
       <input class="field-input" type="number" id="mFoodCal" placeholder="Cal" style="max-width:70px" min="0">
       <button class="food-add-btn" onclick="addFoodFromModal('${dateStr}')">ADD</button>
+    </div>
+    <div style="margin-top:4px;padding:0 2px">
+      <div style="font-family:'DM Mono',monospace;font-size:0.5rem;letter-spacing:2px;color:var(--muted);margin-bottom:4px">MACROS \u2014 OPTIONAL</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+        <input type="number" id="mFoodProtein" placeholder="Protein g" min="0" step="1" style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:6px 8px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.72rem;outline:none;width:100%">
+        <input type="number" id="mFoodCarbs" placeholder="Carbs g" min="0" step="1" style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:6px 8px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.72rem;outline:none;width:100%">
+        <input type="number" id="mFoodFat" placeholder="Fat g" min="0" step="1" style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:6px 8px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.72rem;outline:none;width:100%">
+      </div>
     </div></div>`;
 
     // Exercise levels for this day (AGRO only)
