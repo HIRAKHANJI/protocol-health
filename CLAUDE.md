@@ -574,6 +574,7 @@ Update log:   UPDATE_LOG.md — every version bump must be documented here
 | `UPDATE_LOG.md` | Version history. Every version from 1.0.0 onward with dates, scope, and change descriptions. Must be updated on every version bump. |
 | `ARCHITECTURE.md` | Full system architecture with Mermaid diagrams. Covers dispatcher, plan system, tabs, weight tracking, projection algorithm, goal calculator, schedule, macros, food logging, radar chart, calendar, backup/restore, service worker, and data flow. |
 | `PLAN.md` | Implementation plan for the cut/bulk/maintenance plan addition (v1.9.0). Historical reference — the work is complete. |
+| `WORKOUTS_LIBRARY.md` | Exercise encyclopedia. Every workout with per-plan prescriptions, evidence, progression paths, and auto-prescription data model. Must be consulted before modifying any plan's workout content. |
 
 ---
 
@@ -609,6 +610,54 @@ The following URLs and rules must be consulted before modifying supplement doses
 - Scapular stabilizers (Cools 2016): https://pmc.ncbi.nlm.nih.gov/articles/PMC4886800/
 - Pull-up kinematics (Prinold 2016): https://pmc.ncbi.nlm.nih.gov/articles/PMC4916995/
 
+**HIIT & Cardio science:**
+- HIIT vs MICT fat loss meta-analysis (Schoenfeld 2021 — 54 studies): equivalent fat loss outcomes. https://pmc.ncbi.nlm.nih.gov/articles/PMC7927075/
+- HIIT calorie burn (ACE 2024): up to 30% more cal/min than steady-state. https://www.acefitness.org/resources/everyone/blog/5073/7-things-to-know-about-excess-post-exercise-oxygen-consumption-epoc/
+- HIIT body composition (Boutcher 2011, J Obesity): improved body composition vs MICT. https://pmc.ncbi.nlm.nih.gov/articles/PMC2991639/
+- HIIT vs MICT systematic review (MDPI JCM 2025): age-moderated, both valid. https://doi.org/10.3390/jcm14020520
+- WHO 2020 Physical Activity Guidelines: 150 min moderate + 2 days strength + balance. https://www.who.int/publications/i/item/9789240015128
+
+**Shadowboxing:**
+- Croom 2023 (Int J Phys Educ Fit Sports 12(2), 8-29): 3-week program — increased aerobic capacity, muscle mass, bone mass, BMR; decreased resting HR, fat mass, body fat %, visceral fat. Burns 300-400 cal/30 min. https://doi.org/10.34256/ijpefs2322
+
+**Animal Flow / Quadrupedal Movement Training (QMT):**
+- Buxton et al. 2022 (J Strength Cond Res): 8-week QMT RCT (42 subjects) — improved FMS scores, active joint ROM, balance, upper body endurance. https://pubmed.ncbi.nlm.nih.gov/33136774/
+- Matthews et al. 2016: 4-week QMT — improved cognitive flexibility (Wisconsin Card Sorting Task) and joint repositioning sense. https://doi.org/10.1080/21520704.2016.1227414
+- Buxton et al. 2022 (Front Sports Act Living): energy demands of QMT comparable to moderate-intensity walking. https://doi.org/10.3389/fspor.2022.888190
+
+**Isometric training:**
+- Oranchuk et al. 2019 (PubMed 30580468): systematic review — 5-23% muscle CSA increase. Long muscle length > short for hypertrophy. https://pubmed.ncbi.nlm.nih.gov/30580468/
+- Lum & Barbosa 2019: ~5% strength gain/week from single 6-sec daily isometric effort. https://doi.org/10.1519/JSC.0000000000002564
+- Sato et al. 2022: similar hypertrophy between concentric, eccentric, and isometric when effort matched. https://pubmed.ncbi.nlm.nih.gov/35311855/
+
+**Tempo training:**
+- Schoenfeld et al. 2015 — tempo training review: increased TUT via slow eccentrics enhances hypertrophy. https://pubmed.ncbi.nlm.nih.gov/25601394/
+
+**Jump rope:**
+- 8-week RCT: rope-skipping improved body composition, inflammation, blood pressure. https://pmc.ncbi.nlm.nih.gov/articles/PMC8467906/
+- 2025 controlled trial: 10 min/week improved cardiovascular capacity and lower limb strength. https://pmc.ncbi.nlm.nih.gov/articles/PMC12473967/
+
+**Yoga & Pilates:**
+- Pilates and Yoga health impacts: functional autonomy, balance, flexibility, muscle strength. https://pmc.ncbi.nlm.nih.gov/articles/PMC8038747/
+- Pilates and posture (2024 review): core strength, posture correction, spinal health. https://pmc.ncbi.nlm.nih.gov/articles/PMC11447755/
+- Pilates vs Yoga comparison (2024): both improve functional movement and balance. https://pmc.ncbi.nlm.nih.gov/articles/PMC11123216/
+- Physiology & Behavior 2016: once-weekly Pilates — detectable benefits in muscle mass, flexibility, balance. https://doi.org/10.1016/j.physbeh.2016.05.004
+
+**Tai Chi (Lite Protocol):**
+- Chen et al. 2023 (Front Public Health): meta-analysis (24 RCTs) — fall risk reduced 24% (RR: 0.76). Yang style most effective. Improved TUG, FRT, BBS scores. https://doi.org/10.3389/fpubh.2023.1112250
+
+**Elderly / Limited Mobility guidelines (Lite Protocol):**
+- ICFSR 2021 Expert Consensus (Springer): multicomponent exercise for elderly, resistance training 2+ days/week. https://doi.org/10.14283/jfa.2021.2
+- ICFSR 2025 Global Consensus: aerobic + resistance + balance + flexibility prescription. https://pubmed.ncbi.nlm.nih.gov/39743381/
+- Scoping Review of Elderly PA Guidelines (PMC 8886780): 150 min core, 3x/week optimal frequency. https://pmc.ncbi.nlm.nih.gov/articles/PMC8886780/
+- Deutz et al. 2014: protein needs in elderly — 1.0-1.2g/kg minimum. https://doi.org/10.1016/j.clnu.2013.11.020
+
+**Bulk-specific nutrition:**
+- Iraki et al. 2019 (PMC 6680710): bulk protein 1.6-2.2g/kg, per-meal dosing 0.40-0.55g/kg. https://pmc.ncbi.nlm.nih.gov/articles/PMC6680710/
+
+**Walking & general activity:**
+- JAMA Network Open 2021: walking 7,000-10,000 steps/day associated with reduced all-cause mortality. https://doi.org/10.1001/jamanetworkopen.2021.24516
+
 ### Safety Rules
 
 Before writing ANY supplement dose into app content:
@@ -626,12 +675,50 @@ Before writing ANY supplement dose into app content:
 | Magnesium (supplemental) | 350mg/day | Osmotic diarrhea |
 | Potassium (OTC) | 99mg per serving | Hyperkalemia |
 | MCT Oil | 30g max acute | GI distress |
+| Creatine monohydrate | 5g/day (no loading) | GI distress at higher doses, no safety risk at 3-5g — ISSN 2018 |
+| Calcium (supplemental) | 600mg/day (total food + supplement ≤ 1200mg) | Kidney stones, cardiovascular risk at chronic high doses |
+| Caffeine | 400mg/day (NIH) | Anxiety, insomnia, tachycardia |
 
 ### ZINC COPPER INTERACTION (CRITICAL)
 Chronic zinc >40mg/day blocks copper absorption → copper deficiency. Current protocol: 50mg × 3 days/week (Mon/Wed/Fri) = 21.4mg/day average. True alternate-day spacing, no consecutive dosing, no coverage gaps. DO NOT change zinc to daily dosing without flagging this risk.
+
+### CREATINE PROTOCOL (ALL PLANS)
+Any plan that includes creatine supplementation must specify: 3-5g/day, no loading phase, timing irrelevant (consistency matters). Source: ISSN 2018 Master Review (PMC 6090881). Never recommend loading protocols or doses >5g/day.
 
 ### Push:Pull Ratio (HARD RULE)
 Protocol Health must NEVER generate a training plan with push:pull ratio > 1:1. Default for AGRO CUT: pull-dominant (5:7). Source: Cools 2016 + Prinold 2016
 
 ### Prohibited Sources
 Never cite: supplement brand websites, influencer stacks, sites requiring purchase, single case reports, commercial programs, news articles about research (use original DOI).
+
+---
+
+## 16. Workouts Library
+
+The file `WORKOUTS_LIBRARY.md` in the repo root is the canonical reference for all exercises and training modalities used across Protocol Health's plans.
+
+### When to consult WORKOUTS_LIBRARY.md
+
+- Before generating or modifying any plan's `workoutContent()` function
+- Before adding new exercises to any plan
+- Before changing sets, reps, tempo, or rest periods in any workout card
+- Before building any future auto-prescription or workout generation feature
+- When answering questions about exercise selection, progression, or plan-specific training
+
+### What it contains
+
+- Every exercise from `EXERCISE_PROGRESSIONS` in `app.html` with full biomechanical detail
+- Every non-progression exercise used across all 5 plans
+- All training modalities (HIIT, shadowboxing, Animal Flow, yoga, Pilates, etc.) with evidence
+- Per-plan prescription tables (sets/reps/tempo/rest/frequency) for every exercise
+- Progression prerequisites and paths for every exercise
+- Auto-prescription data model for future workout generation features
+- Safety rules and contraindications per exercise
+
+### Rules
+
+1. Never prescribe an exercise that is not in WORKOUTS_LIBRARY.md without adding it first
+2. Always match the per-plan prescription when generating workout content
+3. The library's evidence citations must reference entries in CLAUDE.md Section 15
+4. Push:pull ratio must remain ≤ 1:1 across any plan's weekly schedule
+5. Exercise progressions in the library must match `EXERCISE_PROGRESSIONS` in `app.html` exactly
