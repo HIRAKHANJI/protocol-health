@@ -305,3 +305,420 @@ the progression ladder approach used in other plans. Never used in Cut/Bulk/Main
 AGRO because those plans assume full mobility and bodyweight load tolerance.
 
 ---
+
+## PROGRESSION EXERCISES
+
+Protocol Health uses group-based progression ladders stored in `EXERCISE_PROGRESSIONS` in
+`app.html`. Each group (push, pull, shoulder, squat, hinge, core, skill tracks) contains a
+sequence of levelled exercises. Users pick a level per group and advance when the top of
+the rep range feels easy. The entries below must match `EXERCISE_PROGRESSIONS` in
+`app.html` exactly — any change to the code must be reflected here in the same commit.
+
+The per-plan prescription tables follow this convention:
+
+- **Lite** — Never uses these progressions. Uses chair/seated resistance instead. Always N/A.
+- **Cut** — Moderate volume, standard tempo. 2× per week on Mon upper + Sat full body.
+- **Bulk** — Tempo-driven hypertrophy (3-1-2-0). 3× per week on Mon + Fri + Sat.
+- **Maintenance** — Moderate volume, standard tempo. 2× per week on Mon + Thu.
+- **AGRO** — Sets and reps match `EXERCISE_PROGRESSIONS` exactly. 3× per week on
+  Mon/Wed/Fri morning sessions (excluded on fast days).
+
+---
+
+### PUSH PROGRESSION (10 Levels)
+
+The push ladder is the primary horizontal and vertical pressing track. It builds chest,
+triceps, and anterior deltoid capacity through 10 sequential exercises ranging from a
+standing wall push-up (L0) to an assisted one-arm push-up (L9). Progression follows the
+principle: own the top of the rep range with clean form before advancing a level. Source
+of truth: `EXERCISE_PROGRESSIONS.push` in `app.html`.
+
+---
+
+#### Wall push-up
+
+**Category:** Push
+**Progression group:** push | **Level:** 0
+**Equipment:** None | Optional: wall
+**Target muscles (primary):** Anterior deltoid, triceps
+**Target muscles (secondary):** Pectoralis major (minimal), serratus anterior
+**Movement type:** Compound
+
+**Description:** Standing push variation with hands placed on a wall at shoulder height
+and feet planted on the floor. Lower the chest toward the wall by bending the elbows, then
+press back to a locked-out arm position. The steepness of the body angle governs the load
+— closer feet = easier, further feet = harder. The safest entry point in the push ladder,
+usable in any age or rehab context.
+
+**Common mistakes:**
+- Hands placed too high or too low, shifting load away from the chest and shoulders
+- Elbows flaring wide past 90°, stressing the anterior shoulder capsule
+
+**Safety notes:** Zero floor contact and very low injury risk. No prerequisites. Suitable
+for users returning from injury, deconditioned users, or anyone unable to perform a knee
+push-up yet.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Uses chair exercises instead |
+| Cut | 3×15 | Normal | 60-90s | 2× | Mon upper + Sat full body (regression / warmup) |
+| Bulk | 4×15 | 3-1-2-0 | 90-120s | 3× | Mon + Fri + Sat (typically too easy — used as warmup) |
+| Maintenance | 3×15 | Normal | 60-90s | 2× | Mon + Thu (entry level / deload) |
+| AGRO | 3×15 | Normal | 60-90s | 3× | Mon/Wed/Fri mornings |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022
+**Progression prerequisites:** None — this is the ladder's entry point.
+**Progression path:** → Knee push-up (L1) once 3×15 feels easy with clean tempo.
+
+---
+
+#### Knee push-up
+
+**Category:** Push
+**Progression group:** push | **Level:** 1
+**Equipment:** None | Optional: knee pad
+**Target muscles (primary):** Pectoralis major, triceps
+**Target muscles (secondary):** Anterior deltoid, core
+**Movement type:** Compound
+
+**Description:** A plank-on-knees position with hands under the shoulders and knees as the
+body's pivot point. The chest lowers to the floor while maintaining a straight line from
+the knees through the head, then presses back up to a locked-out plank. Delivers
+approximately 50-60% of bodyweight load compared to a standard push-up, making it the
+bridge between a wall push and a full push-up.
+
+**Common mistakes:**
+- Hips sagging toward the floor, breaking the straight knee-to-head line and losing core tension
+- Leading the descent with the chin instead of the chest, reducing chest activation and shortening ROM
+
+**Safety notes:** Pad the knees if training on a hard surface. Requires enough wrist
+flexibility to hold neutral under load — use fists or parallettes if wrists are sensitive.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Uses chair exercises instead |
+| Cut | 3×12 | Normal | 60-90s | 2× | Mon upper + Sat full body |
+| Bulk | 4×12 | 3-1-2-0 | 90-120s | 3× | Mon + Fri + Sat |
+| Maintenance | 3×12 | Normal | 60-90s | 2× | Mon + Thu |
+| AGRO | 3×12 | Normal | 60-90s | 3× | Mon/Wed/Fri mornings |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022
+**Progression prerequisites:** Wall push-up 3×15 clean.
+**Progression path:** → Standard push-up (L2) once 3×12 feels easy with full ROM.
+
+---
+
+#### Standard push-up
+
+**Category:** Push
+**Progression group:** push | **Level:** 2
+**Equipment:** None | Optional: parallettes (wrist relief)
+**Target muscles (primary):** Pectoralis major, triceps, anterior deltoid
+**Target muscles (secondary):** Core, serratus anterior
+**Movement type:** Compound
+
+**Description:** Full plank position with hands shoulder-width apart and the body rigid
+from heels through head. Lower the chest until it lightly touches the floor, then press
+back to a full lockout. This is the benchmark for upper-body bodyweight strength and the
+baseline from which all harder push progressions are built. Matches bench press strength
+development when intensity and volume are equated (Kotarsky 2018).
+
+**Common mistakes:**
+- Hips sagging or piking upward, breaking the rigid plank and offloading the chest
+- Stopping short of the floor, reducing ROM and undercutting hypertrophy stimulus
+
+**Safety notes:** Requires healthy wrists and shoulders. Use parallettes if wrist
+extension is painful. Do not lock elbows with violent snap at the top — maintain control.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Uses chair exercises instead |
+| Cut | 3×12-15 | Normal | 60-90s | 2× | Mon upper + Sat full body |
+| Bulk | 4×12-15 | 3-1-2-0 | 90-120s | 3× | Mon + Fri + Sat |
+| Maintenance | 3×12-15 | Normal | 60-90s | 2× | Mon + Thu |
+| AGRO | 3×12-15 | Normal | 60-90s | 3× | Mon/Wed/Fri mornings |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022
+**Progression prerequisites:** Knee push-up 3×12 clean.
+**Progression path:** → Wide push-up (L3) once 3×15 feels easy with chest touching floor.
+
+---
+
+#### Wide push-up
+
+**Category:** Push
+**Progression group:** push | **Level:** 3
+**Equipment:** None
+**Target muscles (primary):** Pectoralis major (emphasised)
+**Target muscles (secondary):** Triceps, anterior deltoid
+**Movement type:** Compound
+
+**Description:** A push-up variant with hands placed approximately 1.5-2× shoulder width.
+Lower the chest to the floor with elbows tracking at roughly 75° from the torso. The
+wider hand position biases pectoral recruitment — especially the sternal fibers — while
+reducing the relative contribution from the triceps. A natural next step once the
+standard push-up is mastered.
+
+**Common mistakes:**
+- Letting elbows flare past 90°, creating shear stress at the anterior shoulder
+- Hands placed excessively wide, reducing motor control and wasting ROM
+
+**Safety notes:** Avoid if you have a history of shoulder impingement. Do not exceed 2×
+shoulder width — beyond that, the joint capsule takes load the musculature should own.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Uses chair exercises instead |
+| Cut | 3×12 | Normal | 60-90s | 2× | Mon upper + Sat full body |
+| Bulk | 4×12 | 3-1-2-0 | 90-120s | 3× | Mon + Fri + Sat |
+| Maintenance | 3×12 | Normal | 60-90s | 2× | Mon + Thu |
+| AGRO | 3×12 | Normal | 60-90s | 3× | Mon/Wed/Fri mornings |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022
+**Progression prerequisites:** Standard push-up 3×15 clean.
+**Progression path:** → Decline push-up (L4) once 3×12 feels easy.
+
+---
+
+#### Decline push-up
+
+**Category:** Push
+**Progression group:** push | **Level:** 4
+**Equipment:** None | Optional: chair, bed, or low bench
+**Target muscles (primary):** Upper (clavicular) pectoralis, anterior deltoid
+**Target muscles (secondary):** Triceps, core
+**Movement type:** Compound
+
+**Description:** A push-up with the feet elevated on a chair, bed, or low bench while
+the hands remain on the floor. The inclined trunk angle shifts the relative load toward
+the upper chest fibers and anterior deltoid, emulating the upper-chest bias of an incline
+press in a traditional strength program. The higher the feet, the more the exercise
+drifts toward a pike push-up.
+
+**Common mistakes:**
+- Elevating the feet too high, unintentionally converting the exercise into a near-pike push-up
+- Letting hips sag mid-rep, losing midline tension and the clean horizontal line
+
+**Safety notes:** Use a stable, non-slip elevation surface. Avoid soft couches or wheeled
+furniture. Ensure the shoulder can tolerate overhead-biased pressing before increasing
+elevation height.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Uses chair exercises instead |
+| Cut | 3×10-12 | Normal | 60-90s | 2× | Mon upper + Sat full body |
+| Bulk | 4×10-12 | 3-1-2-0 | 90-120s | 3× | Mon + Fri + Sat |
+| Maintenance | 3×10-12 | Normal | 60-90s | 2× | Mon + Thu |
+| AGRO | 3×10-12 | Normal | 60-90s | 3× | Mon/Wed/Fri mornings |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022
+**Progression prerequisites:** Wide push-up 3×12 clean.
+**Progression path:** → Diamond push-up (L5) once 3×12 feels easy.
+
+---
+
+#### Diamond push-up
+
+**Category:** Push
+**Progression group:** push | **Level:** 5
+**Equipment:** None
+**Target muscles (primary):** Triceps
+**Target muscles (secondary):** Pectoralis major (inner), anterior deltoid
+**Movement type:** Compound
+
+**Description:** The hands form a triangle beneath the chest, with the thumbs and index
+fingers touching to create the "diamond" shape. Lower the chest toward the diamond while
+keeping the elbows tight against the ribs. The narrow grip maximises triceps recruitment
+while still loading the chest, serving as the first true tricep-dominant step in the push
+ladder.
+
+**Common mistakes:**
+- Elbows flaring outward, which negates the tricep bias and transfers load to the shoulders
+- Stopping at partial depth, robbing the triceps of the stimulus the hand position provides
+
+**Safety notes:** Requires healthy wrists — the narrow hand base increases wrist extension
+demand significantly compared to shoulder-width variants. Prerequisite wrist conditioning.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Uses chair exercises instead |
+| Cut | 3×8-10 | Normal | 60-90s | 2× | Mon upper + Sat full body |
+| Bulk | 4×8-10 | 3-1-2-0 | 90-120s | 3× | Mon + Fri + Sat |
+| Maintenance | 3×8-10 | Normal | 60-90s | 2× | Mon + Thu |
+| AGRO | 3×8-10 | Normal | 60-90s | 3× | Mon/Wed/Fri mornings |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022
+**Progression prerequisites:** Decline push-up 3×12 clean.
+**Progression path:** → Archer push-up (L6) once 3×10 feels easy with elbows pinned.
+
+---
+
+#### Archer push-up
+
+**Category:** Push
+**Progression group:** push | **Level:** 6
+**Equipment:** None
+**Target muscles (primary):** Pectoralis major (unilateral)
+**Target muscles (secondary):** Triceps, core (anti-rotation), obliques
+**Movement type:** Compound
+
+**Description:** Begin in a wide push-up stance. Lower the body toward one arm while the
+opposite arm extends straight out laterally along the floor. The working arm performs
+nearly the entire rep; the extended arm offers only minimal assist. The archer is the
+primary stepping stone on the path to a full one-arm push-up, training the nervous system
+to handle asymmetric load.
+
+**Common mistakes:**
+- The extended arm cheating by pressing through the palm, reducing true unilateral load
+- The trunk twisting toward the working arm, shortening the lever and defeating the purpose
+
+**Safety notes:** Maintain strong anti-rotation through the core and glutes. Do not force
+strength parity between sides — instead, address imbalances gradually via rep matching.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Uses chair exercises instead |
+| Cut | 3×6-8/side | Normal | 60-90s | 2× | Mon upper + Sat full body |
+| Bulk | 4×6-8/side | 3-1-2-0 | 90-120s | 3× | Mon + Fri + Sat |
+| Maintenance | 3×6-8/side | Normal | 60-90s | 2× | Mon + Thu |
+| AGRO | 3×6-8/side | Normal | 60-90s | 3× | Mon/Wed/Fri mornings |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022
+**Progression prerequisites:** Diamond push-up 3×10 clean.
+**Progression path:** → Pike push-up (L7) once 3×8/side feels clean with no cheating.
+
+---
+
+#### Pike push-up
+
+**Category:** Push
+**Progression group:** push | **Level:** 7
+**Equipment:** None
+**Target muscles (primary):** Anterior deltoid, medial deltoid
+**Target muscles (secondary):** Triceps, upper pectoralis
+**Movement type:** Compound
+
+**Description:** Begin in a downward-dog position with hips high and head pointing
+toward the floor. Bend the elbows to lower the crown of the head toward the hands, then
+press back up. The inverted trunk angle shifts the dominant load onto the shoulders,
+effectively turning the exercise into a bodyweight overhead press and preparing the
+shoulder girdle for vertical pressing progressions.
+
+**Common mistakes:**
+- Hips dropping during the rep, reverting the movement back toward a standard push-up
+- The head "crashing" down from weak shoulders — indicates insufficient strength for the level
+
+**Safety notes:** Requires adequate hamstring flexibility to achieve and hold the hip
+position. Discontinue if any shoulder impingement symptoms arise — the overhead position
+is unforgiving to a compromised shoulder.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Uses chair exercises instead |
+| Cut | 3×8-10 | Normal | 60-90s | 2× | Mon upper + Sat full body |
+| Bulk | 4×8-10 | 3-1-2-0 | 90-120s | 3× | Mon + Fri + Sat |
+| Maintenance | 3×8-10 | Normal | 60-90s | 2× | Mon + Thu |
+| AGRO | 3×8-10 | Normal | 60-90s | 3× | Mon/Wed/Fri mornings |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022
+**Progression prerequisites:** Archer push-up 3×8/side clean.
+**Progression path:** → Pseudo-planche lean (L8) once 3×10 feels easy.
+
+---
+
+#### Pseudo-planche lean
+
+**Category:** Push
+**Progression group:** push | **Level:** 8
+**Equipment:** None
+**Target muscles (primary):** Anterior deltoid, pectoralis major, biceps tendon
+**Target muscles (secondary):** Core, wrist flexors, serratus anterior
+**Movement type:** Compound (isometric)
+
+**Description:** Support the body on straight arms with the fingers pointed back toward
+the feet. Lean the shoulders forward past the hand position while keeping the elbows
+fully locked. An isometric hold rather than a dynamic rep — it trains the anterior
+deltoid, biceps tendon, and wrist capacity required for any future planche progression.
+Time under tension is the progression driver.
+
+**Common mistakes:**
+- Bending the elbows under load, which defeats the straight-arm isometric purpose entirely
+- Fingers pointed forward instead of backward, skipping the wrist-conditioning stimulus
+
+**Safety notes:** Start with a shallow lean and progress the lean angle over weeks, not
+days. The wrists must be thoroughly warmed up before loading. Stop immediately on any
+sharp wrist pain — this is a common injury site for this exercise.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Uses chair exercises instead |
+| Cut | 3×15-20 sec | Hold | 60-90s | 2× | Mon upper + Sat full body |
+| Bulk | 4×20 sec | Hold | 90-120s | 3× | Mon + Fri + Sat |
+| Maintenance | 3×15-20 sec | Hold | 60-90s | 2× | Mon + Thu |
+| AGRO | 4×20 sec | Hold | 60-90s | 3× | Mon/Wed/Fri mornings |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022, Oranchuk 2019 (isometric)
+**Progression prerequisites:** Pike push-up 3×10 clean; thoroughly conditioned wrists.
+**Progression path:** → One-arm push-up assisted (L9) once 4×20 sec feels stable with a
+deep forward lean.
+
+---
+
+#### One-arm push-up (assisted)
+
+**Category:** Push
+**Progression group:** push | **Level:** 9
+**Equipment:** None | Optional: bench or low step for assist variation
+**Target muscles (primary):** Pectoralis major (unilateral), triceps
+**Target muscles (secondary):** Core (anti-rotation), obliques, anterior deltoid
+**Movement type:** Compound
+
+**Description:** Begin in a wide stance with one hand on the floor in push-up position
+and the other hand resting on the same-side knee (or on a low bench for a lighter
+assist). Perform a push-up with the overwhelming majority of the load on the working
+arm; the assisting hand provides only what's needed to complete clean reps. The final
+rung of the push ladder before the full free-standing one-arm push-up.
+
+**Common mistakes:**
+- The trunk rotating toward the working arm, shortening the lever and reducing unilateral demand
+- The assisting hand bearing too much load — converting the exercise back into a two-arm push-up
+
+**Safety notes:** Extremely asymmetric load — both the elbow and shoulder of the working
+arm must be fully healthy. Alternate sides strictly on every set to prevent the kind of
+left/right imbalance that this exercise can otherwise entrench.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Uses chair exercises instead |
+| Cut | 3×3-5/side | Normal | 60-90s | 2× | Mon upper + Sat full body |
+| Bulk | 4×3-5/side | 3-1-2-0 | 90-120s | 3× | Mon + Fri + Sat |
+| Maintenance | 3×3-5/side | Normal | 60-90s | 2× | Mon + Thu |
+| AGRO | 3×3-5/side | Normal | 60-90s | 3× | Mon/Wed/Fri mornings |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022
+**Progression prerequisites:** Pseudo-planche lean 4×20 sec clean.
+**Progression path:** → End of push progression. Advance into the dedicated planche
+track (`EXERCISE_PROGRESSIONS.skill_planche`) to continue developing straight-arm
+pressing strength.
+
+---
