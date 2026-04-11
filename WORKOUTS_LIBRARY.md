@@ -1354,3 +1354,371 @@ handstand skill track (`EXERCISE_PROGRESSIONS.skill_handstand`) to develop frees
 HSPU and away-from-wall handstand work.
 
 ---
+
+### SQUAT PROGRESSION (9 Levels)
+
+The squat ladder is the primary lower-body knee-dominant track. It builds quad, glute,
+and adductor capacity through 9 sequential exercises ranging from a static wall squat
+hold (L1) for users with no leg-strength base, all the way to a full unassisted pistol
+squat (L9). Source of truth: `EXERCISE_PROGRESSIONS.squat` in `app.html`.
+
+The squat ladder is the only lower-body track in Lite — Lite users perform the L1 wall
+squat hold exclusively (2×30 sec) on Friday full body day and never advance to L2+. All
+other plans run the full ladder according to the per-plan prescription tables below.
+
+---
+
+#### Wall squat (hold)
+
+**Category:** Squat
+**Progression group:** squat | **Level:** 1
+**Equipment:** None | Required: clear wall space
+**Target muscles (primary):** Quadriceps
+**Target muscles (secondary):** Glutes, hamstrings (isometric)
+**Movement type:** Compound (isometric)
+
+**Description:** Stand with the back flat against a wall and walk the feet out until
+the thighs are parallel to the floor (or as close as the user can hold cleanly). Knees
+track over the toes, feet flat, lower back pressed gently into the wall. Hold the
+position with the quadriceps under continuous tension. The entry point for users with
+no functional leg strength and the only squat exercise prescribed in the Lite plan.
+
+**Common mistakes:**
+- Knees caving inward as fatigue accumulates, breaking knee tracking
+- Letting the hips drift higher than parallel to cheat the time
+
+**Safety notes:** Stop immediately on any sharp knee pain. Mild quad burn is correct
+and expected. The wall must be clear of obstacles and the floor non-slip.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 2×30 sec | Hold | As needed | 1× | Fri full body — Lite uses ONLY this level |
+| Cut | 3×30-45 sec | Hold | 60-90s | 2× | Thu lower + Sat full body (warmup / regression) |
+| Bulk | 4×45 sec | Hold | 90-120s | 2× | Thu lower + Sat full body (warmup) |
+| Maintenance | 3×30-45 sec | Hold | 60-90s | 2× | Mon + Thu (entry level / deload) |
+| AGRO | 3×30-45 sec | Hold | 60-90s | 3× | Tue/Thu/Sat mornings |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022, Oranchuk 2019 (isometric)
+**Progression prerequisites:** None — this is the ladder's entry point.
+**Progression path:** → Box squat (L2) once 3×45 sec is held cleanly with thighs at
+parallel. **Lite users do not progress past this level.**
+
+---
+
+#### Box squat
+
+**Category:** Squat
+**Progression group:** squat | **Level:** 2
+**Equipment:** None | Required: chair, bench, or low surface
+**Target muscles (primary):** Quadriceps, glutes
+**Target muscles (secondary):** Hamstrings, core
+**Movement type:** Compound
+
+**Description:** Stand in front of a chair or low bench with feet shoulder-width apart.
+Squat down until the glutes lightly touch the chair, then stand back up. The chair acts
+as a depth regulator and a confidence cue — the user knows exactly where the bottom of
+the squat is. Used to teach the squat pattern under load without requiring full
+ankle/hip mobility.
+
+**Common mistakes:**
+- Slamming down onto the chair, losing eccentric control and shock-loading the spine
+- Using the hands or arms to push off the chair, removing the leg drive
+
+**Safety notes:** The chair must be sturdy and braced against a wall to prevent
+slipping. Touch the chair lightly — do not sit and rest between reps unless explicitly
+prescribed.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Lite uses Wall squat (L1) only |
+| Cut | 3×10-12 | Normal | 60-90s | 2× | Thu lower + Sat full body |
+| Bulk | 4×10-12 | 3-1-2-0 | 90-120s | 2× | Thu lower + Sat full body |
+| Maintenance | 3×10-12 | Normal | 60-90s | 2× | Mon + Thu |
+| AGRO | 3×10-12 | Normal | 60-90s | 3× | Tue/Thu/Sat mornings |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022
+**Progression prerequisites:** Wall squat hold 3×45 sec clean.
+**Progression path:** → Bodyweight squat (partial) (L3) once 3×12 is clean with controlled
+descent.
+
+---
+
+#### Bodyweight squat (partial)
+
+**Category:** Squat
+**Progression group:** squat | **Level:** 3
+**Equipment:** None
+**Target muscles (primary):** Quadriceps, glutes
+**Target muscles (secondary):** Hamstrings, core
+**Movement type:** Compound
+
+**Description:** A free-standing squat performed to roughly half depth — the thighs
+parallel to the floor or slightly above. Removes the chair as a depth cue and teaches
+the user to find depth proprioceptively. The bridge between the box squat's external
+depth regulator and the full-depth squat's full ROM demand.
+
+**Common mistakes:**
+- Knees caving inward at the bottom of the rep, breaking knee tracking
+- Heels lifting off the floor, indicating insufficient ankle dorsiflexion
+
+**Safety notes:** Maintain heels-down throughout. If heels lift, regress back to box
+squat or address ankle mobility. Stop on any sharp knee pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Lite uses Wall squat (L1) only |
+| Cut | 3×12-15 | Normal | 60-90s | 2× | Thu lower + Sat full body |
+| Bulk | 4×12-15 | 3-1-2-0 | 90-120s | 2× | Thu lower + Sat full body |
+| Maintenance | 3×12-15 | Normal | 60-90s | 2× | Mon + Thu |
+| AGRO | 3×12-15 | Normal | 60-90s | 3× | Tue/Thu/Sat mornings |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022
+**Progression prerequisites:** Box squat 3×12 clean.
+**Progression path:** → Bodyweight squat (full) (L4) once 3×15 is clean with stable knee
+tracking and heels down.
+
+---
+
+#### Bodyweight squat (full)
+
+**Category:** Squat
+**Progression group:** squat | **Level:** 4
+**Equipment:** None
+**Target muscles (primary):** Quadriceps, glutes, adductors
+**Target muscles (secondary):** Core, erector spinae, hamstrings
+**Movement type:** Compound
+
+**Description:** A full-depth bodyweight squat — "ass to grass" — with the hip crease
+dropping below the knee crease at the bottom of the rep. The benchmark for lower body
+bodyweight strength and the foundation for every harder squat variation that follows.
+Trains the full hip and knee range of motion required for athletic and combat
+movements.
+
+**Common mistakes:**
+- Stopping at parallel and counting it as a full rep, robbing the bottom-end ROM
+- Letting the lower back round at the bottom (butt wink), placing shear on the lumbar spine
+
+**Safety notes:** Healthy ankles, knees, hips, and lumbar spine required. Address any
+mobility limitations rather than forcing depth. Stop on any sharp knee or back pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Lite uses Wall squat (L1) only |
+| Cut | 3×15-20 | Normal | 60-90s | 2× | Thu lower + Sat full body |
+| Bulk | 4×15-20 | 3-1-2-0 | 90-120s | 2× | Thu lower + Sat full body |
+| Maintenance | 3×15-20 | Normal | 60-90s | 2× | Mon + Thu |
+| AGRO | 3×15-20 | Normal | 60-90s | 3× | Tue/Thu/Sat mornings |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022
+**Progression prerequisites:** Bodyweight squat partial 3×15 clean.
+**Progression path:** → Jump squat (L5) once 3×20 is clean with full ROM. **Users >100kg
+should skip L5 entirely and progress directly to Bulgarian split squat (L6).**
+
+---
+
+#### Jump squat
+
+**Category:** Squat
+**Progression group:** squat | **Level:** 5
+**Equipment:** None
+**Target muscles (primary):** Quadriceps, glutes
+**Target muscles (secondary):** Calves, core, hip flexors
+**Movement type:** Compound (plyometric)
+
+**Description:** A bodyweight squat performed with maximal explosive intent — at the
+bottom of the rep, drive aggressively upward, leaving the floor entirely, then absorb
+the landing softly back into the next rep. Adds a power and rate-of-force-development
+component to the squat ladder that pure strength reps cannot deliver.
+
+**Common mistakes:**
+- Landing stiff-legged, sending impact straight into the knees and lower back
+- Cutting the depth to maximise jump height, sacrificing the squat pattern's load
+
+**Safety notes:** **N/A for users >100kg — substitute fast bodyweight squats. The joint
+impact load at heavy bodyweight is too high for routine plyometric training.** All users
+must land soft, with knees tracking over toes and hips absorbing the descent. Stop on any
+knee, ankle, or lower back pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Lite uses Wall squat (L1) only |
+| Cut | 3×10 | Explosive | 60-90s | 2× | Thu lower + Sat full body. N/A >100kg — sub fast BW squats |
+| Bulk | 4×10 | Explosive | 90-120s | 2× | Thu lower + Sat full body. N/A >100kg — sub fast BW squats |
+| Maintenance | 3×10 | Explosive | 60-90s | 2× | Mon + Thu. N/A >100kg — sub fast BW squats |
+| AGRO | 3×10 | Explosive | 60-90s | 3× | Tue/Thu/Sat mornings. N/A >100kg — sub fast BW squats |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022
+**Progression prerequisites:** Bodyweight squat full 3×20 clean.
+**Progression path:** → Bulgarian split squat (L6) once 3×10 is clean with soft landings.
+Heavy users (>100kg) skip directly from L4 to L6.
+
+---
+
+#### Bulgarian split squat
+
+**Category:** Squat
+**Progression group:** squat | **Level:** 6
+**Equipment:** None | Optional: chair or low bench for rear foot
+**Target muscles (primary):** Quadriceps, glutes (unilateral)
+**Target muscles (secondary):** Core (balance), hip flexors, adductors
+**Movement type:** Compound
+
+**Description:** Stand a stride length in front of a chair, place the top of the rear
+foot on the chair, and lower the rear knee toward the floor while bending the front
+knee deeply. Drive back up through the front foot. The first true unilateral lower
+body movement in the ladder, exposing strength and balance asymmetries between sides.
+
+**Common mistakes:**
+- The front knee tracking inward at the bottom of the rep
+- The torso pitching too far forward, converting the exercise into a hip-dominant lunge instead of a quad-dominant split squat
+
+**Safety notes:** **Cross-level dependency: requires hinge level ≥ 2 (single-leg
+glute bridge) for sufficient unilateral hip stability before attempting.** The rear
+foot surface must be stable. Bail forward by stepping the rear foot off the chair if
+balance fails.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Lite uses Wall squat (L1) only |
+| Cut | 3×8-10/leg | Normal | 60-90s | 2× | Thu lower + Sat full body |
+| Bulk | 4×8-10/leg | 3-1-2-0 | 90-120s | 2× | Thu lower + Sat full body |
+| Maintenance | 3×8-10/leg | Normal | 60-90s | 2× | Mon + Thu |
+| AGRO | 3×8-10/leg | Normal | 60-90s | 3× | Tue/Thu/Sat mornings |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022
+**Progression prerequisites:** Jump squat 3×10 clean (or Bodyweight squat full 3×20 if
+>100kg). **Plus** hinge level ≥ 2 (single-leg glute bridge 3×12/leg).
+**Progression path:** → Cossack squat (L7) once 3×10/leg is clean with even side balance.
+
+---
+
+#### Cossack squat
+
+**Category:** Squat
+**Progression group:** squat | **Level:** 7
+**Equipment:** None
+**Target muscles (primary):** Quadriceps, adductors, glutes
+**Target muscles (secondary):** Ankle dorsiflexors, hip flexors, hamstrings
+**Movement type:** Compound
+
+**Description:** Stand with feet wider than shoulder width and toes pointed slightly
+out. Shift the weight onto one leg and bend the knee deeply, descending into a full
+squat on that side while the opposite leg remains straight with the heel down or toes
+up. Stand back up and shift to the other side. A lateral squat pattern that builds
+adductor strength and hip + ankle mobility simultaneously.
+
+**Common mistakes:**
+- The straight-leg side coming off the floor or losing the heel contact, breaking the lateral squat shape
+- Rounding the lower back at the bottom of the rep instead of staying tall through the chest
+
+**Safety notes:** Requires healthy hip and ankle mobility. Approach the depth gradually
+over weeks — do not force a deep position. Stop on any sharp groin or knee pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Lite uses Wall squat (L1) only |
+| Cut | 3×6-8/side | Normal | 60-90s | 2× | Thu lower + Sat full body |
+| Bulk | 4×6-8/side | 3-1-2-0 | 90-120s | 2× | Thu lower + Sat full body |
+| Maintenance | 3×6-8/side | Normal | 60-90s | 2× | Mon + Thu |
+| AGRO | 3×6-8/side | Normal | 60-90s | 3× | Tue/Thu/Sat mornings |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022
+**Progression prerequisites:** Bulgarian split squat 3×10/leg clean.
+**Progression path:** → Pistol squat (assisted) (L8) once 3×8/side is clean with full
+depth and heel-down on the straight side.
+
+---
+
+#### Pistol squat (assisted)
+
+**Category:** Squat
+**Progression group:** squat | **Level:** 8
+**Equipment:** None | Required: wall, doorframe, or sturdy upright
+**Target muscles (primary):** Quadriceps (unilateral), glutes
+**Target muscles (secondary):** Core, ankle dorsiflexors, hip flexors (non-working leg)
+**Movement type:** Compound
+
+**Description:** A single-leg squat with one hand holding a wall, doorframe, or sturdy
+upright for assistance and balance. The non-working leg extends straight forward. Lower
+into a full pistol position on the working leg, then drive back up. The assist provides
+just enough support to make full-depth single-leg squats possible while the legs and
+core build the strength to perform them unassisted.
+
+**Common mistakes:**
+- The assisting hand pulling the body up, removing the unilateral leg load
+- The non-working leg drifting toward the floor, losing the pistol shape
+
+**Safety notes:** The doorframe or upright must be sturdy enough to take significant
+load. Bail by sitting back onto the working heel if the rep fails. Healthy ankles and
+knees required.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Lite uses Wall squat (L1) only |
+| Cut | 3×3-5/leg | Normal | 60-90s | 2× | Thu lower + Sat full body |
+| Bulk | 4×3-5/leg | 3-1-2-0 | 90-120s | 2× | Thu lower + Sat full body |
+| Maintenance | 3×3-5/leg | Normal | 60-90s | 2× | Mon + Thu |
+| AGRO | 3×3-5/leg | Normal | 60-90s | 3× | Tue/Thu/Sat mornings |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022
+**Progression prerequisites:** Cossack squat 3×8/side clean.
+**Progression path:** → Pistol squat (full) (L9) once 3×5/leg is clean with the assisting
+hand barely loaded.
+
+---
+
+#### Pistol squat (full)
+
+**Category:** Squat
+**Progression group:** squat | **Level:** 9
+**Equipment:** None
+**Target muscles (primary):** Quadriceps, glutes
+**Target muscles (secondary):** Core, ankle dorsiflexors, hip flexors (non-working leg)
+**Movement type:** Compound
+
+**Description:** An unassisted full-depth single-leg squat. Stand on one leg with the
+other leg extended straight forward and arms outstretched in front for counterbalance.
+Lower the working leg into a deep squat with the non-working leg held off the floor
+throughout the entire rep, then drive back up. The terminal exercise of the squat
+ladder and a recognised elite-level bodyweight strength milestone.
+
+**Common mistakes:**
+- The non-working heel touching the floor at the bottom of the rep, converting the exercise into an assisted variant
+- Cutting the depth, robbing the rep of the full pistol-squat ROM
+
+**Safety notes:** Requires excellent ankle dorsiflexion, hip flexor strength on the
+non-working leg, and full single-leg strength on the working leg. Bail by stepping out
+of the rep with the front leg if the descent fails. Stop on any sharp knee or ankle pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Lite uses Wall squat (L1) only |
+| Cut | 3×3-5/leg | Normal | 60-90s | 2× | Thu lower + Sat full body |
+| Bulk | 4×3-5/leg | 3-1-2-0 | 90-120s | 2× | Thu lower + Sat full body |
+| Maintenance | 3×3-5/leg | Normal | 60-90s | 2× | Mon + Thu |
+| AGRO | 3×3-5/leg | Normal | 60-90s | 3× | Tue/Thu/Sat mornings |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022
+**Progression prerequisites:** Pistol squat assisted 3×5/leg clean.
+**Progression path:** → End of squat progression. Continue accumulating volume and bias
+toward weighted unilateral variants if external load becomes available.
+
+---
