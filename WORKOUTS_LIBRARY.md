@@ -2451,3 +2451,648 @@ track (`EXERCISE_PROGRESSIONS.skill_lsit`) and ultimately toward V-sit and manna
 continued progression in the support-hold family.
 
 ---
+
+### SKILL PROGRESSIONS
+
+**Skill unlock rule:** Skill tracks are only available when core level ≥ 4 (hollow body
+hold) AND push level ≥ 5 (diamond push-up). Per-plan: AGRO only (Thursday evening skill
+work). All other plans = N/A.
+
+Skill tracks are isometric balance and support-hold practices rather than rep-based
+strength work. Their purpose is motor learning, proprioception, and positional strength
+in the straight-arm and inverted postures that traditional bodyweight strength work
+does not reach. Entries below are intentionally concise — each exercise is a hold
+position with a practice dose. Source of truth: `EXERCISE_PROGRESSIONS.skill_crow`,
+`skill_handstand`, `skill_lsit`, and `skill_planche` in `app.html`.
+
+---
+
+#### CROW STAND (4 Levels)
+
+The crow stand ladder is the balance-arm-support track. It trains the wrist, anterior
+deltoid, and core to hold the body on the hands with the knees resting on the upper
+arms. Built into AGRO's Thursday evening skill + core session as the entry skill
+because it has the lowest joint-load demand of the four skill tracks.
+
+---
+
+#### Tuck hold (feet on floor)
+
+**Category:** Skill — Crow Stand
+**Progression group:** skill_crow | **Level:** 1
+**Equipment:** None
+**Target muscles (primary):** Wrist flexors, anterior deltoid, core
+**Target muscles (secondary):** Triceps, finger flexors
+**Movement type:** Isometric (balance)
+
+**Description:** Squat down, place both hands flat on the floor shoulder-width apart,
+and rest the knees high on the backs of the upper arms. Shift the body weight forward
+onto the hands while keeping the feet lightly in contact with the floor — finding and
+holding the forward-balance point without yet committing to a full lift.
+
+**Common mistakes:**
+- Placing the knees too low on the elbows or forearms, losing the knee-to-arm shelf
+- Keeping the weight back over the feet instead of actively leaning forward onto the hands
+
+**Safety notes:** Warm up wrists thoroughly before any crow work. Pad the floor in front
+of the hands — tip-overs fall forward onto the forehead, not backward. Stop on any
+sharp wrist pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not available |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | 3×15 sec | Hold | 60-90s | 1× | Thursday evening skill + core session |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022, Oranchuk 2019 (isometric)
+**Progression prerequisites:** Core ≥ 4 (hollow body hold 3×30 sec), push ≥ 5 (diamond
+push-up 3×10).
+**Progression path:** → Tuck hold (feet lifted) (L2) once 3×15 sec is stable with
+consistent forward balance.
+
+---
+
+#### Tuck hold (feet lifted)
+
+**Category:** Skill — Crow Stand
+**Progression group:** skill_crow | **Level:** 2
+**Equipment:** None
+**Target muscles (primary):** Wrist flexors, anterior deltoid, core
+**Target muscles (secondary):** Triceps, finger flexors
+**Movement type:** Isometric (balance)
+
+**Description:** From the L1 position, commit to the balance point by lifting both
+feet off the floor so the entire body is supported on the hands with the knees resting
+on the upper arms. The first true balance-on-hands skill in the ladder.
+
+**Common mistakes:**
+- Flinching the hips up when the feet leave the floor, toppling backward
+- Failing to grip the floor with the fingers to make micro-balance corrections
+
+**Safety notes:** Pad the floor in front of the hands. Bail forward by rolling the
+head under — never try to catch a tip-over with the face. Stop on any sharp wrist
+pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not available |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | 4×15-20 sec | Hold | 60-90s | 1× | Thursday evening skill + core session |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022, Oranchuk 2019 (isometric)
+**Progression prerequisites:** Tuck hold (feet on floor) 3×15 sec stable.
+**Progression path:** → Crow (one leg extended) (L3) once 4×20 sec is held stable with
+no taps down.
+
+---
+
+#### Crow (one leg extended)
+
+**Category:** Skill — Crow Stand
+**Progression group:** skill_crow | **Level:** 3
+**Equipment:** None
+**Target muscles (primary):** Anterior deltoid, core (anti-rotation)
+**Target muscles (secondary):** Wrist flexors, hip flexors, triceps
+**Movement type:** Isometric (balance)
+
+**Description:** From a stable tuck crow, extend one leg straight back behind the body
+while the other knee remains on the upper arm. The asymmetric lever shifts the centre
+of mass and demands stronger core anti-rotation plus shoulder control to hold the
+balance.
+
+**Common mistakes:**
+- Letting the extended leg drift down toward the floor, breaking the horizontal line
+- Rotating the hips open to compensate for extension, leaking the core's anti-rotation stimulus
+
+**Safety notes:** Forward bail only. Stop on any sharp wrist, shoulder, or elbow pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not available |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | 3×10 sec/side | Hold | 60-90s | 1× | Thursday evening skill + core session |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022, Oranchuk 2019 (isometric)
+**Progression prerequisites:** Tuck hold (feet lifted) 4×20 sec stable.
+**Progression path:** → Full crow stand (L4) once 3×10 sec/side is held cleanly on both
+sides.
+
+---
+
+#### Full crow stand
+
+**Category:** Skill — Crow Stand
+**Progression group:** skill_crow | **Level:** 4
+**Equipment:** None
+**Target muscles (primary):** Anterior deltoid, wrist flexors, core
+**Target muscles (secondary):** Triceps, finger flexors
+**Movement type:** Isometric (balance)
+
+**Description:** A fully stable tuck crow held for extended duration with both knees
+on the upper arms and feet tucked tight to the glutes. The terminal exercise of the
+crow stand ladder — demonstrates ownership of the fundamental arm-balance position
+before progressing into straight-arm balance variants.
+
+**Common mistakes:**
+- Rocking fore/aft to hold balance instead of using finger-grip micro-corrections
+- Letting fatigue collapse the position rather than bailing cleanly when the hold fails
+
+**Safety notes:** Forward bail only. Stop on any sharp wrist, shoulder, or elbow pain.
+Accumulate hold time gradually.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not available |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | 3×20 sec | Hold | 60-90s | 1× | Thursday evening skill + core session |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022, Oranchuk 2019 (isometric)
+**Progression prerequisites:** Crow (one leg extended) 3×10 sec/side stable on both sides.
+**Progression path:** → End of crow stand progression. Advance into crane pose (straight-
+arm crow with knees still resting on arms) and ultimately toward a free straight-arm
+crow as the next arm-balance milestones.
+
+---
+
+#### HANDSTAND (4 Levels)
+
+The handstand skill ladder is the inverted-support track — distinct from the shoulder
+progression's wall handstand work in that its purpose is balance and free-standing
+proficiency rather than pressing strength. Where the shoulder ladder uses the wall
+handstand hold as a strength exercise, the handstand skill ladder uses it as the entry
+step toward kicking up to and holding a free handstand.
+
+---
+
+#### Wall handstand hold (skill)
+
+**Category:** Skill — Handstand
+**Progression group:** skill_handstand | **Level:** 1
+**Equipment:** None | Required: clear wall space
+**Target muscles (primary):** Anterior deltoid, medial deltoid, triceps
+**Target muscles (secondary):** Core, trapezius, forearms, wrist flexors
+**Movement type:** Isometric (balance)
+
+**Description:** Kick up to a handstand with the back of the body against the wall and
+the heels resting on the wall, body stacked vertically with elbows fully locked. The
+entry point for the handstand skill ladder — builds the wrist, shoulder, and inverted
+core capacity required for all further handstand work.
+
+**Common mistakes:**
+- Banana-back arch, with the lower spine compensating for tight shoulders or weak core
+- Walking the hands too far from the wall, creating a planche-like lean instead of a vertical stack
+
+**Safety notes:** Wrist warmup is essential before any handstand work. **Bail laterally,
+not backward** — if the hold fails, step one foot down to the side and rotate out of
+the position. Never collapse straight backward onto the spine. Ensure the wall and
+floor are clear.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not available |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | 3×20-30 sec | Hold | 60-90s | 1× | Thursday evening skill + core session |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022, Oranchuk 2019 (isometric)
+**Progression prerequisites:** Core ≥ 4 (hollow body hold 3×30 sec), push ≥ 5 (diamond
+push-up 3×10), shoulder ≥ 3 (decline pike push-up 3×8).
+**Progression path:** → Wall handstand (belly to wall) (L2) once 3×30 sec is held stable
+with a stacked vertical line.
+
+---
+
+#### Wall handstand (belly to wall)
+
+**Category:** Skill — Handstand
+**Progression group:** skill_handstand | **Level:** 2
+**Equipment:** None | Required: clear wall space
+**Target muscles (primary):** Anterior deltoid, triceps, core
+**Target muscles (secondary):** Trapezius, wrist flexors, serratus anterior
+**Movement type:** Isometric (balance)
+
+**Description:** Start in a plank position with feet against the wall. Walk the hands
+toward the wall as the feet walk up the wall, until the chest is nearly touching the
+wall and the body is close to fully vertical with the belly side facing the wall. A
+more challenging balance position than back-to-wall because the visual cue of the
+wall is removed from view.
+
+**Common mistakes:**
+- Stopping the walk-up before reaching a near-vertical stack, short-changing the work
+- Losing the stacked line by letting the hips sag away from the wall
+
+**Safety notes:** **Bail laterally** — turn out to one side when the hold fails rather
+than dropping back. Warm up wrists thoroughly. Clear wall space required.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not available |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | 3×20 sec | Hold | 60-90s | 1× | Thursday evening skill + core session |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022, Oranchuk 2019 (isometric)
+**Progression prerequisites:** Wall handstand hold (skill L1) 3×30 sec stable.
+**Progression path:** → Kick-up practice (L3) once 3×20 sec belly-to-wall is stable.
+
+---
+
+#### Kick-up practice
+
+**Category:** Skill — Handstand
+**Progression group:** skill_handstand | **Level:** 3
+**Equipment:** None | Required: clear wall space
+**Target muscles (primary):** Coordination, anterior deltoid
+**Target muscles (secondary):** Core, wrist flexors, hip flexors
+**Movement type:** Dynamic (skill practice)
+
+**Description:** From a lunge start position with hands on the floor, kick the back
+leg up into a handstand against the wall, catching the balance briefly before
+stepping down in a controlled manner. Rehearses the kick-up motor pattern that every
+freestanding handstand attempt starts with — building consistency of the kick before
+attempting handstands away from the wall.
+
+**Common mistakes:**
+- Kicking too hard and slamming the wall, losing the balance point entirely
+- Kicking too softly and never reaching vertical, missing the catch opportunity
+
+**Safety notes:** **Bail laterally** on any overshoot — rotate out to the side.
+Start with shallow kicks and increase force gradually. Clear wall space required.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not available |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | 5 attempts | Practice | As needed | 1× | Thursday evening skill + core session |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022
+**Progression prerequisites:** Wall handstand (belly to wall) 3×20 sec stable.
+**Progression path:** → Freestanding hold attempts (L4) once kick-ups consistently catch
+balance against the wall with minimal over- or under-shoot.
+
+---
+
+#### Freestanding hold attempts
+
+**Category:** Skill — Handstand
+**Progression group:** skill_handstand | **Level:** 4
+**Equipment:** None | Required: clear open space
+**Target muscles (primary):** Entire shoulder girdle, core, wrist stabilisers
+**Target muscles (secondary):** Finger flexors (balance corrections), hip flexors
+**Movement type:** Isometric (balance)
+
+**Description:** Kick up to a handstand away from the wall and attempt to catch and
+hold the balance freely. Each attempt is its own hold — track the best duration
+achieved per session. The terminal step of the handstand skill ladder and the bridge
+into freestanding HSPU work.
+
+**Common mistakes:**
+- Giving up at the first wobble instead of making micro-corrections with the fingers
+- Failing to bail cleanly, risking a hard fall
+
+**Safety notes:** **Bail laterally** — cartwheel out to the side or step one foot
+down. Never try to bail backward. Clear open space required — no walls, furniture, or
+breakables in the fall zone. Warm up wrists thoroughly.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not available |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | 5 × max hold | Hold | 60-90s | 1× | Thursday evening — track best duration |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022, Oranchuk 2019 (isometric)
+**Progression prerequisites:** Kick-up practice with consistent wall catches.
+**Progression path:** → End of handstand skill progression. Advance toward freestanding
+handstand push-ups and away-from-wall press to handstand as the next milestones.
+
+---
+
+#### L-SIT (3 Levels)
+
+The L-sit skill ladder is the straight-arm compression hold track. It builds the hip
+flexor, triceps, and abdominal capacity required to support the body on locked-out
+arms with the legs held out horizontally. Shares its terminal exercise with the core
+ladder (Full L-sit) because owning the full L-sit is simultaneously a core milestone
+and a skill milestone.
+
+---
+
+#### L-sit tuck (skill)
+
+**Category:** Skill — L-sit
+**Progression group:** skill_lsit | **Level:** 1
+**Equipment:** None | Optional: parallettes (wrist relief)
+**Target muscles (primary):** Hip flexors, triceps (pressing), abdominals
+**Target muscles (secondary):** Shoulders, wrist flexors, serratus anterior
+**Movement type:** Isometric
+
+**Description:** Sit on the floor with legs extended. Place the hands flat by the hips
+with elbows fully locked, press down hard to lift the entire body off the floor, and
+tuck the knees toward the chest. Hold the body suspended on the hands alone with
+shoulders pressed down away from the ears.
+
+**Common mistakes:**
+- Letting the elbows bend, converting the hold into a partial support that removes the straight-arm demand
+- Hunching the shoulders up by the ears, indicating insufficient scapular depression strength
+
+**Safety notes:** Wrist warmup required. Use parallettes if floor-based wrist extension
+is painful. Stop on any sharp wrist or shoulder pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not available |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | 4×15 sec | Hold | 60-90s | 1× | Thursday evening skill + core session |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022, Oranchuk 2019 (isometric)
+**Progression prerequisites:** Core ≥ 4 (hollow body hold 3×30 sec).
+**Progression path:** → L-sit one leg extended (L2) once 4×15 sec is held cleanly with
+locked elbows and depressed shoulders.
+
+---
+
+#### L-sit (one leg extended)
+
+**Category:** Skill — L-sit
+**Progression group:** skill_lsit | **Level:** 2
+**Equipment:** None | Optional: parallettes (wrist relief)
+**Target muscles (primary):** Hip flexors (extended leg), abdominals, triceps
+**Target muscles (secondary):** Shoulders, wrist flexors, quadriceps (isometric)
+**Movement type:** Isometric
+
+**Description:** From a stable tuck L-sit, extend one leg straight forward parallel to
+the floor while keeping the other knee tucked toward the chest. The intermediate step
+that increases lever arm demand on one side at a time before committing to full
+extension.
+
+**Common mistakes:**
+- The extended leg sagging toward the floor instead of being held strictly horizontal
+- Bending the elbows under the increased asymmetric load, breaking the straight-arm support
+
+**Safety notes:** Wrist warmup required. Use parallettes if wrist extension is painful.
+Stop on any sharp wrist, shoulder, or elbow pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not available |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | 3×10 sec/side | Hold | 60-90s | 1× | Thursday evening skill + core session |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022, Oranchuk 2019 (isometric)
+**Progression prerequisites:** L-sit tuck (skill) 4×15 sec clean.
+**Progression path:** → Full L-sit (L3) once 3×10 sec/side is clean on both sides with
+strict horizontal extension.
+
+---
+
+#### Full L-sit (skill)
+
+**Category:** Skill — L-sit
+**Progression group:** skill_lsit | **Level:** 3
+**Equipment:** None | Optional: parallettes (wrist relief)
+**Target muscles (primary):** Hip flexors, abdominals, triceps
+**Target muscles (secondary):** Quadriceps (isometric), shoulders, wrist flexors
+**Movement type:** Isometric
+
+**Description:** Both legs extended fully forward, body in a clean L shape, supported
+entirely on locked-out straight arms with toes pointed and legs squeezed straight.
+The terminal exercise of the L-sit skill ladder and a recognised elite bodyweight
+strength milestone.
+
+**Common mistakes:**
+- Bending the knees mid-hold, regressing the position to a tuck variant
+- Hunching the shoulders upward, indicating insufficient scapular depression and straight-arm strength
+
+**Safety notes:** Same wrist conditioning and parallette guidance as previous L-sit
+levels. Stop on any sharp wrist, shoulder, or elbow pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not available |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | 3×10-15 sec | Hold | 60-90s | 1× | Thursday evening skill + core session |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022, Oranchuk 2019 (isometric)
+**Progression prerequisites:** L-sit (one leg extended) 3×10 sec/side clean.
+**Progression path:** → End of L-sit skill progression. Advance toward V-sit (legs
+lifted above horizontal) and ultimately manna (legs lifted further still toward the
+chest) as the next support-hold milestones.
+
+---
+
+#### PLANCHE (4 Levels)
+
+The planche skill ladder is the straight-arm horizontal hold track — the most
+wrist-intensive and most advanced skill progression in the library. It begins with
+the pseudo-planche lean (already present as push L8) used here as a skill entry
+point, and builds toward the tuck and straddle planche. True full planche sits beyond
+the end of this ladder as a long-term aspirational milestone. Every planche exercise
+carries significant wrist load — wrists must be conditioned and warmed up thoroughly
+before any planche work.
+
+---
+
+#### Pseudo-planche lean (skill)
+
+**Category:** Skill — Planche
+**Progression group:** skill_planche | **Level:** 1
+**Equipment:** None
+**Target muscles (primary):** Anterior deltoid, pectoralis major, biceps tendon
+**Target muscles (secondary):** Core, wrist flexors, serratus anterior
+**Movement type:** Isometric
+
+**Description:** Support the body on straight arms with the fingers pointed back
+toward the feet. Lean the shoulders forward past the hand position while keeping the
+elbows fully locked. The entry point of the planche skill ladder — identical
+movement to push L8 but held here with a progression target toward the straight-arm
+horizontal holds that follow.
+
+**Common mistakes:**
+- Bending the elbows under load, which defeats the straight-arm isometric purpose
+- Fingers pointed forward instead of backward, skipping the critical wrist-conditioning stimulus
+
+**Safety notes:** **Significant wrist load — build up gradually over weeks.** Wrists
+must be thoroughly warmed up before loading. Start with a shallow lean and increase
+the lean angle progressively. Stop immediately on any sharp wrist pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not available |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | 4×20 sec | Hold | 60-90s | 1× | Thursday evening skill + core session |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022, Oranchuk 2019 (isometric)
+**Progression prerequisites:** Push ≥ 5 (diamond push-up 3×10), scapular push-up
+(pull L6) 3×12.
+**Progression path:** → Planche lean (deeper) (L2) once 4×20 sec is held cleanly with
+locked elbows and healthy wrists.
+
+---
+
+#### Planche lean (deeper)
+
+**Category:** Skill — Planche
+**Progression group:** skill_planche | **Level:** 2
+**Equipment:** None
+**Target muscles (primary):** Anterior deltoid, pectoralis major
+**Target muscles (secondary):** Core, wrist flexors, biceps tendon, serratus anterior
+**Movement type:** Isometric
+
+**Description:** A deeper version of the pseudo-planche lean in which the shoulders
+travel further forward until the wrists are behind the shoulders — the line of the
+torso past the hands becomes visibly steeper. Increased shoulder protraction and
+wrist extension demand.
+
+**Common mistakes:**
+- Piking the hips up to cheat the lean, removing the loading from the shoulders
+- Letting the scapulae retract instead of actively protracting, losing the serratus anterior stimulus
+
+**Safety notes:** **Wrist load increases significantly vs L1.** Progress the lean
+angle over weeks, not sessions. Stop on any sharp wrist pain or biceps tendon discomfort.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not available |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | 4×15 sec | Hold | 60-90s | 1× | Thursday evening skill + core session |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022, Oranchuk 2019 (isometric)
+**Progression prerequisites:** Pseudo-planche lean (skill L1) 4×20 sec clean.
+**Progression path:** → Tuck planche (L3) once 4×15 sec deeper lean is clean and
+wrists tolerate the load without symptoms.
+
+---
+
+#### Tuck planche
+
+**Category:** Skill — Planche
+**Progression group:** skill_planche | **Level:** 3
+**Equipment:** None
+**Target muscles (primary):** Anterior deltoid, pectoralis major, core
+**Target muscles (secondary):** Triceps, wrist flexors, biceps tendon, serratus anterior
+**Movement type:** Isometric
+
+**Description:** From a straight-arm support, lean the shoulders far forward and lift
+the feet off the floor with the knees tucked tight to the chest so the body is
+horizontal but compacted. The first true planche position — feet clear of the floor,
+body supported entirely on straight arms. The transition from lean-based preparation
+into actual planche work.
+
+**Common mistakes:**
+- Letting the hips sag below the shoulder line, losing the horizontal body position
+- Losing scapular protraction under load, which offloads the serratus and overloads the biceps tendon
+
+**Safety notes:** **Extreme wrist, biceps tendon, and shoulder load.** Do not attempt
+before mastering L2 (deeper lean 4×15 sec) AND L-sit tuck (skill L1) 4×15 sec — this
+dual prerequisite ensures both the straight-arm pressing base and the compression
+hold base are present before combining them.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not available |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | 3×10 sec | Hold | 60-90s | 1× | Thursday evening skill + core session |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022, Oranchuk 2019 (isometric)
+**Progression prerequisites:** **Dual prerequisite** — Planche lean deeper 4×15 sec
+clean AND L-sit tuck (skill) 4×15 sec clean.
+**Progression path:** → Straddle planche (L4) once 3×10 sec is held cleanly with
+strong scapular protraction and no sagging hips.
+
+---
+
+#### Straddle planche
+
+**Category:** Skill — Planche
+**Progression group:** skill_planche | **Level:** 4
+**Equipment:** None
+**Target muscles (primary):** Anterior deltoid, pectoralis major, core
+**Target muscles (secondary):** Hip adductors (holding straddle), triceps, wrist flexors,
+biceps tendon
+**Movement type:** Isometric
+
+**Description:** A planche position in which the legs are extended wide in a straddle
+rather than tucked. Holds the body horizontal on straight arms with the legs spread
+laterally to reduce the effective lever arm compared to a full planche while still
+removing the knee-tuck leverage advantage. Very advanced — only a small number of
+dedicated bodyweight practitioners ever achieve this level.
+
+**Common mistakes:**
+- Letting the hips drop below horizontal, regressing the position
+- Failing to engage the adductors, which allows the legs to drift out of position
+
+**Safety notes:** **Extreme wrist, biceps tendon, and shoulder load.** Stop on any
+sharp pain in wrists, biceps tendon, elbows, or shoulders. Bail forward by stepping
+the feet down in sequence rather than collapsing straight down.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not available |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | 3×5 sec | Hold | 60-90s | 1× | Thursday evening skill + core session |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022, Oranchuk 2019 (isometric)
+**Progression prerequisites:** Tuck planche 3×10 sec clean.
+**Progression path:** → End of planche skill progression. Advance toward full planche
+(legs together, body fully extended horizontally) as the terminal long-term bodyweight
+straight-arm milestone.
+
+---
