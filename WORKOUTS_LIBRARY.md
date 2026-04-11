@@ -2024,3 +2024,430 @@ hamstring or lower-back pain.
 consider weighted hinge variants if external load becomes available.
 
 ---
+
+### CORE PROGRESSION (10 Levels)
+
+The core ladder is the trunk-strength and anti-extension/anti-rotation track. It builds
+the deep core (transverse abdominis, internal obliques) and the visible anterior chain
+(rectus abdominis, external obliques) through 10 sequential exercises ranging from
+the dead bug (L1) for users with no core base, all the way to a full L-sit (L10).
+Source of truth: `EXERCISE_PROGRESSIONS.core` in `app.html`.
+
+**Skill unlock threshold:** The core ladder gates access to the four skill tracks
+(crow stand, handstand, L-sit, planche). A user must own L4 (Hollow body hold 3×30 sec)
+before any skill track is prescribed — without that core base, the straight-arm and
+inverted positions of the skill ladders are unsafe and unproductive.
+
+Lite users perform ONLY L1 (Dead bug) at 2×6/side on the Friday session and do not
+progress past this level. AGRO trains core every session (6×/week), making it the
+highest-frequency progression group in the entire library — no other ladder is touched
+that often. All other plans run the full ladder according to the per-plan prescription
+tables below.
+
+---
+
+#### Dead bug
+
+**Category:** Core
+**Progression group:** core | **Level:** 1
+**Equipment:** None
+**Target muscles (primary):** Transverse abdominis, rectus abdominis
+**Target muscles (secondary):** Hip flexors, obliques
+**Movement type:** Isolation (anti-extension)
+
+**Description:** Lie on the back with arms straight up toward the ceiling and knees
+bent at 90° with shins parallel to the floor. Slowly extend one arm overhead and the
+opposite leg straight out toward the floor while keeping the lower back pressed firmly
+into the floor. Return to start and alternate sides. The entry point for the entire
+core ladder and the only core exercise prescribed in the Lite plan.
+
+**Common mistakes:**
+- Letting the lower back arch off the floor as the limbs extend, defeating the entire anti-extension purpose
+- Rushing the rep tempo, which lets momentum take over from the deep-core stabilisers
+
+**Safety notes:** Stop on any sharp lower-back pain. The lower back must remain in
+contact with the floor through the entire rep — if it starts to arch, shorten the
+limb extension range until it can be controlled.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 2×6/side | Normal | As needed | 1× | Fri session — Lite uses ONLY this level |
+| Cut | 3×8/side | Normal | 60s | 3× | Mon + Sat + integrated |
+| Bulk | 2×8/side | 3-1-2-0 | 60s | 5× | Integrated every session |
+| Maintenance | 3×8/side | Normal | 60s | 2× | Mon + Thu |
+| AGRO | 3×8/side | Normal | 60s | 6× | Every session |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022
+**Progression prerequisites:** None — this is the ladder's entry point.
+**Progression path:** → Plank (L2) once 3×8/side is clean with the lower back firmly
+glued to the floor throughout the entire range. **Lite users do not progress past this
+level.**
+
+---
+
+#### Plank
+
+**Category:** Core
+**Progression group:** core | **Level:** 2
+**Equipment:** None
+**Target muscles (primary):** Rectus abdominis, transverse abdominis
+**Target muscles (secondary):** Shoulders (isometric), glutes, quads
+**Movement type:** Compound (isometric)
+
+**Description:** Support the body face down on the forearms (or on straight arms in
+push-up position) with feet together, body forming a rigid straight line from heels
+through the head. Brace the entire trunk and hold the position with continuous
+tension. The classic anti-extension isometric and the foundational tension-holding
+exercise of the core ladder.
+
+**Common mistakes:**
+- Hips sagging toward the floor, breaking the straight line and compressing the lumbar spine
+- Hips piking upward to make the hold easier, removing the anti-extension demand
+
+**Safety notes:** Stop the hold the moment form breaks rather than grinding out extra
+seconds with a sagging hip — quality over duration. Stop on any sharp lower-back or
+shoulder pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Lite uses Dead bug (L1) only |
+| Cut | 3×30-45 sec | Hold | 60s | 3× | Mon + Sat + integrated |
+| Bulk | 2×30-45 sec | Hold | 60s | 5× | Integrated every session |
+| Maintenance | 3×30 sec | Hold | 60s | 2× | Mon + Thu |
+| AGRO | 3×30-45 sec | Hold | 60s | 6× | Every session |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022, Oranchuk 2019 (isometric)
+**Progression prerequisites:** Dead bug 3×8/side clean.
+**Progression path:** → Bicycle crunch (L3) once 3×45 sec is held cleanly with no hip
+sag.
+
+---
+
+#### Bicycle crunch
+
+**Category:** Core
+**Progression group:** core | **Level:** 3
+**Equipment:** None
+**Target muscles (primary):** Obliques, rectus abdominis
+**Target muscles (secondary):** Hip flexors
+**Movement type:** Compound
+
+**Description:** Lie on the back with hands lightly behind the head and legs lifted to
+a tabletop position. Bring one elbow toward the opposite knee while extending the
+other leg straight out, then alternate sides in a controlled, deliberate cycling
+pattern. Trains the obliques' rotational function and adds a dynamic component to the
+core ladder after the static plank.
+
+**Common mistakes:**
+- Yanking on the head and neck with the hands instead of cradling them gently, causing cervical strain
+- Speeding through reps to use momentum instead of muscle, missing the oblique stimulus
+
+**Safety notes:** Hands cradle the head — never pull on it. Stop on any sharp neck
+or lower-back pain. Slow tempo is more effective than fast tempo here.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Lite uses Dead bug (L1) only |
+| Cut | 3×15-20/side | Slow | 60s | 3× | Mon + Sat + integrated |
+| Bulk | 2×15-20/side | 3-1-2-0 | 60s | 5× | Integrated every session |
+| Maintenance | 3×15/side | Slow | 60s | 2× | Mon + Thu |
+| AGRO | 3×15-20/side | Slow | 60s | 6× | Every session |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022
+**Progression prerequisites:** Plank 3×45 sec clean.
+**Progression path:** → Hollow body hold (L4) once 3×20/side is clean with controlled
+rotation and no neck pulling.
+
+---
+
+#### Hollow body hold
+
+**Category:** Core
+**Progression group:** core | **Level:** 4
+**Equipment:** None
+**Target muscles (primary):** Rectus abdominis, transverse abdominis
+**Target muscles (secondary):** Hip flexors, quads (isometric), serratus anterior
+**Movement type:** Compound (isometric)
+
+**Description:** Lie on the back, press the lower back firmly into the floor, then
+lift the legs straight out a few inches off the floor and the arms straight out
+overhead with the head and shoulders just off the floor. The body forms a slight
+banana shape with the lower back glued to the ground. Hold this position with full
+tension throughout the entire trunk. The single most important position in
+gymnastics-style bodyweight training and the core's link to all skill work.
+
+**Common mistakes:**
+- Letting the lower back peel off the floor, immediately disqualifying the rep
+- Holding the breath through the rep instead of breathing shallowly behind a braced trunk
+
+**Safety notes:** **This is the SKILL UNLOCK THRESHOLD — owning Hollow body hold at
+3×30 sec is the prerequisite for any of the four skill tracks (crow stand, handstand,
+L-sit, planche).** Without this base, skill work is unproductive and unsafe. Stop on
+any sharp lower-back pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Lite uses Dead bug (L1) only |
+| Cut | 3×20-30 sec | Hold | 60s | 3× | Mon + Sat + integrated |
+| Bulk | 2×20-30 sec | Hold | 60s | 5× | Integrated every session |
+| Maintenance | 3×20-30 sec | Hold | 60s | 2× | Mon + Thu |
+| AGRO | 3×20-30 sec | Hold | 60s | 6× | Every session |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022, Oranchuk 2019 (isometric)
+**Progression prerequisites:** Bicycle crunch 3×20/side clean.
+**Progression path:** → Hollow body rock (L5) once 3×30 sec is held cleanly with the
+lower back glued to the floor. **At 3×30 sec, skill tracks unlock.**
+
+---
+
+#### Hollow body rock
+
+**Category:** Core
+**Progression group:** core | **Level:** 5
+**Equipment:** None
+**Target muscles (primary):** Rectus abdominis
+**Target muscles (secondary):** Hip flexors, serratus anterior, transverse abdominis
+**Movement type:** Compound
+
+**Description:** Adopt the hollow body position, then rock gently forward and backward
+along the spine while maintaining the rigid hollow shape throughout — no opening up,
+no breaking position. The rocking adds a dynamic stability component to the static
+hollow hold and progresses the user's ability to hold the shape under perturbation.
+
+**Common mistakes:**
+- Letting the body open up at the bottom of each rock, breaking the hollow shape
+- Rocking too hard or too fast, sacrificing position for momentum
+
+**Safety notes:** Stop on any sharp lower-back pain. Rock smoothly along the spine —
+never on a single vertebra. Pad the floor with a yoga mat or rug if a hard floor causes
+discomfort.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Lite uses Dead bug (L1) only |
+| Cut | 3×10 | Controlled | 60s | 3× | Mon + Sat + integrated |
+| Bulk | 2×10 | 3-1-2-0 | 60s | 5× | Integrated every session |
+| Maintenance | 3×10 | Controlled | 60s | 2× | Mon + Thu |
+| AGRO | 3×10 | Controlled | 60s | 6× | Every session |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022
+**Progression prerequisites:** Hollow body hold 3×30 sec clean.
+**Progression path:** → Leg raises lying (L6) once 3×10 is clean with maintained hollow
+shape.
+
+---
+
+#### Leg raises (lying)
+
+**Category:** Core
+**Progression group:** core | **Level:** 6
+**Equipment:** None
+**Target muscles (primary):** Lower rectus abdominis, hip flexors
+**Target muscles (secondary):** Transverse abdominis
+**Movement type:** Compound
+
+**Description:** Lie on the back with hands by the sides or under the lower back for
+support. Keep the legs straight and lift them from a position roughly one inch off
+the floor up to vertical (or as high as the hamstrings allow), then lower with
+control back to one inch off the floor without letting them rest. The lower-abdominal
+benchmark of the core ladder.
+
+**Common mistakes:**
+- Letting the legs drop fast on the descent, using gravity instead of the abs
+- Letting the lower back arch off the floor as the legs lower, indicating insufficient core control for the level
+
+**Safety notes:** Place hands under the glutes for lower-back support if needed. Stop
+on any sharp lower-back pain. Bend the knees slightly if straight legs cause back
+arching.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Lite uses Dead bug (L1) only |
+| Cut | 3×10-12 | Controlled | 60s | 3× | Mon + Sat + integrated |
+| Bulk | 2×10-12 | 3-1-2-0 | 60s | 5× | Integrated every session |
+| Maintenance | 3×10 | Controlled | 60s | 2× | Mon + Thu |
+| AGRO | 3×10-12 | Controlled | 60s | 6× | Every session |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022
+**Progression prerequisites:** Hollow body rock 3×10 clean.
+**Progression path:** → Lying leg raises + hip lift (L7) once 3×12 is clean with no lower
+back arching.
+
+---
+
+#### Lying leg raises + hip lift
+
+**Category:** Core
+**Progression group:** core | **Level:** 7
+**Equipment:** None
+**Target muscles (primary):** Lower abdominals, hip flexors
+**Target muscles (secondary):** Obliques, transverse abdominis
+**Movement type:** Compound
+
+**Description:** Perform a standard lying leg raise to vertical, then at the top of
+the rep continue by lifting the hips off the floor — driving the feet straight up
+toward the ceiling — before lowering the hips back to the floor and the legs back
+to the start. The added hip lift recruits the deep abdominals and shifts the loading
+significantly higher up the rectus abdominis chain.
+
+**Common mistakes:**
+- Swinging the legs to use momentum for the hip lift instead of contracting the abs
+- Dropping the legs and hips uncontrolled on the descent, missing the eccentric stimulus
+
+**Safety notes:** Pad the upper back and head with a folded towel if needed. Stop on
+any sharp lower-back or neck pain. Control the descent every rep.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Lite uses Dead bug (L1) only |
+| Cut | 3×10-12 | Controlled | 60s | 3× | Mon + Sat + integrated |
+| Bulk | 2×10-12 | 3-1-2-0 | 60s | 5× | Integrated every session |
+| Maintenance | 3×10 | Controlled | 60s | 2× | Mon + Thu |
+| AGRO | 3×10-12 | Controlled | 60s | 6× | Every session |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022
+**Progression prerequisites:** Leg raises lying 3×12 clean.
+**Progression path:** → L-sit tuck (floor) (L8) once 3×12 is clean with controlled hip
+lift on every rep.
+
+---
+
+#### L-sit tuck (floor)
+
+**Category:** Core
+**Progression group:** core | **Level:** 8
+**Equipment:** None | Optional: parallettes (wrist relief)
+**Target muscles (primary):** Hip flexors, triceps (pressing), abdominals
+**Target muscles (secondary):** Shoulders, wrist flexors, serratus anterior
+**Movement type:** Compound (isometric)
+
+**Description:** Sit on the floor with legs extended in front. Place the hands flat
+on the floor by the hips with elbows fully locked, press down hard, and lift the
+butt off the floor while tucking the knees toward the chest so the entire body is
+supported on the hands alone. Hold the tucked L-sit position. The first true
+straight-arm support hold in the core ladder and a stepping stone toward the full
+L-sit.
+
+**Common mistakes:**
+- Letting the elbows bend, converting the rep into a partial support and removing the straight-arm demand
+- Hunching the shoulders up by the ears instead of pressing them down and away from the head
+
+**Safety notes:** Wrist health is required — warm up wrists thoroughly. Use parallettes
+if wrist extension on the floor is painful. Stop on any sharp wrist or shoulder pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Lite uses Dead bug (L1) only |
+| Cut | 3×15 sec | Hold | 60s | 3× | Mon + Sat + integrated |
+| Bulk | 2×15 sec | Hold | 60s | 5× | Integrated every session |
+| Maintenance | 3×15 sec | Hold | 60s | 2× | Mon + Thu |
+| AGRO | 3×15 sec | Hold | 60s | 6× | Every session |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022, Oranchuk 2019 (isometric)
+**Progression prerequisites:** Lying leg raises + hip lift 3×12 clean.
+**Progression path:** → Dragon flag negative (L9) once 3×15 sec is held cleanly with
+locked elbows and depressed shoulders.
+
+---
+
+#### Dragon flag negative
+
+**Category:** Core
+**Progression group:** core | **Level:** 9
+**Equipment:** None | Required: bench, sturdy bed edge, or anchored vertical pole
+**Target muscles (primary):** Entire anterior chain (rectus abdominis, obliques, hip flexors)
+**Target muscles (secondary):** Lats (grip), serratus anterior, glutes
+**Movement type:** Compound (eccentric)
+
+**Description:** Lie on a bench (or the edge of a sturdy bed) and grip the bench
+above your head with both hands. Brace the entire body into a rigid straight line
+and lift the legs and hips up so the body is nearly vertical with only the upper back
+and shoulders touching the bench. From this top position, slowly lower the rigid
+body down toward horizontal, fighting gravity the entire way with the anterior chain.
+A Bruce-Lee-popularised eccentric anti-extension exercise that loads the entire
+front of the body extraordinarily hard.
+
+**Common mistakes:**
+- Bending at the hips ("piking") on the descent, taking load off the abs and onto the hip flexors alone
+- Free-falling through the descent once the abs fatigue, missing the eccentric stimulus and risking a hard landing
+
+**Safety notes:** **Requires a solid core base — never attempt before owning L7 (Lying
+leg raises + hip lift 3×12) and ideally L8 (L-sit tuck 3×15 sec) as well. Heavy load
+on the entire anterior chain plus the lower back.** The grip anchor must be sturdy and
+must not move under load. Bail by bending the knees and stepping the feet down to the
+bench rather than dropping rigidly.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Lite uses Dead bug (L1) only |
+| Cut | 3×3-5 | Slow eccentric | 60s | 3× | Mon + Sat + integrated |
+| Bulk | 2×3-5 | 5-0-X-0 | 60s | 5× | Integrated every session |
+| Maintenance | 3×3-5 | Slow eccentric | 60s | 2× | Mon + Thu |
+| AGRO | 3×3-5 | Slow eccentric | 60s | 6× | Every session |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022, Schoenfeld 2015 (tempo / eccentric)
+**Progression prerequisites:** L-sit tuck (floor) 3×15 sec clean. L7 mastery is
+non-negotiable.
+**Progression path:** → Full L-sit (L10) once 3×5 is performed with genuine eccentric
+control through the entire descent (no piking, no free-fall).
+
+---
+
+#### Full L-sit
+
+**Category:** Core
+**Progression group:** core | **Level:** 10
+**Equipment:** None | Optional: parallettes (wrist relief)
+**Target muscles (primary):** Hip flexors, abdominals, triceps
+**Target muscles (secondary):** Quadriceps (isometric), shoulders, serratus anterior, wrist flexors
+**Movement type:** Compound (isometric)
+
+**Description:** Sit on the floor with legs extended in front. Press through both
+hands with locked elbows to lift the entire body off the floor with the legs held
+straight out parallel to the ground, forming a clean L shape. Hold the position with
+the legs squeezed straight, the toes pointed, and the shoulders pressed down and
+away from the head. The terminal exercise of the core ladder and a recognised
+elite-level bodyweight strength milestone.
+
+**Common mistakes:**
+- Bending the knees mid-hold, regressing the rep to a tuck variant
+- Hunching the shoulders, indicating insufficient straight-arm strength for the position
+
+**Safety notes:** Wrist conditioning is essential. Use parallettes if floor-based
+wrist extension is painful. Stop on any sharp wrist, shoulder, or elbow pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Lite uses Dead bug (L1) only |
+| Cut | 3×10-15 sec | Hold | 60s | 3× | Mon + Sat + integrated |
+| Bulk | 2×10-15 sec | Hold | 60s | 5× | Integrated every session |
+| Maintenance | 3×10 sec | Hold | 60s | 2× | Mon + Thu |
+| AGRO | 3×10-15 sec | Hold | 60s | 6× | Every session |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022, Oranchuk 2019 (isometric)
+**Progression prerequisites:** Dragon flag negative 3×5 with clean eccentric control.
+**Progression path:** → End of core progression. Advance into the dedicated L-sit skill
+track (`EXERCISE_PROGRESSIONS.skill_lsit`) and ultimately toward V-sit and manna for
+continued progression in the support-hold family.
+
+---
