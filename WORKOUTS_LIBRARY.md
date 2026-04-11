@@ -1722,3 +1722,305 @@ of the rep with the front leg if the descent fails. Stop on any sharp knee or an
 toward weighted unilateral variants if external load becomes available.
 
 ---
+
+### HINGE PROGRESSION (7 Levels)
+
+The hinge ladder is the primary lower-body posterior-chain track. Where the squat ladder
+addresses knee-dominant movement, the hinge ladder builds the hip-dominant pattern
+through 7 sequential exercises ranging from a basic two-foot glute bridge (L1) to a full
+concentric Nordic hamstring curl (L7). The hinge progression is critical for hamstring
+strength, glute development, lower-back resilience, and hamstring injury prevention.
+Source of truth: `EXERCISE_PROGRESSIONS.hinge` in `app.html`.
+
+The hinge ladder is also the gate-keeper for the squat ladder's L6 (Bulgarian split
+squat) — that exercise carries an explicit cross-level dependency requiring hinge
+level ≥ 2 (single-leg glute bridge) before it can be attempted.
+
+Lite users perform ONLY L1 (Glute bridge) at 2×10 on the Saturday Pilates session and
+do not progress past this level. All other plans run the full ladder according to the
+per-plan prescription tables below.
+
+---
+
+#### Glute bridge
+
+**Category:** Hinge
+**Progression group:** hinge | **Level:** 1
+**Equipment:** None
+**Target muscles (primary):** Glutes, hamstrings
+**Target muscles (secondary):** Core, erector spinae
+**Movement type:** Compound
+
+**Description:** Lie on the back with knees bent and feet flat on the floor about hip
+width apart. Drive through the heels to lift the hips off the floor until the body
+forms a straight line from shoulders to knees, squeezing the glutes hard at the top,
+then lower with control. The entry point for the entire hinge ladder and the only
+hinge exercise prescribed in the Lite plan.
+
+**Common mistakes:**
+- Pushing through the toes instead of the heels, shifting load away from the glutes onto the quads
+- Hyperextending the lower back at the top to make the bridge "higher", compressing the lumbar spine
+
+**Safety notes:** Stop immediately on any sharp lower-back pain. Mild glute and
+hamstring contraction is correct. Squeeze the glutes, do not arch the back.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 2×10 | Normal | As needed | 1× | Sat Pilates session — Lite uses ONLY this level |
+| Cut | 3×12-15 | Normal | 60-90s | 1-2× | Thu lower body |
+| Bulk | 3×15 | 3-1-2-0 | 90-120s | 2× | Tue pull + Thu lower |
+| Maintenance | 3×12 | Normal | 60-90s | 1× | Thu |
+| AGRO | 3×15 | Normal | 60-90s | 3× | Tue/Thu/Sat mornings |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022
+**Progression prerequisites:** None — this is the ladder's entry point.
+**Progression path:** → Glute bridge (single leg) (L2) once 3×15 is clean with strong
+glute squeeze and no lower-back arching. **Lite users do not progress past this level.**
+
+---
+
+#### Glute bridge (single leg)
+
+**Category:** Hinge
+**Progression group:** hinge | **Level:** 2
+**Equipment:** None
+**Target muscles (primary):** Glutes (unilateral), hamstrings
+**Target muscles (secondary):** Core (anti-rotation), erector spinae
+**Movement type:** Compound
+
+**Description:** Set up as a standard glute bridge with one foot flat on the floor, then
+extend the opposite leg straight out (or hold it bent at the hip with the knee at 90°).
+Drive through the working heel to lift the hips, keeping them level and square through
+the entire rep. The first true unilateral hinge in the ladder, exposing left/right
+strength and stability asymmetries that the two-foot bridge can hide. Also the unlock
+for the Bulgarian split squat (squat L6).
+
+**Common mistakes:**
+- Hips dropping or rotating to the non-working side at the top, breaking the level pelvis
+- The non-working leg dropping toward the floor, robbing the core of its anti-rotation work
+
+**Safety notes:** Approach side asymmetries gradually with rep matching, not by forcing
+the weaker side. Stop on any sharp lower-back, hip, or hamstring pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Lite uses Glute bridge (L1) only |
+| Cut | 3×12/leg | Normal | 60-90s | 1-2× | Thu lower body |
+| Bulk | 3×12/leg | 3-1-2-0 | 90-120s | 2× | Tue pull + Thu lower |
+| Maintenance | 3×12/leg | Normal | 60-90s | 1× | Thu |
+| AGRO | 3×12/leg | Normal | 60-90s | 3× | Tue/Thu/Sat mornings |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022
+**Progression prerequisites:** Glute bridge 3×15 clean.
+**Progression path:** → Good morning (bodyweight) (L3) once 3×12/leg is clean with a
+level pelvis on both sides. **Also unlocks Bulgarian split squat (squat L6).**
+
+---
+
+#### Good morning (bodyweight)
+
+**Category:** Hinge
+**Progression group:** hinge | **Level:** 3
+**Equipment:** None
+**Target muscles (primary):** Hamstrings, erector spinae
+**Target muscles (secondary):** Glutes, core
+**Movement type:** Compound
+
+**Description:** Stand with feet hip width apart and place the hands behind the head
+with elbows out wide. Hinge at the hips by pushing the glutes back as the torso pitches
+forward, maintaining a flat (neutral) spine throughout. Lower until the torso is roughly
+parallel to the floor — or as far as hamstring flexibility allows — then drive the hips
+forward to return to standing. The first standing hip-hinge pattern in the ladder and
+the foundation for the bodyweight RDL that follows.
+
+**Common mistakes:**
+- Bending at the lower back instead of hinging at the hips, turning the rep into a spinal flexion exercise
+- Bending the knees excessively, converting the hinge into a partial squat
+
+**Safety notes:** Maintain a neutral spine throughout. Stop the descent before form
+breaks — depth is earned through hamstring flexibility, not forced. Stop on any lower
+back pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Lite uses Glute bridge (L1) only |
+| Cut | 3×12 | Normal | 60-90s | 1-2× | Thu lower body |
+| Bulk | 3×12 | 3-1-2-0 | 90-120s | 2× | Tue pull + Thu lower |
+| Maintenance | 3×12 | Normal | 60-90s | 1× | Thu |
+| AGRO | 3×12 | Normal | 60-90s | 3× | Tue/Thu/Sat mornings |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022
+**Progression prerequisites:** Single leg glute bridge 3×12/leg clean.
+**Progression path:** → Bodyweight RDL (L4) once 3×12 is clean with a neutral spine and
+controlled depth.
+
+---
+
+#### Bodyweight RDL
+
+**Category:** Hinge
+**Progression group:** hinge | **Level:** 4
+**Equipment:** None
+**Target muscles (primary):** Hamstrings (unilateral), glutes
+**Target muscles (secondary):** Core (balance), erector spinae, ankle stabilisers
+**Movement type:** Compound
+
+**Description:** Stand on one leg with a slight bend in the working knee. Hinge at the
+hip by extending the non-working leg straight back behind you while the torso pitches
+forward, keeping the body in a straight T-line from heel through head at the bottom of
+the rep. Return to standing by driving the hip forward. A unilateral version of the
+good morning that adds significant balance and ankle-stability demand.
+
+**Common mistakes:**
+- Twisting the hips open as the back leg extends, breaking the square hip line
+- Letting the back leg drop or bend instead of holding it in line with the torso
+
+**Safety notes:** Use a wall or chair fingertip touch as a balance aid early in the
+learning curve. Maintain neutral spine. Stop on any sharp hamstring or lower back pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Lite uses Glute bridge (L1) only |
+| Cut | 3×10-12/leg | Normal | 60-90s | 1-2× | Thu lower body |
+| Bulk | 3×10-12/leg | 3-1-2-0 | 90-120s | 2× | Tue pull + Thu lower |
+| Maintenance | 3×10-12/leg | Normal | 60-90s | 1× | Thu |
+| AGRO | 3×10-12/leg | Normal | 60-90s | 3× | Tue/Thu/Sat mornings |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022
+**Progression prerequisites:** Good morning 3×12 clean.
+**Progression path:** → Glute bridge march (L5) once 3×12/leg is clean with stable
+balance and a square pelvis.
+
+---
+
+#### Glute bridge march
+
+**Category:** Hinge
+**Progression group:** hinge | **Level:** 5
+**Equipment:** None
+**Target muscles (primary):** Glutes, core
+**Target muscles (secondary):** Hamstrings, hip flexors
+**Movement type:** Compound
+
+**Description:** Hold a standard glute bridge position with hips lifted and the spine
+neutral. Without dropping the hips, lift one knee toward the chest, lower it back to
+the floor, and immediately repeat on the other side, marching the legs alternately.
+The hips must stay stable and level through every rep. Trains the ability to maintain
+hip extension under unilateral leg movement — a key transfer skill for running and
+single-leg stability.
+
+**Common mistakes:**
+- Hips dropping every time a foot lifts, breaking the bridge and removing the core demand
+- Hips rotating side to side as the knees alternate, leaking the anti-rotation work
+
+**Safety notes:** Stop on any sharp lower-back pain. The exercise should be felt
+primarily in the glutes and core — not the lumbar spine.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Lite uses Glute bridge (L1) only |
+| Cut | 3×15 | Normal | 60-90s | 1-2× | Thu lower body |
+| Bulk | 3×15 | 3-1-2-0 | 90-120s | 2× | Tue pull + Thu lower |
+| Maintenance | 3×12 | Normal | 60-90s | 1× | Thu |
+| AGRO | 3×15 | Normal | 60-90s | 3× | Tue/Thu/Sat mornings |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022
+**Progression prerequisites:** Bodyweight RDL 3×10/leg clean.
+**Progression path:** → Nordic hamstring curl (L6) once 3×15 is clean with stable hips
+through every alternation.
+
+---
+
+#### Nordic hamstring curl
+
+**Category:** Hinge
+**Progression group:** hinge | **Level:** 6
+**Equipment:** None | Required: anchor for the feet (heavy sofa, low bed, partner, weighted bar)
+**Target muscles (primary):** Hamstrings (eccentric)
+**Target muscles (secondary):** Calves, glutes, core
+**Movement type:** Compound (eccentric-dominant)
+
+**Description:** Kneel on a soft surface with the ankles hooked securely under a heavy
+anchor — sofa, bed, or partner-pinned. Keeping the body straight from knees through
+head, lower the torso forward toward the floor as slowly as possible by resisting with
+the hamstrings alone. Catch the descent with the hands at the bottom and push back to
+the start position to reset for the next rep. An eccentric-dominant exercise that
+delivers extreme hamstring loading and is one of the strongest evidence-based
+hamstring injury-prevention exercises in the literature.
+
+**Common mistakes:**
+- Bending at the hips ("piking") instead of holding a straight knee-to-head line, taking load off the hamstrings
+- Letting the descent become a free-fall once the hamstring fatigues, missing the eccentric stimulus
+
+**Safety notes:** **Extreme hamstring load — do not attempt before mastering L5
+(Glute bridge march 3×15). Slow eccentric only at first; expect significant hamstring
+soreness for 3-7 days after the first session even at very low volume.** The anchor
+must be heavy enough that it cannot shift. Catch every rep with the hands — never let
+the chest impact the floor.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Lite uses Glute bridge (L1) only |
+| Cut | 3×3-5 | Slow eccentric | 60-90s | 1× | Thu lower body — start with 1×3 and ramp slowly |
+| Bulk | 3×3-5 | 5-0-X-0 (slow eccentric) | 90-120s | 1× | Thu lower — ramp slowly |
+| Maintenance | 3×3-5 | Slow eccentric | 60-90s | 1× | Thu — ramp slowly |
+| AGRO | 3×3-5 | Slow eccentric | 60-90s | 3× | Tue/Thu/Sat mornings — ramp slowly |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022, Schoenfeld 2015 (tempo / eccentric)
+**Progression prerequisites:** Glute bridge march 3×15 clean.
+**Progression path:** → Nordic hamstring curl (full) (L7) once 3×5 is performed with
+genuine eccentric control through the entire descent (no free-fall).
+
+---
+
+#### Nordic hamstring curl (full)
+
+**Category:** Hinge
+**Progression group:** hinge | **Level:** 7
+**Equipment:** None | Required: anchor for the feet
+**Target muscles (primary):** Hamstrings
+**Target muscles (secondary):** Calves, glutes, core
+**Movement type:** Compound
+
+**Description:** The complete Nordic curl — both the slow eccentric descent and a
+genuine concentric pull back up using the hamstrings alone, without pushing off the
+floor with the hands. The terminal exercise of the hinge ladder and a recognised
+elite-level posterior-chain milestone. Very few people on a pure bodyweight system ever
+achieve a full strict concentric Nordic, which is why it sits at the top of the ladder.
+
+**Common mistakes:**
+- Pushing off the floor with the hands to assist the concentric, robbing the rep of its purpose
+- Cheating range of motion by stopping the descent above horizontal before pulling back up
+
+**Safety notes:** Same anchor and ramp-up rules as L6 apply. Do not attempt until L6
+(eccentric Nordic) is owned at 3×5 with full controlled descent. Stop on any sharp
+hamstring or lower-back pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Lite uses Glute bridge (L1) only |
+| Cut | 3×5-8 | Normal | 60-90s | 1× | Thu lower body |
+| Bulk | 3×5-8 | 3-1-2-0 | 90-120s | 1× | Thu lower body |
+| Maintenance | 3×5-8 | Normal | 60-90s | 1× | Thu |
+| AGRO | 3×5-8 | Normal | 60-90s | 3× | Tue/Thu/Sat mornings |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022
+**Progression prerequisites:** Nordic hamstring curl 3×5 with full eccentric control.
+**Progression path:** → End of hinge progression. Continue accumulating volume and
+consider weighted hinge variants if external load becomes available.
+
+---
