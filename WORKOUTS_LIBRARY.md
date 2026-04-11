@@ -1093,3 +1093,264 @@ imbalance. Stop on any sharp elbow or shoulder pain.
 pulling volume and bias toward improvised single-arm rowing variations as needed.
 
 ---
+
+### SHOULDER PROGRESSION (6 Levels)
+
+The shoulder ladder is the dedicated vertical pressing track. Where the push ladder
+addresses horizontal pressing, the shoulder ladder builds the strict overhead press
+pattern through progressively steeper pike positions and ultimately the wall and
+freestanding handstand push-up. Source of truth: `EXERCISE_PROGRESSIONS.shoulder` in
+`app.html`.
+
+The shoulder progression overlaps with the upper end of the push progression: pike
+push-up appears in both ladders because it serves as both the L7 push exercise and the
+L2 shoulder exercise. AGRO sources its dedicated shoulder work via the push progression's
+pike variant, so per-plan tables note this routing in the AGRO row.
+
+---
+
+#### Pike push-up (bent knee)
+
+**Category:** Shoulder
+**Progression group:** shoulder | **Level:** 1
+**Equipment:** None
+**Target muscles (primary):** Anterior deltoid, medial deltoid
+**Target muscles (secondary):** Triceps, upper pectoralis
+**Movement type:** Compound
+
+**Description:** Begin in a downward-dog position with hips piked high but knees kept
+slightly bent to shorten the lever and reduce the percentage of bodyweight loaded onto
+the shoulders. Bend the elbows to lower the crown of the head toward the floor between
+the hands, then press back up. The bent-knee variation makes it the entry point for
+users who can press a standard push-up but cannot yet tolerate full inverted-trunk
+loading.
+
+**Common mistakes:**
+- Letting the hips drop, which converts the rep into a half push-up and removes the shoulder bias
+- Flaring the elbows out wide instead of tracking them in the same plane as the body, stressing the shoulder capsule
+
+**Safety notes:** Requires basic horizontal pressing strength first. Stop immediately on
+any pinch at the front of the shoulder — the pike position is unforgiving to a
+compromised shoulder.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Uses seated shoulder press instead |
+| Cut | 3×8 | Normal | 60-90s | 1× | Mon upper body |
+| Bulk | 3×8 | 3-1-2-0 | 90-120s | 2× | Mon + Fri |
+| Maintenance | 3×8 | Normal | 60-90s | 1× | Thu |
+| AGRO | 3×8 | Normal | 60-90s | — | Via push progression pike variant |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022
+**Progression prerequisites:** Standard push-up 3×12 clean.
+**Progression path:** → Pike push-up (full) (L2) once 3×8 is clean with stable hips.
+
+---
+
+#### Pike push-up (full)
+
+**Category:** Shoulder
+**Progression group:** shoulder | **Level:** 2
+**Equipment:** None
+**Target muscles (primary):** Anterior deltoid, medial deltoid
+**Target muscles (secondary):** Triceps, upper pectoralis, core
+**Movement type:** Compound
+
+**Description:** Same movement as the bent-knee variation but with the legs straight,
+forming a full pike position with the hips driven high. The straighter the legs and
+the higher the hips, the more vertical the trunk angle becomes — and the more bodyweight
+the shoulders take. The full pike push-up is the bodyweight equivalent of a strict
+overhead press with a moderate load and is the foundation pattern for all handstand
+work.
+
+**Common mistakes:**
+- Hips creeping down through the set as fatigue accumulates, regressing the rep back toward bent-knee
+- The head crashing to the floor without control, indicating insufficient eccentric strength for the level
+
+**Safety notes:** Requires adequate hamstring flexibility for the hip position.
+Discontinue on any shoulder impingement symptoms.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Uses seated shoulder press instead |
+| Cut | 3×8-10 | Normal | 60-90s | 1× | Mon upper body |
+| Bulk | 3×10 | 3-1-2-0 | 90-120s | 2× | Mon + Fri |
+| Maintenance | 3×8-10 | Normal | 60-90s | 1× | Thu |
+| AGRO | 3×8-10 | Normal | 60-90s | — | Via push progression pike variant (L7) |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022
+**Progression prerequisites:** Pike push-up bent knee 3×8 clean.
+**Progression path:** → Decline pike push-up (L3) once 3×10 is clean with stable hips and
+controlled descent.
+
+---
+
+#### Decline pike push-up
+
+**Category:** Shoulder
+**Progression group:** shoulder | **Level:** 3
+**Equipment:** None | Optional: chair, bed, or low bench
+**Target muscles (primary):** Anterior deltoid, medial deltoid
+**Target muscles (secondary):** Triceps, upper pectoralis, core
+**Movement type:** Compound
+
+**Description:** A pike push-up performed with the feet elevated on a chair or low
+bench. Elevating the feet drives the trunk angle even more vertical than the standard
+pike, increasing the bodyweight load on the shoulders and bringing the movement closer
+to a true handstand press. The final pike-pattern step before transitioning to wall
+handstand work.
+
+**Common mistakes:**
+- Elevation too high too soon, jumping the load past what the shoulders are ready for
+- Hips drifting away from the elevation point, breaking the steep trunk angle
+
+**Safety notes:** Use a stable, non-slip elevation surface. Avoid soft couches or wheeled
+furniture. Bail forward by stepping the feet down — never collapse to one side.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Uses seated shoulder press instead |
+| Cut | 3×6-8 | Normal | 60-90s | 1× | Mon upper body |
+| Bulk | 3×8 | 3-1-2-0 | 90-120s | 2× | Mon + Fri |
+| Maintenance | 3×6-8 | Normal | 60-90s | 1× | Thu |
+| AGRO | 3×6-8 | Normal | 60-90s | — | Via push progression pike variant |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022
+**Progression prerequisites:** Pike push-up full 3×10 clean.
+**Progression path:** → Wall handstand hold (L4) once 3×8 is clean with stable elevated
+feet.
+
+---
+
+#### Wall handstand hold
+
+**Category:** Shoulder
+**Progression group:** shoulder | **Level:** 4
+**Equipment:** None | Required: clear wall space
+**Target muscles (primary):** Anterior deltoid, medial deltoid, triceps
+**Target muscles (secondary):** Core, trapezius, forearms
+**Movement type:** Compound (isometric)
+
+**Description:** Place the hands on the floor a comfortable distance from the wall and
+walk the feet up the wall until the body is fully inverted with the heels resting on
+the wall. Hold the inverted position with elbows fully locked, body stacked vertically,
+and tension throughout the entire kinetic chain. The first true handstand step in the
+ladder — a static hold that builds shoulder, wrist, and core capacity for the dynamic
+handstand pressing that follows.
+
+**Common mistakes:**
+- Banana-back arch with the lower spine compensating for tight shoulders or weak core
+- Walking the hands too far from the wall, creating a planche-like lean instead of a vertical stack
+
+**Safety notes:** Wrist strength is required — warm up wrists thoroughly before any
+handstand work. **Bail laterally**, not backward — if the hold fails, step one foot
+down to the side and rotate out of the position. Never collapse straight backward onto
+the spine. Ensure the wall is clear of obstacles, picture frames, and breakables before
+kicking up.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Uses seated shoulder press instead |
+| Cut | 3×20-30 sec | Hold | 60-90s | 1× | Mon upper body |
+| Bulk | 3×30 sec | Hold | 90-120s | 2× | Mon + Fri |
+| Maintenance | 3×20-30 sec | Hold | 60-90s | 1× | Thu |
+| AGRO | 3×20-30 sec | Hold | 60-90s | — | Via push progression pike variant |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022, Oranchuk 2019 (isometric)
+**Progression prerequisites:** Decline pike push-up 3×8 clean; thoroughly conditioned
+wrists.
+**Progression path:** → Wall handstand push-up (partial) (L5) once 3×30 sec is held
+stable with no lateral wobble.
+
+---
+
+#### Wall handstand push-up (partial)
+
+**Category:** Shoulder
+**Progression group:** shoulder | **Level:** 5
+**Equipment:** None | Required: clear wall space
+**Target muscles (primary):** Anterior deltoid, medial deltoid, triceps
+**Target muscles (secondary):** Trapezius, core
+**Movement type:** Compound
+
+**Description:** From a stable wall handstand hold, bend the elbows to lower the head
+a small distance toward the floor — typically only a few inches at this stage — and
+press back up to the locked-out handstand. The partial range builds the strength
+required for the eventual full HSPU without overloading the shoulders. Range increases
+gradually over weeks and months until full range is achievable.
+
+**Common mistakes:**
+- Going for too much range too soon and collapsing under the load
+- Letting the body drift away from the wall during the descent, losing the vertical line
+
+**Safety notes:** Requires a solid 30-second wall handstand hold first — do not attempt
+this level without that base. **Bail laterally** on any failed rep — never let the head
+crash straight down. Pad the floor with a folded towel under the head while learning the
+movement.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Uses seated shoulder press instead |
+| Cut | 3×3-5 | Normal | 60-90s | 1× | Mon upper body |
+| Bulk | 3×5 | 3-1-2-0 | 90-120s | 2× | Mon + Fri |
+| Maintenance | 3×3-5 | Normal | 60-90s | 1× | Thu |
+| AGRO | 3×3-5 | Normal | 60-90s | — | Via push progression pike variant |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022
+**Progression prerequisites:** Wall handstand hold 3×30 sec stable.
+**Progression path:** → Full handstand push-up (L6) once 3×5 is clean with the partial
+range expanded toward full ROM.
+
+---
+
+#### Full handstand push-up
+
+**Category:** Shoulder
+**Progression group:** shoulder | **Level:** 6
+**Equipment:** None | Required: clear wall space
+**Target muscles (primary):** Anterior deltoid, medial deltoid, triceps
+**Target muscles (secondary):** Trapezius, core, upper pectoralis
+**Movement type:** Compound
+
+**Description:** From a stable wall handstand, bend the elbows to lower the head all
+the way to the floor (or to a folded towel for protection), then press back up to a
+fully locked-out handstand. A complete strict overhead press performed against full
+bodyweight, with the wall providing only balance — not load relief. Considered an
+advanced bodyweight pressing milestone in any zero-equipment system.
+
+**Common mistakes:**
+- Cheating range by stopping the descent inches above the floor and calling it a full rep
+- Kipping the legs to drive the press, losing the strict-press quality
+
+**Safety notes:** Requires consistent wall handstand push-up partial reps in the bag
+first. **Bail laterally** on any failed rep. Always pad the floor with a folded towel
+under the head. Stop immediately on any neck or shoulder pain — this is the most
+demanding shoulder exercise in the entire library.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Uses seated shoulder press instead |
+| Cut | 3×3-5 | Normal | 60-90s | 1× | Mon upper body |
+| Bulk | 3×5 | 3-1-2-0 | 90-120s | 2× | Mon + Fri |
+| Maintenance | 3×3-5 | Normal | 60-90s | 1× | Thu |
+| AGRO | 3×3-5 | Normal | 60-90s | — | Via push progression pike variant |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022
+**Progression prerequisites:** Wall handstand push-up partial 3×5 clean.
+**Progression path:** → End of shoulder progression. Advance into the dedicated
+handstand skill track (`EXERCISE_PROGRESSIONS.skill_handstand`) to develop freestanding
+HSPU and away-from-wall handstand work.
+
+---
