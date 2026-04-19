@@ -6805,3 +6805,112 @@ Stop immediately on any dizziness, tingling, or sharp pain.
 (combat-sports mission context)
 
 ---
+
+## AUTO-PRESCRIPTION DATA MODEL
+
+> **Status: NOT YET IMPLEMENTED in `app.html`.** This section defines the data
+> structure for a future feature where the app automatically selects and
+> prescribes exercises based on user metrics. Until built, the app continues
+> to use the manual level-picker flow described elsewhere in this file.
+
+### User Input Variables
+
+| Variable | Source | Type | Description |
+|----------|--------|------|-------------|
+| `plan` | `getSettings().plan` | string | Active plan key: lite, cut, bulk, maintenance, agro |
+| `weight` | `getLatestWeight()` | number | Current bodyweight in kg |
+| `age` | `getSettings().age` | number | User age in years |
+| `sex` | `getSettings().sex` | string | male or female |
+| `activityLevel` | `getSettings().activityLevel` | number | Multiplier 1.2 to 1.9 |
+| `risk` | `getSettings().risk` | string | achievable, aggressive, or unrestricted |
+| `exerciseLevels` | `gs(SK.exLevels)` | object | Current level per progression group, keyed by date |
+| `completionHistory` | `gs(SK.dayLogs)` | object | Last N sessions' workout completion data per exercise |
+| `injuries` | Future setting | array | Optional array of body regions to avoid loading |
+
+### Output
+
+1. **Daily exercise list** — specific exercises with sets, reps, tempo, rest tailored to user's level and plan
+2. **Weekly schedule** — modality rotation per plan requirements
+3. **Progression recommendations** — flag exercises ready for level advancement based on streak data
+4. **Deload week trigger** — every 8-10 weeks or when completion < 70% for 2 consecutive weeks
+5. **Exercise substitutions** — swap exercises that load injured body regions
+
+### Volume Caps Per Plan
+
+| Plan | Max sessions/week | Max exercises/session | Max total weekly sets |
+|------|-------------------|----------------------|---------------------|
+| Lite | 6 (gentle) | 8-10 | 30 |
+| Cut | 6 (3 resistance + 2 HIIT + 1 recovery) | 8-10 | 50 |
+| Bulk | 5 (4 resistance + 1 mobility) | 10-12 | 70 |
+| Maintenance | 5-6 (2 resistance + 2-3 cardio/mobility + 1 recreation) | 6-8 | 40 |
+| AGRO | 7 (per current code) | Per current code | Per current code |
+
+### Intensity Modifiers
+
+| User Metric | Modifier |
+|-------------|----------|
+| Risk = aggressive | Progression threshold -1 session. Allow higher volume. |
+| Risk = achievable | Progression threshold +1 session. Reduce HIIT to 1x/week. |
+| Activity level >= 1.725 | Allow max volume caps. Optional extra sets. |
+| Activity level <= 1.375 | Reduce sets by 1 per exercise. Add 30 sec rest. |
+| Weight > 100kg | No plyometrics. Substitute fast bodyweight squats or step-ups. |
+| Weight > 120kg | Default to Lite Protocol exercises regardless of plan. |
+| Age > 50 | Default to Lite variants unless user manually selected higher levels. |
+| Age > 65 | Lock to Lite Protocol. Disable HIIT, plyometrics, advanced skills. |
+| Sex = female | Upper body -2 reps from default, lower body +2 reps. |
+
+### Progression Rules
+
+| Rule | Description |
+|------|-------------|
+| Streak threshold | 3 consecutive completed sessions at current level -> recommend advancement (Lite: 5) |
+| Failure threshold | 2 consecutive sessions < 60% completion -> recommend regression |
+| Deload trigger | 8-10 weeks continuous OR 2 weeks with completion < 70% |
+| Deload protocol | Reduce volume 40% (fewer sets, not exercises). Maintain frequency. 1 week. |
+| Cross-level dependency | Bulgarian split squat (squat L6) requires hinge >= 2 |
+| Skill unlock | Skills available when core >= 4 AND push >= 5 |
+
+### Prescription Rules (Hard Constraints)
+
+1. Never prescribe exercise user hasn't unlocked in progression level
+2. Never exceed plan-specific weekly volume caps
+3. Always include warmup (5 min) and cooldown (5 min)
+4. Bulk: all primary compounds must use tempo 3-1-2-0
+5. Cut: HIIT days never consecutive
+6. Lite: no floor-to-standing transitions
+7. All plans: push:pull ratio <= 1:1 (pull-dominant preferred)
+8. Weight > 100kg: no plyometrics unless user overrides in settings
+9. Age > 50: default Lite variants unless manually overridden
+10. Deload weeks: reduce volume 40%, maintain frequency
+11. Max 2 compound push exercises per session
+12. Always pair push with pull in same session
+13. Lower body sessions: minimum 1 hinge + 1 squat movement
+14. Core work in every session (minimum 2 sets)
+15. Rest days include mobility/stretch option (except Lite Sunday)
+
+### Weekly Templates Per Plan
+
+**Lite:**
+Mon: Walk + Chair Upper | Tue: Tai Chi | Wed: Walk + Chair Lower | Thu: Yoga | Fri: Walk + Chair Full + Isometric | Sat: Pilates + Balance | Sun: Rest
+
+**Cut:**
+Mon: Upper Resistance | Tue: HIIT/Shadowbox/Jump Rope | Wed: Walk + Yoga | Thu: Lower Resistance | Fri: HIIT B | Sat: Full Body + Core | Sun: Rest
+
+**Bulk:**
+Mon: Push Volume (tempo) | Tue: Pull + Posterior (tempo) | Wed: Animal Flow + Walk | Thu: Lower Volume (tempo) | Fri: Push/Pull Intensity | Sat: Full Body + Pilates | Sun: Rest
+
+**Maintenance:**
+Mon: Resistance A | Tue: Cardio Rotation | Wed: Yoga/Pilates | Thu: Resistance B | Fri: Animal Flow | Sat: Recreation | Sun: Rest
+
+### Implementation Notes
+
+When built in `app.html`:
+1. New SK key `ph_rx_v1` — generated prescriptions per date
+2. New SK key `ph_streak_v1` — consecutive completion per exercise group
+3. Engine runs on app open and WORKOUTS tab switch
+4. User can override any auto-prescribed exercise via level selector
+5. Manual overrides respected — engine never auto-reverts
+6. Auto-prescribed exercises show subtle "AUTO" badge
+7. Store rationale in day log ("Promoted from Level 2: 3 consecutive completions")
+
+---
