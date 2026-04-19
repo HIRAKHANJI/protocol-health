@@ -4,6 +4,30 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 6.0.0 — 2026-04-21
+
+**Scope:** Major (Architecture refactor complete — Phase 6 of 2-day refactor)
+**Banner:** "Architecture refactor complete. Zero behavior change; app is now modular under the hood."
+
+- **Refactor milestone.** The 2-day modular refactor that began with v5.1.0 is complete. Zero observable behavior change across the six phases; the app is now a modular ES-module PWA with a ~4,600-line bootstrap (`app.html`), plan definitions under `plans/`, large function groups under `modules/`, shared UI helpers under `components/`, and a schema-migration framework under `migrations/`. See `CLAUDE.md` Section 23 for the full architecture.
+- **CLAUDE.md gains four new sections:**
+  - Section 23 — Modular Architecture (post-refactor directory map + the bare-name/globalThis interop pattern + startup sequence + change-location guide).
+  - Section 24 — Schema Migration Playbook (copy-pasteable migration template + rules).
+  - Section 25 — Working With This Codebase (session-start checklist, feature / bugfix / rollback procedures, non-negotiable principles).
+  - Section 26 — File Line-Count Governance (soft limits with current actuals).
+- **Stale prose fixed:** removed "single-file" / "one HTML file" / "~5000+ lines" claims from Sections 2, 5, 10, and 13.
+- **`sw.js`:** `CACHE_NAME` bumped to `v19`.
+- **`index.html`:** hero-badge updated to `v6.0.0`.
+- **Zero app code changed in Phase 6** — it's pure documentation + version bump.
+
+**Cumulative refactor delta (v5.0.1 → v6.0.0):**
+- `app.html` reduced from ~8,572 lines to ~4,600 (-46%).
+- New directories: `plans/` (7 files), `modules/` (4 files), `components/` (3 files), `migrations/` (3 files) — 17 module files loading natively via ES-module `<script>` tags.
+- New infrastructure: schema version tracking (`ph_sch_v1`), auto-backup before destructive migrations, future-schema-backup guard on restore.
+- New discipline: `WORKING_VERSIONS.md` append-only log, per-phase git tags (`vX.Y.Z-working`), version-tagging rule in CLAUDE.md §11.
+
+---
+
 ## Version 5.5.0 — 2026-04-21
 
 **Scope:** Minor (Shared components extraction — Phase 5 of 2-day refactor)
