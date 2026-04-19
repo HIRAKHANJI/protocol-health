@@ -366,6 +366,29 @@ localStorage is wiped when the user clears Chrome browsing data. The backup syst
 
 > **Critical:** No server, no cloud sync, no account. If localStorage is wiped without a backup, all data is gone. Recommend backing up to Google Drive after first setup and weekly thereafter.
 
+### Schema Version & Migrations (added v5.1.0)
+
+Shape evolution of stored data is governed by `migrations/registry.js`. Each migration object has:
+
+- `from` / `to` — schema versions, monotonic integers
+- `description` — human-readable short label
+- `requiresBackup` — if `true`, the runner auto-downloads a JSON snapshot of all `ph_*` keys before running
+- `run(dataMap)` — pure transform taking `{ [storageKey]: value }` and returning the new map
+- `verify(dataMap)` — optional validation that returns `false` to abort
+- `reverse(dataMap)` — optional inverse operation for future rollback tooling
+
+The schema version lives at `ph_sch_v1`. The record is established on first run of v5.1.0 or later, with `establishedFrom: 'existing-user'` if any `ph_*` data already exists, otherwise `'fresh-install'`.
+
+**Rules:**
+
+- Storage keys are never renamed. New shapes go under new keys (e.g. `ph_dl_v2`), leaving `ph_dl_v1` in place until explicitly cleaned.
+- Migrations are additive. Old keys are preserved unless explicitly cleaned.
+- Destructive changes MUST have `requiresBackup: true`.
+- Every migration must be verified against the owner's actual backup JSON before shipping.
+- `restoreData()` rejects backups whose `schemaVersion` exceeds the current app's. Old backups (no `schemaVersion`) are treated as v1 and restore normally.
+
+Settings → Data Management shows the current schema version and an `EXPORT MIGRATION LOG` button that downloads the full `ph_sch_v1` record.
+
 ---
 
 ## 10. The Improvement Project
@@ -428,7 +451,7 @@ Push to GitHub → GitHub Pages serves new files (~60s)
 
 The service worker caches files under `CACHE_NAME` in `sw.js`. If this name does not change, the SW may keep serving the old cached version even after new files are pushed.
 
-**Current version:** `protocol-health-v13`
+**Current version:** `protocol-health-v14`
 
 > **Rule: Bump `CACHE_NAME` on every significant update to `main`.**
 > - Only bump when merging or pushing to `main` — feature branches do not need cache version increments
@@ -524,7 +547,7 @@ The app has two independent version numbers that serve different purposes:
 | **+0.1.0** (minor) | A new feature, a meaningful UI change, or 4+ bug fixes bundled together | Yes | Added streak counter, redesigned settings panel, new checklist group |
 | **+1.0.0** (major) | New plan added, major rework of a core system, or something that changes how you use the app | Yes | New combat training plan, schedule system rewrite, new tab added |
 
-**Current version:** `5.0.0`
+**Current version:** `5.1.0`
 
 > **Self-Update Rule:** Whenever `APP_VERSION` is bumped in `app.html`, also update ALL version references in this file (`CLAUDE.md`) to match — including this line and the Quick Reference section below. Never leave stale version numbers in project documentation.
 
@@ -541,7 +564,7 @@ The app has two independent version numbers that serve different purposes:
 When making changes, update these two lines near the top of the script in `app.html`:
 
 ```javascript
-const APP_VERSION = '5.0.0';                         // ← bump according to rules above
+const APP_VERSION = '5.1.0';                         // ← bump according to rules above
 const APP_VERSION_MSG = 'Description of changes.';    // ← short description of what changed
 ```
 
@@ -582,6 +605,9 @@ Storage keys (all in SK object at top of script):
   ph_fb_v1  — food library (autocomplete + macro memory)
   ph_ex_v1  — exercise levels (per-day progression tracking)
   ph_sw_v1  — last dismissed SW cache version (for reload banner)
+  ph_sch_v1 — schema version record (migration framework, v5.1.0+)
+
+Modules:      migrations/ — schema versioning and upgrade logic (see Section 9 subsection)
 
 Plans:        PLANS.default, PLANS.agro, PLANS.cut, PLANS.bulk, PLANS.maintenance
 Active plan:  getActivePlan() — never reference PLANS[x] directly elsewhere
@@ -589,8 +615,8 @@ Day types:    getDayType(dateStr) → 'fast' | 'light' | 'normal'
 Data writes:  always end with dispatch("EVENT_NAME")
 Dialogs:      showConfirm(), showAlert() — never native confirm/alert
 Dates:        dateToStr(d), strToDate(s), todayStr() — never toISOString()
-Cache:        sw.js CACHE_NAME = "protocol-health-v13" — bump on every significant push
-App version:  APP_VERSION = "5.0.0" — bump on notable updates (see Section 12)
+Cache:        sw.js CACHE_NAME = "protocol-health-v14" — bump on every significant push
+App version:  APP_VERSION = "5.1.0" — bump on notable updates (see Section 12)
 Update log:   UPDATE_LOG.md — every version bump must be documented here
 ```
 

@@ -4,6 +4,23 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 5.1.0 — 2026-04-20
+
+**Scope:** Minor (Migration framework — Phase 1 of 2-day refactor)
+**Banner:** "Data safety: migration framework installed. Your existing data is untouched."
+
+- **Added `migrations/` directory** with three ES modules: `runner.js`, `registry.js`, `helpers.js`. All loaded via `<script type="module">` from `app.html` and promoted to `window.*` for use from the main inline script.
+- **New schema version tracking** via `ph_sch_v1` localStorage key. On first run of v5.1.0 the record is established with `schemaVersion: 1` and `establishedFrom: 'existing-user' | 'fresh-install'`. No migrations registered in this release — the framework ships empty.
+- **Backup JSON expanded** with two additive fields: `schemaVersion` and `appVersion`. Old backups (without these fields) continue to restore cleanly — missing `schemaVersion` is treated as `1`.
+- **Restore guard added:** backups from a future schema version are rejected with a clear message instructing the user to update the app first. Prevents silently loading data the current app can't interpret.
+- **Auto-backup mechanism** in the migration runner: any migration with `requiresBackup: true` triggers a JSON download of all `ph_*` keys before running. No migrations use this yet, but the plumbing is in place for Phase 3+.
+- **Settings → Data Management:** new SCHEMA card displays the current schema version. EXPORT MIGRATION LOG button downloads the full `ph_sch_v1` record.
+- **`runInit()` converted to async** and reordered: wait for migrations module → `idbAutoRestore` → `runMigrations` → rest of init. Halts with alert if migrations fail. Entry-point IIFE simplified since conditional IDB branching moved into `runInit`.
+- **`sw.js`:** bumped `CACHE_NAME` to `protocol-health-v14` and added the three `migrations/*.js` paths to the critical cache list. Framework works offline.
+- **`index.html`:** hero-badge updated to `v5.1.0` (corrected lingering `v5.0.0` drift from pre-5.0.1).
+
+---
+
 ## Version 5.0.1 — 2026-04-08
 
 **Scope:** Patch (Day modal food log macro inputs)
