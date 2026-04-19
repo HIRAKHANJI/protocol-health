@@ -4142,3 +4142,588 @@ performance — abort any transition that feels unsafe mid-flow.
 **Evidence:** Buxton 2022, Matthews 2016 (CLAUDE.md §15)
 
 ---
+
+### Yoga Poses
+
+> **Plan integration:** Standing/floor poses (1-12, 16-18) run in the Cut Wed
+> recovery flow (15-20 min) and Maintenance Wed alternating weeks (30 min).
+> Lite Thu sessions (25-30 min) use the seated variants (13-15) plus poses
+> 1, 10, 16, 17, 18. Bulk/AGRO do not program yoga in their structured week
+> but any pose here is available as an optional cooldown.
+
+---
+
+#### Cat-cow
+
+**Category:** Mobility
+**Equipment:** None | Optional: mat
+**Target muscles (primary):** Spine (segmental flexion and extension)
+**Target muscles (secondary):** Core, shoulders, hip flexors
+**Movement type:** Mobility
+
+**Description:** On all fours, alternate between arching the spine (cow — chest and
+tailbone lift, belly drops) and rounding it (cat — chin tucks, spine domes upward).
+Syncs breath with movement to mobilize every segment of the spine. 8-10 reps.
+
+**Common mistakes:**
+- Rushing the reps, skipping segmental articulation
+- Not syncing the breath — inhale on cow, exhale on cat
+
+**Safety notes:** Gentle on the lower back and appropriate for all levels. Move
+through available range; never force.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 8 reps | Slow | — | 1× (Thu) | Warm-up for seated flow |
+| Cut | 8-10 reps | Slow | — | 1× (Wed) | Recovery flow opener |
+| Bulk | N/A | — | — | — | Optional cooldown |
+| Maintenance | 8-10 reps | Slow | — | 1× (Wed) | Recovery flow opener |
+| AGRO | N/A | — | — | — | Optional cooldown |
+
+**Evidence:** Evidence-Based CAM, PMC 8038747 (CLAUDE.md §15)
+
+---
+
+#### Downward dog
+
+**Category:** Mobility / Strength
+**Equipment:** None | Optional: mat
+**Target muscles (primary):** Hamstrings, calves, anterior deltoid
+**Target muscles (secondary):** Core, latissimus dorsi, serratus anterior
+**Movement type:** Mobility / Isometric
+
+**Description:** Inverted V position — hands shoulder-width, feet hip-width, press
+heels toward floor while pushing hips high and long through the spine. A whole-body
+decompression pose. Hold 30 sec.
+
+**Common mistakes:**
+- Rounding the upper back because tight shoulders pull the chest down
+- Bending the knees excessively — reduces the hamstring stretch (some bend is fine)
+
+**Safety notes:** Modify with bent knees if hamstrings are tight. Skip if wrist or
+shoulder impingement flares up.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Uses seated variants |
+| Cut | 30 sec | Hold | — | 1× (Wed) | Recovery flow |
+| Bulk | N/A | — | — | — | Optional cooldown |
+| Maintenance | 30 sec | Hold | — | 1× (Wed) | Recovery flow |
+| AGRO | N/A | — | — | — | Optional cooldown |
+
+**Evidence:** Evidence-Based CAM, PMC 8038747 (CLAUDE.md §15)
+
+---
+
+#### Low lunge
+
+**Category:** Mobility
+**Equipment:** None | Optional: mat, knee pad
+**Target muscles (primary):** Hip flexors (psoas, iliacus)
+**Target muscles (secondary):** Quadriceps, gluteus maximus (back leg)
+**Movement type:** Mobility
+
+**Description:** Deep lunge position with the back knee resting on the floor and the
+hips pressing forward and down. Opens the front-line hip flexors — critical for
+everyone who sits for extended periods. 30 sec/side.
+
+**Common mistakes:**
+- Front knee drifting past the toes, overloading the patellar tendon
+- Collapsing the torso forward rather than stacking it tall over the hips
+
+**Safety notes:** Pad the back knee if the floor is uncomfortable. Ease off if any
+sharp hip or knee pain arises.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Uses seated variants |
+| Cut | 30 sec/side | Hold | — | 1× (Wed) | Recovery flow |
+| Bulk | N/A | — | — | — | Optional cooldown |
+| Maintenance | 30 sec/side | Hold | — | 1× (Wed) | Recovery flow |
+| AGRO | N/A | — | — | — | Optional cooldown |
+
+**Evidence:** Evidence-Based CAM, PMC 8038747 (CLAUDE.md §15)
+
+---
+
+#### Pigeon pose
+
+**Category:** Mobility
+**Equipment:** None | Optional: mat, pillow
+**Target muscles (primary):** Hip external rotators (piriformis, gluteus medius/maximus)
+**Target muscles (secondary):** Hip flexors (back leg), obliques
+**Movement type:** Mobility
+
+**Description:** Front shin crossed in front of the body, back leg extended straight.
+Square the pelvis and let the hip sink. Opens the deep external rotators that tighten
+from sitting and running. 45 sec/side.
+
+**Common mistakes:**
+- Forcing depth instead of allowing the hip to open gradually
+- Rotating the pelvis so one hip drops — reduces the stretch target
+
+**Safety notes:** Place a pillow or folded blanket under the front-leg hip if the
+pelvis doesn't square. **Skip if knee pain is present** — the front knee is
+vulnerable in this position.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Uses seated variants |
+| Cut | 45 sec/side | Hold | — | 1× (Wed) | Recovery flow |
+| Bulk | N/A | — | — | — | Optional cooldown |
+| Maintenance | 45 sec/side | Hold | — | 1× (Wed) | Recovery flow |
+| AGRO | N/A | — | — | — | Optional cooldown |
+
+**Evidence:** Evidence-Based CAM, PMC 8038747 (CLAUDE.md §15)
+
+---
+
+#### Standing forward fold
+
+**Category:** Mobility
+**Equipment:** None
+**Target muscles (primary):** Hamstrings, erector spinae
+**Target muscles (secondary):** Calves, glutes
+**Movement type:** Mobility
+
+**Description:** From standing, hinge forward at the hips and let the arms and head
+hang. Release lower back tension and stretch the posterior chain. 30 sec.
+
+**Common mistakes:**
+- Rounding the upper back aggressively instead of hinging cleanly at the hips
+- Locking the knees, which over-stretches the hamstring attachments
+
+**Safety notes:** A slight knee bend is fine and often safer. Rise slowly to avoid
+orthostatic dizziness.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Uses seated variants |
+| Cut | 30 sec | Hold | — | 1× (Wed) | Recovery flow |
+| Bulk | N/A | — | — | — | Optional cooldown |
+| Maintenance | 30 sec | Hold | — | 1× (Wed) | Recovery flow |
+| AGRO | N/A | — | — | — | Optional cooldown |
+
+**Evidence:** Evidence-Based CAM, PMC 8038747 (CLAUDE.md §15)
+
+---
+
+#### Warrior I
+
+**Category:** Strength / Mobility
+**Equipment:** None
+**Target muscles (primary):** Quadriceps, hip flexors (back leg), gluteus maximus
+**Target muscles (secondary):** Shoulders, core, adductors
+**Movement type:** Isometric / Strength-mobility hybrid
+
+**Description:** A deep front lunge with the back foot angled ~45°, hips squared
+forward, and arms extended overhead. Builds leg strength while opening the back-leg
+hip flexor. 30 sec/side.
+
+**Common mistakes:**
+- Back foot not angled — creates knee torque on the front leg
+- Front knee caving medially instead of tracking over the middle toes
+
+**Safety notes:** Shorten the stance if balance or knee comfort is an issue.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Uses seated variants |
+| Cut | 30 sec/side | Hold | — | 1× (Wed) | Recovery flow |
+| Bulk | N/A | — | — | — | Optional cooldown |
+| Maintenance | 30 sec/side | Hold | — | 1× (Wed) | Recovery flow |
+| AGRO | N/A | — | — | — | Optional cooldown |
+
+**Evidence:** Evidence-Based CAM, PMC 8038747 (CLAUDE.md §15)
+
+---
+
+#### Warrior II
+
+**Category:** Strength / Mobility
+**Equipment:** None
+**Target muscles (primary):** Quadriceps, hip abductors
+**Target muscles (secondary):** Deltoids (isometric hold), core, adductors
+**Movement type:** Isometric / Strength-mobility hybrid
+
+**Description:** Wide stance, front knee stacked over the ankle at ~90°, arms
+extended parallel to the floor, gaze over the front fingertips. Trains quad
+endurance and hip-opening capacity simultaneously. 30 sec/side.
+
+**Common mistakes:**
+- Leaning the torso forward over the front knee rather than stacking it upright
+- Front knee not tracking over the middle toes
+
+**Safety notes:** Reduce the depth if quad fatigue causes form breakdown.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Uses seated variants |
+| Cut | 30 sec/side | Hold | — | 1× (Wed) | Recovery flow |
+| Bulk | N/A | — | — | — | Optional cooldown |
+| Maintenance | 30 sec/side | Hold | — | 1× (Wed) | Recovery flow |
+| AGRO | N/A | — | — | — | Optional cooldown |
+
+**Evidence:** Evidence-Based CAM, PMC 8038747 (CLAUDE.md §15)
+
+---
+
+#### Triangle pose
+
+**Category:** Mobility
+**Equipment:** None | Optional: block
+**Target muscles (primary):** Hamstrings, obliques
+**Target muscles (secondary):** Adductors, deltoids (top arm)
+**Movement type:** Mobility
+
+**Description:** Wide stance with one foot turned out 90°, hinge sideways over that
+leg and reach the hand to the shin, ankle, or floor while the other arm reaches
+vertical. 20 sec/side.
+
+**Common mistakes:**
+- Collapsing the chest downward instead of opening it toward the ceiling
+- Bending the front knee — should stay straight or gently soft
+
+**Safety notes:** Use a block or the shin instead of forcing the hand to the floor.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Uses seated variants |
+| Cut | 20 sec/side | Hold | — | 1× (Wed) | Recovery flow |
+| Bulk | N/A | — | — | — | Optional cooldown |
+| Maintenance | 20 sec/side | Hold | — | 1× (Wed) | Recovery flow |
+| AGRO | N/A | — | — | — | Optional cooldown |
+
+**Evidence:** Evidence-Based CAM, PMC 8038747 (CLAUDE.md §15)
+
+---
+
+#### Tree pose
+
+**Category:** Balance
+**Equipment:** None | Optional: wall for support
+**Target muscles (primary):** Ankle stabilizers, hip abductors
+**Target muscles (secondary):** Core, quadriceps, glutes
+**Movement type:** Balance / Isometric
+
+**Description:** Stand on one leg and place the other foot on the inner thigh or
+inner calf — **never on the knee joint**. Hands at heart center or overhead. Trains
+static single-leg balance. 20 sec/side.
+
+**Common mistakes:**
+- Placing the foot directly on the knee joint — creates lateral ligament stress
+- Staring at moving objects, destabilizing balance — fix gaze on a stationary point
+
+**Safety notes:** Use a wall or chair for support initially. Never place the foot on
+the supporting knee.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Uses seated variants |
+| Cut | 20 sec/side | Hold | — | 1× (Wed) | Recovery flow |
+| Bulk | N/A | — | — | — | Optional cooldown |
+| Maintenance | 20 sec/side | Hold | — | 1× (Wed) | Recovery flow |
+| AGRO | N/A | — | — | — | Optional cooldown |
+
+**Evidence:** Evidence-Based CAM, PMC 8038747 (CLAUDE.md §15)
+
+---
+
+#### Child's pose
+
+**Category:** Recovery
+**Equipment:** None | Optional: pillow
+**Target muscles (primary):** Lower back (erector spinae), latissimus dorsi
+**Target muscles (secondary):** Shoulders, hips, gluteus maximus (stretch)
+**Movement type:** Recovery / Mobility
+
+**Description:** Kneel, sit the hips back toward the heels, walk the hands forward
+and rest the forehead on the floor. Universal reset pose. 60 sec.
+
+**Common mistakes:**
+- Forcing the hips to the heels if the knees or ankles are tight
+
+**Safety notes:** Place a pillow between the calves and thighs if needed — this is
+one of the safest poses in the catalog and should be accessible to everyone.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 60 sec | Hold | — | 1× (Thu) | Recovery piece in seated flow |
+| Cut | 60 sec | Hold | — | 1× (Wed) | Recovery flow closer |
+| Bulk | N/A | — | — | — | Optional cooldown |
+| Maintenance | 60 sec | Hold | — | 1× (Wed) | Recovery flow closer |
+| AGRO | N/A | — | — | — | Optional cooldown |
+
+**Evidence:** Evidence-Based CAM, PMC 8038747 (CLAUDE.md §15)
+
+---
+
+#### Seated spinal twist
+
+**Category:** Mobility
+**Equipment:** None | Optional: mat
+**Target muscles (primary):** Thoracic rotators, obliques
+**Target muscles (secondary):** Hip flexors, latissimus dorsi
+**Movement type:** Mobility
+
+**Description:** Seated with one leg crossed over the other, rotate the torso toward
+the raised knee using the opposite arm as a lever. Trains thoracic rotation while
+the hips stay anchored. 30 sec/side.
+
+**Common mistakes:**
+- Rounding the spine instead of sitting tall through the crown
+- Using the arm to crank the rotation rather than breathing into it
+
+**Safety notes:** Gentle — never force the rotation. Stop on any lumbar pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Uses seated cat-cow instead |
+| Cut | 30 sec/side | Hold | — | 1× (Wed) | Recovery flow |
+| Bulk | N/A | — | — | — | Optional cooldown |
+| Maintenance | 30 sec/side | Hold | — | 1× (Wed) | Recovery flow |
+| AGRO | N/A | — | — | — | Optional cooldown |
+
+**Evidence:** Evidence-Based CAM, PMC 8038747 (CLAUDE.md §15)
+
+---
+
+#### Savasana
+
+**Category:** Recovery
+**Equipment:** None | Optional: mat, pillow
+**Target muscles (primary):** Full body (relaxation, parasympathetic activation)
+**Target muscles (secondary):** Nervous system downregulation
+**Movement type:** Recovery
+
+**Description:** Lie flat on the back with arms slightly out, palms up, legs
+relaxed, eyes closed. Consciously release tension from feet to crown. The closing
+pose of every yoga flow. 2-3 min.
+
+**Common mistakes:**
+- Tensing muscles instead of letting them fall heavy
+- Fidgeting or rushing to end — give the nervous system time to downshift
+
+**Safety notes:** None — the safest exercise in existence.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 2-3 min | Rest | — | 1× (Thu) | Closes seated flow |
+| Cut | 2-3 min | Rest | — | 1× (Wed) | Closes recovery flow |
+| Bulk | N/A | — | — | — | Optional cooldown |
+| Maintenance | 2-3 min | Rest | — | 1× (Wed) | Closes recovery flow |
+| AGRO | N/A | — | — | — | Optional cooldown |
+
+**Evidence:** Evidence-Based CAM, PMC 8038747 (CLAUDE.md §15)
+
+---
+
+#### Seated cat-cow (Lite variant)
+
+**Category:** Mobility (Lite variant)
+**Equipment:** Chair
+**Target muscles (primary):** Spine (segmental flexion and extension)
+**Target muscles (secondary):** Core, shoulders
+**Movement type:** Mobility
+
+**Description:** Seated on the front edge of a chair with hands on thighs, alternate
+arching (cow) and rounding (cat) the spine in sync with the breath. The seated
+mobility opener for the Lite Protocol. 8 reps.
+
+**Common mistakes:**
+- Not syncing with breath — inhale on cow, exhale on cat
+
+**Safety notes:** Ideal for limited mobility. Keep both feet planted throughout.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 8 reps | Slow | — | 1× (Thu) | Seated flow opener |
+| Cut | N/A | — | — | — | Uses standing cat-cow |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Uses standing cat-cow |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** Evidence-Based CAM, PMC 8038747 (CLAUDE.md §15)
+
+---
+
+#### Seated side stretch (Lite variant)
+
+**Category:** Mobility (Lite variant)
+**Equipment:** Chair
+**Target muscles (primary):** Obliques, latissimus dorsi
+**Target muscles (secondary):** Intercostals, shoulder (raised arm)
+**Movement type:** Mobility
+
+**Description:** Seated tall with one arm raised overhead, lean to the opposite side
+while keeping both sit bones planted. 30 sec/side.
+
+**Common mistakes:**
+- Rotating the torso forward or backward instead of staying in pure lateral flexion
+
+**Safety notes:** Both sit bones must stay on the chair throughout. Stop on any
+lumbar pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 30 sec/side | Hold | — | 1× (Thu) | Seated flow |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** Evidence-Based CAM, PMC 8038747 (CLAUDE.md §15)
+
+---
+
+#### Seated forward fold (Lite variant)
+
+**Category:** Mobility (Lite variant)
+**Equipment:** Chair
+**Target muscles (primary):** Hamstrings, lower back (erector spinae)
+**Target muscles (secondary):** Glutes, upper back
+**Movement type:** Mobility
+
+**Description:** Seated in a chair, hinge forward at the hips and reach toward the
+shins or ankles while letting the head hang heavy. 30 sec.
+
+**Common mistakes:**
+- Rounding the spine aggressively instead of hinging cleanly at the hips
+
+**Safety notes:** Only go as far as comfortable. Rise slowly to prevent dizziness.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 30 sec | Hold | — | 1× (Thu) | Seated flow |
+| Cut | N/A | — | — | — | Uses standing forward fold |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Uses standing forward fold |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** Evidence-Based CAM, PMC 8038747 (CLAUDE.md §15)
+
+---
+
+#### Standing chest opener
+
+**Category:** Mobility
+**Equipment:** None
+**Target muscles (primary):** Pectoralis major, pectoralis minor
+**Target muscles (secondary):** Anterior deltoid, biceps
+**Movement type:** Mobility
+
+**Description:** Clasp the hands behind the back, squeeze the shoulder blades
+together, and lift the arms gently away from the body while keeping the chest
+lifted. 20 sec.
+
+**Common mistakes:**
+- Jutting the chin forward instead of keeping a neutral neck
+
+**Safety notes:** Skip or reduce range if shoulder impingement is present.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 20 sec | Hold | — | 1× (Thu) | Posture piece in seated flow |
+| Cut | 20 sec | Hold | — | 1× (Wed) | Recovery flow piece |
+| Bulk | N/A | — | — | — | Optional cooldown |
+| Maintenance | 20 sec | Hold | — | 1× (Wed) | Recovery flow piece |
+| AGRO | N/A | — | — | — | Optional cooldown |
+
+**Evidence:** Evidence-Based CAM, PMC 8038747 (CLAUDE.md §15)
+
+---
+
+#### Seated neck stretches
+
+**Category:** Mobility
+**Equipment:** Chair or floor seated
+**Target muscles (primary):** Upper trapezius, sternocleidomastoid (SCM), scalenes
+**Target muscles (secondary):** Levator scapulae
+**Movement type:** Mobility
+
+**Description:** Seated tall, drop one ear toward the shoulder and let gravity do
+the work — no pulling with the hand. 20 sec/side.
+
+**Common mistakes:**
+- Raising the opposite shoulder up to meet the ear, which cancels the stretch
+
+**Safety notes:** Never force — the passive weight of the head is enough stimulus.
+Stop immediately on any tingling, numbness, or dizziness.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 20 sec/side | Hold | — | 1× (Thu) | Seated flow |
+| Cut | 20 sec/side | Hold | — | 1× (Wed) | Recovery flow piece |
+| Bulk | N/A | — | — | — | Optional cooldown |
+| Maintenance | 20 sec/side | Hold | — | 1× (Wed) | Recovery flow piece |
+| AGRO | N/A | — | — | — | Uses dedicated neck protocol |
+
+**Evidence:** Evidence-Based CAM, PMC 8038747 (CLAUDE.md §15)
+
+---
+
+#### Seated meditation
+
+**Category:** Recovery / Mental
+**Equipment:** None | Optional: cushion, chair
+**Target muscles (primary):** Parasympathetic nervous system, diaphragm
+**Target muscles (secondary):** Focus, attention regulation
+**Movement type:** Recovery / Breathwork
+
+**Description:** Seated comfortably — cushion, chair, or floor — with spine tall
+and eyes closed or soft-gazed. Breathing pattern: **4 sec inhale / 4 sec hold /
+6 sec exhale**. The extended exhale drives parasympathetic activation. 3 min.
+
+**Common mistakes:**
+- Forcing the breath into rigid counts instead of letting it settle into rhythm
+- Getting frustrated with a wandering mind — notice and return, don't grade
+
+**Safety notes:** None. Skip the breath hold if it creates anxiety.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 3 min | 4/4/6 breath | — | 1× (Thu) | Closes seated flow |
+| Cut | 3 min | 4/4/6 breath | — | 1× (Wed) | Closes recovery flow |
+| Bulk | N/A | — | — | — | Optional cooldown |
+| Maintenance | 3 min | 4/4/6 breath | — | 1× (Wed) | Closes recovery flow |
+| AGRO | N/A | — | — | — | Optional cooldown |
+
+**Evidence:** Evidence-Based CAM, PMC 8038747 (CLAUDE.md §15)
+
+---
