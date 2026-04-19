@@ -1048,6 +1048,11 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
         <input type="file" id="restoreFileInput" accept=".json" style="display:none" onchange="restoreData(event)">
         <div id="backupStatus" style="display:none;margin-top:10px;padding:10px 13px;border-radius:8px;font-family:'DM Mono',monospace;font-size:0.7rem;line-height:1.6"></div>
         <div id="storageHealth" style="margin-top:10px;padding:10px 13px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--muted);line-height:1.8"></div>
+        <div style="margin-top:10px;padding:10px 13px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-family:'DM Mono',monospace">
+          <div style="font-size:0.6rem;color:var(--muted);letter-spacing:1px;margin-bottom:4px">SCHEMA</div>
+          <div id="schemaVersionDisplay" style="font-size:0.85rem;color:var(--text)">Schema v—</div>
+          <button class="reset-btn" onclick="exportMigrationLog()" style="margin-top:10px;width:100%;border-color:#999;color:#999">EXPORT MIGRATION LOG</button>
+        </div>
       </div>
 
     </div>
@@ -1238,6 +1243,20 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
   </div>
 </div>
 
+<!-- ─── MIGRATION FRAMEWORK MODULE LOADER ─────────────────────────────────────
+     Loads migrations/runner.js as an ES module, promotes its exports to
+     window.* for the main inline script to use, then signals readiness via
+     a flag + custom event. The main script's runInit() awaits this signal
+     before touching storage. -->
+<script type="module">
+  import { runMigrations, getSchemaVersion, getMigrationLog } from './migrations/runner.js';
+  window.runMigrations = runMigrations;
+  window.getSchemaVersion = getSchemaVersion;
+  window.getMigrationLog = getMigrationLog;
+  window._PH_MIGRATIONS_READY = true;
+  window.dispatchEvent(new Event('ph:migrations-ready'));
+</script>
+
 <script>
 // ─── STORAGE KEYS ────────────────────────────────────────────────────────────
 // All localStorage keys live here in one place.
@@ -1368,7 +1387,8 @@ const SK = {
   exLevels:  'ph_ex_v1',   // object keyed by dateStr — each value: { groupId: levelIndex, ... }
   lightDays: 'ph_ld_v1',   // object keyed by dateStr — value: true if that day is a light eating day
   swDismissedVer: 'ph_sw_v1', // string — last SW cache version the user dismissed the reload banner for
-  backupTs: 'ph_bts_v1' // number — timestamp of last backup (for reminder banner)
+  backupTs: 'ph_bts_v1', // number — timestamp of last backup (for reminder banner)
+  schemaVersion: 'ph_sch_v1' // object — schema record: { schemaVersion, migrationsApplied[], lastMigration, establishedAt, establishedFrom }
 };
 
 // ─── APP VERSION ─────────────────────────────────────────────────────────────
@@ -1377,8 +1397,10 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '5.0.1';
-const APP_VERSION_MSG = 'Lite Protocol: gentle workouts for all ages. Supplement tracking now optional in Settings. Cut/Bulk/Maintenance plans overhauled with science-backed multi-modal training.';
+const APP_VERSION = '5.1.0';
+const APP_VERSION_MSG = 'Data safety: migration framework installed. Your existing data is untouched.';
+// Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
+window.APP_VERSION = APP_VERSION;
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -6298,6 +6320,10 @@ function openSettings() {
   syncCustomSelect('activitySelectCustom', 'settingActivityLevel');
   document.getElementById('settingsOverlay').classList.add('active');
   renderStorageHealth();
+  // Populate schema version display (migration framework, v5.1.0+)
+  const schemaV = (typeof window.getSchemaVersion === 'function') ? window.getSchemaVersion() : null;
+  const schemaEl = document.getElementById('schemaVersionDisplay');
+  if (schemaEl) schemaEl.textContent = `Schema v${schemaV != null ? schemaV : '?'}`;
 }
 
 function closeSettings() { document.getElementById('settingsOverlay').classList.remove('active'); }
@@ -7519,6 +7545,8 @@ document.getElementById('scheduleChoiceOverlay').addEventListener('click', e=>{
 function backupData() {
   const backup = {
     version: 'ph_v1',
+    schemaVersion: (typeof window.getSchemaVersion === 'function' ? window.getSchemaVersion() : 1) || 1,
+    appVersion: APP_VERSION,
     exportedAt: dateToStr(new Date()),
     data: {}
   };
@@ -7542,6 +7570,22 @@ function backupData() {
 
   ss(SK.backupTs, String(Date.now()));
   showBackupStatus('✓ Backup downloaded. Save it somewhere safe — Google Drive, email to yourself, etc.', 'var(--green)');
+}
+
+// exportMigrationLog: downloads the current ph_sch_v1 schema record as JSON.
+// Used from Settings → Data Management to inspect schema version and migration history.
+function exportMigrationLog() {
+  const log = (typeof window.getMigrationLog === 'function') ? window.getMigrationLog() : null;
+  if (!log) { showAlert('No migration log available.'); return; }
+  const blob = new Blob([JSON.stringify(log, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `protocol-health-migration-log-${dateToStr(new Date())}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 // restoreData: triggered by the hidden file input when a file is picked.
@@ -7571,6 +7615,18 @@ function restoreData(event) {
       const keys = Object.keys(backup.data);
       if(!keys.length) {
         showBackupStatus('✗ Backup file contains no data.', 'var(--danger)');
+        return;
+      }
+
+      // Guard: reject backups from a future schema version the current app can't handle.
+      // Old backups (no schemaVersion) are treated as v1 and always pass.
+      const incomingSchema = backup.schemaVersion || 1;
+      const currentSchema = (typeof window.getSchemaVersion === 'function' ? window.getSchemaVersion() : 1) || 1;
+      if (incomingSchema > currentSchema) {
+        showBackupStatus(
+          `✗ This backup is from schema v${incomingSchema}; current app uses v${currentSchema}. Update the app first.`,
+          'var(--danger)'
+        );
         return;
       }
 
@@ -8354,7 +8410,32 @@ document.getElementById('settingsOverlay').addEventListener('click',e=>{if(e.tar
 // the IndexedDB mirror before rendering. After init, a full IDB sync ensures
 // the mirror is current.
 
-function runInit() {
+async function runInit() {
+  // Gate 1: wait for the migrations ES module to finish loading.
+  // Flag check first — no wait if already resolved (fast path).
+  if (!window._PH_MIGRATIONS_READY) {
+    await new Promise(resolve => window.addEventListener('ph:migrations-ready', resolve, { once: true }));
+  }
+
+  // Gate 2: if localStorage was wiped (iOS eviction), restore from the IDB mirror
+  // BEFORE migrations run. Otherwise the schema record would be written for an
+  // empty DB and then restored data would arrive under a stale schema version.
+  // idbAutoRestore is internally guarded (no-op if localStorage already has data),
+  // so calling it unconditionally is safe and idempotent.
+  try { await idbAutoRestore(); } catch (e) { console.warn('[init] idbAutoRestore failed:', e); }
+
+  // Gate 3: run schema migrations. Halts init on failure with a user-visible alert.
+  if (typeof window.runMigrations === 'function') {
+    const result = await window.runMigrations(Object.values(SK));
+    if (!result.ok) {
+      if (typeof showAlert === 'function') {
+        showAlert('Data migration failed. An auto-backup has been downloaded. Do not use the app further until this is investigated.');
+      }
+      console.error('[migrations] Halting init:', result);
+      return;
+    }
+  }
+
   const s = getSettings();
 
   // Splash screen — show plan name, then fade out
@@ -8387,23 +8468,9 @@ function runInit() {
   setTimeout(() => idbSyncAll(), 2000);
 }
 
-// Check if localStorage was wiped — if so, restore from IndexedDB mirror first
-(function(){
-  const hasData = Object.values(SK).some(key => {
-    if(key === SK.seenVer || key === SK.swDismissedVer) return false;
-    return localStorage.getItem(key) !== null;
-  });
-  if(hasData) {
-    // localStorage intact — normal fast init
-    runInit();
-  } else {
-    // localStorage empty — attempt IDB restore, then init
-    idbAutoRestore().then(restored => {
-      if(restored) console.log('Data recovered from IndexedDB mirror');
-      runInit();
-    }).catch(() => runInit());
-  }
-})();
+// Entry point. runInit is now async and handles idbAutoRestore + migrations
+// internally in the correct order. Any throw is caught to avoid unhandled promise rejections.
+runInit().catch(err => console.error('[init] runInit failed:', err));
 
 // ─── VISIBILITY CHANGE — CALENDAR REFRESH ON APP FOREGROUND ─────────────────
 // When the PWA returns from background (or user switches back to the tab),
