@@ -4,6 +4,25 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 5.5.0 — 2026-04-21
+
+**Scope:** Minor (Shared components extraction — Phase 5 of 2-day refactor)
+**Banner:** "Under the hood: shared UI components extracted. No behavior change."
+
+- **Extracted shared UI helpers from `app.html` into the new `components/` directory:**
+  - `components/workout-card.js` — `exRow`, `exRowWithLevel`, `workoutCard`, `stretchRow`, `_resetExRowInstances`, plus module-scoped `_exRowInstanceCount` and `_wexCounter` state (54 lines).
+  - `components/rule-card.js` — `ruleCard` (4 lines).
+  - `components/checklist.js` — full TODAY-tab checklist lifecycle: `renderTodayChecklist`, `loadChecklist`, `toggleSupExpand`, `toggleSupItem`, `updateSupCount`, `toggle`, `toggleWaterExpand`, `onWaterInput`, `adjustWater`, `updateWaterCardState`, `saveAllChecks`, `syncAutoStatusChecks`, `refreshAutoItems`, `resetToday` (404 lines).
+- **`app.html` reduced by another ~456 lines** (from ~5045 to ~4590). All content byte-identical to source, verified via text-diff.
+- **Module interop:** a fourth `<script type="module">` shim imports the three component modules and promotes all exports to `window.*`. Plans' `workoutContent`/`rulesContent` templates continue to call `exRow`, `workoutCard`, `ruleCard`, etc. by bare name — resolved via globalThis fallback.
+- **`runInit()`** now awaits a fourth readiness event, `ph:components-ready`, after the existing migrations/plans/fnmodules gates.
+- **Module-local state:** `_exRowInstanceCount` and `_wexCounter` (used by `exRowWithLevel`, `exRow`, `stretchRow` to generate unique row IDs) live inside `components/workout-card.js`. External callers clear them via the exported `_resetExRowInstances()`.
+- **`sw.js`:** bumped `CACHE_NAME` to `v18` and added the three `components/*.js` paths to the critical cache list.
+- **`index.html`:** hero-badge updated to `v5.5.0`.
+- **Part B (judgment-heavy factoring of in-plan duplication) was NOT done** — prompt recommended skipping; app would gain filing-cabinet value at meaningful risk. Left as a post-refactor backlog item if ever warranted.
+
+---
+
 ## Version 5.4.0 — 2026-04-21
 
 **Scope:** Minor (Large function extraction — Phase 4 of 2-day refactor)
