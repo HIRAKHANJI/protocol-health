@@ -23,7 +23,7 @@ It is actively used daily. Every feature exists because it was needed, not becau
 
 ## 2. What the App Is
 
-Protocol Health is a single-file Progressive Web App (PWA) — the entire application lives in one HTML file (`index.html`) with no backend, no server, no database, and no external dependencies beyond Google Fonts. All data is stored in the browser's localStorage on the user's device.
+Protocol Health is a zero-dependency, zero-build Progressive Web App (PWA). The app bootstrap lives in `app.html`; plan definitions, large function groups, UI helpers, and the migration framework load as native ES modules from `plans/`, `modules/`, `components/`, and `migrations/` (see Section 23). No backend, no server, no database, and no external dependencies beyond Google Fonts. All data is stored in the browser's localStorage on the user's device.
 
 Installed on Android Chrome as a fullscreen PWA — behaves like a native app with its own icon, no browser chrome, and full offline capability after first load.
 
@@ -233,7 +233,7 @@ Nothing else changes. `getActivePlan()` reads `settings.plan`, looks up `PLANS[s
 
 | File | Purpose |
 |------|---------|
-| `app.html` | The entire app — HTML, CSS, and all JavaScript in one file. ~5000+ lines. No build process, no bundler, no framework. |
+| `app.html` | App bootstrap — HTML, CSS, and the inline orchestration script (runInit + helpers that stay in classic scope). ~4600 lines post-refactor. Plans, large function groups, shared components, and migrations load as ES modules — see Section 23. Zero build process, zero bundler, zero framework. |
 | `index.html` | Landing/product page. Links to `app.html`. |
 | `manifest.json` | PWA manifest. App name, icons, display mode (standalone = fullscreen), theme color. |
 | `sw.js` | Service Worker. Caches all app files after first load for offline use. Cache-first strategy. Current cache name: `protocol-health-v18`. Bump version on major deploys. |
@@ -393,7 +393,7 @@ Settings → Data Management shows the current schema version and an `EXPORT MIG
 
 ## 10. The Improvement Project
 
-This app is in active development. Updates are made through Claude Code connected directly to the GitHub repository. The single-file architecture makes this straightforward — there is no build system, no compiled output, no package manager for the app itself.
+This app is in active development. Updates are made through Claude Code connected directly to the GitHub repository. The zero-build, zero-dependency architecture makes this straightforward — files are pushed to the repo and served live by GitHub Pages. Plans, modules, components, and migrations load as native ES modules with no bundler, no compiled output, no package manager for the app itself.
 
 ### Known Improvement Areas
 - **Streak tracking** — visible consecutive day compliance counter with streak protection mechanics
@@ -430,7 +430,7 @@ This app is in active development. Updates are made through Claude Code connecte
 - **Mobile-first.** The app is used on a phone. Every UI change must work on a 375px screen.
 - **Dark theme only.** Colors: bg `#0a0a0a`, surface `#111111`, accent `#c8f542` (green), accent2 `#f5a623` (orange).
 - **Fonts:** Bebas Neue (headers), DM Mono (data/labels), DM Sans (body). Do not introduce new fonts.
-- **No over-engineering.** The single-file architecture is a feature, not a limitation.
+- **No over-engineering.** Zero build step, zero dependencies, native ES modules. The constraint is a feature, not a limitation.
 - **Bodyweight first.** Any new workout content must default to zero-equipment exercises.
 
 ---
@@ -589,7 +589,7 @@ const APP_VERSION_MSG = 'Description of changes.';    // ← short description o
 ```
 Repository:   github.com/HIRAKHANJI/protocol-health
 Live URL:     https://hirakhanji.github.io/protocol-health/
-App file:     app.html (single file, ~5000+ lines)
+App file:     app.html (bootstrap, ~4600 lines post-refactor; plans/modules/components load as ES modules — see Section 23)
 Landing:      index.html (product page)
 PWA files:    manifest.json, sw.js, PH_LOGO_192.png, PH_LOGO_512.png
 
