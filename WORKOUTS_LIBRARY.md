@@ -3602,3 +3602,91 @@ push-up form is not yet clean at standard volume.
 Schoenfeld 2021 (rep continuum)
 
 ---
+
+### HIIT Protocols
+
+---
+
+#### HIIT Circuit A
+
+**Category:** Cardio / HIIT
+**Equipment:** None
+**Target muscles (primary):** Cardiovascular system, full body (glutes, quads,
+hamstrings, hip flexors, core)
+**Target muscles (secondary):** Deltoids, calves, pectoralis major, hamstrings
+**Movement type:** Circuit protocol
+
+**Description:** A 30 sec work / 15 sec rest interval circuit rotating through six
+bodyweight exercises for four rounds, with 2 min rest between rounds. Total duration
+~20 min. Biases full-body cardiovascular conditioning and fat oxidation over raw
+power output — lower-impact than Circuit B and appropriate as the week's first HIIT
+session. Exercise order is fixed: high knees → bodyweight squat (fast) → mountain
+climbers → reverse lunge (alternating) → jumping jacks → plank to downdog.
+
+**Common mistakes:**
+- Rushing form as fatigue builds in later rounds — sacrificing depth, ROM, and posture
+- Holding breath during the work interval instead of maintaining rhythmic breathing
+
+**Safety notes:** Scale every exercise to current fitness level — substitute easier
+variants rather than breaking form. **For users >100kg: substitute marching jacks
+for jumping jacks, and use controlled bodyweight squats (no jump) for any jump-based
+movement.** Stop if dizziness, chest pain, or sharp joint pain occurs. Never program
+Circuit A and Circuit B on consecutive days.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Uses tai chi / gentle mobility |
+| Cut | 4 rounds of 6×30s | Fast | 15s intra / 2 min inter-round | 1× | Tuesday HIIT |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | 4 rounds of 6×30s | Fast | 15s intra / 2 min inter-round | 1× | Tuesday HIIT rotation option |
+| AGRO | N/A | — | — | — | Uses run + shadowbox conditioning |
+
+**Evidence:** ACE 2024 (HIIT calorie burn — up to 30% more cal/min than steady-state,
+CLAUDE.md §15), Schoenfeld 2021 (HIIT vs MICT meta-analysis of 54 studies — equivalent
+fat loss outcomes, CLAUDE.md §15), Boutcher 2011 (HIIT body composition, CLAUDE.md §15)
+
+---
+
+#### HIIT Circuit B
+
+**Category:** Cardio / HIIT
+**Equipment:** None
+**Target muscles (primary):** Cardiovascular system, full body (quads, glutes, chest,
+triceps, core)
+**Target muscles (secondary):** Deltoids, hamstrings, hip flexors, calves, obliques
+**Movement type:** Circuit protocol
+
+**Description:** A 40 sec work / 20 sec rest interval circuit rotating through six
+bodyweight exercises for three rounds, with 90 sec rest between rounds. Total
+duration ~20 min. Higher-intensity and higher-impact than Circuit A, biasing full
+body power and muscular endurance. Exercise order is fixed: squat jump → push-up
+(any level from the push progression) → speed skaters → bicycle crunch → burpee →
+flutter kicks.
+
+**Common mistakes:**
+- Sacrificing squat depth for speed on squat jumps — short ROM reduces both power and safety
+- Collapsing hips on push-ups under fatigue; not controlling landings on speed skaters
+
+**Safety notes:** **For users >100kg: use squat thrust (no push-up, no jump) instead
+of burpee, and fast bodyweight squat (no jump) instead of squat jump — this removes
+the two highest-impact movements.** Stop on any sharp joint pain. Pick a push-up
+level that allows clean form for the full 40 sec interval. **Never program Circuit A
+and Circuit B on consecutive days** — separate by at least 48 hours.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not suitable — impact + intensity |
+| Cut | 3 rounds of 6×40s | Fast | 20s intra / 90s inter-round | 1× | Friday HIIT |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | N/A | — | — | — | Uses run + shadowbox conditioning |
+
+**Evidence:** ACE 2024 (HIIT calorie burn, CLAUDE.md §15), Schoenfeld 2021 (HIIT vs
+MICT meta-analysis of 54 studies, CLAUDE.md §15), Boutcher 2011 (HIIT body composition,
+CLAUDE.md §15)
+
+---
