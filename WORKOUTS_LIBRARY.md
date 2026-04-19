@@ -6042,3 +6042,248 @@ creates anxiety.
 **Evidence:** ICFSR 2021 (CLAUDE.md §15)
 
 ---
+
+### Isometric Finishers
+
+> **Plan integration:** Bulk-only finishers that cap the push and lower sessions.
+> Long-muscle-length isometrics produce superior hypertrophy outcomes per
+> Oranchuk 2019 (CLAUDE.md §15).
+
+---
+
+#### Push-up hold at bottom
+
+**Category:** Push / Isometric
+**Equipment:** None
+**Target muscles (primary):** Pectoralis major, triceps, anterior deltoid
+**Target muscles (secondary):** Core, serratus anterior
+**Movement type:** Isometric (long muscle length)
+
+**Description:** Hold the full push-up plank position with the chest hovering
+~1 inch off the floor — the bottom of the ROM, where the chest is at its longest
+stretch. Long muscle-length isometrics produce superior hypertrophy outcomes.
+3×10-15 sec.
+
+**Common mistakes:**
+- Hips sagging or piking, breaking the rigid plank line
+- Holding the breath — breathe steadily throughout the hold
+
+**Safety notes:** **Requires push progression level ≥ 3 (standard push-up) —** do
+not attempt before that level. Drop to the knees if plank form breaks.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not in plan structure |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | 3×10-15 sec | Hold | 60s | 1× (Mon) | End of push session finisher |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** Oranchuk 2019 (long muscle length isometric hypertrophy) (CLAUDE.md §15)
+
+---
+
+#### Deep squat hold
+
+**Category:** Squat / Isometric
+**Equipment:** None | Optional: heel wedge (book or plate), doorframe for balance
+**Target muscles (primary):** Quadriceps, gluteus maximus, hip flexors
+**Target muscles (secondary):** Ankle dorsiflexors, core, adductors
+**Movement type:** Isometric (long muscle length)
+
+**Description:** Descend into a full-depth bodyweight squat with heels flat and
+chest up, and hold the bottom position. Trains quad and hip endurance at long
+muscle length. 3×20-30 sec.
+
+**Common mistakes:**
+- Heels lifting off the floor — indicates insufficient ankle mobility; use a wedge
+- Rounding the lower back at the bottom instead of maintaining a neutral spine
+
+**Safety notes:** Hold onto a doorframe or sturdy pole if balance is an issue.
+Use a heel wedge (book or small plate) if ankle mobility limits depth.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not in plan structure |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | 3×20-30 sec | Hold | 60-90s | 1× (Thu) | End of lower session finisher |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** Oranchuk 2019 (long muscle length isometric hypertrophy) (CLAUDE.md §15)
+
+---
+
+### Warmup Movements
+
+> **Plan integration:** General warmup block (3-5 min total) programmed across
+> every session in every plan. These movements prepare the joints and tissues
+> before the main session. Reference: ACSM guidelines and general exercise
+> physiology.
+
+---
+
+#### Hip CARs (Controlled Articular Rotations)
+
+**Category:** Mobility
+**Equipment:** None | Optional: wall for balance
+**Target muscles (primary):** Hip joint capsule (full ROM control)
+**Target muscles (secondary):** Gluteus medius, hip flexors, adductors
+**Movement type:** Mobility
+
+**Description:** Stand on one leg with the other knee raised, then rotate the
+raised hip through the largest pain-free circle available — out, up, around, and
+back. Each circle takes 3-4 seconds. 5 each direction/hip. Essential for hip
+health and joint longevity.
+
+**Common mistakes:**
+- Rushing — each circle should take 3-4 seconds
+- Using momentum instead of active muscular control
+
+**Safety notes:** Hold a wall for balance. Stop short of any sharp hip pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 5 each way/hip | Very slow | — | Every session | General warmup |
+| Cut | 5 each way/hip | Very slow | — | Every session | General warmup |
+| Bulk | 5 each way/hip | Very slow | — | Every session | General warmup |
+| Maintenance | 5 each way/hip | Very slow | — | Every session | General warmup |
+| AGRO | 5 each way/hip | Very slow | — | Every session | General warmup |
+
+**Evidence:** ACSM guidelines / general exercise physiology
+
+---
+
+#### Arm circles
+
+**Category:** Mobility
+**Equipment:** None
+**Target muscles (primary):** Shoulder joint, deltoids
+**Target muscles (secondary):** Rotator cuff, upper back
+**Movement type:** Mobility
+
+**Description:** Extend the arms out to the sides and draw small circles
+progressing to larger circles, then reverse direction. 10 each direction.
+
+**Common mistakes:**
+- Only performing small circles and skipping the large-range finish
+- Not reversing direction
+
+**Safety notes:** Skip if an acute shoulder injury is present — substitute gentle
+pendulum swings.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 10 each way | Slow | — | Every session | General warmup |
+| Cut | 10 each way | Slow | — | Every session | General warmup |
+| Bulk | 10 each way | Slow | — | Every session | General warmup |
+| Maintenance | 10 each way | Slow | — | Every session | General warmup |
+| AGRO | 10 each way | Slow | — | Every session | General warmup |
+
+**Evidence:** ACSM guidelines / general exercise physiology
+
+---
+
+#### Leg swings
+
+**Category:** Mobility
+**Equipment:** None | Optional: wall for balance
+**Target muscles (primary):** Hip flexors, hamstrings (front-to-back), hip adductors, hip abductors (lateral)
+**Target muscles (secondary):** Core (anti-rotation)
+**Movement type:** Dynamic mobility
+
+**Description:** Hold a wall for support, swing one leg front-to-back through a
+controlled ROM, then side-to-side. 10 each direction/leg.
+
+**Common mistakes:**
+- Swinging aggressively with momentum — use controlled ROM increase instead
+- Rotating the torso with the swing
+
+**Safety notes:** Start with a small arc and increase gradually.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 10 each way/leg | Controlled | — | Every session | General warmup |
+| Cut | 10 each way/leg | Controlled | — | Every session | General warmup |
+| Bulk | 10 each way/leg | Controlled | — | Every session | General warmup |
+| Maintenance | 10 each way/leg | Controlled | — | Every session | General warmup |
+| AGRO | 10 each way/leg | Controlled | — | Every session | General warmup |
+
+**Evidence:** ACSM guidelines / general exercise physiology
+
+---
+
+#### Thoracic rotation
+
+**Category:** Mobility
+**Equipment:** None
+**Target muscles (primary):** Thoracic spine rotators
+**Target muscles (secondary):** Obliques, rear deltoid
+**Movement type:** Mobility
+
+**Description:** From all fours or standing, place one hand behind the head and
+rotate the elbow toward the ceiling, then toward the floor. Trains segmental
+thoracic rotation. 8/side.
+
+**Common mistakes:**
+- Rotating from the lumbar spine instead of the thoracic segment
+- Rushing through reps
+
+**Safety notes:** Very gentle — ideal for desk workers and anyone with upper-back
+stiffness.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 8/side | Slow | — | Every session | General warmup |
+| Cut | 8/side | Slow | — | Every session | General warmup |
+| Bulk | 8/side | Slow | — | Every session | General warmup |
+| Maintenance | 8/side | Slow | — | Every session | General warmup |
+| AGRO | 8/side | Slow | — | Every session | General warmup |
+
+**Evidence:** ACSM guidelines / general exercise physiology
+
+---
+
+#### Wrist CARs
+
+**Category:** Mobility
+**Equipment:** None
+**Target muscles (primary):** Wrist joint, forearm flexors, forearm extensors
+**Target muscles (secondary):** Fingers, intrinsic hand muscles
+**Movement type:** Mobility
+
+**Description:** Interlace the fingers and rotate the wrists slowly through full
+circles — outward, up, inward, down — then reverse. 10 each direction.
+
+**Common mistakes:**
+- Not exploring full ROM — wrist CARs are only useful at end range
+
+**Safety notes:** **Critical before any ground-based work** — push-ups, planks,
+handstands, Animal Flow. If wrist pain persists, modify ground exercises to
+fist-based positions.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 10 each way | Very slow | — | Every session | General warmup |
+| Cut | 10 each way | Very slow | — | Every session | General warmup |
+| Bulk | 10 each way | Very slow | — | Every session | General warmup |
+| Maintenance | 10 each way | Very slow | — | Every session | General warmup |
+| AGRO | 10 each way | Very slow | — | Every session | Mandatory before ground work |
+
+**Evidence:** ACSM guidelines / general exercise physiology
+
+---
