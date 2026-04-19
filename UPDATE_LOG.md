@@ -4,6 +4,21 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 5.3.0 — 2026-04-20
+
+**Scope:** Minor (Plan extraction — Phase 3 of 2-day refactor)
+**Banner:** "Under the hood: plan definitions now load as separate files. No behavior change."
+
+- **Extracted all 5 plan objects and `EXERCISE_PROGRESSIONS` from `app.html` into ES modules** under the new `plans/` directory: `lite.js` (historical `default` key), `agro.js`, `cut.js`, `bulk.js`, `maintenance.js`, `exercise-progressions.js`, plus `index.js` that assembles the `PLANS` object and maps the historical `default` key to LITE PROTOCOL.
+- **`app.html` reduced by ~1765 lines** — the inline plan definitions (previously ~L2253-L4027) are now a 10-line pointer comment.
+- **Module interop:** new `<script type="module">` loader in `<body>` imports from `plans/index.js` and promotes `PLANS` + `EXERCISE_PROGRESSIONS` to `window.*`. Dispatches a `ph:plans-ready` event; `runInit()` awaits this gate alongside the existing `ph:migrations-ready` gate.
+- **Byte-fidelity:** every extracted plan was verified identical to its original source lines via text diff before the source was removed. Zero behavior change.
+- **Backward compatibility:** users whose `settings.plan === 'default'` continue to see LITE PROTOCOL — the historical key is explicitly mapped in `plans/index.js`.
+- **`sw.js`:** bumped `CACHE_NAME` to `v16` and added the 7 new `plans/*.js` paths to the critical cache list so the whole app works offline.
+- **`index.html`:** hero-badge updated to `v5.3.0`.
+
+---
+
 ## Version 5.2.0 — 2026-04-20
 
 **Scope:** Minor (Bugfixes — Phase 2 of 2-day refactor)
