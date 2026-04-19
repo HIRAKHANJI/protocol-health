@@ -1366,11 +1366,25 @@ async function idbAutoRestore() {
     const dataKeys = Object.keys(idbData).filter(k => !k.startsWith('_'));
     if(dataKeys.length === 0) return false; // IDB also empty, nothing to restore
 
-    // Restore from IndexedDB → localStorage
+    // Restore from IndexedDB → localStorage, tracking any write failures
+    const failed = [];
     dataKeys.forEach(key => {
-      try { localStorage.setItem(key, JSON.stringify(idbData[key])); } catch {}
+      try {
+        localStorage.setItem(key, JSON.stringify(idbData[key]));
+      } catch (e) {
+        failed.push(key);
+        console.error(`[idb] Auto-restore failed for ${key}:`, e);
+      }
     });
-    console.log('Auto-restored ' + dataKeys.length + ' keys from IndexedDB mirror');
+    console.log('Auto-restored ' + (dataKeys.length - failed.length) + '/' + dataKeys.length + ' keys from IndexedDB mirror');
+    // Surface partial failures to the user once the UI is ready.
+    if (failed.length > 0) {
+      setTimeout(() => {
+        if (typeof showAlert === 'function') {
+          showAlert('Auto-restore partially failed: ' + failed.length + ' key(s) could not be written. Back up immediately and free storage.');
+        }
+      }, 1000);
+    }
     return true;
   } catch {
     return false;
