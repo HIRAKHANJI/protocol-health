@@ -4,6 +4,26 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 5.4.0 — 2026-04-21
+
+**Scope:** Minor (Large function extraction — Phase 4 of 2-day refactor)
+**Banner:** "Under the hood: export, calendar, and radar load as separate modules. No behavior change."
+
+- **Extracted four large function groups from `app.html` into the new `modules/` directory:**
+  - `modules/schedule-html.js` — `downloadScheduleHTML` (233 lines)
+  - `modules/radar.js` — `setRadarWindow`, `computeRadarMetrics`, `renderRadar`, plus the module-scoped `radarWindow` state (411 lines)
+  - `modules/calendar.js` — `changeMonth`, `renderCalendar`, `openDayModal`, 6 modal handlers (`toggleModalCheck`, `toggleModalSupItem`, `toggleModalWorkoutChecklist`, `toggleModalWorkoutEx`, `toggleFastDay`, `toggleLightDay`), `saveDayLog`, `closeModal`, plus the module-scoped `calYear`/`calMonth` state and the modalOverlay click-outside listener (583 lines)
+  - `modules/export.js` — `openExport`, `generateExport` (with all nested helpers), `renderMarkdownPreview`, `inlineFormat`, `copyExport`, `downloadReport` (716 lines)
+- **`app.html` reduced by another ~1943 lines** (from ~6929 to ~4990). All extracted code is byte-identical to its former inline source, verified by text-diff before removal.
+- **Module interop:** a new `<script type="module">` shim imports the four modules and promotes each exported function to `window.*`. Runtime callers (classic script + HTML onclick handlers) continue to resolve bare identifiers (`renderCalendar()`, `openDayModal('2026-04-10')`, etc.) via globalThis fallback.
+- **Globals exposure:** the classic script explicitly runs `Object.assign(window, { SK, MONTHS_LIST, DAYS_SHORT, AUTO_WORKOUT_IDS, WORKOUT_ITEM_SESSION })` so the extracted modules can reference those `const` bindings by bare name. Function declarations are automatically window-attached; only `const`/`let` needed explicit exposure.
+- **New startup gate:** `runInit()` now awaits a third readiness event, `ph:fnmodules-ready`, after the existing migrations-ready and plans-ready gates.
+- **Module-local state:** `radarWindow` (default 7-day radar window) lives inside `modules/radar.js`; `calYear`/`calMonth` (current calendar month pointer) lives inside `modules/calendar.js`. Neither is reachable from the classic script — the module exports the functions that read/mutate them.
+- **`sw.js`:** bumped `CACHE_NAME` to `v17` and added the four `modules/*.js` paths to the critical cache list.
+- **`index.html`:** hero-badge updated to `v5.4.0`.
+
+---
+
 ## Version 5.3.0 — 2026-04-20
 
 **Scope:** Minor (Plan extraction — Phase 3 of 2-day refactor)
