@@ -3690,3 +3690,148 @@ MICT meta-analysis of 54 studies, CLAUDE.md §15), Boutcher 2011 (HIIT body comp
 CLAUDE.md §15)
 
 ---
+
+### Shadowboxing
+
+---
+
+#### Shadowboxing cardio
+
+**Category:** Cardio / Combat conditioning
+**Equipment:** None | Optional: hand wraps
+**Target muscles (primary):** Deltoids (anterior, lateral, posterior), core
+(rotational — obliques, transverse abdominis), cardiovascular system
+**Target muscles (secondary):** Hip flexors, calves, forearms, glutes (rotation
+drivers), upper back (rear delts, rhomboids)
+**Movement type:** Cardio / Skill
+
+**Description:** Five 3-minute rounds of imagined boxing work with 60 sec rest
+between rounds, structured in a classic boxing-gym progression — warm-up, speed,
+power, intervals, and mixed tempo. No opponent, no bag — pure cardio and skill
+training focused on technique, rotation, footwork, and breath rhythm. Burns 300-400
+cal per 30 min session while building shoulder endurance, rotational core strength,
+and combat-sport fundamentals. Total duration ~20 min including rest periods.
+
+**Round breakdown:**
+- **Round 1 — Warm-up:** Jab-cross combinations, light footwork, finding rhythm.
+- **Round 2 — Speed:** Fast combinations (jab-cross-hook, 1-2-3), high volume, light power.
+- **Round 3 — Power:** Hooks, uppercuts, overhand rights. Rotate hips fully on every shot. Fewer combos, maximum force.
+- **Round 4 — Intervals:** 20 sec all-out flurry (max speed, max volume) / 10 sec light movement. Repeat 9×.
+- **Round 5 — Mixed tempo:** Alternate 30 sec speed / 30 sec power for the full 3 min. Combine everything from rounds 2-3.
+
+**Common mistakes:**
+- Dropping the hands between punches under fatigue, breaking defensive posture
+- Flat-footed stance or arms-only punching — must stay on balls of feet and rotate hips for real power
+
+**Safety notes:** **Wrist alignment is critical** — punch with flat knuckles aligned
+with the forearm to prevent wrist injury. Use hand wraps if available. Beginners
+should start at a slow pace focused on form before adding speed or power. Reduce
+round count if shoulder pain develops. **Beginner modification:** 3 × 2-min rounds
+with 90 sec rest; use rounds 1-2 only (jab-cross + speed) and add rounds 3-5
+progressively over weeks as conditioning improves.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not suitable — intensity |
+| Cut | 5 × 3-min rounds | Varies by round | 60s between rounds | 1× | Tuesday option (alternates with HIIT/jump rope) |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | 5 × 3-min rounds | Varies by round | 60s between rounds | 1× | Tuesday cardio rotation option |
+| AGRO | N/A | — | — | — | Uses dedicated boxing/MMA conditioning |
+
+**Evidence:** Croom 2023 (Int J Phys Educ Fit Sports 12(2), 8-29, CLAUDE.md §15) —
+3-week shadowboxing program produced increased aerobic capacity, muscle mass, bone
+mass, and BMR; decreased resting HR, fat mass, body fat %, and visceral fat. Burns
+300-400 cal/30 min.
+
+---
+
+### Jump Rope
+
+---
+
+#### Jump rope HIIT
+
+**Category:** Cardio / HIIT
+**Equipment:** Required: jump rope (~₹200-500 / ~$5)
+**Target muscles (primary):** Calves (gastrocnemius, soleus), cardiovascular system
+**Target muscles (secondary):** Shoulders (rope turning), core, forearms, quadriceps
+**Movement type:** Cardio
+
+**Description:** An interval-style rope protocol in two phases. Phase 1: 30 sec jump
+/ 20 sec rest × 8 rounds. Phase 2: 3 × 60 sec continuous jumping with 30 sec rest
+between. Total ~18 min. High cardiovascular output in a small footprint, strong
+calf-elastic and coordination stimulus. Used as the Cut Tuesday cardio option,
+alternating weekly with shadowboxing and HIIT Circuit A.
+
+**Common mistakes:**
+- Jumping too high (should be only 1-2 inches off the ground) — wastes energy and spikes impact
+- Using arms instead of wrists to turn the rope — creates shoulder fatigue and breaks rhythm
+
+**Safety notes:** **Caution for users >100kg — jump rope creates significant joint
+impact on ankles, knees, and hips.** Start with 15 sec intervals and progress.
+**Always jump on a forgiving surface (rubber mat, wooden floor, grass) — never on
+concrete.** If shin splints develop, stop and substitute another cardio option.
+Keep eyes forward, not down. Use a rope length sized correctly: standing on the
+middle of the rope, the handles should reach the armpits.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not suitable — impact |
+| Cut | 8×30s + 3×60s | Fast | 20s / 30s | 1× | Tuesday option (alternates with HIIT/shadowbox) |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Uses steady-state jump rope instead |
+| AGRO | N/A | — | — | — | Uses run + shadowbox conditioning |
+
+**Evidence:** PMC 8467906 (CLAUDE.md §15) — 8-week RCT showed jump rope improved
+body composition, reduced inflammation markers, and improved blood pressure.
+PMC 12473967 — 10 min/week improved cardiovascular capacity and lower-limb strength.
+
+---
+
+#### Jump rope steady-state
+
+**Category:** Cardio
+**Equipment:** Required: jump rope (~₹200-500 / ~$5)
+**Target muscles (primary):** Calves (gastrocnemius, soleus), cardiovascular
+endurance
+**Target muscles (secondary):** Shoulders, core, forearms, coordination systems
+(proprioception, timing)
+**Movement type:** Cardio
+
+**Description:** Four 3-minute continuous-jumping rounds with 1 min rest between
+rounds, rotating technique each round to maintain engagement. Round 1: basic bounce.
+Round 2: alternating feet (boxer skip). Round 3: high knees. Round 4: mixed
+(freestyle — combine all three or add footwork variations). Total ~16 min. Burns
+~100 cal/10 min while training coordination, balance, and bone density. Used as a
+Maintenance Tuesday cardio rotation option.
+
+**Common mistakes:**
+- Tensing the shoulders instead of keeping them relaxed and letting the wrists do the turning
+- Landing on the heels rather than the balls of the feet — blunts calf elasticity and spikes impact
+
+**Safety notes:** **Same >100kg impact caution as jump rope HIIT** — use forgiving
+surface, start with shorter intervals, stop on shin pain. Start with 1 min continuous
+if 3 min is too demanding. **Progress duration before adding technique complexity**
+— master basic bounce for the full 3 min before attempting alternating feet or
+high-knee variations.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not suitable — impact |
+| Cut | N/A | — | — | — | Uses jump rope HIIT instead |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | 4 × 3 min continuous | Moderate | 60s between rounds | 1× | Tuesday cardio rotation option |
+| AGRO | N/A | — | — | — | Uses run + shadowbox conditioning |
+
+**Evidence:** PMC 8467906 (CLAUDE.md §15) — 8-week RCT, body composition,
+inflammation, blood pressure benefits. Cleveland Clinic 2024 — ~100 cal/10 min,
+coordination + balance + bone density benefits; AHA and British Osteoporosis Society
+recommend jump rope for bone health at all life stages.
+
+---
