@@ -6287,3 +6287,443 @@ fist-based positions.
 **Evidence:** ACSM guidelines / general exercise physiology
 
 ---
+
+### Cooldown / Stretch Movements
+
+> **Plan integration:** 5-10 min post-session cooldown block. Used across every
+> plan based on each plan's `stretchSub` mapping — push-day cooldowns bias
+> upper-body stretches, lower-day cooldowns bias lower-body and hip stretches,
+> balance work is universal.
+
+---
+
+#### Doorframe chest stretch
+
+**Category:** Stretch
+**Equipment:** Doorframe
+**Target muscles (primary):** Pectoralis major, pectoralis minor
+**Target muscles (secondary):** Anterior deltoid, biceps
+**Movement type:** Static stretch
+
+**Description:** Place the forearm on the doorframe at shoulder height with the
+elbow bent ~90°, then step through until a gentle stretch is felt across the
+chest. 30-60 sec/side.
+
+**Common mistakes:**
+- Overarching the lower back to increase the stretch
+
+**Safety notes:** Stop at the first resistance — this is a gentle stretch, not an
+end-range drill. Best after push days.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 30 sec/side | Hold | — | Push-focused cooldown | After any upper-body session |
+| Cut | 30-60 sec/side | Hold | — | Push-day cooldown | Mon + Sat |
+| Bulk | 30-60 sec/side | Hold | — | Push-day cooldown | Mon + Fri |
+| Maintenance | 30 sec/side | Hold | — | Push-day cooldown | Mon + Thu |
+| AGRO | 30 sec/side | Hold | — | Push-day cooldown | Mon/Wed/Fri mornings |
+
+**Evidence:** General exercise physiology
+
+---
+
+#### Shoulder dislocates
+
+**Category:** Mobility
+**Equipment:** Required: towel or broomstick
+**Target muscles (primary):** Shoulder joint (full ROM), rotator cuff
+**Target muscles (secondary):** Pectoralis, lats, rhomboids
+**Movement type:** Mobility
+
+**Description:** Hold a towel or broomstick with a wide overhand grip. Bring it
+from in front of the hips, up overhead, and behind the back in a smooth arc,
+then reverse. 10 reps.
+
+**Common mistakes:**
+- Grip too narrow — can pinch the shoulder capsule and cause impingement
+- Forcing through sharp pain instead of widening the grip
+
+**Safety notes:** Widen the grip until the movement is smooth and pain-free.
+Progress by narrowing the grip over weeks.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 10 reps | Slow | — | 1× | Shoulder mobility work |
+| Cut | 10 reps | Slow | — | 2× | Push-day cooldowns |
+| Bulk | 10 reps | Slow | — | 2× | Push-day cooldowns |
+| Maintenance | 10 reps | Slow | — | 2× | Push-day cooldowns |
+| AGRO | 10 reps | Slow | — | 3× | Neck + shoulder mobility piece |
+
+**Evidence:** General exercise physiology
+
+---
+
+#### Behind-back clasp
+
+**Category:** Stretch
+**Equipment:** None
+**Target muscles (primary):** Pectoralis minor, anterior deltoid, biceps
+**Target muscles (secondary):** Serratus anterior (stretch)
+**Movement type:** Static stretch
+
+**Description:** Clasp the hands behind the back, squeeze the shoulder blades
+together, and lift the arms gently away from the body while keeping the chest
+lifted. 20 sec.
+
+**Common mistakes:**
+- Jutting the chin forward instead of keeping a neutral neck
+
+**Safety notes:** Skip if shoulder impingement is present.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 20 sec | Hold | — | 1× | Posture piece |
+| Cut | 20 sec | Hold | — | 2× | Push-day cooldown |
+| Bulk | 20 sec | Hold | — | 2× | Push-day cooldown |
+| Maintenance | 20 sec | Hold | — | 2× | Push-day cooldown |
+| AGRO | 20 sec | Hold | — | 3× | Push-day cooldown |
+
+**Evidence:** General exercise physiology
+
+---
+
+#### World's greatest stretch
+
+**Category:** Compound stretch
+**Equipment:** None
+**Target muscles (primary):** Hip flexors, hamstrings, thoracic spine
+**Target muscles (secondary):** Glutes, adductors, deltoids
+**Movement type:** Compound mobility
+
+**Description:** From a deep lunge with the front foot flat, place the
+same-side hand on the floor inside the front foot. Rotate the opposite arm up to
+the ceiling (thoracic rotation), then straighten the front leg to hinge into a
+hamstring stretch. Return and switch. 30 sec/side. **The most effective single
+stretch in the catalog — covers 3 major areas in one flow.**
+
+**Common mistakes:**
+- Rushing through the transitions instead of settling into each position
+- Rounding the lower back during the hamstring portion
+
+**Safety notes:** Suitable for all levels with depth modification — shorten the
+lunge depth as needed.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 30 sec/side | Slow | — | 1× (cooldown) | Most efficient stretch — high priority |
+| Cut | 30 sec/side | Slow | — | Lower + HIIT days | Cooldown |
+| Bulk | 30 sec/side | Slow | — | Lower days | Cooldown |
+| Maintenance | 30 sec/side | Slow | — | Lower days | Cooldown |
+| AGRO | 30 sec/side | Slow | — | Lower/run days | Cooldown |
+
+**Evidence:** General exercise physiology
+
+---
+
+#### Deep squat hold stretch
+
+**Category:** Stretch
+**Equipment:** None | Optional: doorframe, heel wedge
+**Target muscles (primary):** Hip flexors, hip adductors, ankles (dorsiflexion)
+**Target muscles (secondary):** Hip rotators, calves
+**Movement type:** Passive stretch
+
+**Description:** Descend into a full-depth squat with the heels flat, chest up,
+and elbows gently pushing the knees apart. **Hold passively** — this is a
+relaxed stretch, distinct from the Bulk isometric finisher which trains active
+muscular contraction at the same depth. 60 sec.
+
+**Common mistakes:**
+- Heels lifting — use a wedge (book or plate) to allow full depth
+- Rounding the lower back at the bottom
+
+**Safety notes:** Hold onto a pole or doorframe for support. **Different from the
+Bulk Deep squat hold isometric finisher** — this is passive/relaxed, that is
+active/contracted.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 30 sec | Hold | — | 1× | Reduced depth acceptable |
+| Cut | 60 sec | Hold | — | Lower-day cooldown | Passive stretch |
+| Bulk | 60 sec | Hold | — | Lower-day cooldown | Passive — distinct from iso finisher |
+| Maintenance | 60 sec | Hold | — | Lower-day cooldown | Passive stretch |
+| AGRO | 60 sec | Hold | — | Lower/run-day cooldown | Passive stretch |
+
+**Evidence:** General exercise physiology
+
+---
+
+#### 90/90 hip stretch
+
+**Category:** Stretch
+**Equipment:** None | Optional: cushion
+**Target muscles (primary):** Hip internal rotators, hip external rotators
+**Target muscles (secondary):** Gluteus medius, piriformis
+**Movement type:** Static stretch
+
+**Description:** Seated on the floor with the front leg bent at 90° in front and
+the back leg bent at 90° out to the side. Keep both knees and hips at 90°. Lean
+the torso forward over the front shin. 2 min/side.
+
+**Common mistakes:**
+- Forcing depth at the expense of the 90° angles — lose the angles, lose the stretch
+- Losing the 90° on the back leg as the hips tilt forward
+
+**Safety notes:** Most people are very tight in this position initially. Place a
+cushion under the front-leg hip if the pelvis cannot square.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 1 min/side | Hold | — | 1× | Hip mobility piece |
+| Cut | 2 min/side | Hold | — | Lower-day cooldown | Hip mobility |
+| Bulk | 2 min/side | Hold | — | Lower-day cooldown | Hip mobility |
+| Maintenance | 2 min/side | Hold | — | Lower-day cooldown | Hip mobility |
+| AGRO | 2 min/side | Hold | — | Lower/run-day cooldown | Hip mobility |
+
+**Evidence:** General exercise physiology
+
+---
+
+#### Frog stretch
+
+**Category:** Stretch
+**Equipment:** None | Optional: mat or pad under knees
+**Target muscles (primary):** Hip adductors (inner thighs)
+**Target muscles (secondary):** Hip flexors, lower back
+**Movement type:** Static stretch
+
+**Description:** On all fours with the knees as wide as comfortable and the feet
+turned out so the inner edges rest on the floor. Rock the hips back gently
+toward the heels. 2 min.
+
+**Common mistakes:**
+- Bouncing in and out of the stretch
+- Going too deep too fast
+
+**Safety notes:** Very intense for tight hips — respect current ROM and progress
+slowly.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 30-60 sec | Hold | — | 1× | Reduced depth acceptable |
+| Cut | 2 min | Hold | — | Lower-day cooldown | Adductor mobility |
+| Bulk | 2 min | Hold | — | Lower-day cooldown | Adductor mobility |
+| Maintenance | 2 min | Hold | — | Lower-day cooldown | Adductor mobility |
+| AGRO | 2 min | Hold | — | Lower/run-day cooldown | Adductor mobility |
+
+**Evidence:** General exercise physiology
+
+---
+
+#### Cossack squat stretch
+
+**Category:** Stretch / Mobility
+**Equipment:** None | Optional: doorframe for balance
+**Target muscles (primary):** Hip adductors, ankle dorsiflexion
+**Target muscles (secondary):** Quadriceps (squatting side), hamstrings (straight leg)
+**Movement type:** Mobility
+
+**Description:** Wide stance with toes pointed slightly out. Shift the weight
+fully to one side into a deep lateral squat while the opposite leg stays
+straight with the heel on the floor. 60 sec/side. Doubles as ankle mobility work.
+
+**Common mistakes:**
+- Heel lifting on the squatting side
+- Rounding the lower back to reach depth
+
+**Safety notes:** Reduce depth initially. Use a doorframe for balance.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not in plan structure |
+| Cut | 60 sec/side | Hold | — | Lower-day cooldown | Adductor + ankle mobility |
+| Bulk | 60 sec/side | Hold | — | Lower-day cooldown | Adductor + ankle mobility |
+| Maintenance | 60 sec/side | Hold | — | Lower-day cooldown | Adductor + ankle mobility |
+| AGRO | 60 sec/side | Hold | — | Lower/run-day cooldown | Adductor + ankle mobility |
+
+**Evidence:** General exercise physiology
+
+---
+
+#### Figure-4 stretch
+
+**Category:** Stretch
+**Equipment:** None | Optional: chair for seated variant
+**Target muscles (primary):** Piriformis, gluteus medius
+**Target muscles (secondary):** Deep hip rotators
+**Movement type:** Static stretch
+
+**Description:** Supine with knees bent and feet flat, cross one ankle over the
+opposite knee to form a "4" shape. Pull the standing leg toward the chest until
+a stretch is felt in the crossed-leg glute. 30 sec/side. Seated variant: same
+ankle-over-knee crossover while seated in a chair, lean torso forward.
+
+**Common mistakes:**
+- Rounding the spine (in the seated version) instead of hinging at the hips
+- Pulling too aggressively — let the stretch build
+
+**Safety notes:** If the supine version causes lower back discomfort, use the
+seated-in-chair variant.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 30 sec/side | Hold | — | 1× | Seated variant suitable |
+| Cut | 30 sec/side | Hold | — | Lower-day cooldown | Glute mobility |
+| Bulk | 30 sec/side | Hold | — | Lower-day cooldown | Glute mobility |
+| Maintenance | 30 sec/side | Hold | — | Lower-day cooldown | Glute mobility |
+| AGRO | 30 sec/side | Hold | — | Lower/run-day cooldown | Glute mobility |
+
+**Evidence:** General exercise physiology
+
+---
+
+#### Neck isometrics 4 directions
+
+**Category:** Isometric / Stretch
+**Equipment:** None
+**Target muscles (primary):** Neck flexors, neck extensors, lateral flexors (SCM, scalenes, splenius)
+**Target muscles (secondary):** Upper trapezius, deep cervical stabilizers
+**Movement type:** Isometric
+
+**Description:** Press the head against the palm for resistance in each of four
+directions — forward (palm on forehead), backward (palm on back of head), left
+(palm on left side of head), right (palm on right side of head). **50% effort
+only**, never maximal. 30 sec each direction.
+
+**Common mistakes:**
+- Pushing too hard — 50% effort is sufficient; maximal effort causes headaches
+- Holding the breath during the hold
+
+**Safety notes:** **Isometric only — never perform dynamic neck circles or
+resisted-motion neck drills.** Stop immediately on any dizziness, tingling, or
+sharp pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Uses seated neck stretches |
+| Cut | 30 sec each dir | Hold | — | 1-2× | Cooldown piece |
+| Bulk | 30 sec each dir | Hold | — | 1-2× | Cooldown piece |
+| Maintenance | 30 sec each dir | Hold | — | 1-2× | Cooldown piece |
+| AGRO | 30 sec each dir | Hold | — | 2× | Part of neck protocol |
+
+**Evidence:** Oranchuk 2019 (isometric hypertrophy) (CLAUDE.md §15)
+
+---
+
+#### Heel-to-toe walk
+
+**Category:** Balance / Fall prevention
+**Equipment:** None | Optional: wall for support
+**Target muscles (primary):** Ankle stabilizers, proprioception systems
+**Target muscles (secondary):** Hip stabilizers, core
+**Movement type:** Dynamic balance
+
+**Description:** Walk in a straight line placing the heel of the front foot
+directly in front of the toes of the back foot, arms out for balance. 2×10 steps.
+Important for fall prevention across all ages.
+
+**Common mistakes:**
+- Looking down at the feet — fix the gaze on a point ahead
+- Rushing — the slower, the harder
+
+**Safety notes:** Stay near a wall for support when first learning.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 2×10 steps | Very slow | — | 1× | Fall prevention — priority piece |
+| Cut | 2×10 steps | Slow | — | 1× | Balance cooldown |
+| Bulk | 2×10 steps | Slow | — | 1× | Balance cooldown |
+| Maintenance | 2×10 steps | Slow | — | 1× | Balance cooldown |
+| AGRO | 2×10 steps | Slow | — | 1× | Balance cooldown |
+
+**Evidence:** General exercise physiology
+
+---
+
+#### Single-leg stand
+
+**Category:** Balance / Proprioception
+**Equipment:** None | Optional: wall or chair for support
+**Target muscles (primary):** Ankle stabilizers, hip stabilizers, proprioception
+**Target muscles (secondary):** Core, gluteus medius
+**Movement type:** Balance / Isometric
+
+**Description:** Stand on one leg with the gaze fixed forward on a stationary
+point. 3×15 sec/leg. **Advanced progression: close the eyes** to eliminate visual
+input and load the vestibular and proprioceptive systems more heavily.
+
+**Common mistakes:**
+- Staring at the ground — destabilizes balance; fix the gaze level
+- Tensing the upper body
+
+**Safety notes:** Stay near a wall or chair for support when first learning.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 3×10-15 sec/leg | Hold | 15-30s | 1× | Eyes open |
+| Cut | 3×15 sec/leg | Hold | 15-30s | 1× | Balance cooldown |
+| Bulk | 3×15 sec/leg | Hold | 15-30s | 1× | Balance cooldown |
+| Maintenance | 3×15 sec/leg | Hold | 15-30s | 1× | Balance cooldown |
+| AGRO | 3×15 sec/leg | Hold | 15-30s | 1× | Balance cooldown; eyes-closed progression |
+
+**Evidence:** General exercise physiology
+
+---
+
+#### Weight shifts
+
+**Category:** Balance
+**Equipment:** None
+**Target muscles (primary):** Ankle stabilizers, hip stabilizers
+**Target muscles (secondary):** Core
+**Movement type:** Dynamic balance
+
+**Description:** Stand with feet together (or slightly apart for beginners),
+shift the weight slowly from one foot to the other — hips drive the shift, not
+the torso. 2×10 shifts. **The gentlest balance exercise** — good starting point
+for elderly users or post-injury rehab.
+
+**Common mistakes:**
+- Moving too fast
+- Bending at the waist instead of shifting from the ankles
+
+**Safety notes:** The entry point into balance training — universally safe and
+scalable.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 2×10 shifts | Very slow | — | 1× | Entry-level balance drill |
+| Cut | 2×10 shifts | Slow | — | 1× | Balance cooldown |
+| Bulk | 2×10 shifts | Slow | — | 1× | Balance cooldown |
+| Maintenance | 2×10 shifts | Slow | — | 1× | Balance cooldown |
+| AGRO | 2×10 shifts | Slow | — | 1× | Balance cooldown |
+
+**Evidence:** General exercise physiology
+
+---
