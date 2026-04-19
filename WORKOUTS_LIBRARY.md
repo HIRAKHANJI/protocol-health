@@ -5424,3 +5424,621 @@ Seals the session and downshifts the nervous system. 1 min.
 **Evidence:** Chen 2023 (CLAUDE.md §15)
 
 ---
+
+### Chair Exercises (Lite Protocol)
+
+> **Plan integration:** Chair exercises are Lite Protocol only, organized by weekday:
+> **Monday (upper body, 7 exercises), Wednesday (lower body, 7 exercises), Friday
+> (full body + isometric, 6 exercises)**. All other plans mark every entry N/A.
+> Isometric variants (entries 15-17) cite both ICFSR 2021 and Oranchuk 2019 per
+> CLAUDE.md §15.
+
+---
+
+#### Seated marching
+
+**Category:** Cardio / Warm-up
+**Equipment:** Chair (sturdy, no wheels)
+**Target muscles (primary):** Hip flexors, quadriceps
+**Target muscles (secondary):** Core, calves
+**Movement type:** Dynamic warm-up
+
+**Description:** Seated tall, alternate lifting each knee to waist height in a
+steady marching rhythm. 2×20 (10/leg).
+
+**Common mistakes:**
+- Leaning back into the chair to swing the knees up
+
+**Safety notes:** Hold the chair sides for stability.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 2×20 | Moderate | 30s | 1× (Mon) | Monday upper-body warm-up |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** ICFSR 2021 (CLAUDE.md §15)
+
+---
+
+#### Seated arm raises
+
+**Category:** Shoulders
+**Equipment:** Chair
+**Target muscles (primary):** Deltoids (all three heads)
+**Target muscles (secondary):** Upper trapezius, serratus anterior
+**Movement type:** Isolation
+
+**Description:** Seated tall, raise both arms from the sides up overhead under
+control, then lower. 2×10.
+
+**Common mistakes:**
+- Shrugging the shoulders toward the ears on the way up
+
+**Safety notes:** Reduce ROM if shoulder pain arises.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 2×10 | Slow | 30s | 1× (Mon) | Monday upper-body block |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** ICFSR 2021 (CLAUDE.md §15)
+
+---
+
+#### Seated bicep curls (no weight)
+
+**Category:** Arms
+**Equipment:** Chair | Optional: light water bottles for progression
+**Target muscles (primary):** Biceps brachii
+**Target muscles (secondary):** Brachialis, forearm flexors
+**Movement type:** Isolation
+
+**Description:** Seated, curl the closed fists up to the shoulders with slow tempo
+and a 1 sec squeeze at the top. 2×12.
+
+**Common mistakes:**
+- Swinging the arms instead of keeping the movement controlled
+
+**Safety notes:** Add light water bottles once the unloaded version is easy — a
+natural progression.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 2×12 | Slow, 1s squeeze | 30s | 1× (Mon) | Monday upper-body block |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** ICFSR 2021 (CLAUDE.md §15)
+
+---
+
+#### Seated shoulder press
+
+**Category:** Shoulders
+**Equipment:** Chair
+**Target muscles (primary):** Deltoids, triceps
+**Target muscles (secondary):** Upper trapezius, serratus anterior
+**Movement type:** Compound
+
+**Description:** Seated upright with back pressed into the chair, press hands from
+shoulder height to overhead, then lower with control. 2×10.
+
+**Common mistakes:**
+- Arching the lower back instead of keeping the spine pressed into the chair
+
+**Safety notes:** Press the lower back into the chair for support.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 2×10 | Slow | 30-45s | 1× (Mon) | Monday upper-body block |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** ICFSR 2021 (CLAUDE.md §15)
+
+---
+
+#### Seated chest press
+
+**Category:** Push (Isometric)
+**Equipment:** Chair
+**Target muscles (primary):** Pectoralis major, triceps
+**Target muscles (secondary):** Anterior deltoid
+**Movement type:** Isometric
+
+**Description:** Seated tall, press the palms together at chest height and hold a
+firm squeeze for 3 sec, then release. 2×10.
+
+**Common mistakes:**
+- Holding the breath during the squeeze
+
+**Safety notes:** Pure isometric contraction — no joint stress.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 2×10 | 3s squeeze | 20-30s | 1× (Mon) | Monday upper-body block |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** ICFSR 2021 (CLAUDE.md §15)
+
+---
+
+#### Seated row
+
+**Category:** Pull
+**Equipment:** Chair
+**Target muscles (primary):** Rhomboids, mid trapezius
+**Target muscles (secondary):** Posterior deltoid, biceps
+**Movement type:** Compound pull
+
+**Description:** Seated tall with arms extended forward at shoulder height, pull
+the elbows back while squeezing the shoulder blades together. 2×10.
+
+**Common mistakes:**
+- Shrugging the shoulders up toward the ears
+
+**Safety notes:** Very gentle — suitable for all levels.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 2×10 | Slow, 1s squeeze | 30s | 1× (Mon) | Monday upper-body block |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** ICFSR 2021 (CLAUDE.md §15)
+
+---
+
+#### Wrist circles
+
+**Category:** Mobility
+**Equipment:** Chair
+**Target muscles (primary):** Wrist flexors, wrist extensors
+**Target muscles (secondary):** Forearms
+**Movement type:** Mobility
+
+**Description:** Seated, extend the arms and rotate the wrists slowly through full
+range in one direction, then reverse. 10 each way.
+
+**Common mistakes:**
+- Rushing the circles instead of exploring full range
+
+**Safety notes:** Important for those with arthritis — go slowly.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 10 each way | Very slow | 10s | 1× (Mon) | Monday block closer |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** ICFSR 2021 (CLAUDE.md §15)
+
+---
+
+#### Seated leg extensions
+
+**Category:** Quads
+**Equipment:** Chair
+**Target muscles (primary):** Quadriceps
+**Target muscles (secondary):** Hip flexors
+**Movement type:** Isolation
+
+**Description:** Seated tall, extend one leg until straight with a 2 sec hold at
+the top, then lower with control. 2×10/leg.
+
+**Common mistakes:**
+- Locking the knee aggressively at the top
+
+**Safety notes:** Controlled extension — no snapping.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 2×10/leg | Slow, 2s hold | 30s | 1× (Wed) | Wednesday lower-body block |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** ICFSR 2021 (CLAUDE.md §15)
+
+---
+
+#### Seated knee lifts
+
+**Category:** Hip flexors / Core
+**Equipment:** Chair
+**Target muscles (primary):** Hip flexors, lower abs
+**Target muscles (secondary):** Quadriceps
+**Movement type:** Isolation
+
+**Description:** Seated tall, lift one knee toward the chest while keeping the
+torso upright. 2×10/leg.
+
+**Common mistakes:**
+- Leaning the torso back to help hoist the knee up
+
+**Safety notes:** Hold the chair sides for stability.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 2×10/leg | Slow | 30s | 1× (Wed) | Wednesday lower-body block |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** ICFSR 2021 (CLAUDE.md §15)
+
+---
+
+#### Seated ankle circles
+
+**Category:** Mobility
+**Equipment:** Chair
+**Target muscles (primary):** Ankle joint, calves
+**Target muscles (secondary):** Intrinsic foot muscles
+**Movement type:** Mobility
+
+**Description:** Seated, lift one foot off the floor and rotate the ankle slowly
+through full range in one direction, then reverse. 10 each way/foot.
+
+**Common mistakes:**
+- Moving the whole leg instead of isolating the ankle
+
+**Safety notes:** Important for circulation in sedentary/elderly users.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 10 each way/foot | Very slow | 10s | 1× (Wed) | Wednesday lower-body block |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** ICFSR 2021 (CLAUDE.md §15)
+
+---
+
+#### Sit-to-stand
+
+**Category:** Compound / Functional
+**Equipment:** Chair (against a wall to prevent sliding)
+**Target muscles (primary):** Quadriceps, gluteus maximus
+**Target muscles (secondary):** Core, hamstrings, calves
+**Movement type:** Compound
+
+**Description:** Stand up from the chair without using the hands, then sit back
+down with controlled descent. **The single most functional exercise in the Lite
+Protocol — directly improves daily-life independence.** 2×8.
+
+**Common mistakes:**
+- Falling into the chair on the way down instead of controlling the descent
+
+**Safety notes:** Keep the chair against a wall to prevent sliding. Use hands on
+thighs or chair arms if unassisted is not yet possible.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 2×8 | Slow descent | 45-60s | 1× (Wed) | **Most functional exercise — priority item** |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** ICFSR 2021 (CLAUDE.md §15)
+
+---
+
+#### Standing heel raises (chair)
+
+**Category:** Calves
+**Equipment:** Chair (hold back for balance)
+**Target muscles (primary):** Gastrocnemius, soleus
+**Target muscles (secondary):** Intrinsic foot muscles
+**Movement type:** Isolation
+
+**Description:** Stand behind the chair with a light hand on the backrest, rise
+onto the balls of the feet, pause, then lower with control. 2×12.
+
+**Common mistakes:**
+- Leaning forward onto the chair
+
+**Safety notes:** Light touch on the chair — don't grip.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 2×12 | Slow | 30s | 1× (Wed) | Wednesday lower-body block |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** ICFSR 2021 (CLAUDE.md §15)
+
+---
+
+#### Standing hip abduction (chair)
+
+**Category:** Hips
+**Equipment:** Chair (hold back for balance)
+**Target muscles (primary):** Gluteus medius
+**Target muscles (secondary):** TFL, hip stabilizers
+**Movement type:** Isolation
+
+**Description:** Stand beside the chair with a hand on the back for balance, lift
+the outer leg to the side without swinging. 2×8/leg.
+
+**Common mistakes:**
+- Leaning the torso away from the lifting leg
+
+**Safety notes:** Slow controlled movement — this is not a high-kick.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 2×8/leg | Slow | 30s | 1× (Wed) | Wednesday lower-body block |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** ICFSR 2021 (CLAUDE.md §15)
+
+---
+
+#### Seated calf pumps
+
+**Category:** Circulation
+**Equipment:** Chair
+**Target muscles (primary):** Calves, ankle pumps (soleal venous pump)
+**Target muscles (secondary):** Tibialis anterior
+**Movement type:** Mobility / Circulation
+
+**Description:** Seated, alternately point the toes and pull the toes toward the
+shin through full ankle ROM. 2×15.
+
+**Common mistakes:**
+- Not going through full ROM
+
+**Safety notes:** **Critical for circulation** — especially for users who sit for
+long periods.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 2×15 | Moderate | 15s | 1× (Wed) | Wednesday block closer |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** ICFSR 2021 (CLAUDE.md §15)
+
+---
+
+#### Seated chest press hold (isometric)
+
+**Category:** Push / Isometric
+**Equipment:** Chair
+**Target muscles (primary):** Pectoralis major, anterior deltoid
+**Target muscles (secondary):** Triceps, serratus anterior
+**Movement type:** Isometric
+
+**Description:** Seated tall, press the palms together at chest height and hold a
+maximal squeeze for 10 sec. 3×10 sec.
+
+**Common mistakes:**
+- Holding the breath during the isometric hold
+
+**Safety notes:** Breathe normally during holds.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 3×10 sec | Hold | 30-45s | 1× (Fri) | Friday full-body + iso block |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** ICFSR 2021, Oranchuk 2019 (isometric hypertrophy) (CLAUDE.md §15)
+
+---
+
+#### Seated leg extension hold (isometric)
+
+**Category:** Quads / Isometric
+**Equipment:** Chair
+**Target muscles (primary):** Quadriceps
+**Target muscles (secondary):** Hip flexors
+**Movement type:** Isometric
+
+**Description:** Seated tall, extend one leg to full straight and hold at the top
+for 10 sec. 3×10 sec/leg.
+
+**Common mistakes:**
+- Holding at partial extension instead of full
+
+**Safety notes:** Controlled — no bouncing.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 3×10 sec/leg | Hold | 30-45s | 1× (Fri) | Friday full-body + iso block |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** ICFSR 2021, Oranchuk 2019 (isometric hypertrophy) (CLAUDE.md §15)
+
+---
+
+#### Wall sit hold 45°
+
+**Category:** Quads / Isometric
+**Equipment:** Wall
+**Target muscles (primary):** Quadriceps, gluteus maximus
+**Target muscles (secondary):** Calves, core
+**Movement type:** Isometric
+
+**Description:** Stand with the back against a wall and slide down to a **45°
+knee angle** (not 90° — gentler for elderly). Hold. 2×10-15 sec.
+
+**Common mistakes:**
+- Going deeper than 45°
+
+**Safety notes:** **45° only for Lite Protocol** — deeper angles (90°) are
+programmed in Cut/Bulk via the separate Wall sit entry.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 2×10-15 sec | Hold at 45° | 45s | 1× (Fri) | Friday full-body + iso block |
+| Cut | N/A | — | — | — | Uses 90° Wall sit |
+| Bulk | N/A | — | — | — | Uses 90° Wall sit |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** ICFSR 2021, Oranchuk 2019 (isometric hypertrophy) (CLAUDE.md §15)
+
+---
+
+#### Seated torso rotation
+
+**Category:** Core
+**Equipment:** Chair
+**Target muscles (primary):** Obliques, thoracic rotators
+**Target muscles (secondary):** Core, lats
+**Movement type:** Mobility / Dynamic core
+
+**Description:** Seated tall with hands on the shoulders (elbows out), rotate the
+torso left and right while keeping the hips anchored. 2×8/side.
+
+**Common mistakes:**
+- Moving the hips with the rotation — this should be pure torso rotation
+
+**Safety notes:** Gentle — never force ROM.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 2×8/side | Slow | 30s | 1× (Fri) | Friday full-body + iso block |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** ICFSR 2021 (CLAUDE.md §15)
+
+---
+
+#### Standing balance hold (chair)
+
+**Category:** Balance / Fall prevention
+**Equipment:** Chair (for fingertip support)
+**Target muscles (primary):** Ankle stabilizers, proprioception systems
+**Target muscles (secondary):** Hip abductors, core
+**Movement type:** Balance / Isometric
+
+**Description:** Stand on one leg with the fingertips resting lightly on the chair
+back, hold 10 sec, switch legs. 2×3/leg, 10 sec each. Dedicated fall-prevention
+exercise.
+
+**Common mistakes:**
+- Gripping the chair too tightly — defeats the balance stimulus
+
+**Safety notes:** **Finger-contact progression:** full hand → 2 fingers → 1 finger
+→ hover → no contact. The reliable path toward independent standing balance.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 2×3/leg, 10s each | Hold | 30s | 1× (Fri) | Fall prevention — priority item |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** ICFSR 2021 (CLAUDE.md §15)
+
+---
+
+#### Seated deep breathing
+
+**Category:** Recovery
+**Equipment:** Chair
+**Target muscles (primary):** Diaphragm, parasympathetic nervous system
+**Target muscles (secondary):** Focus, attention regulation
+**Movement type:** Breathwork
+
+**Description:** Seated tall with hands on the thighs, breathe **4 sec inhale /
+4 sec hold / 6 sec exhale**. 5 full breath cycles.
+
+**Common mistakes:**
+- Chest breathing instead of diaphragmatic — the belly should rise on the inhale
+
+**Safety notes:** Universally safe — session closer. Skip the breath hold if it
+creates anxiety.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 5 breath cycles | 4/4/6 breath | — | 1× (Fri) | Friday session closer |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** ICFSR 2021 (CLAUDE.md §15)
+
+---
