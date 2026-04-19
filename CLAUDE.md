@@ -475,6 +475,36 @@ const CACHE_NAME = 'protocol-health-v13'; // ← increment this on every signifi
 
 > **On feature branches:** commit `app.html` freely without touching `sw.js`. Bump `CACHE_NAME` once as part of the merge to `main`.
 
+### Version Tagging Rule (added 2026-04-19)
+
+Every commit that (a) passes its phase smoke test and (b) bumps APP_VERSION MUST be tagged in git and logged in `WORKING_VERSIONS.md` BEFORE any further work begins.
+
+**The sequence is:**
+
+1. Commit the change with the APP_VERSION bump.
+2. Run smoke test on owner's device. Confirm PASS.
+3. `git tag vX.Y.Z-working` on the commit.
+4. `git push origin vX.Y.Z-working`.
+5. Append a new entry to `WORKING_VERSIONS.md` at the TOP.
+6. Commit the `WORKING_VERSIONS.md` update separately with message `docs: log working version vX.Y.Z`.
+7. Push that commit.
+
+**Rollback contract:**
+
+If any future change breaks the app and the owner asks for a rollback, the recovery procedure is:
+
+1. Read `WORKING_VERSIONS.md`, find the most recent entry.
+2. `git reset --hard <tag>` to that version.
+3. Bump `CACHE_NAME` in `sw.js` by 1 so user devices pick up the rollback.
+4. Bump `APP_VERSION` as a patch (e.g., `5.4.0` → `5.4.1`) with message: `APP_VERSION_MSG = 'Reverted recent changes — investigating. Your data is safe.'`
+5. Commit with message `revert: rollback to vX.Y.Z-working — <one-sentence reason>`.
+6. Push. `git push --force-with-lease origin main` is acceptable here.
+7. Log the revert as a new entry in `WORKING_VERSIONS.md` with the note "REVERT from vA.B.C → vX.Y.Z".
+
+**Claude Code accepts the command:** "Rollback to the most recent working version in WORKING_VERSIONS.md. Bump cache. Push." and executes the full sequence above with no additional input.
+
+**Never skip tagging.** If a phase's APP_VERSION bump is not tagged and logged, the next phase has no rollback target. This is non-negotiable.
+
 ---
 
 ## 12. App Versioning (`APP_VERSION`)
@@ -722,3 +752,41 @@ The file `WORKOUTS_LIBRARY.md` in the repo root is the canonical reference for a
 3. The library's evidence citations must reference entries in CLAUDE.md Section 15
 4. Push:pull ratio must remain ≤ 1:1 across any plan's weekly schedule
 5. Exercise progressions in the library must match `EXERCISE_PROGRESSIONS` in `app.html` exactly
+
+---
+
+## 22. Refactor Context (April 2026, 2-Day Compressed Timeline)
+
+In April 2026, the app is undergoing a major architectural refactor from single-file to modular ES modules. The refactor executes across ~6 phases in 2 days (owner's choice, testing-compressed timeline with explicit acknowledged risk).
+
+**Refactor artifacts in the repo:**
+
+- `WORKING_VERSIONS.md` — append-only log of git-tagged working versions
+- `docs/PHASE_0_RECON.md` — the recon report
+- `docs/PHASE_N_PLAN.md` — pre-execution plan for each phase
+- `docs/PHASE_N_SUMMARY.md` — post-execution summary for each phase
+
+**The destination architecture** (after Phase 5/6 completion):
+
+```
+/
+├── app.html                  # Bootstrap + HTML + CSS + init orchestration (~2500 lines)
+├── index.html, sw.js, manifest.json
+├── CLAUDE.md, UPDATE_LOG.md, WORKING_VERSIONS.md, WORKOUTS_LIBRARY.md
+├── plans/
+│   ├── index.js, lite.js, agro.js, cut.js, bulk.js, maintenance.js
+│   └── exercise-progressions.js
+├── modules/
+│   ├── export.js, schedule-html.js, calendar.js, radar.js
+├── components/
+│   ├── workout-card.js, rule-card.js, checklist.js
+├── migrations/
+│   ├── registry.js, runner.js, helpers.js
+└── docs/
+```
+
+**Module interop pattern (will be in place after Phase 3):**
+
+ES modules load via `<script type="module">`. Their exports are promoted to `window.*` so the inline script in `app.html` can reference them from onclick handlers. A `ph:modules-ready` event signals init readiness.
+
+**If you (future Claude session) are onboarding post-refactor:** read Section 23 (Modular Architecture), Section 24 (Migration Framework), and Section 25 (Working With This Codebase). Those are added in Phase 6 of the refactor.
