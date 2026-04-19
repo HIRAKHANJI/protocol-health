@@ -4727,3 +4727,436 @@ and eyes closed or soft-gazed. Breathing pattern: **4 sec inhale / 4 sec hold /
 **Evidence:** Evidence-Based CAM, PMC 8038747 (CLAUDE.md §15)
 
 ---
+
+### Pilates Exercises
+
+> **Plan integration:** Lite Sat (25-30 min full mat session), Bulk Sat (15 min
+> core-focused portion as finisher), Maintenance Wed (alternating weeks, 30 min).
+> Cut/AGRO do not program Pilates in their structured week.
+
+---
+
+#### Pelvic tilts
+
+**Category:** Core
+**Equipment:** None (mat optional)
+**Target muscles (primary):** Transverse abdominis, pelvic floor
+**Target muscles (secondary):** Rectus abdominis, deep lumbar stabilizers
+**Movement type:** Core activation
+
+**Description:** Lying supine with knees bent and feet flat, gently tilt the pelvis
+to flatten the lower back against the floor, then release. Builds awareness of deep
+core activation and neutral pelvis — the foundation of every other Pilates movement.
+2×10.
+
+**Common mistakes:**
+- Using the glutes to drive the tilt instead of the deep core
+- Holding the breath instead of exhaling into the contraction
+
+**Safety notes:** Foundational — master this before progressing. Stop on any lumbar
+pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 2×10 | Slow | 30s | 1× (Sat) | 25-30 min mat session opener |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | 2×10 | Slow | 30s | 1× (Sat) | 15 min core portion opener |
+| Maintenance | 2×10 | Slow | 30s | 1× (Wed alt) | 30 min alternating-week session |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** PMC 11447755, Physiology & Behavior 2016 (CLAUDE.md §15)
+
+---
+
+#### Bridge
+
+**Category:** Core / Glutes
+**Equipment:** None (mat optional)
+**Target muscles (primary):** Gluteus maximus, hamstrings
+**Target muscles (secondary):** Core, erector spinae, adductors
+**Movement type:** Hinge / Isometric-dynamic hybrid
+
+**Description:** Lying supine with knees bent and feet flat, lift the hips by
+squeezing the glutes and pressing through the heels. Hold the top position for 3 sec,
+then lower with control. 2×8.
+
+**Common mistakes:**
+- Hyperextending the lower back at the top instead of stopping at neutral hip extension
+- Pushing from the toes instead of the heels — shifts load off the glutes
+
+**Safety notes:** Safe for all levels. Stop on any lower back discomfort.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 2×8 | Slow, 3s hold | 30s | 1× (Sat) | 25-30 min mat session |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | 2×8 | Slow, 3s hold | 30s | 1× (Sat) | 15 min core portion |
+| Maintenance | 2×8 | Slow, 3s hold | 30s | 1× (Wed alt) | 30 min alternating-week session |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** PMC 11447755, Physiology & Behavior 2016 (CLAUDE.md §15)
+
+---
+
+#### Single leg stretch modified
+
+**Category:** Core
+**Equipment:** None (mat optional)
+**Target muscles (primary):** Rectus abdominis, hip flexors
+**Target muscles (secondary):** Obliques, transverse abdominis
+**Movement type:** Dynamic core
+
+**Description:** Supine with head and shoulders lifted slightly, alternate pulling
+one knee to the chest while the opposite leg extends low — **foot stays above
+floor level, not hovering just above it**. The modified version keeps the extended
+leg higher to reduce lumbar demand. 2×6/side.
+
+**Common mistakes:**
+- Neck strain from lifting the head too high instead of letting it rest on the hands
+- Losing pelvic stability as the legs switch — the lower back should stay pressed down
+
+**Safety notes:** Keep the head down on the mat if neck pain arises. Extend the leg
+higher (closer to vertical) if the lower back lifts.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 2×6/side | Slow | 30s | 1× (Sat) | 25-30 min mat session |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | 2×6/side | Slow | 30s | 1× (Sat) | 15 min core portion |
+| Maintenance | 2×6/side | Slow | 30s | 1× (Wed alt) | 30 min alternating-week session |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** PMC 11447755, Physiology & Behavior 2016 (CLAUDE.md §15)
+
+---
+
+#### Arm circles lying
+
+**Category:** Shoulders / Mobility
+**Equipment:** None (mat optional)
+**Target muscles (primary):** Deltoids, rotator cuff
+**Target muscles (secondary):** Serratus anterior, upper traps
+**Movement type:** Mobility
+
+**Description:** Supine with arms extended toward the ceiling, draw small controlled
+circles. Reverse direction after the target rep count. 2×10 each direction.
+
+**Common mistakes:**
+- Making circles too large, losing control and shoulder centration
+- Letting the lower back arch off the floor
+
+**Safety notes:** Very low intensity — suitable for all. Stop on any sharp shoulder
+pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 2×10 each way | Slow | 20s | 1× (Sat) | 25-30 min mat session |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in core portion |
+| Maintenance | 2×10 each way | Slow | 20s | 1× (Wed alt) | 30 min alternating-week session |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** PMC 11447755, Physiology & Behavior 2016 (CLAUDE.md §15)
+
+---
+
+#### Spine twist lying
+
+**Category:** Core / Mobility
+**Equipment:** None (mat optional)
+**Target muscles (primary):** Obliques, thoracic spine
+**Target muscles (secondary):** Lumbar paraspinals, hip rotators
+**Movement type:** Mobility
+
+**Description:** Supine with knees bent and stacked, arms extended T-shape. Let both
+knees drop to one side while the opposite shoulder stays anchored. 2×5/side.
+
+**Common mistakes:**
+- Letting the shoulders lift off the floor — reduces thoracic rotation
+- Rushing the rotation instead of dropping the knees with gravity
+
+**Safety notes:** Keep knees stacked and let gravity do the work — never force.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 2×5/side | Slow | 30s | 1× (Sat) | 25-30 min mat session |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in core portion |
+| Maintenance | 2×5/side | Slow | 30s | 1× (Wed alt) | 30 min alternating-week session |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** PMC 11447755, Physiology & Behavior 2016 (CLAUDE.md §15)
+
+---
+
+#### The Hundred modified
+
+**Category:** Core endurance
+**Equipment:** None (mat optional)
+**Target muscles (primary):** Rectus abdominis, transverse abdominis
+**Target muscles (secondary):** Hip flexors, deltoids
+**Movement type:** Dynamic core endurance
+
+**Description:** Supine with legs in tabletop (knees bent 90°, shins parallel to
+floor — modified version), head and shoulders slightly lifted. Pump the arms
+vigorously up and down while inhaling for 5 pumps and exhaling for 5 pumps. 5 cycles
+of 10-count = 50 pumps total.
+
+**Common mistakes:**
+- Holding breath instead of maintaining the 5-in / 5-out pattern
+- Neck strain from overlifting the head
+
+**Safety notes:** Keep legs in tabletop (not extended) if the core cannot hold the
+lower back pressed to the floor. Head-down modification is available — rest the
+head on the mat if neck fatigue builds.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 5×10-count | Fast arm pumps | 45s | 1× (Sat) | 25-30 min mat session |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | 5×10-count | Fast arm pumps | 45s | 1× (Sat) | 15 min core portion |
+| Maintenance | 5×10-count | Fast arm pumps | 45s | 1× (Wed alt) | 30 min alternating-week session |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** PMC 11447755, Physiology & Behavior 2016 (CLAUDE.md §15)
+
+---
+
+#### Roll-up
+
+**Category:** Core / Mobility
+**Equipment:** None (mat optional)
+**Target muscles (primary):** Rectus abdominis, hip flexors
+**Target muscles (secondary):** Spinal articulators, obliques
+**Movement type:** Dynamic core
+
+**Description:** From supine with arms overhead, slowly roll up to a seated forward
+fold one vertebra at a time, then reverse the motion back down. Trains segmental
+spinal control and strong hip-flexor engagement. 6 reps.
+
+**Common mistakes:**
+- Using momentum to "throw" the torso up instead of articulating through each segment
+- Feet lifting off the mat — anchor them throughout
+
+**Safety notes:** Use the assisted variant (hold the backs of the thighs) if strength
+is insufficient. **Skip if lower back pain is present.**
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 6 reps | Slow | 30s | 1× (Sat) | 25-30 min mat session |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | 6 reps | Slow | 30s | 1× (Sat) | 15 min core portion |
+| Maintenance | 6 reps | Slow | 30s | 1× (Wed alt) | 30 min alternating-week session |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** PMC 11447755, Physiology & Behavior 2016 (CLAUDE.md §15)
+
+---
+
+#### Single leg circles
+
+**Category:** Hip mobility
+**Equipment:** None (mat optional)
+**Target muscles (primary):** Hip flexors, hip adductors, hip abductors
+**Target muscles (secondary):** Core (anti-rotation), hamstrings
+**Movement type:** Mobility
+
+**Description:** Supine with one leg extended toward the ceiling (bottom leg
+straight or bent), draw controlled circles with the raised leg. Reverse direction
+after target reps. 8/direction/leg.
+
+**Common mistakes:**
+- Circles too large so the pelvis rocks — keep the pelvis anchored
+- Bending the circling leg instead of keeping it long
+
+**Safety notes:** Bend the bottom leg for stability if the lower back rises off the
+mat.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 8/dir/leg | Slow | 20s | 1× (Sat) | 25-30 min mat session |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in core portion |
+| Maintenance | 8/dir/leg | Slow | 20s | 1× (Wed alt) | 30 min alternating-week session |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** PMC 11447755, Physiology & Behavior 2016 (CLAUDE.md §15)
+
+---
+
+#### Double leg stretch
+
+**Category:** Core
+**Equipment:** None (mat optional)
+**Target muscles (primary):** Full core (rectus abdominis, obliques, transverse abdominis)
+**Target muscles (secondary):** Hip flexors, deltoids
+**Movement type:** Dynamic core
+
+**Description:** Supine with head and shoulders slightly lifted, start tucked (knees
+to chest, hands around shins). Extend both arms overhead and legs out to a long
+diagonal simultaneously, then return to the tuck. 8 reps.
+
+**Common mistakes:**
+- Lower back arching off the mat when arms and legs extend — extend only as far as control allows
+- Losing control on the return, slamming knees back to chest
+
+**Safety notes:** Only extend legs as far as the core can control — **the lower
+back must stay pressed against the floor throughout**.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 8 reps | Slow | 30s | 1× (Sat) | 25-30 min mat session |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | 8 reps | Slow | 30s | 1× (Sat) | 15 min core portion |
+| Maintenance | 8 reps | Slow | 30s | 1× (Wed alt) | 30 min alternating-week session |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** PMC 11447755, Physiology & Behavior 2016 (CLAUDE.md §15)
+
+---
+
+#### Bridge with march
+
+**Category:** Core / Glutes
+**Equipment:** None (mat optional)
+**Target muscles (primary):** Gluteus maximus, core (anti-rotation)
+**Target muscles (secondary):** Gluteus medius, hamstrings
+**Movement type:** Dynamic stability
+
+**Description:** From a bridge position (hips lifted), alternate lifting one foot
+off the floor into a march while keeping the hips level. 10 reps total (5/side).
+
+**Common mistakes:**
+- Hips dropping each time a foot lifts — must stay level
+- Rotating the pelvis as the leg lifts instead of resisting rotation
+
+**Safety notes:** Master the regular bridge first. Stop on any low-back pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 10 reps | Slow | 30s | 1× (Sat) | 25-30 min mat session |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | 10 reps | Slow | 30s | 1× (Sat) | 15 min core portion |
+| Maintenance | 10 reps | Slow | 30s | 1× (Wed alt) | 30 min alternating-week session |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** PMC 11447755, Physiology & Behavior 2016 (CLAUDE.md §15)
+
+---
+
+#### Swimming prone
+
+**Category:** Posterior chain
+**Equipment:** None (mat optional)
+**Target muscles (primary):** Erector spinae, gluteus maximus
+**Target muscles (secondary):** Deltoids, hamstrings
+**Movement type:** Dynamic stability
+
+**Description:** Prone with arms extended overhead, alternate lifting the opposite
+arm and leg a few inches off the floor in a swimming pattern. 20 alternating (10/side).
+
+**Common mistakes:**
+- Lifting too high, hyperextending the lumbar spine — keep movements small
+- Holding the breath instead of maintaining steady rhythm
+
+**Safety notes:** Small controlled movements — the work is the contraction, not the
+height. Stop on any lumbar pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 20 alternating | Slow | 30s | 1× (Sat) | 25-30 min mat session |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | 20 alternating | Slow | 30s | 1× (Sat) | 15 min core portion |
+| Maintenance | 20 alternating | Slow | 30s | 1× (Wed alt) | 30 min alternating-week session |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** PMC 11447755, Physiology & Behavior 2016 (CLAUDE.md §15)
+
+---
+
+#### Seal
+
+**Category:** Mobility / Recovery
+**Equipment:** None (mat required — soft surface)
+**Target muscles (primary):** Spine (segmental massage), core
+**Target muscles (secondary):** Hip flexors
+**Movement type:** Mobility
+
+**Description:** Seated with knees open, soles of feet together, hands grasping the
+ankles. Rock backward onto the mid-back and return to seated under control. 6 reps.
+
+**Common mistakes:**
+- Rolling onto the neck — **stop the roll at the upper back**, never on the cervical spine
+- Using too much momentum and losing control on the return
+
+**Safety notes:** Soft surface only — never on hard floor. **Skip if any spinal
+issues are present.**
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 6 reps | Controlled | 30s | 1× (Sat) | 25-30 min mat session closer |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in core portion |
+| Maintenance | 6 reps | Controlled | 30s | 1× (Wed alt) | 30 min alternating-week session |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** PMC 11447755, Physiology & Behavior 2016 (CLAUDE.md §15)
+
+---
+
+#### Side-lying leg lift
+
+**Category:** Hip stability
+**Equipment:** None (mat optional)
+**Target muscles (primary):** Gluteus medius, tensor fasciae latae (TFL)
+**Target muscles (secondary):** Core (anti-rotation), adductors (bottom leg)
+**Movement type:** Isolation
+
+**Description:** Side-lying with bottom leg bent for stability and top leg extended
+straight. Lift the top leg to ~45° without rotating the hip forward, pause, lower
+under control. 10/side.
+
+**Common mistakes:**
+- Rotating the hip forward to recruit hip flexors / TFL instead of glute med
+- Kicking with momentum instead of a controlled lift
+
+**Safety notes:** Very low intensity — suitable for all levels. Stop on any sharp
+lateral hip pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 10/side | Slow | 30s | 1× (Sat) | 25-30 min mat session |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | 10/side | Slow | 30s | 1× (Sat) | 15 min core portion |
+| Maintenance | 10/side | Slow | 30s | 1× (Wed alt) | 30 min alternating-week session |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** PMC 11447755, Physiology & Behavior 2016 (CLAUDE.md §15)
+
+---
