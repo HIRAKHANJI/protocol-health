@@ -20,7 +20,7 @@
 // VERSION: bump CACHE_NAME (e.g. 'protocol-health-v8') when you deploy a major update.
 // This forces old caches to be deleted and new files to be fetched fresh.
 
-const CACHE_NAME = 'protocol-health-v13';
+const CACHE_NAME = 'protocol-health-v19';
 
 // ─── INSTALL ─────────────────────────────────────────────────────────────────
 // Runs once when the service worker is first registered (or when CACHE_NAME changes).
@@ -33,8 +33,30 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
 
-      // Critical files — these must be cached for the app to work offline
-      return cache.addAll(['./app.html', './index.html', './manifest.json'])
+      // Critical files — these must be cached for the app to work offline.
+      // Includes the migrations/, plans/, and modules/ ES modules so everything runs offline.
+      return cache.addAll([
+        './app.html',
+        './index.html',
+        './manifest.json',
+        './migrations/runner.js',
+        './migrations/registry.js',
+        './migrations/helpers.js',
+        './plans/index.js',
+        './plans/lite.js',
+        './plans/agro.js',
+        './plans/cut.js',
+        './plans/bulk.js',
+        './plans/maintenance.js',
+        './plans/exercise-progressions.js',
+        './modules/calendar.js',
+        './modules/radar.js',
+        './modules/export.js',
+        './modules/schedule-html.js',
+        './components/workout-card.js',
+        './components/rule-card.js',
+        './components/checklist.js'
+      ])
         .then(() => {
           // Best-effort files — icons and Google Fonts
           // Promise.allSettled means one failure won't block the others

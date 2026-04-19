@@ -23,7 +23,7 @@ It is actively used daily. Every feature exists because it was needed, not becau
 
 ## 2. What the App Is
 
-Protocol Health is a single-file Progressive Web App (PWA) — the entire application lives in one HTML file (`index.html`) with no backend, no server, no database, and no external dependencies beyond Google Fonts. All data is stored in the browser's localStorage on the user's device.
+Protocol Health is a zero-dependency, zero-build Progressive Web App (PWA). The app bootstrap lives in `app.html`; plan definitions, large function groups, UI helpers, and the migration framework load as native ES modules from `plans/`, `modules/`, `components/`, and `migrations/` (see Section 23). No backend, no server, no database, and no external dependencies beyond Google Fonts. All data is stored in the browser's localStorage on the user's device.
 
 Installed on Android Chrome as a fullscreen PWA — behaves like a native app with its own icon, no browser chrome, and full offline capability after first load.
 
@@ -233,10 +233,10 @@ Nothing else changes. `getActivePlan()` reads `settings.plan`, looks up `PLANS[s
 
 | File | Purpose |
 |------|---------|
-| `app.html` | The entire app — HTML, CSS, and all JavaScript in one file. ~5000+ lines. No build process, no bundler, no framework. |
+| `app.html` | App bootstrap — HTML, CSS, and the inline orchestration script (runInit + helpers that stay in classic scope). ~4600 lines post-refactor. Plans, large function groups, shared components, and migrations load as ES modules — see Section 23. Zero build process, zero bundler, zero framework. |
 | `index.html` | Landing/product page. Links to `app.html`. |
 | `manifest.json` | PWA manifest. App name, icons, display mode (standalone = fullscreen), theme color. |
-| `sw.js` | Service Worker. Caches all app files after first load for offline use. Cache-first strategy. Current cache name: `protocol-health-v13`. Bump version on major deploys. |
+| `sw.js` | Service Worker. Caches all app files after first load for offline use. Cache-first strategy. Current cache name: `protocol-health-v19`. Bump version on major deploys. |
 | `PH_LOGO_192.png` | Home screen icon at 192×192px. |
 | `PH_LOGO_512.png` | Splash screen icon at 512×512px. |
 
@@ -366,11 +366,34 @@ localStorage is wiped when the user clears Chrome browsing data. The backup syst
 
 > **Critical:** No server, no cloud sync, no account. If localStorage is wiped without a backup, all data is gone. Recommend backing up to Google Drive after first setup and weekly thereafter.
 
+### Schema Version & Migrations (added v5.1.0)
+
+Shape evolution of stored data is governed by `migrations/registry.js`. Each migration object has:
+
+- `from` / `to` — schema versions, monotonic integers
+- `description` — human-readable short label
+- `requiresBackup` — if `true`, the runner auto-downloads a JSON snapshot of all `ph_*` keys before running
+- `run(dataMap)` — pure transform taking `{ [storageKey]: value }` and returning the new map
+- `verify(dataMap)` — optional validation that returns `false` to abort
+- `reverse(dataMap)` — optional inverse operation for future rollback tooling
+
+The schema version lives at `ph_sch_v1`. The record is established on first run of v5.1.0 or later, with `establishedFrom: 'existing-user'` if any `ph_*` data already exists, otherwise `'fresh-install'`.
+
+**Rules:**
+
+- Storage keys are never renamed. New shapes go under new keys (e.g. `ph_dl_v2`), leaving `ph_dl_v1` in place until explicitly cleaned.
+- Migrations are additive. Old keys are preserved unless explicitly cleaned.
+- Destructive changes MUST have `requiresBackup: true`.
+- Every migration must be verified against the owner's actual backup JSON before shipping.
+- `restoreData()` rejects backups whose `schemaVersion` exceeds the current app's. Old backups (no `schemaVersion`) are treated as v1 and restore normally.
+
+Settings → Data Management shows the current schema version and an `EXPORT MIGRATION LOG` button that downloads the full `ph_sch_v1` record.
+
 ---
 
 ## 10. The Improvement Project
 
-This app is in active development. Updates are made through Claude Code connected directly to the GitHub repository. The single-file architecture makes this straightforward — there is no build system, no compiled output, no package manager for the app itself.
+This app is in active development. Updates are made through Claude Code connected directly to the GitHub repository. The zero-build, zero-dependency architecture makes this straightforward — files are pushed to the repo and served live by GitHub Pages. Plans, modules, components, and migrations load as native ES modules with no bundler, no compiled output, no package manager for the app itself.
 
 ### Known Improvement Areas
 - **Streak tracking** — visible consecutive day compliance counter with streak protection mechanics
@@ -407,7 +430,7 @@ This app is in active development. Updates are made through Claude Code connecte
 - **Mobile-first.** The app is used on a phone. Every UI change must work on a 375px screen.
 - **Dark theme only.** Colors: bg `#0a0a0a`, surface `#111111`, accent `#c8f542` (green), accent2 `#f5a623` (orange).
 - **Fonts:** Bebas Neue (headers), DM Mono (data/labels), DM Sans (body). Do not introduce new fonts.
-- **No over-engineering.** The single-file architecture is a feature, not a limitation.
+- **No over-engineering.** Zero build step, zero dependencies, native ES modules. The constraint is a feature, not a limitation.
 - **Bodyweight first.** Any new workout content must default to zero-equipment exercises.
 
 ---
@@ -428,7 +451,7 @@ Push to GitHub → GitHub Pages serves new files (~60s)
 
 The service worker caches files under `CACHE_NAME` in `sw.js`. If this name does not change, the SW may keep serving the old cached version even after new files are pushed.
 
-**Current version:** `protocol-health-v13`
+**Current version:** `protocol-health-v19`
 
 > **Rule: Bump `CACHE_NAME` on every significant update to `main`.**
 > - Only bump when merging or pushing to `main` — feature branches do not need cache version increments
@@ -439,7 +462,7 @@ The service worker caches files under `CACHE_NAME` in `sw.js`. If this name does
 
 ```javascript
 // sw.js — line 22
-const CACHE_NAME = 'protocol-health-v13'; // ← increment this on every significant push
+const CACHE_NAME = 'protocol-health-v19'; // ← increment this on every significant push
 ```
 
 ### Files That Must Be Pushed Together
@@ -475,6 +498,36 @@ const CACHE_NAME = 'protocol-health-v13'; // ← increment this on every signifi
 
 > **On feature branches:** commit `app.html` freely without touching `sw.js`. Bump `CACHE_NAME` once as part of the merge to `main`.
 
+### Version Tagging Rule (added 2026-04-19)
+
+Every commit that (a) passes its phase smoke test and (b) bumps APP_VERSION MUST be tagged in git and logged in `WORKING_VERSIONS.md` BEFORE any further work begins.
+
+**The sequence is:**
+
+1. Commit the change with the APP_VERSION bump.
+2. Run smoke test on owner's device. Confirm PASS.
+3. `git tag vX.Y.Z-working` on the commit.
+4. `git push origin vX.Y.Z-working`.
+5. Append a new entry to `WORKING_VERSIONS.md` at the TOP.
+6. Commit the `WORKING_VERSIONS.md` update separately with message `docs: log working version vX.Y.Z`.
+7. Push that commit.
+
+**Rollback contract:**
+
+If any future change breaks the app and the owner asks for a rollback, the recovery procedure is:
+
+1. Read `WORKING_VERSIONS.md`, find the most recent entry.
+2. `git reset --hard <tag>` to that version.
+3. Bump `CACHE_NAME` in `sw.js` by 1 so user devices pick up the rollback.
+4. Bump `APP_VERSION` as a patch (e.g., `5.4.0` → `5.4.1`) with message: `APP_VERSION_MSG = 'Reverted recent changes — investigating. Your data is safe.'`
+5. Commit with message `revert: rollback to vX.Y.Z-working — <one-sentence reason>`.
+6. Push. `git push --force-with-lease origin main` is acceptable here.
+7. Log the revert as a new entry in `WORKING_VERSIONS.md` with the note "REVERT from vA.B.C → vX.Y.Z".
+
+**Claude Code accepts the command:** "Rollback to the most recent working version in WORKING_VERSIONS.md. Bump cache. Push." and executes the full sequence above with no additional input.
+
+**Never skip tagging.** If a phase's APP_VERSION bump is not tagged and logged, the next phase has no rollback target. This is non-negotiable.
+
 ---
 
 ## 12. App Versioning (`APP_VERSION`)
@@ -494,7 +547,7 @@ The app has two independent version numbers that serve different purposes:
 | **+0.1.0** (minor) | A new feature, a meaningful UI change, or 4+ bug fixes bundled together | Yes | Added streak counter, redesigned settings panel, new checklist group |
 | **+1.0.0** (major) | New plan added, major rework of a core system, or something that changes how you use the app | Yes | New combat training plan, schedule system rewrite, new tab added |
 
-**Current version:** `5.0.0`
+**Current version:** `6.0.0`
 
 > **Self-Update Rule:** Whenever `APP_VERSION` is bumped in `app.html`, also update ALL version references in this file (`CLAUDE.md`) to match — including this line and the Quick Reference section below. Never leave stale version numbers in project documentation.
 
@@ -511,7 +564,7 @@ The app has two independent version numbers that serve different purposes:
 When making changes, update these two lines near the top of the script in `app.html`:
 
 ```javascript
-const APP_VERSION = '5.0.0';                         // ← bump according to rules above
+const APP_VERSION = '6.0.0';                         // ← bump according to rules above
 const APP_VERSION_MSG = 'Description of changes.';    // ← short description of what changed
 ```
 
@@ -536,7 +589,7 @@ const APP_VERSION_MSG = 'Description of changes.';    // ← short description o
 ```
 Repository:   github.com/HIRAKHANJI/protocol-health
 Live URL:     https://hirakhanji.github.io/protocol-health/
-App file:     app.html (single file, ~5000+ lines)
+App file:     app.html (bootstrap, ~4600 lines post-refactor; plans/modules/components load as ES modules — see Section 23)
 Landing:      index.html (product page)
 PWA files:    manifest.json, sw.js, PH_LOGO_192.png, PH_LOGO_512.png
 
@@ -552,15 +605,24 @@ Storage keys (all in SK object at top of script):
   ph_fb_v1  — food library (autocomplete + macro memory)
   ph_ex_v1  — exercise levels (per-day progression tracking)
   ph_sw_v1  — last dismissed SW cache version (for reload banner)
+  ph_sch_v1 — schema version record (migration framework, v5.1.0+)
 
-Plans:        PLANS.default, PLANS.agro, PLANS.cut, PLANS.bulk, PLANS.maintenance
+Modules:      migrations/ — schema versioning and upgrade logic (see Section 9 subsection)
+              plans/ — plan definitions + EXERCISE_PROGRESSIONS, loaded as ES modules
+              modules/ — export.js, calendar.js, radar.js, schedule-html.js
+                        (large function groups extracted from app.html in v5.4.0)
+              components/ — workout-card.js, rule-card.js, checklist.js
+                        (shared UI helpers extracted from app.html in v5.5.0)
+
+Plans:        PLANS.default (= lite), PLANS.agro, PLANS.cut, PLANS.bulk, PLANS.maintenance
+              (defined in plans/*.js; historical `default` key aliases LITE PROTOCOL)
 Active plan:  getActivePlan() — never reference PLANS[x] directly elsewhere
 Day types:    getDayType(dateStr) → 'fast' | 'light' | 'normal'
 Data writes:  always end with dispatch("EVENT_NAME")
 Dialogs:      showConfirm(), showAlert() — never native confirm/alert
 Dates:        dateToStr(d), strToDate(s), todayStr() — never toISOString()
-Cache:        sw.js CACHE_NAME = "protocol-health-v13" — bump on every significant push
-App version:  APP_VERSION = "5.0.0" — bump on notable updates (see Section 12)
+Cache:        sw.js CACHE_NAME = "protocol-health-v19" — bump on every significant push
+App version:  APP_VERSION = "6.0.0" — bump on notable updates (see Section 12)
 Update log:   UPDATE_LOG.md — every version bump must be documented here
 ```
 
@@ -722,3 +784,300 @@ The file `WORKOUTS_LIBRARY.md` in the repo root is the canonical reference for a
 3. The library's evidence citations must reference entries in CLAUDE.md Section 15
 4. Push:pull ratio must remain ≤ 1:1 across any plan's weekly schedule
 5. Exercise progressions in the library must match `EXERCISE_PROGRESSIONS` in `app.html` exactly
+
+---
+
+## 22. Refactor Context (April 2026, 2-Day Compressed Timeline)
+
+In April 2026, the app is undergoing a major architectural refactor from single-file to modular ES modules. The refactor executes across ~6 phases in 2 days (owner's choice, testing-compressed timeline with explicit acknowledged risk).
+
+**Refactor artifacts in the repo:**
+
+- `WORKING_VERSIONS.md` — append-only log of git-tagged working versions
+- `docs/PHASE_0_RECON.md` — the recon report
+- `docs/PHASE_N_PLAN.md` — pre-execution plan for each phase
+- `docs/PHASE_N_SUMMARY.md` — post-execution summary for each phase
+
+**The destination architecture** (after Phase 5/6 completion):
+
+```
+/
+├── app.html                  # Bootstrap + HTML + CSS + init orchestration (~2500 lines)
+├── index.html, sw.js, manifest.json
+├── CLAUDE.md, UPDATE_LOG.md, WORKING_VERSIONS.md, WORKOUTS_LIBRARY.md
+├── plans/
+│   ├── index.js, lite.js, agro.js, cut.js, bulk.js, maintenance.js
+│   └── exercise-progressions.js
+├── modules/
+│   ├── export.js, schedule-html.js, calendar.js, radar.js
+├── components/
+│   ├── workout-card.js, rule-card.js, checklist.js
+├── migrations/
+│   ├── registry.js, runner.js, helpers.js
+└── docs/
+```
+
+**Module interop pattern (will be in place after Phase 3):**
+
+ES modules load via `<script type="module">`. Their exports are promoted to `window.*` so the inline script in `app.html` can reference them from onclick handlers. A `ph:modules-ready` event signals init readiness.
+
+**If you (future Claude session) are onboarding post-refactor:** read Section 23 (Modular Architecture), Section 24 (Migration Framework), Section 25 (Working With This Codebase), and Section 26 (File Line-Count Governance). Those are added in Phase 6 of the refactor.
+
+---
+
+## 23. Modular Architecture (Post-Refactor, v6.0.0)
+
+As of v6.0.0 the app is a modular ES-module PWA, not a single-file app. Zero build step, zero dependencies, zero framework — just native ES modules served by GitHub Pages.
+
+### Directory structure
+
+```
+/
+├── app.html                  # Bootstrap: HTML + CSS + inline orchestration script (~4600 lines)
+├── index.html                # Landing page (not the app entry point — that's app.html)
+├── manifest.json             # PWA manifest
+├── sw.js                     # Service worker (cache list covers every module file)
+├── CLAUDE.md                 # Canonical project brief (this file)
+├── UPDATE_LOG.md             # Version history
+├── WORKING_VERSIONS.md       # Git-tagged working-version log (append-only)
+├── WORKOUTS_LIBRARY.md       # Exercise encyclopedia
+├── plans/
+│   ├── index.js              # Assembles PLANS; re-exports EXERCISE_PROGRESSIONS
+│   ├── lite.js               # LITE PROTOCOL (historical key: 'default')
+│   ├── agro.js               # AGRO CUT CALISTHENICS
+│   ├── cut.js                # DEFAULT CUT
+│   ├── bulk.js               # DEFAULT BULK
+│   ├── maintenance.js        # DEFAULT MAINTENANCE
+│   └── exercise-progressions.js
+├── modules/
+│   ├── export.js             # openExport, generateExport + nested helpers, renderMarkdownPreview, copyExport, downloadReport
+│   ├── schedule-html.js      # downloadScheduleHTML
+│   ├── calendar.js           # changeMonth, renderCalendar, openDayModal, modal handlers, closeModal
+│   └── radar.js              # setRadarWindow, computeRadarMetrics, renderRadar (+ module-local radarWindow state)
+├── components/
+│   ├── workout-card.js       # exRow, exRowWithLevel, workoutCard, stretchRow (+ module-local row counters)
+│   ├── rule-card.js          # ruleCard
+│   └── checklist.js          # renderTodayChecklist, loadChecklist, and the full TODAY-tab handler suite
+├── migrations/
+│   ├── registry.js           # MIGRATIONS array (ordered list of migration objects)
+│   ├── runner.js             # runMigrations(), getSchemaVersion(), getMigrationLog()
+│   └── helpers.js            # gsSafe, ssSafe, downloadJson
+└── docs/
+    ├── PHASE_0_RECON.md
+    ├── PHASE_N_PLAN.md       # One per phase
+    └── baselines/            # Pre/post diff baselines captured during the refactor
+```
+
+### Interop pattern — bare-name fallback to `globalThis`
+
+ES modules cannot share lexical scope with the inline classic `<script>`. Rather than a `window.PH` wrapper object, this codebase uses JavaScript's built-in scope-chain fallback:
+
+1. **Classic-script constants needed by modules** (e.g. `SK`, `MONTHS_LIST`, `DAYS_SHORT`, `AUTO_WORKOUT_IDS`, `WORKOUT_ITEM_SESSION`) are explicitly attached to `window` once, early in the inline script:
+
+   ```javascript
+   Object.assign(window, { SK, MONTHS_LIST, DAYS_SHORT, AUTO_WORKOUT_IDS, WORKOUT_ITEM_SESSION });
+   ```
+
+2. **Classic-script function declarations** (e.g. `getSettings()`, `saveDayLogField()`, `dispatch()`, `getActivePlan()`) are automatically on `window` by virtue of being top-level function declarations in a classic `<script>`.
+
+3. **Module exports that classic code needs to call** (including HTML onclick handlers) are explicitly assigned to `window.*` by the module loader `<script type="module">` block for that module group — for example:
+
+   ```javascript
+   import * as Calendar from './modules/calendar.js';
+   window.renderCalendar = Calendar.renderCalendar;
+   window.openDayModal = Calendar.openDayModal;
+   /* ...etc for every exported function... */
+   ```
+
+4. **Both directions use the same mechanism:** bare identifier lookup inside a function body walks the lexical scope chain and falls through to `globalThis` / `window` when nothing matches. This works identically in modules and in classic scripts, and it's evaluated at call time rather than at parse/load time — which is why it works across the module-versus-classic boundary.
+
+This pattern was chosen over a `window.PH` bridge because it preserves **byte-identity** of extracted function bodies: every `renderCalendar` reference, every `workoutCard(...)` template-literal call, every `getSettings()` invocation inside an extracted module is identical to the original source line. No mechanical `foo` → `PH.foo` rewrite to verify.
+
+### Startup sequence
+
+All module `<script type="module">` tags are placed in `<body>` before the main classic `<script>`. Modules are deferred; classic script runs synchronously first (so `Object.assign(window, {...})` happens before modules evaluate). `runInit()` is async and awaits four readiness events:
+
+1. Browser parses HTML top-to-bottom.
+2. Hits module `<script>` tags (4 of them) — fetches start, execution deferred.
+3. Hits the main classic `<script>` — runs synchronously; defines constants, exposes them on `window`, declares functions, calls `runInit().catch(...)`.
+4. `runInit()` begins and immediately awaits:
+   - `ph:migrations-ready` (from `migrations/runner.js` loader)
+   - `ph:plans-ready` (from `plans/index.js` loader)
+   - `ph:fnmodules-ready` (from `modules/*.js` loader)
+   - `ph:components-ready` (from `components/*.js` loader)
+5. Each module group's loader fires its ready event once its `window.*` assignments complete.
+6. With all gates passed, `runInit()` proceeds: `idbAutoRestore()` → `runMigrations()` → plan UI setup → `renderTodayChecklist` → `loadChecklist` → tab setup → rest of init.
+
+### Change location guide
+
+| If you want to change… | Edit |
+|-----------------------|------|
+| A plan's workouts | `plans/<name>.js` |
+| A plan's nutrition or rules content | `plans/<name>.js` |
+| Exercise progression levels | `plans/exercise-progressions.js` |
+| How calendar cells are coloured | `modules/calendar.js` (`renderCalendar`) |
+| Day modal behaviour | `modules/calendar.js` (`openDayModal` + handlers) |
+| Radar axis / scoring | `modules/radar.js` (`computeRadarMetrics`) |
+| Radar chart rendering | `modules/radar.js` (`renderRadar`) |
+| Markdown export structure | `modules/export.js` (`generateExport` + nested builders) |
+| Downloaded schedule HTML | `modules/schedule-html.js` |
+| TODAY tab checklist render / handlers | `components/checklist.js` |
+| Workout card / row HTML | `components/workout-card.js` |
+| Rule card HTML | `components/rule-card.js` |
+| Storage key shape | Add a migration in `migrations/registry.js` (see Section 24) |
+| Add a training plan | Add `plans/newplan.js` + import in `plans/index.js` + `<option>` in Settings + matching custom-dropdown entry |
+| Service worker cache list | `sw.js` — any new file must be added |
+
+---
+
+## 24. Schema Migration Playbook
+
+The migration framework (added v5.1.0) handles all shape changes to stored data. See Section 9's "Schema Version & Migrations" subsection for the framework basics.
+
+### When you need a migration
+
+Any change to the shape of a value stored under one of the `SK` keys. Examples:
+
+- Renaming a field inside `dayLogs` entries
+- Splitting a field into multiple fields
+- Changing a field's type (e.g., string → number)
+- Introducing a new mandatory field in an existing object
+
+Examples of changes that do **NOT** need a migration:
+
+- Adding a new storage key (just add to `SK`; no migration needed)
+- Adding an optional field that defaults sensibly when absent
+- Adding a new plan
+
+### How to add a migration
+
+1. Determine the next schema version. Read `getSchemaVersion()` in the live app. Increment by 1.
+2. Add an object to the `MIGRATIONS` array in `migrations/registry.js`:
+
+   ```javascript
+   {
+     from: N,
+     to: N + 1,
+     description: 'Rename dayLogs.checks.old_id to dayLogs.checks.new_id',
+     requiresBackup: true,  // ALWAYS true if modifying existing data shape
+     run: (data) => {
+       const dayLogs = data['ph_dl_v1'];
+       if (dayLogs) {
+         for (const date in dayLogs) {
+           const checks = dayLogs[date].checks || {};
+           if ('old_id' in checks) {
+             checks.new_id = checks.old_id;
+             delete checks.old_id;
+           }
+         }
+       }
+       return data;
+     },
+     verify: (data) => {
+       const dayLogs = data['ph_dl_v1'] || {};
+       return Object.values(dayLogs).every(log => !('old_id' in (log.checks || {})));
+     },
+     reverse: (data) => {
+       const dayLogs = data['ph_dl_v1'];
+       if (dayLogs) {
+         for (const date in dayLogs) {
+           const checks = dayLogs[date].checks || {};
+           if ('new_id' in checks) {
+             checks.old_id = checks.new_id;
+             delete checks.new_id;
+           }
+         }
+       }
+       return data;
+     }
+   }
+   ```
+
+3. Test against the owner's actual backup JSON before shipping.
+4. Bump `APP_VERSION` as minor so the banner shows.
+5. Ship.
+
+### Rules
+
+- **Never rename a storage key.** For big shape changes, create a new key (`ph_dl_v2`) and migrate data from old to new. Keep the old key around for downgrade compatibility.
+- **Always set `requiresBackup: true` for any non-trivial change.** The runner auto-downloads a JSON snapshot of all `ph_*` keys before applying.
+- **Always include `verify`.** If `verify` returns false, the migration aborts and `runInit()` halts with a user-visible alert.
+- **Always include `reverse` if you can define one.** Needed for clean rollback tooling.
+- **Never bundle destructive cleanup into a migration.** Deleting old keys is its own separate, explicit, opt-in operation.
+
+---
+
+## 25. Working With This Codebase (Claude Code Onboarding)
+
+Start every session with these steps. Do not skip any.
+
+### On session start
+
+1. `git pull origin main`
+2. `head -30 WORKING_VERSIONS.md` — know the current known-good state.
+3. Read `CLAUDE.md` in full — this file.
+4. Identify the files relevant to the request. Read them before writing anything.
+
+### On feature requests
+
+1. Produce a plan document under `docs/` before touching code.
+2. Stop and wait for owner approval of the plan.
+3. Execute.
+4. Test (smoke test per `08_SMOKE_TESTS.md` or owner-driven verification).
+5. Bump `APP_VERSION` + `CACHE_NAME` per Section 12.
+6. After smoke test passes, tag `vX.Y.Z-working` and add an entry at the TOP of `WORKING_VERSIONS.md` per Section 11.
+7. Write a phase/feature summary under `docs/`.
+
+### On bug reports
+
+1. Reproduce locally against the owner's most recent backup.
+2. Identify the root cause before writing any fix.
+3. Produce a fix plan.
+4. Wait for approval.
+5. Execute surgically — only the fix. No "while we're here" changes.
+
+### On rollback requests
+
+The owner may say: **"Rollback to the most recent working version. Bump cache. Push."**
+
+Procedure:
+
+1. Read `WORKING_VERSIONS.md`, find the top entry.
+2. `git reset --hard <tag>`
+3. Edit `sw.js`: bump `CACHE_NAME` by 1 past current (so user devices pick up the rollback).
+4. Edit `app.html`: patch-bump `APP_VERSION` (e.g. `5.4.0` → `5.4.1`) with `APP_VERSION_MSG = 'Reverted recent changes — investigating. Your data is safe.'`
+5. Edit `UPDATE_LOG.md`: add revert entry.
+6. Stage and commit: `git commit -m "revert: rollback to <tag> — <one-sentence reason>"`.
+7. `git push --force-with-lease origin main` (acceptable on rollback).
+8. Append a new REVERT entry to `WORKING_VERSIONS.md`, commit, push normally.
+9. Notify the owner; they should hard-refresh the PWA (close and reopen on phone; `Ctrl+Shift+R` on desktop).
+
+### Principles that never change
+
+- **Zero dependencies.** No npm, no build step, no framework, no TypeScript.
+- **Offline-first.** Every new file must be added to the `sw.js` cache list.
+- **Data safety.** Never rename a storage key. Every shape change has a migration. Every destructive migration auto-backs-up first. Old backups restore forever (backward-compatible format).
+- **Bodyweight-first design.** See Sections 1 and 3.
+- **Science Reference Directive.** Section 15 governs all supplement, macro, and training claims.
+- **Version discipline.** Every commit that touches `app.html` bumps `APP_VERSION` and adds a `UPDATE_LOG.md` entry (Section 12). Every merge to `main` bumps `CACHE_NAME`. Every working phase is tagged `vX.Y.Z-working` and logged in `WORKING_VERSIONS.md`.
+- **Byte-identity in refactors.** When moving code between files, verify the extracted content is byte-identical to the source (text-diff) before deleting the source.
+
+---
+
+## 26. File Line-Count Governance
+
+Approximate targets. Exceeding them is a hint to split, not a failure.
+
+| File | Target | Actual (v6.0.0) |
+|------|--------|-----------------|
+| `app.html` | ≤ 5,000 lines | ~4,600 ✓ |
+| Any `plans/*.js` | ≤ 800 lines | max 580 (agro) ✓ |
+| Any `modules/*.js` | ≤ 1,000 lines | max 716 (export) ✓ |
+| Any `components/*.js` | ≤ 400 lines | max 404 (checklist) — at the line ⚠ |
+| `migrations/runner.js` | ≤ 300 lines | ~130 ✓ |
+| `sw.js` | ≤ 300 lines | ~180 ✓ |
+
+These are soft limits. Exceeding means "think about whether splitting would help," not "must split." If `components/checklist.js` grows further, consider splitting the water-tracking handlers into their own component.
+
+The `app.html` target is deliberately relaxed from a more aggressive "≤ 2,500" aspirational goal. Further reduction is possible (TDEE/goal calculator, settings UI, schedule logic, weight-log UI) but has diminishing returns — each extraction adds a new module gate and window-exposure surface without proportional complexity relief. Stop here unless a concrete pain point motivates more work.
+

@@ -4,6 +4,113 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 6.0.0 — 2026-04-21
+
+**Scope:** Major (Architecture refactor complete — Phase 6 of 2-day refactor)
+**Banner:** "Architecture refactor complete. Zero behavior change; app is now modular under the hood."
+
+- **Refactor milestone.** The 2-day modular refactor that began with v5.1.0 is complete. Zero observable behavior change across the six phases; the app is now a modular ES-module PWA with a ~4,600-line bootstrap (`app.html`), plan definitions under `plans/`, large function groups under `modules/`, shared UI helpers under `components/`, and a schema-migration framework under `migrations/`. See `CLAUDE.md` Section 23 for the full architecture.
+- **CLAUDE.md gains four new sections:**
+  - Section 23 — Modular Architecture (post-refactor directory map + the bare-name/globalThis interop pattern + startup sequence + change-location guide).
+  - Section 24 — Schema Migration Playbook (copy-pasteable migration template + rules).
+  - Section 25 — Working With This Codebase (session-start checklist, feature / bugfix / rollback procedures, non-negotiable principles).
+  - Section 26 — File Line-Count Governance (soft limits with current actuals).
+- **Stale prose fixed:** removed "single-file" / "one HTML file" / "~5000+ lines" claims from Sections 2, 5, 10, and 13.
+- **`sw.js`:** `CACHE_NAME` bumped to `v19`.
+- **`index.html`:** hero-badge updated to `v6.0.0`.
+- **Zero app code changed in Phase 6** — it's pure documentation + version bump.
+
+**Cumulative refactor delta (v5.0.1 → v6.0.0):**
+- `app.html` reduced from ~8,572 lines to ~4,600 (-46%).
+- New directories: `plans/` (7 files), `modules/` (4 files), `components/` (3 files), `migrations/` (3 files) — 17 module files loading natively via ES-module `<script>` tags.
+- New infrastructure: schema version tracking (`ph_sch_v1`), auto-backup before destructive migrations, future-schema-backup guard on restore.
+- New discipline: `WORKING_VERSIONS.md` append-only log, per-phase git tags (`vX.Y.Z-working`), version-tagging rule in CLAUDE.md §11.
+
+---
+
+## Version 5.5.0 — 2026-04-21
+
+**Scope:** Minor (Shared components extraction — Phase 5 of 2-day refactor)
+**Banner:** "Under the hood: shared UI components extracted. No behavior change."
+
+- **Extracted shared UI helpers from `app.html` into the new `components/` directory:**
+  - `components/workout-card.js` — `exRow`, `exRowWithLevel`, `workoutCard`, `stretchRow`, `_resetExRowInstances`, plus module-scoped `_exRowInstanceCount` and `_wexCounter` state (54 lines).
+  - `components/rule-card.js` — `ruleCard` (4 lines).
+  - `components/checklist.js` — full TODAY-tab checklist lifecycle: `renderTodayChecklist`, `loadChecklist`, `toggleSupExpand`, `toggleSupItem`, `updateSupCount`, `toggle`, `toggleWaterExpand`, `onWaterInput`, `adjustWater`, `updateWaterCardState`, `saveAllChecks`, `syncAutoStatusChecks`, `refreshAutoItems`, `resetToday` (404 lines).
+- **`app.html` reduced by another ~456 lines** (from ~5045 to ~4590). All content byte-identical to source, verified via text-diff.
+- **Module interop:** a fourth `<script type="module">` shim imports the three component modules and promotes all exports to `window.*`. Plans' `workoutContent`/`rulesContent` templates continue to call `exRow`, `workoutCard`, `ruleCard`, etc. by bare name — resolved via globalThis fallback.
+- **`runInit()`** now awaits a fourth readiness event, `ph:components-ready`, after the existing migrations/plans/fnmodules gates.
+- **Module-local state:** `_exRowInstanceCount` and `_wexCounter` (used by `exRowWithLevel`, `exRow`, `stretchRow` to generate unique row IDs) live inside `components/workout-card.js`. External callers clear them via the exported `_resetExRowInstances()`.
+- **`sw.js`:** bumped `CACHE_NAME` to `v18` and added the three `components/*.js` paths to the critical cache list.
+- **`index.html`:** hero-badge updated to `v5.5.0`.
+- **Part B (judgment-heavy factoring of in-plan duplication) was NOT done** — prompt recommended skipping; app would gain filing-cabinet value at meaningful risk. Left as a post-refactor backlog item if ever warranted.
+
+---
+
+## Version 5.4.0 — 2026-04-21
+
+**Scope:** Minor (Large function extraction — Phase 4 of 2-day refactor)
+**Banner:** "Under the hood: export, calendar, and radar load as separate modules. No behavior change."
+
+- **Extracted four large function groups from `app.html` into the new `modules/` directory:**
+  - `modules/schedule-html.js` — `downloadScheduleHTML` (233 lines)
+  - `modules/radar.js` — `setRadarWindow`, `computeRadarMetrics`, `renderRadar`, plus the module-scoped `radarWindow` state (411 lines)
+  - `modules/calendar.js` — `changeMonth`, `renderCalendar`, `openDayModal`, 6 modal handlers (`toggleModalCheck`, `toggleModalSupItem`, `toggleModalWorkoutChecklist`, `toggleModalWorkoutEx`, `toggleFastDay`, `toggleLightDay`), `saveDayLog`, `closeModal`, plus the module-scoped `calYear`/`calMonth` state and the modalOverlay click-outside listener (583 lines)
+  - `modules/export.js` — `openExport`, `generateExport` (with all nested helpers), `renderMarkdownPreview`, `inlineFormat`, `copyExport`, `downloadReport` (716 lines)
+- **`app.html` reduced by another ~1943 lines** (from ~6929 to ~4990). All extracted code is byte-identical to its former inline source, verified by text-diff before removal.
+- **Module interop:** a new `<script type="module">` shim imports the four modules and promotes each exported function to `window.*`. Runtime callers (classic script + HTML onclick handlers) continue to resolve bare identifiers (`renderCalendar()`, `openDayModal('2026-04-10')`, etc.) via globalThis fallback.
+- **Globals exposure:** the classic script explicitly runs `Object.assign(window, { SK, MONTHS_LIST, DAYS_SHORT, AUTO_WORKOUT_IDS, WORKOUT_ITEM_SESSION })` so the extracted modules can reference those `const` bindings by bare name. Function declarations are automatically window-attached; only `const`/`let` needed explicit exposure.
+- **New startup gate:** `runInit()` now awaits a third readiness event, `ph:fnmodules-ready`, after the existing migrations-ready and plans-ready gates.
+- **Module-local state:** `radarWindow` (default 7-day radar window) lives inside `modules/radar.js`; `calYear`/`calMonth` (current calendar month pointer) lives inside `modules/calendar.js`. Neither is reachable from the classic script — the module exports the functions that read/mutate them.
+- **`sw.js`:** bumped `CACHE_NAME` to `v17` and added the four `modules/*.js` paths to the critical cache list.
+- **`index.html`:** hero-badge updated to `v5.4.0`.
+
+---
+
+## Version 5.3.0 — 2026-04-20
+
+**Scope:** Minor (Plan extraction — Phase 3 of 2-day refactor)
+**Banner:** "Under the hood: plan definitions now load as separate files. No behavior change."
+
+- **Extracted all 5 plan objects and `EXERCISE_PROGRESSIONS` from `app.html` into ES modules** under the new `plans/` directory: `lite.js` (historical `default` key), `agro.js`, `cut.js`, `bulk.js`, `maintenance.js`, `exercise-progressions.js`, plus `index.js` that assembles the `PLANS` object and maps the historical `default` key to LITE PROTOCOL.
+- **`app.html` reduced by ~1765 lines** — the inline plan definitions (previously ~L2253-L4027) are now a 10-line pointer comment.
+- **Module interop:** new `<script type="module">` loader in `<body>` imports from `plans/index.js` and promotes `PLANS` + `EXERCISE_PROGRESSIONS` to `window.*`. Dispatches a `ph:plans-ready` event; `runInit()` awaits this gate alongside the existing `ph:migrations-ready` gate.
+- **Byte-fidelity:** every extracted plan was verified identical to its original source lines via text diff before the source was removed. Zero behavior change.
+- **Backward compatibility:** users whose `settings.plan === 'default'` continue to see LITE PROTOCOL — the historical key is explicitly mapped in `plans/index.js`.
+- **`sw.js`:** bumped `CACHE_NAME` to `v16` and added the 7 new `plans/*.js` paths to the critical cache list so the whole app works offline.
+- **`index.html`:** hero-badge updated to `v5.3.0`.
+
+---
+
+## Version 5.2.0 — 2026-04-20
+
+**Scope:** Minor (Bugfixes — Phase 2 of 2-day refactor)
+**Banner:** "Calendar accuracy: compliance now measured against full checklist, not just items you touched. Some past days will shift from green to partial — this is correct."
+
+- **`getValidCheckCompletion` denominator bug fixed.** Total is now computed from the filtered checklist definition (items + day-filtered sub-items + `_workout` when rendered), not from the count of check entries the user had previously touched. Past days that were green from partial compliance now correctly display as partial or missed. Parent items with sub-items are no longer double-counted; the parent is a derived aggregate per `loadChecklist`, only the sub-items themselves count toward the ratio.
+- **`idbSyncAll` no longer silently swallows errors.** Replaces the empty `catch {}` with `console.warn` including the storage key and error, so IndexedDB mirror sync failures are visible in devtools.
+- **`idbAutoRestore` surfaces partial restore failures to the user.** Tracks failed keys, logs each with `console.error`, and shows a `showAlert` after init if any key couldn't be written back from the IDB mirror to localStorage.
+- Bumped `CACHE_NAME` to `v15`, hero-badge to `v5.2.0`.
+
+---
+
+## Version 5.1.0 — 2026-04-20
+
+**Scope:** Minor (Migration framework — Phase 1 of 2-day refactor)
+**Banner:** "Data safety: migration framework installed. Your existing data is untouched."
+
+- **Added `migrations/` directory** with three ES modules: `runner.js`, `registry.js`, `helpers.js`. All loaded via `<script type="module">` from `app.html` and promoted to `window.*` for use from the main inline script.
+- **New schema version tracking** via `ph_sch_v1` localStorage key. On first run of v5.1.0 the record is established with `schemaVersion: 1` and `establishedFrom: 'existing-user' | 'fresh-install'`. No migrations registered in this release — the framework ships empty.
+- **Backup JSON expanded** with two additive fields: `schemaVersion` and `appVersion`. Old backups (without these fields) continue to restore cleanly — missing `schemaVersion` is treated as `1`.
+- **Restore guard added:** backups from a future schema version are rejected with a clear message instructing the user to update the app first. Prevents silently loading data the current app can't interpret.
+- **Auto-backup mechanism** in the migration runner: any migration with `requiresBackup: true` triggers a JSON download of all `ph_*` keys before running. No migrations use this yet, but the plumbing is in place for Phase 3+.
+- **Settings → Data Management:** new SCHEMA card displays the current schema version. EXPORT MIGRATION LOG button downloads the full `ph_sch_v1` record.
+- **`runInit()` converted to async** and reordered: wait for migrations module → `idbAutoRestore` → `runMigrations` → rest of init. Halts with alert if migrations fail. Entry-point IIFE simplified since conditional IDB branching moved into `runInit`.
+- **`sw.js`:** bumped `CACHE_NAME` to `protocol-health-v14` and added the three `migrations/*.js` paths to the critical cache list. Framework works offline.
+- **`index.html`:** hero-badge updated to `v5.1.0` (corrected lingering `v5.0.0` drift from pre-5.0.1).
+
+---
+
 ## Version 5.0.1 — 2026-04-08
 
 **Scope:** Patch (Day modal food log macro inputs)
