@@ -20,7 +20,7 @@
 // VERSION: bump CACHE_NAME (e.g. 'protocol-health-v8') when you deploy a major update.
 // This forces old caches to be deleted and new files to be fetched fresh.
 
-const CACHE_NAME = 'protocol-health-v17';
+const CACHE_NAME = 'protocol-health-v18';
 
 // ─── INSTALL ─────────────────────────────────────────────────────────────────
 // Runs once when the service worker is first registered (or when CACHE_NAME changes).
@@ -52,7 +52,10 @@ self.addEventListener('install', event => {
         './modules/calendar.js',
         './modules/radar.js',
         './modules/export.js',
-        './modules/schedule-html.js'
+        './modules/schedule-html.js',
+        './components/workout-card.js',
+        './components/rule-card.js',
+        './components/checklist.js'
       ])
         .then(() => {
           // Best-effort files — icons and Google Fonts
