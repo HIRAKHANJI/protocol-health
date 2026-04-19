@@ -20,7 +20,7 @@
 // VERSION: bump CACHE_NAME (e.g. 'protocol-health-v8') when you deploy a major update.
 // This forces old caches to be deleted and new files to be fetched fresh.
 
-const CACHE_NAME = 'protocol-health-v16';
+const CACHE_NAME = 'protocol-health-v17';
 
 // ─── INSTALL ─────────────────────────────────────────────────────────────────
 // Runs once when the service worker is first registered (or when CACHE_NAME changes).
@@ -34,7 +34,7 @@ self.addEventListener('install', event => {
     caches.open(CACHE_NAME).then(cache => {
 
       // Critical files — these must be cached for the app to work offline.
-      // Includes the migrations/ and plans/ ES modules so everything runs offline.
+      // Includes the migrations/, plans/, and modules/ ES modules so everything runs offline.
       return cache.addAll([
         './app.html',
         './index.html',
@@ -48,7 +48,11 @@ self.addEventListener('install', event => {
         './plans/cut.js',
         './plans/bulk.js',
         './plans/maintenance.js',
-        './plans/exercise-progressions.js'
+        './plans/exercise-progressions.js',
+        './modules/calendar.js',
+        './modules/radar.js',
+        './modules/export.js',
+        './modules/schedule-html.js'
       ])
         .then(() => {
           // Best-effort files — icons and Google Fonts
