@@ -3835,3 +3835,310 @@ coordination + balance + bone density benefits; AHA and British Osteoporosis Soc
 recommend jump rope for bone health at all life stages.
 
 ---
+
+### Animal Flow / QMT
+
+> **Beginner note for all Animal Flow movements:** Hold each position 5 seconds before
+> transitioning. Build position quality before chaining. Wrist prep is mandatory
+> before any ground-based flow work.
+
+---
+
+#### Wrist mobilizations
+
+**Category:** Mobility / Prep
+**Equipment:** None
+**Target muscles (primary):** Wrist flexors, wrist extensors
+**Target muscles (secondary):** Forearms, fingers
+**Movement type:** Mobility
+
+**Description:** Essential preparation for all ground-based Animal Flow work. From
+all fours, perform slow wrist circles, forward and backward flexion/extension,
+finger-point variations, and knuckle rolls. 3 min continuous cycling through the
+positions.
+
+**Common mistakes:**
+- Rushing through the positions instead of exploring end-range
+- Not loading each position (staying light on the hands) — defeats the tissue prep purpose
+
+**Safety notes:** If wrist pain persists after prep, modify subsequent exercises to
+fist-based positions (knuckles down) to offload the wrist extensors.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not in plan structure |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | 3 min continuous | Slow | — | 1× (Wed) | Mandatory prep for Animal Flow block |
+| Maintenance | 3 min continuous | Slow | — | 1× (Fri) | Mandatory prep for Animal Flow block |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** Buxton 2022, Matthews 2016 (CLAUDE.md §15)
+
+---
+
+#### Beast hold
+
+**Category:** Isometric / Foundational
+**Equipment:** None
+**Target muscles (primary):** Anterior deltoid, quadriceps
+**Target muscles (secondary):** Core (rectus abdominis, obliques), hip flexors, wrists
+**Movement type:** Isometric
+
+**Description:** From all fours, press the knees ~1 inch off the ground while keeping
+a neutral spine, shoulders stacked over wrists, and hips at knee height. The
+foundational position of Animal Flow — everything else is built on this. 3×15 sec holds.
+
+**Common mistakes:**
+- Lifting the knees too high, which disengages the core and quads
+- Holding the breath instead of breathing steadily through the hold
+
+**Safety notes:** Complete wrist mobilizations first. Stop on any sharp wrist pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not in plan structure |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | 3×15 sec | Hold | 30-45s | 1× (Wed) | Foundational position |
+| Maintenance | 3×15 sec | Hold | 30-45s | 1× (Fri) | Foundational position |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** Buxton 2022, Matthews 2016 (CLAUDE.md §15)
+
+---
+
+#### Beast to crab transition
+
+**Category:** Compound / Mobility
+**Equipment:** None
+**Target muscles (primary):** Full body (rotational power)
+**Target muscles (secondary):** Shoulders, core, hip mobility, wrists
+**Movement type:** Compound transition
+
+**Description:** From the beast position, rotate 180° by pivoting through the hands
+and feet to land in a crab position (supine support on hands and feet, hips up), then
+rotate back. Trains rotational coordination and shoulder mobility under load. 5 full
+reps (beast → crab → beast counts as one).
+
+**Common mistakes:**
+- Rushing the rotation before the supporting hand is firmly planted
+- Letting the hips drop mid-transition, interrupting the flow
+
+**Safety notes:** Master the beast hold and a static crab position separately before
+attempting the transition. Skip if wrist or shoulder pain is present.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not in plan structure |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | 5 reps | Controlled | 30s | 1× (Wed) | After beast hold |
+| Maintenance | 5 reps | Controlled | 30s | 1× (Fri) | After beast hold |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** Buxton 2022, Matthews 2016 (CLAUDE.md §15)
+
+---
+
+#### Crab reach
+
+**Category:** Mobility
+**Equipment:** None
+**Target muscles (primary):** Thoracic spine extensors, gluteus maximus
+**Target muscles (secondary):** Anterior deltoid, hip flexors (stretch), obliques
+**Movement type:** Mobility
+
+**Description:** From a crab position (supine support on hands and feet, hips lifted),
+drive the hips high and reach one arm overhead behind the body while the gaze follows
+the reaching hand. Opens the thoracic spine and hip flexors. 5/side.
+
+**Common mistakes:**
+- Not driving the hips high enough — reduces the thoracic opening
+- Straining the neck by craning it instead of following the reaching hand naturally
+
+**Safety notes:** Skip if shoulder impingement or anterior shoulder instability is
+present. Stop on any neck discomfort.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not in plan structure |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | 5/side | Slow | 20-30s | 1× (Wed) | Thoracic mobility piece |
+| Maintenance | 5/side | Slow | 20-30s | 1× (Fri) | Thoracic mobility piece |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** Buxton 2022, Matthews 2016 (CLAUDE.md §15)
+
+---
+
+#### Lateral ape
+
+**Category:** Squat / Mobility
+**Equipment:** None
+**Target muscles (primary):** Hip adductors, hip abductors, quadriceps
+**Target muscles (secondary):** Ankle mobility, core, shoulders (support)
+**Movement type:** Compound / Mobility
+
+**Description:** From a deep squat position, walk laterally by planting both hands to
+one side, shifting the feet across, and resetting. Requires full ankle and hip
+mobility. 5 steps/direction.
+
+**Common mistakes:**
+- Not sitting deep enough into the squat — reduces the mobility stimulus
+- Shifting weight too far forward onto the hands, pulling the feet off the ground
+
+**Safety notes:** Requires adequate ankle and hip mobility — regress to assisted deep
+squat holds if the position is not yet accessible.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not in plan structure |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | 5/direction | Controlled | 20-30s | 1× (Wed) | Hip + ankle mobility piece |
+| Maintenance | 5/direction | Controlled | 20-30s | 1× (Fri) | Hip + ankle mobility piece |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** Buxton 2022, Matthews 2016 (CLAUDE.md §15)
+
+---
+
+#### Front step-through
+
+**Category:** Core / Mobility
+**Equipment:** None
+**Target muscles (primary):** Obliques, hip flexors
+**Target muscles (secondary):** Shoulders (supporting side), core, adductors
+**Movement type:** Compound / Rotational
+
+**Description:** From a beast hold, lift one leg and thread it across under the body
+to the opposite side while rotating the torso open. Return and alternate. Trains
+rotational core control and hip mobility under shoulder load. 5/side.
+
+**Common mistakes:**
+- Collapsing the supporting shoulder as the leg threads through
+- Not rotating the torso fully — the ribcage should open toward the ceiling
+
+**Safety notes:** Master the beast hold first. Stop on any sharp shoulder or hip pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not in plan structure |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | 5/side | Controlled | 30s | 1× (Wed) | Rotational core piece |
+| Maintenance | 5/side | Controlled | 30s | 1× (Fri) | Rotational core piece |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** Buxton 2022, Matthews 2016 (CLAUDE.md §15)
+
+---
+
+#### Scorpion reach
+
+**Category:** Mobility
+**Equipment:** None
+**Target muscles (primary):** Thoracic spine (rotation), hip flexors (stretch)
+**Target muscles (secondary):** Gluteus maximus, obliques, latissimus dorsi
+**Movement type:** Mobility
+
+**Description:** Lie prone with arms out to the sides. Lift one leg, bend the knee,
+and reach the foot across the body toward the opposite hand while keeping the chest
+pressed into the floor. Trains thoracic rotation and hip mobility. 4/side.
+
+**Common mistakes:**
+- Forcing the rotation with momentum instead of controlling it
+- Lifting the chest off the floor, which cheats the thoracic segment
+
+**Safety notes:** Avoid if lower back pain is present. Move slowly and stop at the
+first point of restriction — do not force end range.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not in plan structure |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | 4/side | Slow | 20-30s | 1× (Wed) | Thoracic rotation piece |
+| Maintenance | 4/side | Slow | 20-30s | 1× (Fri) | Thoracic rotation piece |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** Buxton 2022, Matthews 2016 (CLAUDE.md §15)
+
+---
+
+#### Loaded beast to underswitch
+
+**Category:** Compound / Advanced transition
+**Equipment:** None
+**Target muscles (primary):** Anterior deltoid, quadriceps, core (rotational), hip rotators
+**Target muscles (secondary):** Wrists, forearms, glutes, coordination systems
+**Movement type:** Compound transition
+
+**Description:** From a loaded beast (hips pushed back toward the heels, arms long),
+explode forward and rotate under one shoulder to land in a seated side-sit
+("underswitch") position. Return and alternate. The most complex movement in this
+Animal Flow sequence. 5 reps total.
+
+**Common mistakes:**
+- Not loading the hips back far enough before the explosive rotation
+- Losing hand placement mid-transition, creating an unsafe landing
+
+**Safety notes:** **Master every preceding movement in this section first** — the
+underswitch requires the wrist, shoulder, and core coordination built by beast hold,
+beast/crab transition, and step-through. Skip if any shoulder instability is present.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not in plan structure |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | 5 reps | Explosive | 45-60s | 1× (Wed) | Most complex movement — master prerequisites first |
+| Maintenance | 5 reps | Explosive | 45-60s | 1× (Fri) | Most complex movement — master prerequisites first |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** Buxton 2022, Matthews 2016 (CLAUDE.md §15)
+
+---
+
+#### Free flow
+
+**Category:** Cardio / Mobility
+**Equipment:** None
+**Target muscles (primary):** Full body
+**Target muscles (secondary):** Coordination, creativity, transitional strength
+**Movement type:** Flow / Continuous
+
+**Description:** Link any combination of previously learned Animal Flow movements
+continuously without stopping. This is the creative integration block — not a
+prescribed sequence. 2-3 min continuous.
+
+**Common mistakes:**
+- Defaulting to only comfortable movements — this is the time to practice weak transitions
+- Stopping between movements, which breaks the flow and the cardio stimulus
+
+**Safety notes:** Stay within movements already mastered. This is practice, not
+performance — abort any transition that feels unsafe mid-flow.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not in plan structure |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | 2-3 min continuous | Varied | — | 1× (Wed) | Closing integration block |
+| Maintenance | 2-3 min continuous | Varied | — | 1× (Fri) | Closing integration block |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** Buxton 2022, Matthews 2016 (CLAUDE.md §15)
+
+---
