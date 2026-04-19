@@ -4350,8 +4350,10 @@ function saveDayLogField(dateStr, fields) {
   ss(SK.dayLogs, all);
 }
 
-// getValidCheckCompletion: counts only check IDs that exist in the current checklist definition.
-// Prevents orphaned IDs (from version transitions) from dragging down completion scores.
+// getValidCheckCompletion: completion ratio for a given date.
+// total = count of items/subs/_workout actually rendered in the UI for that day.
+// Fixes a pre-v5.2.0 bug where total was the count of checks the user had TOUCHED,
+// so a user who ticked 3 of 15 items would display as 100% compliant.
 function getValidCheckCompletion(dateStr) {
   const log = getDayLog(dateStr);
   const checks = log.checks || {};
@@ -4363,19 +4365,34 @@ function getValidCheckCompletion(dateStr) {
   const _rawChecklist = isFast ? (plan.checklistFast||[]) : isLight ? (plan.checklistLight||plan.checklistNormal||[]) : (plan.checklistNormal||[]);
   const _supOn = getSettings().supplementsEnabled !== false;
   const checklist = _rawChecklist.filter(item => !(item.group === 'SUPPLEMENTS' && !_supOn));
+  const day = strToDate(dateStr).getDay();
 
-  // Build valid IDs — info items (f2 calorie card) ARE counted toward completion
-  // (severe overshoot >50% over ceiling = fail, otherwise pass)
-  const validIds = new Set();
+  let done = 0;
+  let total = 0;
+
   checklist.forEach(item => {
-    validIds.add(item.id);
-    if(item.subItems) item.subItems.forEach(sub => validIds.add(sub.id));
+    if (item.subItems && item.subItems.length) {
+      // Parent with subItems is a derived aggregate — not counted independently.
+      // Each sub counts if its day-of-week filter (if any) allows it.
+      item.subItems.forEach(si => {
+        if (si.days && !si.days.includes(day)) return;
+        total++;
+        if (checks[si.id]) done++;
+      });
+    } else {
+      total++;
+      if (checks[item.id]) done++;
+    }
   });
-  validIds.add('_workout');
 
-  const validChecks = Object.entries(checks).filter(([id]) => validIds.has(id));
-  const done = validChecks.filter(([,v]) => v).length;
-  const total = validChecks.length;
+  // _workout: counted only when the fallback card is actually rendered
+  // (checklist has no AUTO_WORKOUT items — typically fast/light days).
+  const hasWorkoutItems = checklist.some(i => AUTO_WORKOUT_IDS.includes(i.id));
+  if (!hasWorkoutItems) {
+    total++;
+    if (checks['_workout']) done++;
+  }
+
   return { done, total, pct: total > 0 ? Math.round((done/total)*100) : 0 };
 }
 
