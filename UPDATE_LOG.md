@@ -4,6 +4,18 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 5.2.0 — 2026-04-20
+
+**Scope:** Minor (Bugfixes — Phase 2 of 2-day refactor)
+**Banner:** "Calendar accuracy: compliance now measured against full checklist, not just items you touched. Some past days will shift from green to partial — this is correct."
+
+- **`getValidCheckCompletion` denominator bug fixed.** Total is now computed from the filtered checklist definition (items + day-filtered sub-items + `_workout` when rendered), not from the count of check entries the user had previously touched. Past days that were green from partial compliance now correctly display as partial or missed. Parent items with sub-items are no longer double-counted; the parent is a derived aggregate per `loadChecklist`, only the sub-items themselves count toward the ratio.
+- **`idbSyncAll` no longer silently swallows errors.** Replaces the empty `catch {}` with `console.warn` including the storage key and error, so IndexedDB mirror sync failures are visible in devtools.
+- **`idbAutoRestore` surfaces partial restore failures to the user.** Tracks failed keys, logs each with `console.error`, and shows a `showAlert` after init if any key couldn't be written back from the IDB mirror to localStorage.
+- Bumped `CACHE_NAME` to `v15`, hero-badge to `v5.2.0`.
+
+---
+
 ## Version 5.1.0 — 2026-04-20
 
 **Scope:** Minor (Migration framework — Phase 1 of 2-day refactor)
