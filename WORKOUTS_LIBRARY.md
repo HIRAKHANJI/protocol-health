@@ -5160,3 +5160,267 @@ lateral hip pain.
 **Evidence:** PMC 11447755, Physiology & Behavior 2016 (CLAUDE.md §15)
 
 ---
+
+### Tai Chi — Yang Style 8-Form
+
+> **Sequence note:** Each movement flows into the next. The 8-form takes
+> approximately 15-20 minutes as a continuous sequence. Speed should be slow and
+> deliberate — focus on weight transfer and breathing. The forms are prescribed
+> only on the Lite Protocol (Tuesday); all other plans mark N/A.
+
+---
+
+#### Wu Ji stance
+
+**Category:** Balance / Breathing
+**Equipment:** None
+**Target muscles (primary):** Postural muscles (deep paraspinals, core), diaphragm
+**Target muscles (secondary):** Ankles, feet (proprioception)
+**Movement type:** Static meditation
+
+**Description:** Stand feet shoulder-width, arms relaxed at the sides, weight
+evenly distributed between both feet. Soften the knees and let the crown of the
+head float upward. Focus on slow, diaphragmatic breathing. 2 min.
+
+**Common mistakes:**
+- Locking the knees and tensing the shoulders instead of settling into a relaxed, rooted posture
+
+**Safety notes:** Universally safe — the foundational standing meditation of the
+entire 8-form. Sit on a chair if standing this long is not possible.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 2 min | Slow | — | 1× (Tue) | Opens the 8-form sequence |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** Chen 2023 (CLAUDE.md §15)
+
+---
+
+#### Part the wild horse's mane
+
+**Category:** Balance / Mobility
+**Equipment:** None
+**Target muscles (primary):** Hip rotators, quadriceps (weight transfer)
+**Target muscles (secondary):** Deltoids, core, ankle stabilizers
+**Movement type:** Dynamic flow
+
+**Description:** Step forward on a diagonal while one arm sweeps upward and the
+other sweeps downward in opposite directions, separating like parting a horse's
+mane. Weight transfers fully to the front leg with the turn. 4 reps/side.
+
+**Common mistakes:**
+- Stepping too wide and not transferring weight fully to the front leg
+
+**Safety notes:** Reduce step length if balance is uncertain. Keep a hand near a
+wall or chair for support initially.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 4 reps/side | Slow | — | 1× (Tue) | Part of continuous 8-form sequence |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** Chen 2023 (CLAUDE.md §15)
+
+---
+
+#### White crane spreads wings
+
+**Category:** Balance
+**Equipment:** None | Optional: wall for support
+**Target muscles (primary):** Single-leg balance (ankle + hip stabilizers), shoulder stabilizers
+**Target muscles (secondary):** Quadriceps, core
+**Movement type:** Balance
+
+**Description:** Weight shifts fully onto one leg as the arms open wide like a
+crane spreading its wings. The non-weight-bearing foot rests lightly on the ground
+or lifts slightly. 4 reps.
+
+**Common mistakes:**
+- Raising the shoulders toward the ears or dropping the gaze to the floor — keep shoulders relaxed and gaze level
+
+**Safety notes:** Stand near a wall for support when first learning. Skip the
+lifted foot if single-leg balance is not yet reliable.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 4 reps | Slow | — | 1× (Tue) | Part of continuous 8-form sequence |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** Chen 2023 (CLAUDE.md §15)
+
+---
+
+#### Brush knee and push
+
+**Category:** Coordination
+**Equipment:** None
+**Target muscles (primary):** Quadriceps, core
+**Target muscles (secondary):** Anterior deltoid (push arm), obliques
+**Movement type:** Dynamic flow
+
+**Description:** Step forward while one hand brushes across at knee level and the
+opposite hand pushes forward at chest level. Builds forward-stepping coordination
+and upper-lower body rhythm. 4 reps/side.
+
+**Common mistakes:**
+- Leaning the torso forward over the front foot instead of staying upright with a vertical spine
+
+**Safety notes:** Use small steps initially and lengthen as balance and confidence
+grow.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 4 reps/side | Slow | — | 1× (Tue) | Part of continuous 8-form sequence |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** Chen 2023 (CLAUDE.md §15)
+
+---
+
+#### Playing the lute
+
+**Category:** Balance / Control
+**Equipment:** None
+**Target muscles (primary):** Weight shifting (quads, ankles), upper-body control (shoulders, forearms)
+**Target muscles (secondary):** Core, postural muscles
+**Movement type:** Dynamic flow
+
+**Description:** The rear foot steps lightly to join behind the front foot as the
+arms lift and position in front of the chest as if cradling a lute. A fine-motor,
+balance-biased form. 4 reps/side.
+
+**Common mistakes:**
+- Shifting weight too quickly instead of letting it transfer smoothly with the breath
+
+**Safety notes:** Very gentle movement — suitable for all levels including limited
+mobility.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 4 reps/side | Slow | — | 1× (Tue) | Part of continuous 8-form sequence |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** Chen 2023 (CLAUDE.md §15)
+
+---
+
+#### Reverse reeling forearm
+
+**Category:** Balance / Coordination
+**Equipment:** None | Optional: wall for support
+**Target muscles (primary):** Quadriceps, core (backward stepping control)
+**Target muscles (secondary):** Deltoids, ankle stabilizers
+**Movement type:** Dynamic flow
+
+**Description:** Step backward one foot at a time while the arms rotate in a
+reeling motion at shoulder height. Trains backward balance and body awareness. 4
+reps/side.
+
+**Common mistakes:**
+- Twisting the neck to look behind — trust the step and keep the gaze forward
+
+**Safety notes:** Ensure a clear space behind before stepping back. Keep a wall or
+chair within reach for balance support when first learning.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 4 reps/side | Slow | — | 1× (Tue) | Part of continuous 8-form sequence |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** Chen 2023 (CLAUDE.md §15)
+
+---
+
+#### Wave hands like clouds
+
+**Category:** Mobility
+**Equipment:** None
+**Target muscles (primary):** Thoracic rotators, hip adductors, hip abductors (lateral weight transfer)
+**Target muscles (secondary):** Deltoids, core, ankle stabilizers
+**Movement type:** Dynamic flow
+
+**Description:** Side-step laterally while the arms move continuously in opposing
+arcs in front of the torso, as if gently parting clouds. Weight transfers smoothly
+side to side with the rotation. 6 reps.
+
+**Common mistakes:**
+- Moving the arms independent of the body rotation — arms and torso should rotate as one
+
+**Safety notes:** The most meditative movement in the form — should feel effortless.
+If it feels labored, slow down further.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 6 reps | Slow | — | 1× (Tue) | Part of continuous 8-form sequence |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** Chen 2023 (CLAUDE.md §15)
+
+---
+
+#### Closing form
+
+**Category:** Recovery
+**Equipment:** None
+**Target muscles (primary):** Parasympathetic nervous system, diaphragm
+**Target muscles (secondary):** Postural muscles
+**Movement type:** Static recovery
+
+**Description:** Return to the Wu Ji stance, bringing the hands to rest on the
+lower dantian (an area below the navel) and take 3 deep diaphragmatic breaths.
+Seals the session and downshifts the nervous system. 1 min.
+
+**Common mistakes:**
+- Rushing the close instead of giving the breath and attention time to settle
+
+**Safety notes:** None.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 1 min | Slow | — | 1× (Tue) | Closes the 8-form sequence |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** Chen 2023 (CLAUDE.md §15)
+
+---
