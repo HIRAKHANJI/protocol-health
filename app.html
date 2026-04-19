@@ -1339,7 +1339,11 @@ function idbSyncAll() {
     Object.values(SK).forEach(storageKey => {
       const raw = localStorage.getItem(storageKey);
       if(raw !== null) {
-        try { store.put(JSON.parse(raw), storageKey); } catch {}
+        try {
+          store.put(JSON.parse(raw), storageKey);
+        } catch (e) {
+          console.warn(`[idb] Could not sync ${storageKey} to IndexedDB:`, e);
+        }
       }
     });
     // Also store last backup timestamp
