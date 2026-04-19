@@ -236,7 +236,7 @@ Nothing else changes. `getActivePlan()` reads `settings.plan`, looks up `PLANS[s
 | `app.html` | The entire app — HTML, CSS, and all JavaScript in one file. ~5000+ lines. No build process, no bundler, no framework. |
 | `index.html` | Landing/product page. Links to `app.html`. |
 | `manifest.json` | PWA manifest. App name, icons, display mode (standalone = fullscreen), theme color. |
-| `sw.js` | Service Worker. Caches all app files after first load for offline use. Cache-first strategy. Current cache name: `protocol-health-v13`. Bump version on major deploys. |
+| `sw.js` | Service Worker. Caches all app files after first load for offline use. Cache-first strategy. Current cache name: `protocol-health-v15`. Bump version on major deploys. |
 | `PH_LOGO_192.png` | Home screen icon at 192×192px. |
 | `PH_LOGO_512.png` | Splash screen icon at 512×512px. |
 
@@ -462,7 +462,7 @@ The service worker caches files under `CACHE_NAME` in `sw.js`. If this name does
 
 ```javascript
 // sw.js — line 22
-const CACHE_NAME = 'protocol-health-v13'; // ← increment this on every significant push
+const CACHE_NAME = 'protocol-health-v15'; // ← increment this on every significant push
 ```
 
 ### Files That Must Be Pushed Together
