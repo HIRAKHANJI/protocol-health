@@ -6727,3 +6727,81 @@ scalable.
 **Evidence:** General exercise physiology
 
 ---
+
+### Neck Protocol
+
+> **Plan integration:** AGRO-only protocol built to condition the cervical spine
+> for combat-sport load (Kyokushin / MMA goal, CLAUDE.md §1). Runs daily as a
+> short mobility piece + Sunday as a full-length session. **Isometric only — no
+> dynamic resisted neck drills at any time.** All other plans mark N/A.
+
+---
+
+#### Neck nods
+
+**Category:** Mobility
+**Equipment:** None
+**Target muscles (primary):** Deep cervical flexors, neck extensors, suboccipitals
+**Target muscles (secondary):** Upper trapezius
+**Movement type:** Mobility
+
+**Description:** Slow, controlled neck flexion (chin toward chest) and extension
+(gaze toward ceiling) through a pain-free range of motion. 10 nods.
+
+**Common mistakes:**
+- Going too fast
+- Forcing end range rather than staying within the pain-free arc
+
+**Safety notes:** **NEVER perform full neck circles — flexion/extension only.**
+Stop immediately on any dizziness, tingling, or sharp pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not in plan structure |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | 10 nods | Slow, controlled | — | Daily | Daily neck mobility piece |
+
+**Evidence:** General exercise physiology; CLAUDE.md §1 (combat-sports mission context)
+
+---
+
+#### Neck isometrics 4 directions × 30 sec
+
+**Category:** Isometric
+**Equipment:** None
+**Target muscles (primary):** SCM, upper trapezius, scalenes, deep cervical flexors
+**Target muscles (secondary):** Levator scapulae, splenius capitis/cervicis
+**Movement type:** Isometric
+
+**Description:** Press the head against the palm for resistance in each of four
+directions — forward (palm on forehead), backward (palm on back of head), left
+(palm on left side of head), right (palm on right side of head). Hold 30 sec each
+direction on Sunday full sessions; 15 sec each as the abbreviated daily version.
+**50% effort maximum, never maximal.** Critical for neck health in combat-sports
+preparation (Kyokushin / MMA goal — CLAUDE.md §1).
+
+**Common mistakes:**
+- Pushing too hard — 50% effort is sufficient; excessive effort causes headaches
+- Holding the breath during the isometric hold
+
+**Safety notes:** **Isometric ONLY — never perform dynamic resisted neck drills.**
+Stop immediately on any dizziness, tingling, or sharp pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not in plan structure |
+| Cut | N/A | — | — | — | See Cooldown Neck isometrics entry |
+| Bulk | N/A | — | — | — | See Cooldown Neck isometrics entry |
+| Maintenance | N/A | — | — | — | See Cooldown Neck isometrics entry |
+| AGRO | 30 sec each dir (Sun) / 15 sec each dir (daily) | Hold, 50% effort | — | Daily + 1× (Sun full) | Combat-sports neck conditioning |
+
+**Evidence:** Oranchuk 2019 (isometric hypertrophy) (CLAUDE.md §15); CLAUDE.md §1
+(combat-sports mission context)
+
+---
