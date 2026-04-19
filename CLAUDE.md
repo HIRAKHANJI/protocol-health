@@ -821,4 +821,263 @@ In April 2026, the app is undergoing a major architectural refactor from single-
 
 ES modules load via `<script type="module">`. Their exports are promoted to `window.*` so the inline script in `app.html` can reference them from onclick handlers. A `ph:modules-ready` event signals init readiness.
 
-**If you (future Claude session) are onboarding post-refactor:** read Section 23 (Modular Architecture), Section 24 (Migration Framework), and Section 25 (Working With This Codebase). Those are added in Phase 6 of the refactor.
+**If you (future Claude session) are onboarding post-refactor:** read Section 23 (Modular Architecture), Section 24 (Migration Framework), Section 25 (Working With This Codebase), and Section 26 (File Line-Count Governance). Those are added in Phase 6 of the refactor.
+
+---
+
+## 23. Modular Architecture (Post-Refactor, v6.0.0)
+
+As of v6.0.0 the app is a modular ES-module PWA, not a single-file app. Zero build step, zero dependencies, zero framework — just native ES modules served by GitHub Pages.
+
+### Directory structure
+
+```
+/
+├── app.html                  # Bootstrap: HTML + CSS + inline orchestration script (~4600 lines)
+├── index.html                # Landing page (not the app entry point — that's app.html)
+├── manifest.json             # PWA manifest
+├── sw.js                     # Service worker (cache list covers every module file)
+├── CLAUDE.md                 # Canonical project brief (this file)
+├── UPDATE_LOG.md             # Version history
+├── WORKING_VERSIONS.md       # Git-tagged working-version log (append-only)
+├── WORKOUTS_LIBRARY.md       # Exercise encyclopedia
+├── plans/
+│   ├── index.js              # Assembles PLANS; re-exports EXERCISE_PROGRESSIONS
+│   ├── lite.js               # LITE PROTOCOL (historical key: 'default')
+│   ├── agro.js               # AGRO CUT CALISTHENICS
+│   ├── cut.js                # DEFAULT CUT
+│   ├── bulk.js               # DEFAULT BULK
+│   ├── maintenance.js        # DEFAULT MAINTENANCE
+│   └── exercise-progressions.js
+├── modules/
+│   ├── export.js             # openExport, generateExport + nested helpers, renderMarkdownPreview, copyExport, downloadReport
+│   ├── schedule-html.js      # downloadScheduleHTML
+│   ├── calendar.js           # changeMonth, renderCalendar, openDayModal, modal handlers, closeModal
+│   └── radar.js              # setRadarWindow, computeRadarMetrics, renderRadar (+ module-local radarWindow state)
+├── components/
+│   ├── workout-card.js       # exRow, exRowWithLevel, workoutCard, stretchRow (+ module-local row counters)
+│   ├── rule-card.js          # ruleCard
+│   └── checklist.js          # renderTodayChecklist, loadChecklist, and the full TODAY-tab handler suite
+├── migrations/
+│   ├── registry.js           # MIGRATIONS array (ordered list of migration objects)
+│   ├── runner.js             # runMigrations(), getSchemaVersion(), getMigrationLog()
+│   └── helpers.js            # gsSafe, ssSafe, downloadJson
+└── docs/
+    ├── PHASE_0_RECON.md
+    ├── PHASE_N_PLAN.md       # One per phase
+    └── baselines/            # Pre/post diff baselines captured during the refactor
+```
+
+### Interop pattern — bare-name fallback to `globalThis`
+
+ES modules cannot share lexical scope with the inline classic `<script>`. Rather than a `window.PH` wrapper object, this codebase uses JavaScript's built-in scope-chain fallback:
+
+1. **Classic-script constants needed by modules** (e.g. `SK`, `MONTHS_LIST`, `DAYS_SHORT`, `AUTO_WORKOUT_IDS`, `WORKOUT_ITEM_SESSION`) are explicitly attached to `window` once, early in the inline script:
+
+   ```javascript
+   Object.assign(window, { SK, MONTHS_LIST, DAYS_SHORT, AUTO_WORKOUT_IDS, WORKOUT_ITEM_SESSION });
+   ```
+
+2. **Classic-script function declarations** (e.g. `getSettings()`, `saveDayLogField()`, `dispatch()`, `getActivePlan()`) are automatically on `window` by virtue of being top-level function declarations in a classic `<script>`.
+
+3. **Module exports that classic code needs to call** (including HTML onclick handlers) are explicitly assigned to `window.*` by the module loader `<script type="module">` block for that module group — for example:
+
+   ```javascript
+   import * as Calendar from './modules/calendar.js';
+   window.renderCalendar = Calendar.renderCalendar;
+   window.openDayModal = Calendar.openDayModal;
+   /* ...etc for every exported function... */
+   ```
+
+4. **Both directions use the same mechanism:** bare identifier lookup inside a function body walks the lexical scope chain and falls through to `globalThis` / `window` when nothing matches. This works identically in modules and in classic scripts, and it's evaluated at call time rather than at parse/load time — which is why it works across the module-versus-classic boundary.
+
+This pattern was chosen over a `window.PH` bridge because it preserves **byte-identity** of extracted function bodies: every `renderCalendar` reference, every `workoutCard(...)` template-literal call, every `getSettings()` invocation inside an extracted module is identical to the original source line. No mechanical `foo` → `PH.foo` rewrite to verify.
+
+### Startup sequence
+
+All module `<script type="module">` tags are placed in `<body>` before the main classic `<script>`. Modules are deferred; classic script runs synchronously first (so `Object.assign(window, {...})` happens before modules evaluate). `runInit()` is async and awaits four readiness events:
+
+1. Browser parses HTML top-to-bottom.
+2. Hits module `<script>` tags (4 of them) — fetches start, execution deferred.
+3. Hits the main classic `<script>` — runs synchronously; defines constants, exposes them on `window`, declares functions, calls `runInit().catch(...)`.
+4. `runInit()` begins and immediately awaits:
+   - `ph:migrations-ready` (from `migrations/runner.js` loader)
+   - `ph:plans-ready` (from `plans/index.js` loader)
+   - `ph:fnmodules-ready` (from `modules/*.js` loader)
+   - `ph:components-ready` (from `components/*.js` loader)
+5. Each module group's loader fires its ready event once its `window.*` assignments complete.
+6. With all gates passed, `runInit()` proceeds: `idbAutoRestore()` → `runMigrations()` → plan UI setup → `renderTodayChecklist` → `loadChecklist` → tab setup → rest of init.
+
+### Change location guide
+
+| If you want to change… | Edit |
+|-----------------------|------|
+| A plan's workouts | `plans/<name>.js` |
+| A plan's nutrition or rules content | `plans/<name>.js` |
+| Exercise progression levels | `plans/exercise-progressions.js` |
+| How calendar cells are coloured | `modules/calendar.js` (`renderCalendar`) |
+| Day modal behaviour | `modules/calendar.js` (`openDayModal` + handlers) |
+| Radar axis / scoring | `modules/radar.js` (`computeRadarMetrics`) |
+| Radar chart rendering | `modules/radar.js` (`renderRadar`) |
+| Markdown export structure | `modules/export.js` (`generateExport` + nested builders) |
+| Downloaded schedule HTML | `modules/schedule-html.js` |
+| TODAY tab checklist render / handlers | `components/checklist.js` |
+| Workout card / row HTML | `components/workout-card.js` |
+| Rule card HTML | `components/rule-card.js` |
+| Storage key shape | Add a migration in `migrations/registry.js` (see Section 24) |
+| Add a training plan | Add `plans/newplan.js` + import in `plans/index.js` + `<option>` in Settings + matching custom-dropdown entry |
+| Service worker cache list | `sw.js` — any new file must be added |
+
+---
+
+## 24. Schema Migration Playbook
+
+The migration framework (added v5.1.0) handles all shape changes to stored data. See Section 9's "Schema Version & Migrations" subsection for the framework basics.
+
+### When you need a migration
+
+Any change to the shape of a value stored under one of the `SK` keys. Examples:
+
+- Renaming a field inside `dayLogs` entries
+- Splitting a field into multiple fields
+- Changing a field's type (e.g., string → number)
+- Introducing a new mandatory field in an existing object
+
+Examples of changes that do **NOT** need a migration:
+
+- Adding a new storage key (just add to `SK`; no migration needed)
+- Adding an optional field that defaults sensibly when absent
+- Adding a new plan
+
+### How to add a migration
+
+1. Determine the next schema version. Read `getSchemaVersion()` in the live app. Increment by 1.
+2. Add an object to the `MIGRATIONS` array in `migrations/registry.js`:
+
+   ```javascript
+   {
+     from: N,
+     to: N + 1,
+     description: 'Rename dayLogs.checks.old_id to dayLogs.checks.new_id',
+     requiresBackup: true,  // ALWAYS true if modifying existing data shape
+     run: (data) => {
+       const dayLogs = data['ph_dl_v1'];
+       if (dayLogs) {
+         for (const date in dayLogs) {
+           const checks = dayLogs[date].checks || {};
+           if ('old_id' in checks) {
+             checks.new_id = checks.old_id;
+             delete checks.old_id;
+           }
+         }
+       }
+       return data;
+     },
+     verify: (data) => {
+       const dayLogs = data['ph_dl_v1'] || {};
+       return Object.values(dayLogs).every(log => !('old_id' in (log.checks || {})));
+     },
+     reverse: (data) => {
+       const dayLogs = data['ph_dl_v1'];
+       if (dayLogs) {
+         for (const date in dayLogs) {
+           const checks = dayLogs[date].checks || {};
+           if ('new_id' in checks) {
+             checks.old_id = checks.new_id;
+             delete checks.new_id;
+           }
+         }
+       }
+       return data;
+     }
+   }
+   ```
+
+3. Test against the owner's actual backup JSON before shipping.
+4. Bump `APP_VERSION` as minor so the banner shows.
+5. Ship.
+
+### Rules
+
+- **Never rename a storage key.** For big shape changes, create a new key (`ph_dl_v2`) and migrate data from old to new. Keep the old key around for downgrade compatibility.
+- **Always set `requiresBackup: true` for any non-trivial change.** The runner auto-downloads a JSON snapshot of all `ph_*` keys before applying.
+- **Always include `verify`.** If `verify` returns false, the migration aborts and `runInit()` halts with a user-visible alert.
+- **Always include `reverse` if you can define one.** Needed for clean rollback tooling.
+- **Never bundle destructive cleanup into a migration.** Deleting old keys is its own separate, explicit, opt-in operation.
+
+---
+
+## 25. Working With This Codebase (Claude Code Onboarding)
+
+Start every session with these steps. Do not skip any.
+
+### On session start
+
+1. `git pull origin main`
+2. `head -30 WORKING_VERSIONS.md` — know the current known-good state.
+3. Read `CLAUDE.md` in full — this file.
+4. Identify the files relevant to the request. Read them before writing anything.
+
+### On feature requests
+
+1. Produce a plan document under `docs/` before touching code.
+2. Stop and wait for owner approval of the plan.
+3. Execute.
+4. Test (smoke test per `08_SMOKE_TESTS.md` or owner-driven verification).
+5. Bump `APP_VERSION` + `CACHE_NAME` per Section 12.
+6. After smoke test passes, tag `vX.Y.Z-working` and add an entry at the TOP of `WORKING_VERSIONS.md` per Section 11.
+7. Write a phase/feature summary under `docs/`.
+
+### On bug reports
+
+1. Reproduce locally against the owner's most recent backup.
+2. Identify the root cause before writing any fix.
+3. Produce a fix plan.
+4. Wait for approval.
+5. Execute surgically — only the fix. No "while we're here" changes.
+
+### On rollback requests
+
+The owner may say: **"Rollback to the most recent working version. Bump cache. Push."**
+
+Procedure:
+
+1. Read `WORKING_VERSIONS.md`, find the top entry.
+2. `git reset --hard <tag>`
+3. Edit `sw.js`: bump `CACHE_NAME` by 1 past current (so user devices pick up the rollback).
+4. Edit `app.html`: patch-bump `APP_VERSION` (e.g. `5.4.0` → `5.4.1`) with `APP_VERSION_MSG = 'Reverted recent changes — investigating. Your data is safe.'`
+5. Edit `UPDATE_LOG.md`: add revert entry.
+6. Stage and commit: `git commit -m "revert: rollback to <tag> — <one-sentence reason>"`.
+7. `git push --force-with-lease origin main` (acceptable on rollback).
+8. Append a new REVERT entry to `WORKING_VERSIONS.md`, commit, push normally.
+9. Notify the owner; they should hard-refresh the PWA (close and reopen on phone; `Ctrl+Shift+R` on desktop).
+
+### Principles that never change
+
+- **Zero dependencies.** No npm, no build step, no framework, no TypeScript.
+- **Offline-first.** Every new file must be added to the `sw.js` cache list.
+- **Data safety.** Never rename a storage key. Every shape change has a migration. Every destructive migration auto-backs-up first. Old backups restore forever (backward-compatible format).
+- **Bodyweight-first design.** See Sections 1 and 3.
+- **Science Reference Directive.** Section 15 governs all supplement, macro, and training claims.
+- **Version discipline.** Every commit that touches `app.html` bumps `APP_VERSION` and adds a `UPDATE_LOG.md` entry (Section 12). Every merge to `main` bumps `CACHE_NAME`. Every working phase is tagged `vX.Y.Z-working` and logged in `WORKING_VERSIONS.md`.
+- **Byte-identity in refactors.** When moving code between files, verify the extracted content is byte-identical to the source (text-diff) before deleting the source.
+
+---
+
+## 26. File Line-Count Governance
+
+Approximate targets. Exceeding them is a hint to split, not a failure.
+
+| File | Target | Actual (v6.0.0) |
+|------|--------|-----------------|
+| `app.html` | ≤ 5,000 lines | ~4,600 ✓ |
+| Any `plans/*.js` | ≤ 800 lines | max 580 (agro) ✓ |
+| Any `modules/*.js` | ≤ 1,000 lines | max 716 (export) ✓ |
+| Any `components/*.js` | ≤ 400 lines | max 404 (checklist) — at the line ⚠ |
+| `migrations/runner.js` | ≤ 300 lines | ~130 ✓ |
+| `sw.js` | ≤ 300 lines | ~180 ✓ |
+
+These are soft limits. Exceeding means "think about whether splitting would help," not "must split." If `components/checklist.js` grows further, consider splitting the water-tracking handlers into their own component.
+
+The `app.html` target is deliberately relaxed from a more aggressive "≤ 2,500" aspirational goal. Further reduction is possible (TDEE/goal calculator, settings UI, schedule logic, weight-log UI) but has diminishing returns — each extraction adds a new module gate and window-exposure surface without proportional complexity relief. Stop here unless a concrete pain point motivates more work.
+
