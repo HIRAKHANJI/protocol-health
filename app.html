@@ -1051,6 +1051,7 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
         <div style="margin-top:10px;padding:10px 13px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-family:'DM Mono',monospace">
           <div style="font-size:0.6rem;color:var(--muted);letter-spacing:1px;margin-bottom:4px">SCHEMA</div>
           <div id="schemaVersionDisplay" style="font-size:0.85rem;color:var(--text)">Schema v—</div>
+          <p style="font-size:0.62rem;color:var(--muted);margin:6px 0 0;line-height:1.5;font-family:'DM Sans',sans-serif">Tracks the data-shape version of your stored data. Used internally to safely upgrade your data when the app changes how things are saved. Safe to ignore — you'll never need to touch this.</p>
           <button class="reset-btn" onclick="exportMigrationLog()" style="margin-top:10px;width:100%;border-color:#999;color:#999">EXPORT MIGRATION LOG</button>
         </div>
       </div>
@@ -1513,8 +1514,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '6.0.0';
-const APP_VERSION_MSG = 'Architecture refactor complete. Zero behavior change; app is now modular under the hood.';
+const APP_VERSION = '6.1.0';
+const APP_VERSION_MSG = 'Calorie card bands restored (≤1000 green, 1001-1500 orange, >1500 red = fails day). Radar consistency + fasting axes now use the same checklist counter as the calendar.';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
 
@@ -2665,7 +2666,8 @@ function migrateOrphanedChecks() {
         const fl = (gs(SK.foodLog) || {})[dateStr] || [];
         const calTotal = fl.reduce((sum, e) => sum + (e.calories || 0), 0);
         const ceiling = (gs(SK.settings) || {}).calories || 1500;
-        const calPass = !fl.length || calTotal <= ceiling * 1.5;
+        // calPass: no food logged OR total <= ceiling. Over ceiling = fails day (v6.0.1).
+        const calPass = !fl.length || calTotal <= ceiling;
         if(checks[item.id] !== calPass) { checks[item.id] = calPass; changed = true; }
       }
     });

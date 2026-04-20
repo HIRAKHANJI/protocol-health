@@ -123,11 +123,10 @@ export function computeRadarMetrics(days) {
       fastScheduled++;
       if (fastDays[ds]) {
         const dc = getDayCalories(ds);
-        const log = dayLogs[ds];
-        const checks = log ? Object.values(log.checks || {}) : [];
-        const checksDone = checks.filter(Boolean).length;
-        const checksTotal = checks.length;
-        const checklistScore = checksTotal > 0 ? checksDone / checksTotal : 0;
+        // Checklist score uses the same counter as calendar + CHECKLIST axis (Phase 2 denominator).
+        // Avoids counting orphan IDs or off-plan items — only what's in today's checklistFast.
+        const vc = getValidCheckCompletion(ds);
+        const checklistScore = vc.total > 0 ? (vc.done / vc.total) : 0;
 
         if (!dc.hasData || dc.total === 0) {
           // Food absence confirmed. Score weighted by checklist completion.
@@ -224,16 +223,12 @@ export function computeRadarMetrics(days) {
     if (!isTracked(ds)) { dailyQualities.push(-1); return; } // -1 = not trackable
     effectiveDays++;
     const log = dayLogs[ds];
-    // Checklist depth: what % of the day's checklist was completed (not just "any box")
-    const dayType = getDayType(ds);
-    const dayChecklist = dayType === 'fast' ? plan.checklistFast
-      : (dayType === 'light' && plan.checklistLight ? plan.checklistLight : plan.checklistNormal);
-    const totalItems = dayChecklist.length;
-    let checkedCount = 0;
-    if (log && log.checks && totalItems > 0) {
-      dayChecklist.forEach(item => { if (log.checks[item.id]) checkedCount++; });
-    }
-    const checklistDepth = totalItems > 0 ? (checkedCount / totalItems) : 0;
+    // Checklist depth: use the same counter the calendar and CHECKLIST axis use
+    // (getValidCheckCompletion counts subItems individually, skips parent-aggregates,
+    // and filters to items actually in the current plan's day-type checklist). Keeps
+    // the consistency axis honest with the rest of the app — avoids parent-only under-counting.
+    const vcc = getValidCheckCompletion(ds);
+    const checklistDepth = vcc.total > 0 ? (vcc.done / vcc.total) : 0;
     // Other engagement signals
     const hasWeight = weights.some(w => w.date === ds) ? 1 : 0;
     const hasFood = getDayCalories(ds).hasData ? 1 : 0;
