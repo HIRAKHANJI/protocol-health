@@ -4,6 +4,24 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 6.1.0 — 2026-04-21
+
+**Scope:** Minor (Post-refactor regression fixes + radar consistency + UX polish)
+**Banner:** "Calorie card bands restored (≤1000 green, 1001-1500 orange, >1500 red = fails day). Radar consistency + fasting axes now use the same checklist counter as the calendar."
+
+- **Calorie card color bands restored to pre-refactor behavior.** Thresholds on the TODAY calorie info card and the auto-refresh code:
+  - `actual ≤ ceiling × 2/3` (≤1000 when ceiling is 1500) → GREEN
+  - `ceiling × 2/3 < actual ≤ ceiling` (1001-1500) → ORANGE — doesn't fail the day
+  - `actual > ceiling` (>1500) → RED — fails the day (calPass = false)
+  Previously (post-refactor regression): red threshold was at `ceiling × 1.5` (2250), so 1501-2249 cal days were scored as "pass" and flooded calendar with false-green days. Fix brings the threshold back to `ceiling`, matching owner's actual intent. Applied in three places: `components/checklist.js` render, `components/checklist.js` refresh, `app.html` `migrateOrphanedChecks`.
+- **Radar CONSISTENCY axis aligned with calendar.** Previously computed `checklistDepth` from `plan.checklistNormal.length` (parent-only counter). Now uses `getValidCheckCompletion(ds)` — same source of truth the calendar uses. Fixes parent-aggregate under-counting for supplement groups (a group with N subs used to count as 1 item; now counts as N).
+- **Radar FASTING axis aligned with calendar.** Previously used `Object.values(log.checks).filter(Boolean).length / .length` — unfiltered by valid IDs, could include orphans. Now uses `getValidCheckCompletion(ds)` — same as calendar + CHECKLIST axis.
+- **Schema card explanation added.** Settings → Data Management → Schema card now has a one-line description: "Tracks the data-shape version of your stored data. Used internally to safely upgrade your data when the app changes how things are saved. Safe to ignore."
+- **Expected user-visible effect:** past days with 1501-2249 cal that previously displayed green will now display partial. This matches the pre-refactor intent (over-ceiling = fails day). Radar CONSISTENCY and FASTING axis values may shift slightly to reflect true checklist completion (usually slightly lower because the denominator is more accurate).
+- **`sw.js`:** bumped `CACHE_NAME` to `v20`.
+
+---
+
 ## Version 6.0.0 — 2026-04-21
 
 **Scope:** Major (Architecture refactor complete — Phase 6 of 2-day refactor)
