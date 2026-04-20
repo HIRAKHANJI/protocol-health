@@ -1,5 +1,9 @@
 # Protocol Health — Full Architecture
 
+> **Status (v6.2.x):** This document describes the app's **domain logic** — data flow, algorithms, and subsystem behavior. As of v6.0.0 the code is organized into ES modules (`plans/`, `modules/`, `components/`, `migrations/`). The algorithmic/data-flow descriptions below remain accurate — the same functions simply live in module files now instead of inline. For the **module layout**, interop pattern, and startup sequence, see `CLAUDE.md` Section 23. For the **migration framework**, see Section 24.
+
+---
+
 ## 1. System Overview
 
 ```mermaid
@@ -10,10 +14,10 @@ graph TB
         ICONS["PH_LOGO_192 / PH_LOGO_512"]
     end
 
-    subgraph APP["app.html — Single File Application"]
+    subgraph APP["app.html — Bootstrap + Modular ES Modules (v6.0.0+)"]
         HTML["HTML Structure<br/>6 Tabs + Settings + Modals"]
         CSS["CSS Styles<br/>Dark theme, mobile-first"]
-        JS["JavaScript Engine<br/>All logic, no framework"]
+        JS["Inline Orchestration<br/>+ plans/, modules/,<br/>components/, migrations/"]
     end
 
     subgraph STORAGE["💾 localStorage (Device Only)"]
