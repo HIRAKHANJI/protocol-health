@@ -236,7 +236,7 @@ Nothing else changes. `getActivePlan()` reads `settings.plan`, looks up `PLANS[s
 | `app.html` | App bootstrap — HTML, CSS, and the inline orchestration script (runInit + helpers that stay in classic scope). ~4600 lines post-refactor. Plans, large function groups, shared components, and migrations load as ES modules — see Section 23. Zero build process, zero bundler, zero framework. |
 | `index.html` | Landing/product page. Links to `app.html`. |
 | `manifest.json` | PWA manifest. App name, icons, display mode (standalone = fullscreen), theme color. |
-| `sw.js` | Service Worker. Caches all app files after first load for offline use. Cache-first strategy. Current cache name: `protocol-health-v22`. Bump version on major deploys. |
+| `sw.js` | Service Worker. Caches all app files after first load for offline use. Cache-first strategy. Current cache name: `protocol-health-v23`. Bump version on major deploys. |
 | `PH_LOGO_192.png` | Home screen icon at 192×192px. |
 | `PH_LOGO_512.png` | Splash screen icon at 512×512px. |
 
@@ -451,7 +451,7 @@ Push to GitHub → GitHub Pages serves new files (~60s)
 
 The service worker caches files under `CACHE_NAME` in `sw.js`. If this name does not change, the SW may keep serving the old cached version even after new files are pushed.
 
-**Current version:** `protocol-health-v22`
+**Current version:** `protocol-health-v23`
 
 > **Rule: Bump `CACHE_NAME` on every significant update to `main`.**
 > - Only bump when merging or pushing to `main` — feature branches do not need cache version increments
@@ -462,7 +462,7 @@ The service worker caches files under `CACHE_NAME` in `sw.js`. If this name does
 
 ```javascript
 // sw.js — line 22
-const CACHE_NAME = 'protocol-health-v22'; // ← increment this on every significant push
+const CACHE_NAME = 'protocol-health-v23'; // ← increment this on every significant push
 ```
 
 ### Files That Must Be Pushed Together
@@ -547,7 +547,7 @@ The app has two independent version numbers that serve different purposes:
 | **+0.1.0** (minor) | A new feature, a meaningful UI change, or 4+ bug fixes bundled together | Yes | Added streak counter, redesigned settings panel, new checklist group |
 | **+1.0.0** (major) | New plan added, major rework of a core system, or something that changes how you use the app | Yes | New combat training plan, schedule system rewrite, new tab added |
 
-**Current version:** `6.2.1`
+**Current version:** `6.2.2`
 
 > **Self-Update Rule:** Whenever `APP_VERSION` is bumped in `app.html`, also update ALL version references in this file (`CLAUDE.md`) to match — including this line and the Quick Reference section below. Never leave stale version numbers in project documentation.
 
@@ -564,7 +564,7 @@ The app has two independent version numbers that serve different purposes:
 When making changes, update these two lines near the top of the script in `app.html`:
 
 ```javascript
-const APP_VERSION = '6.2.1';                         // ← bump according to rules above
+const APP_VERSION = '6.2.2';                         // ← bump according to rules above
 const APP_VERSION_MSG = 'Description of changes.';    // ← short description of what changed
 ```
 
@@ -621,8 +621,8 @@ Day types:    getDayType(dateStr) → 'fast' | 'light' | 'normal'
 Data writes:  always end with dispatch("EVENT_NAME")
 Dialogs:      showConfirm(), showAlert() — never native confirm/alert
 Dates:        dateToStr(d), strToDate(s), todayStr() — never toISOString()
-Cache:        sw.js CACHE_NAME = "protocol-health-v22" — bump on every significant push
-App version:  APP_VERSION = "6.2.1" — bump on notable updates (see Section 12)
+Cache:        sw.js CACHE_NAME = "protocol-health-v23" — bump on every significant push
+App version:  APP_VERSION = "6.2.2" — bump on notable updates (see Section 12)
 Update log:   UPDATE_LOG.md — every version bump must be documented here
 ```
 
@@ -632,11 +632,16 @@ Update log:   UPDATE_LOG.md — every version bump must be documented here
 
 | File | Purpose |
 |------|---------|
-| `CLAUDE.md` | This file. Project brief, rules, and quick reference for Claude Code. |
-| `UPDATE_LOG.md` | Version history. Every version from 1.0.0 onward with dates, scope, and change descriptions. Must be updated on every version bump. |
-| `ARCHITECTURE.md` | Full system architecture with Mermaid diagrams. Covers dispatcher, plan system, tabs, weight tracking, projection algorithm, goal calculator, schedule, macros, food logging, radar chart, calendar, backup/restore, service worker, and data flow. |
-| `PLAN.md` | Implementation plan for the cut/bulk/maintenance plan addition (v1.9.0). Historical reference — the work is complete. |
+| `README.md` | Short visitor-facing intro to the project. Links to this file, UPDATE_LOG, architecture docs, and the refactor retrospective. |
+| `CLAUDE.md` | This file. Project brief, rules, and quick reference for Claude Code. **Start here for any code change.** |
+| `UPDATE_LOG.md` | Version history. Every version from 1.0.0 onward with dates, scope, banner messages, and change descriptions. Must be updated on every version bump. |
+| `WORKING_VERSIONS.md` | Append-only log of git-tagged working versions. Records the baseline (`v5.0.1-working`) and post-refactor milestone (`v6.0.0-working`) for rollback purposes. |
+| `ARCHITECTURE.md` | Domain-logic diagrams (Mermaid): dispatcher, plan system, tabs, weight tracking, projection algorithm, goal calculator, schedule, macros, food logging, radar chart, calendar, backup/restore, service worker, and data flow. The algorithmic/data-flow descriptions remain accurate post-refactor — the same functions simply live in ES modules now. For the **module layout + interop pattern**, see Section 23 below. |
+| `PLAN.md` | Historical — implementation plan for the cut/bulk/maintenance plan addition (v1.9.0). Shipped. |
 | `WORKOUTS_LIBRARY.md` | Exercise encyclopedia. Every workout with per-plan prescriptions, evidence, progression paths, and auto-prescription data model. Must be consulted before modifying any plan's workout content. |
+| `docs/REFACTOR_COMPLETE.md` | Retrospective of the 2-day v5.0.1 → v6.0.0 modular refactor: phase-by-phase scope, file-level delta, interop pattern chosen, decisions made, post-refactor bugs fixed, smoke results, lessons. |
+| `docs/PHASE_N_PLAN.md` | Pre-execution plans saved during the refactor (N = 0-6, with gaps for batched phases). Historical reference. |
+| `docs/PHASE_0_RECON.md` | The recon report: line-count verification, storage-key inventory, plan ranges, large-function extraction targets, bug confirmations. Historical reference. |
 
 ---
 

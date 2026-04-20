@@ -4,6 +4,21 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 6.2.2 — 2026-04-21
+
+**Scope:** Patch (cleanup pass — dead code, docs, repo polish; no behavior change)
+**Banner:** none (patch)
+
+- **Dead code removed:** `idbGet(key)` in `app.html` was never called anywhere in the repo (only `idbGetAll` and `idbPut` are used). Deleted.
+- **`ARCHITECTURE.md` stale claim fixed:** the "app.html — Single File Application" subgraph label updated to reflect the post-v6.0.0 modular structure; added a top-of-file note explaining the doc covers domain logic and pointing readers to `CLAUDE.md` §23 for the module layout.
+- **`README.md` added** at repo root — short visitor-facing intro: what the app does, architecture at a glance, documentation map, editing rules (with pointers to `CLAUDE.md`).
+- **`docs/REFACTOR_COMPLETE.md` added** — consolidated retrospective of the 2-day v5.0.1 → v6.0.0 modular refactor: phase ladder, file-level delta, interop pattern rationale, decisions made, post-refactor bugs found and fixed, owner-confirmed smoke results, lessons. Replaces the per-phase summary docs that were never written (owner used batched testing strategy).
+- **`CLAUDE.md` §14 (Related Documentation) expanded** to cover `README.md`, `WORKING_VERSIONS.md`, `docs/REFACTOR_COMPLETE.md`, and the `docs/PHASE_N_PLAN.md` files with honest descriptions of each.
+- **Comprehensive audit run:** 5 scans across repo structure, dead code, bugs, documentation, and data integrity. Only findings were the items above — code-level invariants (onclick resolution, import resolution, module-to-window assignments, DOM ID references, SK key usage) all scanned clean.
+- **`sw.js`:** bumped `CACHE_NAME` to `v23`.
+
+---
+
 ## Version 6.2.1 — 2026-04-21
 
 **Scope:** Patch (calendar root-cause fix — calorie info item missing from legacy days)
