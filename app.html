@@ -1398,18 +1398,6 @@ function idbPut(key, value) {
   }).catch(() => {}); // silent fail — IDB is a safety net, not critical path
 }
 
-// Read a single key from IndexedDB
-function idbGet(key) {
-  return openIDB().then(db => {
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(IDB_STORE, 'readonly');
-      const req = tx.objectStore(IDB_STORE).get(key);
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error);
-    });
-  });
-}
-
 // Read ALL keys from IndexedDB
 function idbGetAll() {
   return openIDB().then(db => {
@@ -1514,8 +1502,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '6.2.1';
-const APP_VERSION_MSG = 'Calorie logic rebuilt per plan: CUT/LITE/MAINTENANCE ≤ceiling=green, ceiling-1.5×=orange, ≥1.5×=red+fails day. BULK ≥target=green, >0.5×=orange, ≤0.5×=red+fails day. Past days will re-evaluate on reload.';
+const APP_VERSION = '6.2.2';
+const APP_VERSION_MSG = 'Cleanup pass: removed dead code, refreshed docs, added README, consolidated refactor retrospective. No behavior change.';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
 
