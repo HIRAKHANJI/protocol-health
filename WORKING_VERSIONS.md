@@ -30,6 +30,18 @@ This log records every git-tagged working version of Protocol Health during the 
 
 ---
 
+## v6.0.0-working — 2026-04-21 (refactor complete, smoke passed)
+- **Phase:** 1-6 merged as a single deploy (Phases 1-5 code shipped; Phase 6 is CLAUDE.md finalize + version bump)
+- **Git tag:** `v6.0.0-working` (local only — remote tag push blocked by sandbox 403)
+- **Commit hash:** `3b74187` (merge commit on `main` from `claude/refactor-v6`)
+- **CACHE_NAME:** `protocol-health-v19`
+- **Smoke test:** PASS — sections A/B/D/E/F/G/H/I/J/L all PASS on owner's device (Xiaomi Mi 15 Ultra PWA install). Dev console (K) skipped by owner choice.
+- **Owner-confirmed:** yes
+- **Auto-backup on owner device:** full backup taken during test section I
+- **Notes:** 2-day refactor complete. 6 phases deployed as a single merge to `main`. ~1,765 inline-plan lines + ~1,943 inline-function lines + ~456 inline-helper lines extracted from `app.html` (8,572 → 4,637, −46%). New `plans/`, `modules/`, `components/`, `migrations/` directories with 17 ES module files. Intermediate versions v5.1.0-v5.5.0 were pushed to the refactor branch but never individually smoke-tested — owner chose batch-test-at-end strategy. Flagged follow-up items (non-blocking): calendar "partial" day investigation, radar accuracy reassurance, recent-notes food log day cap, schema card explanation UX, and a new calorie-threshold indicator feature request.
+
+---
+
 ## v5.0.1-working — 2026-04-19 (baseline)
 - **Phase:** 0 (baseline before refactor begins)
 - **Git tag:** `v5.0.1-working`
