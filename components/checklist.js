@@ -76,27 +76,21 @@ export function renderTodayChecklist() {
         </div>
       </div>`;
     } else if(item.type === 'info') {
-      // Info card — auto-colored calorie status, no checkbox, COUNTS toward completion
-      // only when actual > ceiling (over-ceiling = failure; at-or-under = pass, regardless of low).
-      // Color bands: ≤ ceiling * 2/3 → green, > 2/3 and ≤ ceiling → orange, > ceiling → red.
+      // Info card — calorie status evaluated via universal plan-aware evaluator (v6.2.0).
+      // See evalCalorieStatus() in app.html for the spec (cut/bulk/maintenance branches).
+      // Only RED (>=1.5×ceiling for cut, <=0.5×target for bulk) fails the day (calPass=false).
       const dc = getDayCalories(todayStr());
       const ceiling = s.calories || 1500;
       const actual = dc.total || 0;
-      let cardBg = 'var(--surface)', statusText = `0 / ${ceiling} cal`, calPass = true;
-      if(dc.hasData) {
-        if(actual <= ceiling * 2/3) {
-          cardBg = 'rgba(76,175,80,0.15)';
-          statusText = `${actual} / ${ceiling} cal \u2714`;
-        } else if(actual <= ceiling) {
-          cardBg = 'rgba(255,152,0,0.15)';
-          statusText = `${actual} / ${ceiling} cal \u00b7 ${ceiling - actual} under`;
-        } else {
-          cardBg = 'rgba(244,67,54,0.15)';
-          statusText = `${actual} / ${ceiling} cal \u00b7 ${actual - ceiling} over`;
-          calPass = false; // over ceiling — counts as failure for day completion
-        }
-      }
-      html += `<div class="check-item${calPass ? '' : ' auto-status fail'}" style="background:${cardBg};cursor:default;opacity:0.95" data-id="${item.id}" data-type="info" data-cal-pass="${calPass}"><div style="width:22px;display:flex;align-items:center;justify-content:center">${!calPass ? '<span style="color:var(--danger);font-weight:bold;font-size:12px">\u2717</span>' : (dc.hasData && actual <= ceiling * 2/3 ? '<span style="color:var(--accent);font-weight:bold;font-size:10px">\u2714</span>' : '')}</div><div class="item-content"><div class="item-title">${label}</div><div style="font-family:'DM Mono',monospace;font-size:0.8rem;margin-top:4px;color:var(--text)" data-cal-status>${statusText}</div></div></div>`;
+      const goalMode = plan.goalMode || 'cut';
+      const cs = evalCalorieStatus(actual, ceiling, goalMode, dc.hasData);
+      const cardBg = cs.bgColor;
+      const statusText = cs.statusText;
+      const calPass = cs.calPass;
+      const iconHtml = !calPass
+        ? '<span style="color:var(--danger);font-weight:bold;font-size:12px">\u2717</span>'
+        : (cs.band === 'green' ? '<span style="color:var(--accent);font-weight:bold;font-size:10px">\u2714</span>' : '');
+      html += `<div class="check-item${calPass ? '' : ' auto-status fail'}" style="background:${cardBg};cursor:default;opacity:0.95" data-id="${item.id}" data-type="info" data-cal-pass="${calPass}"><div style="width:22px;display:flex;align-items:center;justify-content:center">${iconHtml}</div><div class="item-content"><div class="item-title">${label}</div><div style="font-family:'DM Mono',monospace;font-size:0.8rem;margin-top:4px;color:var(--text)" data-cal-status>${statusText}</div></div></div>`;
     } else if(AUTO_WORKOUT_IDS.includes(item.id)) {
       // Auto workout items — reads PER-SESSION counts (morning/evening), not global total
       const wLog = getDayLog(todayStr());
@@ -324,27 +318,20 @@ export function refreshAutoItems() {
   document.querySelectorAll('.check-item[data-type="info"]').forEach(el => {
     const dc = getDayCalories(todayStr());
     const actual = dc.total || 0;
-    let cardBg = 'var(--surface)', statusText = `0 / ${cal} cal`, calPass = true;
-    if(dc.hasData) {
-      if(actual <= cal * 2/3) {
-        cardBg = 'rgba(76,175,80,0.15)';
-        statusText = `${actual} / ${cal} cal \u2714`;
-      } else if(actual <= cal) {
-        cardBg = 'rgba(255,152,0,0.15)';
-        statusText = `${actual} / ${cal} cal \u00b7 ${cal - actual} under`;
-      } else {
-        cardBg = 'rgba(244,67,54,0.15)';
-        statusText = `${actual} / ${cal} cal \u00b7 ${actual - cal} over`;
-        calPass = false;
-      }
-    }
+    const goalMode = plan.goalMode || 'cut';
+    const cs = evalCalorieStatus(actual, cal, goalMode, dc.hasData);
+    const cardBg = cs.bgColor;
+    const statusText = cs.statusText;
+    const calPass = cs.calPass;
     el.style.background = cardBg;
     el.dataset.calPass = String(calPass);
     el.classList.toggle('fail', !calPass);
     // Update icon
     const iconEl = el.querySelector('div:first-child');
     if(iconEl && iconEl.style.width === '22px') {
-      iconEl.innerHTML = !calPass ? '<span style="color:var(--danger);font-weight:bold;font-size:12px">\u2717</span>' : (dc.hasData && actual <= cal * 2/3 ? '<span style="color:var(--accent);font-weight:bold;font-size:10px">\u2714</span>' : '');
+      iconEl.innerHTML = !calPass
+        ? '<span style="color:var(--danger);font-weight:bold;font-size:12px">\u2717</span>'
+        : (cs.band === 'green' ? '<span style="color:var(--accent);font-weight:bold;font-size:10px">\u2714</span>' : '');
     }
     const valEl = el.querySelector('[data-cal-status]');
     if(valEl) valEl.textContent = statusText;

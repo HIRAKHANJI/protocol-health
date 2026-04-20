@@ -1514,8 +1514,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '6.1.0';
-const APP_VERSION_MSG = 'Calorie card bands restored (≤1000 green, 1001-1500 orange, >1500 red = fails day). Radar consistency + fasting axes now use the same checklist counter as the calendar.';
+const APP_VERSION = '6.2.0';
+const APP_VERSION_MSG = 'Calorie logic rebuilt per plan: CUT/LITE/MAINTENANCE ≤ceiling=green, ceiling-1.5×=orange, ≥1.5×=red+fails day. BULK ≥target=green, >0.5×=orange, ≤0.5×=red+fails day. Past days will re-evaluate on reload.';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
 
@@ -1629,6 +1629,52 @@ function getDayCalories(dateStr) {
   const entries = fl[dateStr] || [];
   const total = entries.reduce((sum, e) => sum + (e.calories || 0), 0);
   return { total, entries, hasData: entries.length > 0 };
+}
+
+// evalCalorieStatus: universal calorie-card evaluator across all plans (added v6.2.0).
+// Returns { band: 'green'|'orange'|'red', calPass, bgColor, statusText } based on goalMode.
+//
+// Spec (owner-confirmed):
+//   CUT / MAINTENANCE (ceiling is the cap):
+//     actual <= ceiling            → GREEN  (at or under cap → perfect cut day)         calPass=true
+//     ceiling < actual < 1.5×ceil  → ORANGE (over cap but not far)                       calPass=true
+//     actual >= 1.5×ceiling        → RED    (50%+ over cap → fails day)                  calPass=false
+//
+//   BULK (ceiling is the target to meet/exceed):
+//     actual >= target             → GREEN  (met or exceeded target)                     calPass=true
+//     0.5×target < actual < target → ORANGE (below target but not far)                   calPass=true
+//     actual <= 0.5×target         → RED    (50%+ under target → fails day)              calPass=false
+//
+// Only RED affects calendar partial/complete judgment. ORANGE is informational.
+// If no food is logged yet (actual=0, hasData=false), returns neutral grey + calPass=true (no penalty).
+function evalCalorieStatus(actual, ceiling, goalMode, hasData) {
+  const C_BG_GREEN  = 'rgba(76,175,80,0.15)';
+  const C_BG_ORANGE = 'rgba(255,152,0,0.15)';
+  const C_BG_RED    = 'rgba(244,67,54,0.15)';
+  const C_BG_NEUTRAL = 'var(--surface)';
+  if (!hasData) {
+    return { band: 'neutral', calPass: true, bgColor: C_BG_NEUTRAL, statusText: `0 / ${ceiling} cal` };
+  }
+  const isBulk = goalMode === 'bulk';
+  if (isBulk) {
+    if (actual >= ceiling) {
+      return { band: 'green', calPass: true, bgColor: C_BG_GREEN, statusText: `${actual} / ${ceiling} cal \u2714` };
+    }
+    const halfTarget = ceiling * 0.5;
+    if (actual > halfTarget) {
+      return { band: 'orange', calPass: true, bgColor: C_BG_ORANGE, statusText: `${actual} / ${ceiling} cal \u00b7 ${ceiling - actual} under` };
+    }
+    return { band: 'red', calPass: false, bgColor: C_BG_RED, statusText: `${actual} / ${ceiling} cal \u00b7 severely under target` };
+  }
+  // CUT / MAINTENANCE (default)
+  if (actual <= ceiling) {
+    return { band: 'green', calPass: true, bgColor: C_BG_GREEN, statusText: `${actual} / ${ceiling} cal \u2714` };
+  }
+  const hardCap = ceiling * 1.5;
+  if (actual < hardCap) {
+    return { band: 'orange', calPass: true, bgColor: C_BG_ORANGE, statusText: `${actual} / ${ceiling} cal \u00b7 ${actual - ceiling} over` };
+  }
+  return { band: 'red', calPass: false, bgColor: C_BG_RED, statusText: `${actual} / ${ceiling} cal \u00b7 ${actual - ceiling} over (>50%)` };
 }
 
 // getAvgActualCalories: returns average actual calorie intake over last N days (eating days only).
@@ -2660,14 +2706,16 @@ function migrateOrphanedChecks() {
       }
     });
 
-    // Fix stale calorie info items: compute pass/fail from food log
+    // Fix stale calorie info items: use the universal plan-aware evaluator (v6.2.0).
+    // Only RED band (>=1.5×ceiling for cut, <=0.5×target for bulk) fails the day.
     checklist.forEach(item => {
       if(item.type === 'info' && (item.id in checks)) {
         const fl = (gs(SK.foodLog) || {})[dateStr] || [];
         const calTotal = fl.reduce((sum, e) => sum + (e.calories || 0), 0);
         const ceiling = (gs(SK.settings) || {}).calories || 1500;
-        // calPass: no food logged OR total <= ceiling. Over ceiling = fails day (v6.0.1).
-        const calPass = !fl.length || calTotal <= ceiling;
+        const goalMode = plan.goalMode || 'cut';
+        const cs = evalCalorieStatus(calTotal, ceiling, goalMode, fl.length > 0);
+        const calPass = cs.calPass;
         if(checks[item.id] !== calPass) { checks[item.id] = calPass; changed = true; }
       }
     });
