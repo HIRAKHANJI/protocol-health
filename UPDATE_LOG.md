@@ -4,6 +4,26 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 6.2.0 — 2026-04-21
+
+**Scope:** Minor (Calorie logic rebuilt plan-aware + calendar semantics fix)
+**Banner:** "Calorie logic rebuilt per plan: CUT/LITE/MAINTENANCE ≤ceiling=green, ceiling-1.5×=orange, ≥1.5×=red+fails day. BULK ≥target=green, >0.5×=orange, ≤0.5×=red+fails day. Past days will re-evaluate on reload."
+
+- **Plan-aware calorie card logic (new utility `evalCalorieStatus` in `app.html`)** replaces the three duplicated threshold blocks in `components/checklist.js` (render + refresh) and `migrateOrphanedChecks` in `app.html`.
+- **CUT / LITE / MAINTENANCE plans (goalMode === 'cut' or 'maintenance'):**
+  - `actual ≤ ceiling` → **GREEN** (at or under cap — ideal cut day). Does NOT fail day.
+  - `ceiling < actual < ceiling × 1.5` → **ORANGE** on TODAY card only. Does NOT fail day. Calendar stays green/partial based on other items.
+  - `actual ≥ ceiling × 1.5` → **RED** on TODAY card. **Fails the day** (calPass=false). Calendar marks partial due to this single item.
+- **BULK plan (goalMode === 'bulk'):**
+  - `actual ≥ target` → **GREEN** (met or exceeded target).
+  - `target × 0.5 < actual < target` → **ORANGE** on TODAY card. Does NOT fail day.
+  - `actual ≤ target × 0.5` → **RED**. Fails day (severely under target).
+- **Previous v6.1.0 regression fixed.** v6.1.0 mistakenly flipped the red threshold to `> ceiling` (any overshoot fails), which falsely marked everything between `ceiling` and `ceiling × 1.5` as failing. Days with 1113 cal on a 1000 ceiling (11% over — normal cut variation) were incorrectly partial. Restored to the original intent: only ≥50% overshoot fails.
+- **Auto re-evaluation on load.** `migrateOrphanedChecks` runs every init and re-computes stored `f2` (calorie info) check values from the food log using the new evaluator. Past days will retroactively correct to the new bands on next reload — no user action needed.
+- **`sw.js`:** bumped `CACHE_NAME` to `v21`.
+
+---
+
 ## Version 6.1.0 — 2026-04-21
 
 **Scope:** Minor (Post-refactor regression fixes + radar consistency + UX polish)
