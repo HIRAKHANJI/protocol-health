@@ -4,6 +4,22 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 6.2.1 — 2026-04-21
+
+**Scope:** Patch (calendar root-cause fix — calorie info item missing from legacy days)
+**Banner:** none (patch)
+
+- **Root cause fix for "all past days showing partial orange".** `migrateOrphanedChecks` previously updated the `f2` calorie info check value ONLY when `f2` was already present in the day's `checks` object. Legacy days where the user never tapped the calorie card had `f2` missing entirely. The completion counter (`getValidCheckCompletion`) counts every plan-checklist item in the denominator and treats missing as not-done — so a day with all 18 other items ticked plus a missing f2 showed as 18/19 = 94.7% → partial.
+- **Fix:** removed the `(item.id in checks)` guard in `migrateOrphanedChecks`. Info items (`type: 'info'`, e.g. `f2` across all plans) are now always populated from the food log via `evalCalorieStatus`. On next reload, every past day's `f2` auto-computes:
+  - Day with no food log → `f2 = true` (no penalty, no log means nothing to judge).
+  - Day with food ≤ ceiling → `f2 = true` (green card).
+  - Day with food > ceiling but < 1.5× → `f2 = true` (orange card, still passes).
+  - Day with food ≥ 1.5× ceiling → `f2 = false` (red card, day fails).
+- **Effect on owner's data:** days 3/23-3/31 that were fully ticked with food 750-1300 cal will flip back to green on next reload. Days that genuinely had calorie overages ≥ 1.5× ceiling stay partial/red.
+- **`sw.js`:** bumped `CACHE_NAME` to `v22`.
+
+---
+
 ## Version 6.2.0 — 2026-04-21
 
 **Scope:** Minor (Calorie logic rebuilt plan-aware + calendar semantics fix)

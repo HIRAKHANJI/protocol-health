@@ -1514,7 +1514,7 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '6.2.0';
+const APP_VERSION = '6.2.1';
 const APP_VERSION_MSG = 'Calorie logic rebuilt per plan: CUT/LITE/MAINTENANCE ≤ceiling=green, ceiling-1.5×=orange, ≥1.5×=red+fails day. BULK ≥target=green, >0.5×=orange, ≤0.5×=red+fails day. Past days will re-evaluate on reload.';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
@@ -2706,10 +2706,14 @@ function migrateOrphanedChecks() {
       }
     });
 
-    // Fix stale calorie info items: use the universal plan-aware evaluator (v6.2.0).
-    // Only RED band (>=1.5×ceiling for cut, <=0.5×target for bulk) fails the day.
+    // Compute calorie info items from food log (v6.2.1 — runs for every info item
+    // whether or not it's already in checks). Pre-fix bug: the `(item.id in checks)`
+    // guard meant legacy days where the user never tapped the calorie card left f2
+    // missing entirely, so the completion counter treated it as not-done and past
+    // days showed partial even when every other item was ticked. Fix: always
+    // populate info-item check values from the food log evaluator.
     checklist.forEach(item => {
-      if(item.type === 'info' && (item.id in checks)) {
+      if(item.type === 'info') {
         const fl = (gs(SK.foodLog) || {})[dateStr] || [];
         const calTotal = fl.reduce((sum, e) => sum + (e.calories || 0), 0);
         const ceiling = (gs(SK.settings) || {}).calories || 1500;
