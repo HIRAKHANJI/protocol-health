@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+// If opened as installed PWA, skip landing
+if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+  window.location.replace('app.html');
+}
+</script>
+<title>Protocol Health · v6.2.2 — free, offline, anywhere</title>
+<meta name="description" content="Free fitness protocol PWA. Installs like a native app. Five training plans. Zero equipment. Zero accounts. Your data stays on your device.">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="apple-touch-icon" href="PH_LOGO_192.png">
+<link rel="stylesheet" href="assets/landing.css?v=6.2.5">
+<link rel="stylesheet" href="assets/landing-sections.css?v=6.2.5">
+<link rel="stylesheet" href="assets/landing-demos.css?v=6.2.5">
+<link rel="stylesheet" href="assets/landing-v5.css?v=6.2.5">
+<link rel="stylesheet" href="assets/install-guide.css?v=6.2.5">
+</head>
+<body>
+
+<div class="ambient-grid" aria-hidden="true"></div>
+<div class="ambient-noise" aria-hidden="true"></div>
+
+<!-- NAV -->
+<nav class="nav" id="nav">
+  <a href="#" class="nav-logo">
+    <img src="assets/PH_ARROWS_LOGO.png" alt="">
+    <div class="brand">PROTOCOL <span>HEALTH</span></div>
+    <div class="ver">v6.2.2</div>
+  </a>
+  <div class="nav-links">
+    <a href="#anywhere">ANYWHERE</a>
+    <a href="#features">FEATURES</a>
+    <a href="#power">POWER</a>
+    <a href="#plans">PLANS</a>
+    <a href="#faq">FAQ</a>
+    <a href="#" class="nav-install" onclick="openInstall(); return false;">INSTALL</a>
+    <a href="app.html" class="nav-cta">OPEN APP</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-copy">
+    <div class="hero-badge">
+      <span class="dot"></span>
+      v6.2.2 · FREE · OFFLINE · NO ACCOUNT
+    </div>
+    <h1>
+      <span class="outlined">YOUR</span> <span class="accent">PROTOCOL.</span><br>
+      YOUR PHONE.<br>NO CLOUD.
+    </h1>
+    <p class="hero-sub">
+      Free forever. Runs on your device. Five training plans, smart macros,
+      fast-day aware calendar — no signup, no subscription, no data leaves your phone.
+    </p>
+    <div class="hero-btns">
+      <a href="app.html" class="btn-primary">
+        LAUNCH APP
+        <svg class="arrow" width="18" height="14" viewBox="0 0 18 14" fill="none" aria-hidden="true">
+          <path d="M1 7h15M11 1l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+      <a href="#" class="btn-ghost" onclick="openInstall(); return false;">INSTALL GUIDE</a>
+    </div>
+    <div class="hero-trust">
+      <span><span class="tick">✓</span> 100% Free</span>
+      <span><span class="tick">✓</span> Zero equipment</span>
+      <span><span class="tick">✓</span> Works offline</span>
+      <span><span class="tick">✓</span> Installs like native</span>
+    </div>
+  </div>
+
+  <div class="hero-3d" id="hero-3d">
+    <div class="hero-phone" aria-hidden="true">
+      <div class="hero-phone-screen">
+        <div class="demo-head">
+          <span class="demo-plan-badge">AGRO CUT</span>
+          <span class="demo-cal-ceil">1000 CAL</span>
+        </div>
+        <div class="demo-fast-banner">⚡ FAST DAY · Electrolytes only</div>
+        <div class="demo-today" style="pointer-events:none">
+          <div class="demo-item done"><span>500ml water + salt</span><span class="check"></span></div>
+          <div class="demo-item done"><span>Electrolyte tab AM</span><span class="check"></span></div>
+          <div class="demo-item"><span>Morning zone-2</span><span class="check"></span></div>
+          <div class="demo-item"><span>Neck protocol</span><span class="check"></span></div>
+          <div class="demo-bar"><div class="demo-bar-fill" style="width:50%"></div></div>
+          <div class="demo-pct-row"><span>TODAY</span><span class="demo-pct">50%</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- STATS BAR -->
+<div class="stats-bar reveal">
+  <div class="stats-inner">
+    <div class="stat"><div class="v" data-counter="5">0</div><div class="l">PLANS</div></div>
+    <div class="stat"><div class="v" data-counter="60" data-suffix="+">0</div><div class="l">UPDATES</div></div>
+    <div class="stat"><div class="v">100%</div><div class="l">OFFLINE</div></div>
+    <div class="stat"><div class="v stat-free">FREE</div><div class="l">FOREVER</div></div>
+  </div>
+</div>
+
+<!-- PROMISE BAND — free · local · no equipment -->
+<section class="promise-band">
+  <div class="promise-card reveal">
+    <div class="pc-icon">🆓</div>
+    <h3><span class="a">FREE.</span> FOREVER.</h3>
+    <p>No subscription. No paywall. No trial. Not freemium. No account. No credit card. It is, and will always be, 100% free to use.</p>
+    <div class="pc-chips"><span>NO SIGNUP</span><span>NO ADS</span><span>NO TRACKING</span></div>
+  </div>
+  <div class="promise-card cloud reveal">
+    <div class="pc-icon">🔒</div>
+    <h3>YOUR DATA <span class="a">STAYS HOME.</span></h3>
+    <p>Every weight log, every meal, every checklist tick stays on your device — nowhere else. No server, no cloud, no breach to worry about. One-tap backup to a file you keep.</p>
+    <div class="pc-chips"><span>ON-DEVICE ONLY</span><span>ZERO APIS</span><span>JSON BACKUP</span></div>
+  </div>
+  <div class="promise-card gym reveal">
+    <div class="pc-icon">🏋️</div>
+    <h3>ZERO <span class="a">EQUIPMENT.</span></h3>
+    <p>Every workout runs from your bodyweight. Variations scale up the moment a band, dumbbell, or bar shows up — but nothing is ever required.</p>
+    <div class="pc-chips"><span>BODYWEIGHT FIRST</span><span>GYM OPTIONAL</span><span>HOTEL READY</span></div>
+  </div>
+</section>
+
+<!-- ANYWHERE / GLOBE -->
+<section class="anywhere" id="anywhere">
+  <div class="anywhere-copy reveal">
+    <div class="section-tag">NO BORDERS · NO EXCUSES</div>
+    <h2>
+      <span class="out">TRAIN &amp;</span><br>
+      <span class="out">EAT FROM</span><br>
+      <span class="g">ANYWHERE.</span>
+    </h2>
+    <p>
+      Hotel room. Airport gate. Rural cabin. Phone in airplane mode for three days.
+      The protocol still runs. The checklist still ticks. Your streak never breaks.
+    </p>
+    <p>
+      No supplements? The plan adapts. No gym? Bodyweight covers it. No signal?
+      Everything is already on your device.
+    </p>
+    <div class="anywhere-pillars">
+      <div class="anywhere-pill">
+        <div class="t">OFFLINE PWA</div>
+        <div class="d">Cached after first load. Works with the wi-fi off.</div>
+      </div>
+      <div class="anywhere-pill">
+        <div class="t">NO TIMEZONE BUGS</div>
+        <div class="d">Local dates only. Fly wherever — today is today.</div>
+      </div>
+      <div class="anywhere-pill">
+        <div class="t">BODYWEIGHT CORE</div>
+        <div class="d">Chair, floor, wall. That's the equipment list.</div>
+      </div>
+      <div class="anywhere-pill">
+        <div class="t">SUPPLEMENT-OPTIONAL</div>
+        <div class="d">Out of stock? Toggle off. Protocol recalculates.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="globe-stage reveal" id="globe-stage" aria-hidden="true">
+    <!-- three.js canvas mounts here -->
+
+    <!-- Emoji poppers overlayed on top of canvas -->
+    <div class="poppers" id="poppers"></div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <div class="section-head reveal">
+    <div class="section-tag">WHAT IT DOES</div>
+    <h2 class="section-title">Built for the <span class="accent">protocol.</span></h2>
+    <p class="section-desc">
+      Four screens. Every element earns its place. No feature bloat, ever.
+    </p>
+  </div>
+
+  <!-- F01 TODAY -->
+  <div class="feature-row reveal">
+    <div class="f-copy">
+      <div class="f-index"><span class="n">01</span> · TODAY</div>
+      <h3 class="f-title">Your daily <span class="accent">compliance</span> loop.</h3>
+      <p class="f-desc">
+        Plan-aware checklist that swaps between eating, water fast, and light-eating
+        days automatically. Calorie card auto-tracks from your food log; workout items
+        tick independently for morning vs. evening sessions; supplements expand into
+        individual pills with weekday-specific schedules.
+      </p>
+      <ul class="f-bullets">
+        <li>Calorie card auto-flips on your thresholds</li>
+        <li>Morning / evening workout items tick independently</li>
+        <li>Expandable supplement pills (Zinc EOD, D3 + MCT, Osteocare)</li>
+        <li>Water tracked in liters with +/− steppers</li>
+      </ul>
+      <div class="f-pills">
+        <span class="f-pill new">NEW · AUTO CALORIE</span>
+        <span class="f-pill new">NEW · PER-SESSION</span>
+        <span class="f-pill">SUPPLEMENT SUB-ITEMS</span>
+      </div>
+    </div>
+    <div class="f-visual">
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="demo-head">
+            <span class="demo-plan-badge">AGRO CUT CALISTHENICS</span>
+            <span class="demo-cal-ceil">1000 CAL</span>
+          </div>
+          <div class="demo-fast-banner">⚡ WATER FAST DAY — Electrolytes only</div>
+          <div class="demo-day-title">WEDNESDAY · CHECKLIST</div>
+          <div class="demo-today">
+            <div class="demo-item"><span>500ml water + salt on waking</span><span class="check"></span></div>
+            <div class="demo-item"><span>Electrolyte tab mid-morning</span><span class="check"></span></div>
+            <div class="demo-item"><span>Electrolyte tab pre-training</span><span class="check"></span></div>
+            <div class="demo-item"><span>D3 + K2 with MCT gel</span><span class="sup-badge">SUPP</span></div>
+            <div class="demo-item"><span>Magnesium before bed</span><span class="check"></span></div>
+            <div class="demo-bar"><div class="demo-bar-fill"></div></div>
+            <div class="demo-pct-row"><span>TODAY'S MINIMUM</span><span class="demo-pct">0%</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="chip-float a">
+        <div style="font-size:9px;color:var(--muted);letter-spacing:1.5px">STREAK</div>
+        <div style="font-family:var(--f-display);font-size:20px;color:var(--accent);letter-spacing:2px">24 DAYS</div>
+      </div>
+      <div class="chip-float b">
+        <div style="font-size:9px;color:var(--muted);letter-spacing:1.5px">FAST PHASE</div>
+        <div style="font-family:var(--f-display);font-size:16px;color:var(--fast);letter-spacing:2px">H 18:42</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- F02 GOAL ENGINE -->
+  <div class="feature-row reverse reveal">
+    <div class="f-copy">
+      <div class="f-index"><span class="n">02</span> · GOAL ENGINE</div>
+      <h3 class="f-title">Auto TDEE. <span class="accent">Real</span> timelines.</h3>
+      <p class="f-desc">
+        Mifflin-St Jeor from your own numbers. Pick a deadline or pick a calorie
+        ceiling — the engine returns the other, with a risk flag that tells you the truth.
+      </p>
+      <ul class="f-bullets">
+        <li>Dual schedule support</li>
+        <li>Compliance-adjusted projection</li>
+        <li>Flags: achievable · aggressive · unrealistic</li>
+      </ul>
+      <div class="f-pills">
+        <span class="f-pill new">NEW · AUTO TDEE</span>
+        <span class="f-pill new">NEW · DUAL SCHEDULE</span>
+        <span class="f-pill">MIFFLIN-ST JEOR</span>
+      </div>
+    </div>
+    <div class="f-visual">
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="demo-goal">
+            <h5>PROJECTED <span>PLAN</span></h5>
+            <div class="demo-goal-grid">
+              <div class="demo-goal-cell"><div class="v">8</div><div class="l">WEEKS</div></div>
+              <div class="demo-goal-cell"><div class="v">1000</div><div class="l">CAL / DAY</div></div>
+              <div class="demo-goal-cell"><div class="v">-1.43</div><div class="l">KG / WEEK</div></div>
+              <div class="demo-goal-cell"><div class="v">3,536</div><div class="l">AUTO TDEE</div></div>
+            </div>
+            <div class="demo-goal-flag">⚡ AGGRESSIVE · ACHIEVABLE</div>
+            <div class="demo-day-title">PROJECTED — NEXT 8 WEEKS</div>
+            <svg class="demo-chart" viewBox="0 0 220 80" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#f5a623" stop-opacity="0.55"/>
+                  <stop offset="1" stop-color="#f5a623" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <line class="grid" x1="0" y1="20" x2="220" y2="20"/>
+              <line class="grid" x1="0" y1="40" x2="220" y2="40"/>
+              <line class="grid" x1="0" y1="60" x2="220" y2="60"/>
+              <path class="area" d="M0,12 L30,18 L60,24 L90,32 L120,38 L150,46 L180,54 L220,60 L220,80 L0,80 Z"/>
+              <path class="line" d="M0,12 L30,18 L60,24 L90,32 L120,38 L150,46 L180,54 L220,60"/>
+              <circle class="dot" cx="0"   cy="12" r="2.5"/>
+              <circle class="dot" cx="220" cy="60" r="2.5"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="chip-float c">
+        <div style="font-size:9px;color:var(--muted);letter-spacing:1.5px">COMPLIANCE</div>
+        <div style="font-family:var(--f-display);font-size:18px;color:var(--accent);letter-spacing:2px">87%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- F03 MONTHS CALENDAR -->
+  <div class="feature-row reveal">
+    <div class="f-copy">
+      <div class="f-index"><span class="n">03</span> · MONTHS</div>
+      <h3 class="f-title">Every day, <span class="accent">color-coded.</span></h3>
+      <p class="f-desc">
+        Green = done. Purple = fast. Amber = light. Orange = partial. Red = missed.
+        Tap any cell — past, present, or future — to log or override.
+      </p>
+      <ul class="f-bullets">
+        <li>Workout checklist inside the day modal</li>
+        <li>Calendar recolors instantly on every edit</li>
+        <li>Light-eating day (amber) — v5</li>
+        <li>Toggle any day: fast · light · normal</li>
+      </ul>
+      <div class="f-pills">
+        <span class="f-pill new">NEW · MODAL WORKOUTS</span>
+        <span class="f-pill new">NEW · INSTANT RECOLOR</span>
+        <span class="f-pill">SCHEDULE OVERLAY</span>
+      </div>
+    </div>
+    <div class="f-visual">
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="demo-cal-head">MARCH <span>2026</span></div>
+          <div class="demo-cal">
+            <div class="demo-cal-grid">
+              <div class="dow">S</div><div class="dow">M</div><div class="dow">T</div>
+              <div class="dow">W</div><div class="dow">T</div><div class="dow">F</div><div class="dow">S</div>
+              <div class="cell fast">1</div><div class="cell done">2</div><div class="cell done">3</div>
+              <div class="cell fast">4</div><div class="cell partial">5</div><div class="cell done">6</div>
+              <div class="cell fast">7</div>
+              <div class="cell fast">8</div><div class="cell done">9</div><div class="cell done">10</div>
+              <div class="cell fast">11</div><div class="cell done">12</div><div class="cell missed">13</div>
+              <div class="cell fast">14</div>
+              <div class="cell light">15</div><div class="cell done today">16</div><div class="cell">17</div>
+              <div class="cell">18</div><div class="cell">19</div><div class="cell">20</div><div class="cell">21</div>
+            </div>
+            <div class="demo-cal-legend">
+              <div class="lg"><div class="sw" style="background:var(--green)"></div>DONE</div>
+              <div class="lg"><div class="sw" style="background:var(--fast)"></div>FAST</div>
+              <div class="lg"><div class="sw" style="background:var(--light)"></div>LIGHT</div>
+              <div class="lg"><div class="sw" style="background:var(--accent-2)"></div>PARTIAL</div>
+              <div class="lg"><div class="sw" style="background:var(--danger)"></div>MISSED</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- F04 NUTRITION -->
+  <div class="feature-row reverse reveal">
+    <div class="f-copy">
+      <div class="f-index"><span class="n">04</span> · NUTRITION</div>
+      <h3 class="f-title"><span class="accent">Smart</span> macro engine.</h3>
+      <p class="f-desc">
+        Log food with calories and optional P/C/F. Plan-aware calorie logic flips
+        green/orange/red on CUT, LITE, MAINTENANCE at the right thresholds —
+        and inverts for BULK, where hitting the surplus target is the green state.
+      </p>
+      <ul class="f-bullets">
+        <li>CUT/LITE: ≤ceiling green · up to 1.5× orange · ≥1.5× red</li>
+        <li>BULK: ≥target green · &gt;0.5× orange · ≤0.5× red</li>
+        <li>P/C/F bars with live targets</li>
+        <li>Food library learns from you</li>
+      </ul>
+      <div class="f-pills">
+        <span class="f-pill new">NEW · PLAN-AWARE BANDS</span>
+        <span class="f-pill new">NEW · MACROS IN MODAL</span>
+        <span class="f-pill">AUTO-SUGGEST</span>
+      </div>
+    </div>
+    <div class="f-visual">
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="demo-food">
+            <h5>FOOD <span>LOG</span></h5>
+            <div class="demo-food-signal">PRE-FAST SPLIT</div>
+            <div class="demo-food-entry"><span>Chicken breast + rice</span><span class="c">520</span></div>
+            <div class="demo-food-entry"><span>Greek yogurt (200g)</span><span class="c">130</span></div>
+            <div class="demo-food-entry"><span>3 boiled eggs</span><span class="c">215</span></div>
+            <div class="demo-macros">
+              <div class="demo-macro">
+                <div class="row"><span style="color:#ff9966">PROTEIN</span><span style="color:#ff9966">84g / 130g · 65%</span></div>
+                <div class="track"><div class="fill" style="width:65%;background:#ff9966"></div></div>
+              </div>
+              <div class="demo-macro">
+                <div class="row"><span style="color:var(--accent-2)">CARBS</span><span style="color:var(--accent-2)">68g / 113g · 60%</span></div>
+                <div class="track"><div class="fill" style="width:60%;background:var(--accent-2)"></div></div>
+              </div>
+              <div class="demo-macro">
+                <div class="row"><span style="color:#88ccff">FAT</span><span style="color:#88ccff">22g / 33g · 67%</span></div>
+                <div class="track"><div class="fill" style="width:67%;background:#88ccff"></div></div>
+              </div>
+            </div>
+            <div class="demo-total">
+              <span>135 remaining / 1000</span>
+              <span class="big">865</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- POWER STRIP — compact customer-facing capability row -->
+<section class="power-strip" id="power">
+  <div class="section-head reveal">
+    <div class="section-tag">WHAT YOU GET</div>
+    <h2 class="section-title">Everything you <span class="accent">actually need.</span></h2>
+    <p class="section-desc">No bloat. No upsell. Just the tools that make the protocol stick.</p>
+  </div>
+
+  <div class="pstrip reveal" role="list">
+    <div class="pstrip-item" role="listitem">
+      <div class="pstrip-icon" aria-hidden="true">
+        <svg viewBox="0 0 40 40"><polygon points="20,4 33,11 33,29 20,36 7,29 7,11" fill="none" stroke="currentColor" stroke-width="1.5"/><polygon points="20,12 28,16 28,24 20,28 12,24 12,16" fill="currentColor" opacity="0.25"/><circle cx="20" cy="20" r="2" fill="currentColor"/></svg>
+      </div>
+      <div class="pstrip-t">PROGRESS RADAR</div>
+      <div class="pstrip-d">See your momentum across five lanes at a glance.</div>
+    </div>
+
+    <div class="pstrip-item" role="listitem">
+      <div class="pstrip-icon" aria-hidden="true">
+        <svg viewBox="0 0 40 40"><path d="M8 20 a12 12 0 1 1 6 10.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M8 12 L8 20 L16 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="pstrip-t">NEVER LOSE DATA</div>
+      <div class="pstrip-d">Auto-mirrored locally. If your phone ever forgets, the app doesn't.</div>
+    </div>
+
+    <div class="pstrip-item" role="listitem">
+      <div class="pstrip-icon" aria-hidden="true">
+        <svg viewBox="0 0 40 40"><path d="M6 30 L14 22 L20 26 L34 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M26 10 L34 10 L34 18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="pstrip-t">WEIGHT FORECAST</div>
+      <div class="pstrip-d">A realistic projection that gets smarter the more you log.</div>
+    </div>
+
+    <div class="pstrip-item" role="listitem">
+      <div class="pstrip-icon" aria-hidden="true">
+        <svg viewBox="0 0 40 40"><rect x="6" y="6" width="28" height="28" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="11" y="11" width="5" height="5" fill="currentColor" opacity="0.8"/><rect x="18" y="11" width="5" height="5" fill="currentColor" opacity="0.4"/><rect x="25" y="11" width="5" height="5" fill="currentColor" opacity="0.8"/><rect x="11" y="18" width="5" height="5" fill="currentColor" opacity="0.4"/><rect x="18" y="18" width="5" height="5" fill="currentColor"/><rect x="25" y="18" width="5" height="5" fill="currentColor" opacity="0.4"/></svg>
+      </div>
+      <div class="pstrip-t">SMART CALENDAR</div>
+      <div class="pstrip-d">Every day color-coded. Tap to edit, plan ahead, or catch up.</div>
+    </div>
+
+    <div class="pstrip-item" role="listitem">
+      <div class="pstrip-icon" aria-hidden="true">
+        <svg viewBox="0 0 40 40"><path d="M20 6 L20 26 M13 19 L20 26 L27 19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><rect x="8" y="30" width="24" height="4" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+      </div>
+      <div class="pstrip-t">ONE-TAP BACKUP</div>
+      <div class="pstrip-d">Export a single file. Keep it anywhere. Restore in seconds.</div>
+    </div>
+
+    <div class="pstrip-item" role="listitem">
+      <div class="pstrip-icon" aria-hidden="true">
+        <svg viewBox="0 0 40 40"><path d="M20 4 L20 36 M4 20 L36 20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="20" cy="20" r="14" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="20" cy="20" r="7" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+      </div>
+      <div class="pstrip-t">WORKS ANYWHERE</div>
+      <div class="pstrip-d">Install once. Open it on a plane, in a tunnel, at 30,000 ft.</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PLANS CAROUSEL -->
+<section class="plans-section" id="plans">
+  <div class="section-head reveal">
+    <div class="section-tag">FIVE LANES</div>
+    <h2 class="section-title">Pick your <span class="accent">protocol.</span></h2>
+    <p class="section-desc">
+      Each plan is self-contained — workouts, rules, fasts, macros. Switch anytime; your data carries over.
+    </p>
+  </div>
+
+  <div class="plans-carousel-wrap reveal">
+    <div class="plans-carousel-stage">
+      <div class="plans-carousel" id="plansCarousel">
+    <div class="plan-card lite">
+      <div class="pc-name">LITE</div>
+      <div class="pc-sub">GENTLE · SUSTAINABLE</div>
+      <div class="pc-metric">1200</div>
+      <div class="pc-metric-label">CAL / DAY</div>
+      <div class="pc-row"><span>FAST DAYS</span><span>3 × WEEK</span></div>
+      <div class="pc-row"><span>FOCUS</span><span>CHAIR · YOGA</span></div>
+      <div class="pc-row"><span>AUDIENCE</span><span>ALL AGES</span></div>
+      <div class="pc-intensity"><i class="on"></i><i></i><i></i><i></i><i></i></div>
+    </div>
+
+    <div class="plan-card cut">
+      <div class="pc-name">DEFAULT CUT</div>
+      <div class="pc-sub">FLEXIBLE · DEFICIT</div>
+      <div class="pc-metric">1500</div>
+      <div class="pc-metric-label">CAL / DAY</div>
+      <div class="pc-row"><span>FAST DAYS</span><span>0</span></div>
+      <div class="pc-row"><span>FOCUS</span><span>MODERATE</span></div>
+      <div class="pc-row"><span>MACROS</span><span>SMART</span></div>
+      <div class="pc-intensity"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></div>
+    </div>
+
+    <div class="plan-card agro">
+      <div class="pc-name">AGRO CUT</div>
+      <div class="pc-sub">AGGRESSIVE · CALISTHENICS</div>
+      <div class="pc-metric">1000</div>
+      <div class="pc-metric-label">CAL / DAY</div>
+      <div class="pc-row"><span>FAST DAYS</span><span>3 × WEEK</span></div>
+      <div class="pc-row"><span>FOCUS</span><span>CALISTHENICS</span></div>
+      <div class="pc-row"><span>INTENSITY</span><span>HIGH VOLUME</span></div>
+      <div class="pc-intensity"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></div>
+    </div>
+
+    <div class="plan-card bulk">
+      <div class="pc-name">DEFAULT BULK</div>
+      <div class="pc-sub">CLEAN · SURPLUS</div>
+      <div class="pc-metric">+300</div>
+      <div class="pc-metric-label">ABOVE TDEE</div>
+      <div class="pc-row"><span>LIGHT DAYS</span><span>2 × WEEK</span></div>
+      <div class="pc-row"><span>FOCUS</span><span>MASS</span></div>
+      <div class="pc-row"><span>GUT REST</span><span>SUN / WED</span></div>
+      <div class="pc-intensity"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></div>
+    </div>
+
+    <div class="plan-card maint">
+      <div class="pc-name">MAINTENANCE</div>
+      <div class="pc-sub">SUSTAIN · HABIT</div>
+      <div class="pc-metric">TDEE</div>
+      <div class="pc-metric-label">±200 CAL</div>
+      <div class="pc-row"><span>LIGHT DAYS</span><span>1 × WEEK</span></div>
+      <div class="pc-row"><span>FOCUS</span><span>RHYTHM</span></div>
+      <div class="pc-row"><span>RESTRICTION</span><span>MINIMAL</span></div>
+      <div class="pc-intensity"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></div>
+    </div>
+      </div>
+    </div>
+    <div class="plans-carousel-ctrls">
+      <button class="pcc-btn" id="plansPrev" aria-label="Previous plan">
+        <svg width="18" height="14" viewBox="0 0 18 14" fill="none"><path d="M17 7H2M7 1L1 7l6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="pcc-dots" id="plansDots"></div>
+      <button class="pcc-btn" id="plansNext" aria-label="Next plan">
+        <svg width="18" height="14" viewBox="0 0 18 14" fill="none"><path d="M1 7h15M11 1l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CHANGELOG -->
+<section class="changelog" id="changelog">
+  <div class="section-head reveal">
+    <div class="section-tag">CHANGELOG</div>
+    <h2 class="section-title">The <span class="accent">v6</span> release.</h2>
+    <p class="section-desc">Ships only when it adds real capability.</p>
+  </div>
+
+  <div class="changelog-wrap">
+    <div class="cl-entry reveal">
+      <div class="cl-dot current"></div>
+      <div class="cl-body">
+        <div class="cl-head">
+          <div class="cl-ver">v6.2.2</div>
+          <div class="cl-date">CURRENT · APR 2026</div>
+          <div class="cl-tag">PATCH</div>
+        </div>
+        <h4>Smarter calorie tracking</h4>
+        <ul>
+          <li>Your calorie card now flips color the moment you log a meal</li>
+          <li>Bulk plans flip the logic — hit your target, not a ceiling</li>
+          <li>Past days re-grade themselves automatically when you open the app</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="cl-entry reveal">
+      <div class="cl-dot"></div>
+      <div class="cl-body">
+        <div class="cl-head">
+          <div class="cl-ver">v6.0.0</div>
+          <div class="cl-date">APR 2026</div>
+          <div class="cl-tag">MAJOR</div>
+        </div>
+<h4>Rebuilt from the inside out</h4>
+        <ul>
+          <li>Faster load, cleaner state, nothing you do changes</li>
+          <li>Auto-backup runs quietly before any risky data upgrade</li>
+          <li>Foundation for features coming across the rest of v6</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="cl-entry reveal">
+      <div class="cl-dot"></div>
+      <div class="cl-body">
+        <div class="cl-head">
+          <div class="cl-ver">v5.x</div>
+          <div class="cl-date">APR 2026</div>
+          <div class="cl-tag minor">MINOR</div>
+        </div>
+        <h4>Progress radar + safer data</h4>
+        <ul>
+          <li>New 5-axis radar: consistency, calories, fasting, water, weight</li>
+          <li>Toggle the window — last 7 days, last 30, or all-time</li>
+          <li>Restore guard so an older version can never corrupt newer data</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="cl-entry reveal">
+      <div class="cl-dot"></div>
+      <div class="cl-body">
+        <div class="cl-head">
+          <div class="cl-ver">v4.2</div>
+          <div class="cl-date">MAR 2026</div>
+          <div class="cl-tag">MAJOR</div>
+        </div>
+        <h4>Bulletproof local storage</h4>
+        <ul>
+          <li>Silent auto-recovery if your phone ever clears app data</li>
+          <li>Weekly backup reminder with one-tap export</li>
+          <li>Storage health panel so you can see what's safe</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="cl-entry reveal">
+      <div class="cl-dot"></div>
+      <div class="cl-body">
+        <div class="cl-head">
+          <div class="cl-ver">v4.0</div>
+          <div class="cl-date">MAR 2026</div>
+          <div class="cl-tag">MAJOR</div>
+        </div>
+        <h4>Checklist that fills itself in</h4>
+        <ul>
+          <li>Calorie card updates itself from the food log</li>
+          <li>Workout items tick when you finish the exercises</li>
+          <li>Radar consistency axis now counts workouts too</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="cl-entry reveal">
+      <div class="cl-dot"></div>
+      <div class="cl-body">
+        <div class="cl-head">
+          <div class="cl-ver">v3.9</div>
+          <div class="cl-date">MAR 2026</div>
+          <div class="cl-tag minor">MINOR</div>
+        </div>
+        <h4>Per-exercise + supplement detail</h4>
+        <ul>
+          <li>Every exercise gets its own checkbox</li>
+          <li>Tap a supplement pill to reveal the items inside it</li>
+          <li>Retroactively tick off workouts for any past day</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="cl-entry reveal">
+      <div class="cl-dot"></div>
+      <div class="cl-body">
+        <div class="cl-head">
+          <div class="cl-ver">v1.0</div>
+          <div class="cl-date">EARLY 2025</div>
+          <div class="cl-tag minor">ORIGIN</div>
+        </div>
+        <h4>First release</h4>
+        <ul>
+          <li>Checklist · calendar · weight log</li>
+          <li>Installable PWA. On-device only. Offline by default.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SCIENCE -->
+<section class="science" id="science">
+  <div class="section-head reveal">
+    <div class="section-tag">WHY IT WORKS</div>
+    <h2 class="section-title">Rooted in the <span class="accent">literature</span>.</h2>
+    <p class="section-desc">If we can't cite it, we don't ship it.</p>
+  </div>
+
+  <div class="sci-grid">
+    <div class="sci-card reveal">
+      <div class="sci-metric">1.6g</div>
+      <div class="sci-title">PROTEIN TARGET</div>
+      <p class="sci-text">Minimum 1.6g/kg bodyweight. Plateaus at 2.2g. Undershoot is catastrophic during a cut.</p>
+      <div class="sci-cite">Morton et al. 2018 · BJSM</div>
+    </div>
+    <div class="sci-card reveal">
+      <div class="sci-metric">TDEE</div>
+      <div class="sci-title">MIFFLIN-ST JEOR</div>
+      <p class="sci-text">BMR = 10×kg + 6.25×cm − 5×age ± 5/161. Activity factor 1.2–1.9. Auto-applied.</p>
+      <div class="sci-cite">Mifflin et al. 1990 · AJCN</div>
+    </div>
+    <div class="sci-card reveal">
+      <div class="sci-metric">500</div>
+      <div class="sci-title">SAFE DEFICIT CEILING</div>
+      <p class="sci-text">500 kcal/day ≈ 0.5 kg/week. Aggressive caps at 1000; anything steeper erodes lean mass.</p>
+      <div class="sci-cite">ACSM Position Stand</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FAQ -->
+<section class="faq" id="faq">
+  <div class="section-head reveal">
+    <div class="section-tag">QUESTIONS</div>
+    <h2 class="section-title">Answered.</h2>
+  </div>
+
+  <div class="faq-list reveal">
+    <div class="faq-item">
+      <button class="faq-q">Where is my data stored? <span class="chev">+</span></button>
+      <div class="faq-a"><div class="faq-a-inner">
+        Entirely on your device. Nothing leaves your phone, ever. Install it like a native app and it works fully offline.
+      </div></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q">Is it really free? <span class="chev">+</span></button>
+      <div class="faq-a"><div class="faq-a-inner">
+        Yes. No subscription, no freemium tier, no ads, no credit card. Free to install, free to use, forever.
+      </div></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q">Do I need any equipment? <span class="chev">+</span></button>
+      <div class="faq-a"><div class="faq-a-inner">
+        No. Bodyweight is the default for every plan. Every exercise has variations that scale up the moment you have a band, dumbbell, or bar — but nothing is required, ever.
+      </div></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q">Does it work on iPhone? <span class="chev">+</span></button>
+      <div class="faq-a"><div class="faq-a-inner">
+        Yes. Safari → Share → Add to Home Screen. Launches fullscreen like native.
+      </div></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q">Can I add my own plan? <span class="chev">+</span></button>
+      <div class="faq-a"><div class="faq-a-inner">
+        Yes. The five built-in plans cover most needs — more are on the roadmap. Custom plan support is coming.
+      </div></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q">What if I lose my phone? <span class="chev">+</span></button>
+      <div class="faq-a"><div class="faq-a-inner">
+        TRACK tab → BACKUP exports all your data as a JSON file. Save it wherever. RESTORE reads it back.
+      </div></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q">Why no cloud sync? <span class="chev">+</span></button>
+      <div class="faq-a"><div class="faq-a-inner">
+        Because a server means a subscription, a signup, and a breach to worry about. JSON backup solves the real need without any of that.
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BAND -->
+<section class="cta-band">
+  <h2>Start the <span class="accent">protocol.</span></h2>
+  <p>Your device. Your data. Free forever.</p>
+  <div class="hero-btns">
+    <a href="app.html" class="btn-primary">
+      LAUNCH APP
+      <svg class="arrow" width="18" height="14" viewBox="0 0 18 14" fill="none" aria-hidden="true">
+        <path d="M1 7h15M11 1l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </a>
+    <a href="#" class="btn-ghost" onclick="openInstall(); return false;">INSTALL GUIDE</a>
+  </div>
+  <div class="note">v6.2.2 · Installable PWA · Offline ready</div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="logo">
+        <img src="assets/PH_ARROWS_LOGO.png" alt="">
+        <div class="name">PROTOCOL <span>HEALTH</span></div>
+      </div>
+      <p>Installable PWA. On your device. No cloud.</p>
+      <div class="footer-stats">
+        <div><span class="v">v6.2.2</span><span class="l">CURRENT</span></div>
+        <div><span class="v">60+</span><span class="l">SHIPPED</span></div>
+        <div><span class="v">0</span><span class="l">APIS</span></div>
+      </div>
+    </div>
+
+    <div class="footer-col">
+      <h4>APP</h4>
+      <a href="app.html">LAUNCH</a>
+      <a href="#features">FEATURES</a>
+      <a href="#power">POWER</a>
+      <a href="#plans">PLANS</a>
+      <a href="#changelog">CHANGELOG</a>
+    </div>
+
+    <div class="footer-col">
+      <h4>LEARN</h4>
+      <a href="#anywhere">ANYWHERE</a>
+      <a href="#science">SCIENCE</a>
+      <a href="#faq">FAQ</a>
+    </div>
+
+    <div class="footer-col">
+      <h4>INSTALL</h4>
+      <a href="#" onclick="openInstall(); return false;">INSTALL GUIDE</a>
+      <a href="app.html">OPEN IN BROWSER</a>
+      <a href="#faq">BACKUP &amp; RESTORE</a>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <div>© 2026 PROTOCOL HEALTH · v6.2.2 · ALL RIGHTS RESERVED</div>
+    <div class="fb-tags">
+      <span>NO ACCOUNTS</span>
+      <span>NO CLOUD</span>
+      <span>NO COMPROMISES</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ═══ INSTALL MODAL ═══ -->
+<div class="modal-overlay" id="installModal" onclick="if(event.target===this)closeInstall()">
+  <div class="modal lg-surface" role="dialog" aria-labelledby="installTitle">
+    <div class="modal-head">
+      <div>
+        <h2 id="installTitle">INSTALL <span class="a">GUIDE</span></h2>
+        <p>ADD PROTOCOL HEALTH TO YOUR HOME SCREEN · RUNS FULLSCREEN · WORKS OFFLINE</p>
+      </div>
+      <button class="modal-close" onclick="closeInstall()" aria-label="Close">✕</button>
+    </div>
+
+    <div class="install-tabs" role="tablist">
+      <div class="install-tab active" data-tab="android" onclick="switchTab('android')">ANDROID</div>
+      <div class="install-tab" data-tab="ios" onclick="switchTab('ios')">iOS</div>
+      <div class="install-tab" data-tab="desktop" onclick="switchTab('desktop')">DESKTOP</div>
+    </div>
+
+    <!-- ── ANDROID PANEL ──────────────────────────────────────── -->
+    <div class="install-panel active" data-panel="android">
+      <div class="ig-layout">
+        <div class="ig-steps-col">
+          <div class="install-step" data-s="1"><div class="num">1</div><div class="t">Open <b>app.html</b> in <b>Chrome</b> on Android.</div></div>
+          <div class="install-step" data-s="2"><div class="num">2</div><div class="t">Tap the <b>⋮ menu</b> in the top-right.</div></div>
+          <div class="install-step" data-s="3"><div class="num">3</div><div class="t">Select <b>Install app</b> (or <b>Add to Home screen</b>).</div></div>
+          <div class="install-step" data-s="4"><div class="num">4</div><div class="t">Confirm. The icon lands on your home screen.</div></div>
+          <div class="install-step" data-s="5"><div class="num">5</div><div class="t">Open it from there — launches <b>fullscreen</b>, no browser chrome.</div></div>
+        </div>
+        <div class="ig-demo-col">
+          <div class="ig-demo-label"><span class="ig-demo-dot"></span> LIVE PREVIEW</div>
+          <div class="ig-phone ig-phone-android" data-step="1">
+            <div class="ig-phone-notch"></div>
+            <div class="ig-phone-screen">
+              <!-- Chrome browser chrome -->
+              <div class="ig-chrome-bar">
+                <div class="ig-chrome-back">‹</div>
+                <div class="ig-chrome-url">app.html</div>
+                <div class="ig-chrome-dots" title="menu">⋮<span class="ig-tap-ring"></span></div>
+              </div>
+              <!-- Fake app landing inside the browser -->
+              <div class="ig-page">
+                <div class="ig-page-logo">PROTOCOL <span>HEALTH</span></div>
+                <div class="ig-page-sub">TAP ⋮ TO INSTALL</div>
+                <div class="ig-page-card">
+                  <div class="ig-page-badge">AGRO CUT</div>
+                  <div class="ig-page-line"></div>
+                  <div class="ig-page-line short"></div>
+                </div>
+              </div>
+              <!-- Chrome dropdown menu (step 2→3) -->
+              <div class="ig-chrome-menu">
+                <div class="ig-menu-item">New tab</div>
+                <div class="ig-menu-item">Bookmarks</div>
+                <div class="ig-menu-item">History</div>
+                <div class="ig-menu-item ig-menu-hi">
+                  <span class="ig-menu-ico">⊕</span>
+                  Install app
+                  <span class="ig-tap-ring ig-tap-ring-s"></span>
+                </div>
+                <div class="ig-menu-item">Settings</div>
+              </div>
+              <!-- Install confirm dialog (step 4) -->
+              <div class="ig-dialog">
+                <div class="ig-dialog-head">
+                  <div class="ig-dialog-ico"><img src="PH_LOGO_192.png" alt=""></div>
+                  <div>
+                    <div class="ig-dialog-title">Install app?</div>
+                    <div class="ig-dialog-sub">Protocol Health</div>
+                  </div>
+                </div>
+                <div class="ig-dialog-btns">
+                  <div class="ig-dialog-btn ghost">Cancel</div>
+                  <div class="ig-dialog-btn primary">Install<span class="ig-tap-ring ig-tap-ring-s"></span></div>
+                </div>
+              </div>
+              <!-- Home screen (step 5) -->
+              <div class="ig-home">
+                <div class="ig-home-time">9:41</div>
+                <div class="ig-home-grid">
+                  <div class="ig-home-app"><div class="ig-home-ico ph"><img src="PH_LOGO_192.png" alt=""></div><div class="ig-home-lbl">Protocol<span class="ig-tap-ring ig-tap-ring-s"></span></div></div>
+                  <div class="ig-home-app"><div class="ig-home-ico c1"></div><div class="ig-home-lbl">Mail</div></div>
+                  <div class="ig-home-app"><div class="ig-home-ico c2"></div><div class="ig-home-lbl">Maps</div></div>
+                  <div class="ig-home-app"><div class="ig-home-ico c3"></div><div class="ig-home-lbl">Notes</div></div>
+                  <div class="ig-home-app"><div class="ig-home-ico c4"></div><div class="ig-home-lbl">Music</div></div>
+                  <div class="ig-home-app"><div class="ig-home-ico c5"></div><div class="ig-home-lbl">Photos</div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="ig-timeline"><div class="ig-timeline-fill"></div></div>
+          <div class="ig-caption">Step <span class="ig-cap-n">1</span> of 5 · <span class="ig-cap-t">Open in Chrome</span></div>
+        </div>
+      </div>
+      <div class="install-note"><b>Offline ready:</b> after the first launch, the service worker caches every file. Airplane mode works.</div>
+    </div>
+
+    <!-- ── iOS PANEL ──────────────────────────────────────────── -->
+    <div class="install-panel" data-panel="ios">
+      <div class="ig-layout">
+        <div class="ig-steps-col">
+          <div class="install-step" data-s="1"><div class="num">1</div><div class="t">Open <b>app.html</b> in <b>Safari</b> (not Chrome — iOS requires Safari).</div></div>
+          <div class="install-step" data-s="2"><div class="num">2</div><div class="t">Tap the <b>Share</b> button (square with arrow up).</div></div>
+          <div class="install-step" data-s="3"><div class="num">3</div><div class="t">Scroll down and tap <b>Add to Home Screen</b>.</div></div>
+          <div class="install-step" data-s="4"><div class="num">4</div><div class="t">Name it, tap <b>Add</b>. Icon appears on home screen.</div></div>
+          <div class="install-step" data-s="5"><div class="num">5</div><div class="t">Tap the icon — opens fullscreen, no Safari UI.</div></div>
+        </div>
+        <div class="ig-demo-col">
+          <div class="ig-demo-label"><span class="ig-demo-dot"></span> LIVE PREVIEW</div>
+          <div class="ig-phone ig-phone-ios" data-step="1">
+            <div class="ig-phone-notch"></div>
+            <div class="ig-phone-screen">
+              <!-- Fake app landing inside Safari -->
+              <div class="ig-page">
+                <div class="ig-page-logo">PROTOCOL <span>HEALTH</span></div>
+                <div class="ig-page-sub">TAP SHARE TO INSTALL</div>
+                <div class="ig-page-card">
+                  <div class="ig-page-badge">AGRO CUT</div>
+                  <div class="ig-page-line"></div>
+                  <div class="ig-page-line short"></div>
+                </div>
+              </div>
+              <!-- Safari bottom tab bar -->
+              <div class="ig-safari-bar">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 18l-6-6 6-6"/></svg>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" opacity=".4"><path d="M9 6l6 6-6 6"/></svg>
+                <div class="ig-safari-share">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12M8 7l4-4 4 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg>
+                  <span class="ig-tap-ring"></span>
+                </div>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+              </div>
+              <!-- Share sheet (step 2→3) -->
+              <div class="ig-share-sheet">
+                <div class="ig-share-handle"></div>
+                <div class="ig-share-header">
+                  <div class="ig-share-url">
+                    <div class="ig-share-url-name">Protocol Health</div>
+                    <div class="ig-share-url-path">app.html</div>
+                  </div>
+                </div>
+                <div class="ig-share-row"><span class="ig-share-ico">📋</span> Copy</div>
+                <div class="ig-share-row"><span class="ig-share-ico">🔖</span> Add Bookmark</div>
+                <div class="ig-share-row ig-share-hi">
+                  <span class="ig-share-ico">+</span> Add to Home Screen
+                  <span class="ig-tap-ring ig-tap-ring-s"></span>
+                </div>
+                <div class="ig-share-row"><span class="ig-share-ico">🖨</span> Print</div>
+              </div>
+              <!-- Name / Add dialog (step 4) -->
+              <div class="ig-dialog ig-dialog-ios">
+                <div class="ig-dialog-head">
+                  <div class="ig-dialog-cancel">Cancel</div>
+                  <div class="ig-dialog-title ctr">Add to Home Screen</div>
+                  <div class="ig-dialog-add">Add<span class="ig-tap-ring ig-tap-ring-s"></span></div>
+                </div>
+                <div class="ig-ios-name">
+                  <div class="ig-ios-name-ico"><img src="PH_LOGO_192.png" alt=""></div>
+                  <div class="ig-ios-name-input">Protocol Health</div>
+                </div>
+                <div class="ig-ios-url-readout">app.html</div>
+              </div>
+              <!-- Home screen (step 5) -->
+              <div class="ig-home">
+                <div class="ig-home-time">9:41</div>
+                <div class="ig-home-grid">
+                  <div class="ig-home-app"><div class="ig-home-ico ph"><img src="PH_LOGO_192.png" alt=""></div><div class="ig-home-lbl">Protocol<span class="ig-tap-ring ig-tap-ring-s"></span></div></div>
+                  <div class="ig-home-app"><div class="ig-home-ico c1"></div><div class="ig-home-lbl">Mail</div></div>
+                  <div class="ig-home-app"><div class="ig-home-ico c2"></div><div class="ig-home-lbl">Maps</div></div>
+                  <div class="ig-home-app"><div class="ig-home-ico c3"></div><div class="ig-home-lbl">Notes</div></div>
+                  <div class="ig-home-app"><div class="ig-home-ico c4"></div><div class="ig-home-lbl">Music</div></div>
+                  <div class="ig-home-app"><div class="ig-home-ico c5"></div><div class="ig-home-lbl">Photos</div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="ig-timeline"><div class="ig-timeline-fill"></div></div>
+          <div class="ig-caption">Step <span class="ig-cap-n">1</span> of 5 · <span class="ig-cap-t">Open in Safari</span></div>
+        </div>
+      </div>
+      <div class="install-note"><b>iOS note:</b> if you haven't opened the app in ~7 weeks, iOS may clear local storage. Use <b>TRACK → BACKUP</b> every so often to save a backup file.</div>
+    </div>
+
+    <!-- ── DESKTOP PANEL ──────────────────────────────────────── -->
+    <div class="install-panel" data-panel="desktop">
+      <div class="ig-layout">
+        <div class="ig-steps-col">
+          <div class="install-step" data-s="1"><div class="num">1</div><div class="t">Open <b>app.html</b> in <b>Chrome</b>, <b>Edge</b>, or <b>Brave</b>.</div></div>
+          <div class="install-step" data-s="2"><div class="num">2</div><div class="t">Look for the <b>install icon</b> (⊕) on the right of the address bar.</div></div>
+          <div class="install-step" data-s="3"><div class="num">3</div><div class="t">Click it → <b>Install</b>. Or use <kbd>⋮</kbd> → <b>Install Protocol Health</b>.</div></div>
+          <div class="install-step" data-s="4"><div class="num">4</div><div class="t">Launches as a standalone window. Pins to dock / taskbar.</div></div>
+        </div>
+        <div class="ig-demo-col">
+          <div class="ig-demo-label"><span class="ig-demo-dot"></span> LIVE PREVIEW</div>
+          <div class="ig-browser" data-step="1">
+            <div class="ig-browser-chrome">
+              <span class="ig-tl r"></span><span class="ig-tl y"></span><span class="ig-tl g"></span>
+              <div class="ig-browser-url">
+                <span class="ig-lock">🔒</span>
+                app.html
+                <span class="ig-install-icon">⊕<span class="ig-tap-ring ig-tap-ring-s"></span></span>
+              </div>
+              <div class="ig-browser-dots">⋮</div>
+            </div>
+            <div class="ig-browser-body">
+              <div class="ig-page">
+                <div class="ig-page-logo lg">PROTOCOL <span>HEALTH</span></div>
+                <div class="ig-page-sub">CLICK ⊕ TO INSTALL</div>
+                <div class="ig-page-card wide">
+                  <div class="ig-page-badge">AGRO CUT · 1000 CAL</div>
+                  <div class="ig-page-line"></div>
+                  <div class="ig-page-line"></div>
+                  <div class="ig-page-line short"></div>
+                </div>
+              </div>
+              <!-- Install popover (step 3) -->
+              <div class="ig-desktop-pop">
+                <div class="ig-desktop-pop-head">
+                  <div class="ig-desktop-pop-ico"><img src="PH_LOGO_192.png" alt=""></div>
+                  <div>
+                    <div class="ig-dialog-title">Install Protocol Health?</div>
+                    <div class="ig-dialog-sub">hirakhanji.github.io</div>
+                  </div>
+                </div>
+                <div class="ig-dialog-btns">
+                  <div class="ig-dialog-btn ghost">Cancel</div>
+                  <div class="ig-dialog-btn primary">Install<span class="ig-tap-ring ig-tap-ring-s"></span></div>
+                </div>
+              </div>
+              <!-- Standalone app window (step 4) -->
+              <div class="ig-standalone">
+                <div class="ig-standalone-chrome">
+                  <span class="ig-tl r"></span><span class="ig-tl y"></span><span class="ig-tl g"></span>
+                  <div class="ig-standalone-title">
+                    <img src="PH_LOGO_192.png" alt="">
+                    Protocol Health
+                  </div>
+                </div>
+                <div class="ig-standalone-body">
+                  <div class="ig-page-logo">PROTOCOL <span>HEALTH</span></div>
+                  <div class="ig-page-card wide">
+                    <div class="ig-page-badge">INSTALLED · FULLSCREEN</div>
+                    <div class="ig-page-line"></div>
+                    <div class="ig-page-line short"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="ig-timeline"><div class="ig-timeline-fill"></div></div>
+          <div class="ig-caption">Step <span class="ig-cap-n">1</span> of 4 · <span class="ig-cap-t">Open in Chrome</span></div>
+        </div>
+      </div>
+      <div class="install-note"><b>Firefox:</b> PWA install isn't supported by default — bookmark <code>app.html</code> instead. Everything else works identically.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="assets/landing.js"></script>
+<script src="assets/landing-v5.js?v=6.2.5"></script>
+<script src="assets/install-guide.js?v=6.2.5"></script>
+
+</body>
+</html>
