@@ -20,7 +20,7 @@
 // VERSION: bump CACHE_NAME (e.g. 'protocol-health-v8') when you deploy a major update.
 // This forces old caches to be deleted and new files to be fetched fresh.
 
-const CACHE_NAME = 'protocol-health-v23';
+const CACHE_NAME = 'protocol-health-v24';
 
 // ─── INSTALL ─────────────────────────────────────────────────────────────────
 // Runs once when the service worker is first registered (or when CACHE_NAME changes).
@@ -34,7 +34,8 @@ self.addEventListener('install', event => {
     caches.open(CACHE_NAME).then(cache => {
 
       // Critical files — these must be cached for the app to work offline.
-      // Includes the migrations/, plans/, and modules/ ES modules so everything runs offline.
+      // Includes the migrations/, plans/, modules/, components/ ES modules (for app.html)
+      // AND the assets/ bundle (for index.html landing page + install guide modal).
       return cache.addAll([
         './app.html',
         './index.html',
@@ -55,7 +56,16 @@ self.addEventListener('install', event => {
         './modules/schedule-html.js',
         './components/workout-card.js',
         './components/rule-card.js',
-        './components/checklist.js'
+        './components/checklist.js',
+        './assets/landing.css',
+        './assets/landing-sections.css',
+        './assets/landing-demos.css',
+        './assets/landing-v5.css',
+        './assets/install-guide.css',
+        './assets/landing.js',
+        './assets/landing-v5.js',
+        './assets/install-guide.js',
+        './assets/land-110m.json'
       ])
         .then(() => {
           // Best-effort files — icons and Google Fonts

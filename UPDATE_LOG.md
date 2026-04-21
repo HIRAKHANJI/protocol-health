@@ -4,6 +4,23 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 6.2.3 — 2026-04-21
+
+**Scope:** Patch (landing page redesign + animated install guide; app unchanged)
+**Banner:** none (patch — only new visitors see the landing; installed PWA users skip via the standalone redirect)
+
+- **New landing page (`index.html`) shipped** with a full visual redesign: hero, anywhere/globe section, features, power, plans, changelog, science, FAQ, and a new **animated install guide modal** with three tabs (Android/iOS/Desktop). Each tab auto-advances through its platform-specific steps with a live device mockup, tap-ring pulses, timeline progress, and synchronized step list.
+- **New `assets/` directory** with 9 files: 5 CSS (`landing.css`, `landing-sections.css`, `landing-demos.css`, `landing-v5.css`, `install-guide.css`), 3 JS (`landing.js`, `landing-v5.js`, `install-guide.js`), 1 JSON (`land-110m.json` — world map topology for the "ANYWHERE" section's interactive globe).
+- **PWA standalone redirect preserved** at the very top of `<head>`. Users who have already installed the PWA never see the landing page — their app icon opens `index.html` → inline script fires before paint → `window.location.replace('app.html')`.
+- **Logos use existing repo-root assets.** Handoff bundle included `assets/PH_ARROWS_LOGO.png` (duplicate of the existing one at repo root); skipped to avoid duplication. All image refs in the new `index.html` were rewritten to point at the repo-root `PH_ARROWS_LOGO.png` and `PH_LOGO_192.png`. `hero3d.js` in the handoff was also unused (never referenced by `index.html`); skipped.
+- **Cache-bust query strings aligned** to `?v=6.2.3` across all 5 CSS and 3 JS asset references for consistent invalidation on returning visitors.
+- **Version surface consistency:** title, nav badge, hero badge, changelog entry, footer, all note `v6.2.3`. Historical changelog entries for prior versions left untouched.
+- **`sw.js`:** bumped `CACHE_NAME` to `v24` and added the 9 new `assets/*` files to the critical cache list so the landing page + install guide work offline for returning visitors.
+- **`app.html`:** bumped `APP_VERSION` to `6.2.3`. No code behavior changed.
+- **Cleanup:** the handoff `Temp/` directory was removed from the repo after the migration; only the production assets remain.
+
+---
+
 ## Version 6.2.2 — 2026-04-21
 
 **Scope:** Patch (cleanup pass — dead code, docs, repo polish; no behavior change)
