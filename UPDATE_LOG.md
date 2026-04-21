@@ -4,6 +4,19 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 6.2.4 — 2026-04-21
+
+**Scope:** Patch (landing page content corrections; app unchanged)
+**Banner:** none (patch)
+
+- **Stats corrected** on `index.html`. "60+ UPDATES" and "60+ SHIPPED" were stale (actual version count is 85+). Bumped both stat displays to `85+`. Visitors now see an accurate cadence indicator.
+- **Changelog entry for v6.2.3 rewritten** to accurately describe the release. Previously the "current" entry had bullets for the plan-aware calorie work (actually v6.2.0-v6.2.2). Now v6.2.4 entry describes the landing redesign + animated install guide + these content corrections, and a new v6.2.2 entry was added below it to cover the calorie/radar work chronologically.
+- **Plan cards qualifier added.** The section description now explicitly notes "Calorie numbers below are typical presets — every plan is user-configurable in Settings." Clarifies that the displayed numbers (LITE 1200, CUT 1500, AGRO 1000, BULK +300, MAINTENANCE TDEE ±200) are editorial typicals rather than hard plan defaults.
+- **Version surfaces synced** to `v6.2.4` across title, nav badge, hero badge, install-guide header, stat card, footer, cache-bust query strings (`?v=6.2.4`).
+- **`sw.js`:** bumped `CACHE_NAME` to `v25` to force visitors to fetch the updated landing on their next visit.
+
+---
+
 ## Version 6.2.3 — 2026-04-21
 
 **Scope:** Patch (landing page redesign + animated install guide; app unchanged)
