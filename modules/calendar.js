@@ -64,21 +64,30 @@ export function renderCalendar() {
       // Current day is ALWAYS in-progress — never classify as missed or partial.
       // Only show done (green) if all items are checked, to give positive feedback.
       // Otherwise show no compliance color — the day is still ongoing.
+      // Phase C: a broken fast on today shows orange immediately.
+      const _todayBroken = isFast && (typeof isFastBroken === 'function') && isFastBroken(dateStr);
       if(log) {
         const vc = getValidCheckCompletion(dateStr);
-        if(isFast)  { cls+=' cal-fast'; fasts++; }
+        if(isFast && _todayBroken) { cls+=' cal-partial'; partial++; }
+        else if(isFast)  { cls+=' cal-fast'; fasts++; }
         else if(isLight){ cls+=' cal-light'; lights++; }
         else if(vc.done > 0 && vc.done === vc.total && vc.total > 0){ cls+=' cal-done'; done++; }
         // Partial or zero checks on today: no color — day is in progress
       } else {
         // No log at all yet today — no color
-        if(isFast) { cls+=' cal-fast'; fasts++; }
+        if(isFast && _todayBroken) { cls+=' cal-partial'; partial++; }
+        else if(isFast) { cls+=' cal-fast'; fasts++; }
         else if(isLight) { cls+=' cal-light'; lights++; }
       }
     }
     else {
       // Past days — judge retroactively
-      if(isFast){
+      // Phase C: a fast that was explicitly broken (food logged during active
+      // window) renders orange (cal-partial) regardless of checklist state.
+      const _pastBroken = isFast && (typeof isFastBroken === 'function') && isFastBroken(dateStr);
+      if(isFast && _pastBroken){
+        cls+=' cal-partial'; partial++;
+      } else if(isFast){
         if(log){
           const vc = getValidCheckCompletion(dateStr);
           if(vc.done===vc.total&&vc.total>0){cls+=' cal-fast'; fasts++;}
@@ -153,6 +162,12 @@ export function openDayModal(dateStr, dt) {
 
   if(isFast) html+=`<div class="fast-protocol-box"><div class="fast-protocol-title">⚡ FAST PROTOCOL</div>
     <div class="fast-protocol-body">Wake: 500ml water + salt · Mid-morning: electrolyte tablet · Allowed: water/black coffee/green tea · Pre-training: electrolyte 20 min before · Sleep: 400mg magnesium<br><strong style="color:#cc4444">Stop if:</strong> palpitations · chest tightness · vision goes dark</div></div>`;
+
+  // Phase C: fast-window editor — shows actual start/end times if logged,
+  // or "legacy 24h fast" fallback. Edit button opens the time-picker modal.
+  if(isFast && !isFuture && typeof renderDayModalFastEditor === 'function') {
+    html += renderDayModalFastEditor(dateStr);
+  }
 
   if(isLight) html+=`<div class="light-protocol-box"><div class="light-protocol-title">🍽 LIGHT EATING PROTOCOL</div>
     <div class="light-protocol-body">Low-cal, easy digestion day. Protein-focused · small portions · no heavy carbs or junk · hydrate well · give the gut a rest<br><strong style="color:var(--light)">Goal:</strong> recovery and digestive reset while maintaining nutrition</div></div>`;

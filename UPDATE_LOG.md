@@ -4,6 +4,29 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 6.4.0 — 2026-04-26
+
+**Scope:** Minor (calibration project — Phase C; fast-window timestamps + broken-fast UX)
+**Banner:** shown — "Fast days now have real start/stop timestamps. Tap START FAST when you begin, END FAST when you finish. Edit times retroactively. Logging food during an active fast asks if it breaks the fast. Old fast days remain valid (treated as 24-hour fasts)."
+
+- **New file `components/fast-window.js`** (~290 lines) — all fast-window logic:
+  - **Read helpers:** `getFastWindows`, `getActiveFastWindow`, `getMostRecentWindow`, `isFastBroken`, `getFastDurationHours`
+  - **Write helpers:** `startFast`, `endFast`, `markFastBroken`, `editFastWindow`, `deleteFastWindow` — each fires `FAST_WINDOW_CHANGED` (registered in Phase A)
+  - **Render helpers:** `renderTodayFastUI` (TODAY banner state machine — Ready / Active / Broken / Done), `renderDayModalFastEditor` (calendar day modal block), `openFastEditModal` / `saveFastEditFromModal` / `deleteFastWindowFromModal` / `closeFastEditModal`
+  - **Live timer:** `startFastTickInterval` — 30 s setInterval refreshes `#fwTimerVal` text; cheap no-op when not on TODAY tab
+- **`SK.fastWindows`** (added in Phase A) is now populated by these helpers. Old `SK.fastDays` remains untouched and is interpreted as a 24-hour fast wherever no window exists. **Backward compatible.**
+- **`addFoodEntry`** in `app.html` now checks for an active unbroken fast window after logging food; shows a confirm dialog "Break this fast? — BREAK FAST / Cancel". Cancel keeps the fast intact (water, electrolytes, salt, black coffee, green tea allowed mid-fast).
+- **Fast banner** on TODAY tab gains a controls strip: live timer, Start/End buttons, Edit Times link.
+- **Fast Edit Modal** added (popup-overlay style, matches existing dialogs). Two date+time pickers, "Mark broken" checkbox, Save/Cancel/Delete actions. Cross-midnight overnight fasts handled — start ISO can be on the previous calendar date.
+- **Calendar (`modules/calendar.js`)** — `renderCalendar` now colors broken-fast days **orange** (cal-partial) instead of purple (cal-fast), for both today and past days. Uncomplicated fast days remain purple. `openDayModal` now shows the fast-window editor block on past fast days; tap Edit Times to backfill or correct historical fast windows.
+- **Module loader** at `app.html:1325` registers all fast-window exports on `window.*` for inline-script + onclick-handler access (same pattern as workout-card / rule-card / checklist).
+- **CSS** — new `.fast-banner-controls`, `.fw-state`, `.fw-timer`, `.fw-meta`, `.fw-broken-pill`, `.fw-btn`, `.fw-btn-start`, `.fw-btn-end`, `.fw-btn-edit`, `.fw-btn-row`, `.fast-window-editor`, `.fw-editor-title` classes added inline in `app.html`.
+- **No data migration** — fastWindows[date] is empty by default; readers fall back to existing fastDays. The Phase A migration v1→v2 already registered the schema version bump.
+- **Phase plan:** `docs/CALIBRATION_PHASE_C_PLAN.md`.
+- **No `sw.js` change** — CACHE_NAME bumps once at merge to main per CLAUDE.md feature-branch convention. **`components/fast-window.js` will need to be added to the sw.js cache list at merge time.**
+
+---
+
 ## Version 6.3.0 — 2026-04-26
 
 **Scope:** Minor (calibration project — Phase B; new auto-recompute behavior on weight log)
