@@ -4,6 +4,52 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 7.0.0 — 2026-04-26
+
+**Scope:** Major (calibration project — Phase D; closes the TDEE feedback loop)
+**Banner:** shown — "Adaptive TDEE calibration is now live. The app compares your real intake + weight loss against the formula prediction every week and adjusts your TDEE if reality disagrees by more than 7%. New REALITY CHECK block on the TRACK tab shows predicted vs actual loss live. Manual override toggle in Settings if you want to freeze TDEE."
+
+- **New file `modules/calibration.js`** (~210 lines) — closes the TDEE feedback loop:
+  - **`computeObservedTDEE(days=14)`** — pure CICO rearrangement: `observedTDEE = avgIntake + (kgLoss × 7700 ÷ spanDays)`. Excludes unlogged eating days from the intake average. Treats fast days as 0 intake unless broken (then uses food log). Returns full status: `{ tdee, daysLogged, daysAvailable, kgLoss, avgIntake, spanDays, valid, reason }`.
+  - **`getCalibrationStatus()`** — composes formula TDEE (Mifflin × activity), observed TDEE, and a 70/30 blend. Returns state: `GATHERING` (< 14 days weight or < 7 days food log) or `CALIBRATED`.
+  - **`weeklyCalibration()`** — runs at app load. Cadence-gated to once every 7 days. Skipped if `settings.tdeeManualOverride === true` or if state is `GATHERING`. Otherwise blends 70% observed + 30% formula → if change > 7%, writes `settings.tdee`, dispatches `TDEE_CHANGED` (registered in Phase A), and shows a `showAlert` explanation.
+  - **`renderRealityCheck()`** — populates the new `#realityCheckBox` block on the TRACK tab. Shows predicted loss, actual loss, gap %, formula TDEE, observed TDEE, currently-used TDEE, average intake, and days logged. Hidden if `daysAvailable < 7`. Color-codes the gap (orange = slower than predicted, green = faster).
+- **New TRACK tab block** — `<div id="realityCheckBox">` inserted between radar and weight log. Always-visible (per the simplified plan), no banner-only treatment. New `.reality-check`, `.rc-row`, `.rc-label`, `.rc-val`, `.rc-state-pill`, `.rc-title` CSS.
+- **Settings panel** — new "Freeze TDEE — disable weekly auto-calibration" checkbox under the TDEE field. Wired to `settings.tdeeManualOverride`. `openSettings()` hydrates the checkbox from settings on open.
+- **`recomputeAndApplyTDEE` (Phase B)** now also syncs `settings.currentKg` to the latest weight log, fixing the minor UX inconsistency identified in the Phase A/B audit (settings panel display was lagging behind reality after a weight log).
+- **`runInit`** runs `weeklyCalibration()` once after `idbAutoRestore` + migrations + plan UI setup. Wrapped in try/catch to avoid blocking init on calibration errors.
+- **`switchTab('track')`** now also calls `renderRealityCheck()`.
+- **Settings defaults** (in `getSettings`) gain four new fields: `tdeeManualOverride: false`, `lastCalibrationAt: null`, `lastCalibrationFormula: null`, `lastCalibrationObserved: null`. All default-merged via the existing `Object.assign({}, defaults, saved)` pattern — backward compatible with all existing user data.
+- **No new SK key, no new migration.** All calibration state lives in `settings`. Phase A's v1→v2 schema bump remains the only schema change in this project.
+- **APP_VERSION** 6.4.0 → 7.0.0 (major — closes a multi-phase feature category, rework of how TDEE is computed and applied).
+- **Phase plan:** `docs/CALIBRATION_PHASE_D_PLAN.md`.
+- **At merge to main, `sw.js` cache list must include the two new module files** (`components/fast-window.js` and `modules/calibration.js`) and `CACHE_NAME` must bump (`v25` → `v26`).
+
+---
+
+## Version 6.4.0 — 2026-04-26
+
+**Scope:** Minor (calibration project — Phase C; fast-window timestamps + broken-fast UX)
+**Banner:** shown — "Fast days now have real start/stop timestamps. Tap START FAST when you begin, END FAST when you finish. Edit times retroactively. Logging food during an active fast asks if it breaks the fast. Old fast days remain valid (treated as 24-hour fasts)."
+
+- **New file `components/fast-window.js`** (~290 lines) — all fast-window logic:
+  - **Read helpers:** `getFastWindows`, `getActiveFastWindow`, `getMostRecentWindow`, `isFastBroken`, `getFastDurationHours`
+  - **Write helpers:** `startFast`, `endFast`, `markFastBroken`, `editFastWindow`, `deleteFastWindow` — each fires `FAST_WINDOW_CHANGED` (registered in Phase A)
+  - **Render helpers:** `renderTodayFastUI` (TODAY banner state machine — Ready / Active / Broken / Done), `renderDayModalFastEditor` (calendar day modal block), `openFastEditModal` / `saveFastEditFromModal` / `deleteFastWindowFromModal` / `closeFastEditModal`
+  - **Live timer:** `startFastTickInterval` — 30 s setInterval refreshes `#fwTimerVal` text; cheap no-op when not on TODAY tab
+- **`SK.fastWindows`** (added in Phase A) is now populated by these helpers. Old `SK.fastDays` remains untouched and is interpreted as a 24-hour fast wherever no window exists. **Backward compatible.**
+- **`addFoodEntry`** in `app.html` now checks for an active unbroken fast window after logging food; shows a confirm dialog "Break this fast? — BREAK FAST / Cancel". Cancel keeps the fast intact (water, electrolytes, salt, black coffee, green tea allowed mid-fast).
+- **Fast banner** on TODAY tab gains a controls strip: live timer, Start/End buttons, Edit Times link.
+- **Fast Edit Modal** added (popup-overlay style, matches existing dialogs). Two date+time pickers, "Mark broken" checkbox, Save/Cancel/Delete actions. Cross-midnight overnight fasts handled — start ISO can be on the previous calendar date.
+- **Calendar (`modules/calendar.js`)** — `renderCalendar` now colors broken-fast days **orange** (cal-partial) instead of purple (cal-fast), for both today and past days. Uncomplicated fast days remain purple. `openDayModal` now shows the fast-window editor block on past fast days; tap Edit Times to backfill or correct historical fast windows.
+- **Module loader** at `app.html:1325` registers all fast-window exports on `window.*` for inline-script + onclick-handler access (same pattern as workout-card / rule-card / checklist).
+- **CSS** — new `.fast-banner-controls`, `.fw-state`, `.fw-timer`, `.fw-meta`, `.fw-broken-pill`, `.fw-btn`, `.fw-btn-start`, `.fw-btn-end`, `.fw-btn-edit`, `.fw-btn-row`, `.fast-window-editor`, `.fw-editor-title` classes added inline in `app.html`.
+- **No data migration** — fastWindows[date] is empty by default; readers fall back to existing fastDays. The Phase A migration v1→v2 already registered the schema version bump.
+- **Phase plan:** `docs/CALIBRATION_PHASE_C_PLAN.md`.
+- **No `sw.js` change** — CACHE_NAME bumps once at merge to main per CLAUDE.md feature-branch convention. **`components/fast-window.js` will need to be added to the sw.js cache list at merge time.**
+
+---
+
 ## Version 6.3.0 — 2026-04-26
 
 **Scope:** Minor (calibration project — Phase B; new auto-recompute behavior on weight log)

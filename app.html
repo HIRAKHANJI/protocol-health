@@ -134,6 +134,24 @@ body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif
 .fast-day-banner.visible { display:block; }
 .fast-banner-title { font-family:'Bebas Neue',sans-serif; font-size:0.95rem; letter-spacing:2px; color:var(--fast); margin-bottom:3px; }
 .fast-banner-sub { font-family:'DM Mono',monospace; font-size:0.62rem; color:#9988cc; line-height:1.6; }
+/* ─── Fast window controls (Phase C) ───────────────────────────────────────── */
+.fast-banner-controls { margin-top:10px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.08); }
+.fast-banner-controls:empty { display:none; }
+.fw-state { margin-bottom:8px; }
+.fw-timer { font-family:'Bebas Neue',sans-serif; font-size:1.1rem; letter-spacing:2px; color:var(--fast); }
+.fw-timer span { color:var(--text); }
+.fw-meta { font-family:'DM Mono',monospace; font-size:0.6rem; color:#9988cc; margin-top:2px; }
+.fw-state-broken .fw-broken-pill { display:inline-block; background:rgba(255,152,0,0.18); color:var(--accent2); padding:3px 8px; border-radius:4px; font-family:'DM Mono',monospace; font-size:0.62rem; letter-spacing:1px; }
+.fw-state-done .fw-timer { color:var(--accent); }
+.fw-btn-row { display:flex; gap:6px; flex-wrap:wrap; }
+.fw-btn { flex:1; min-width:100px; padding:8px 10px; border-radius:6px; border:1px solid var(--border); background:transparent; color:var(--text); font-family:'Bebas Neue',sans-serif; font-size:0.8rem; letter-spacing:1.5px; cursor:pointer; }
+.fw-btn-start { background:var(--fast); color:#fff; border-color:var(--fast); }
+.fw-btn-end { background:var(--accent2); color:#000; border-color:var(--accent2); }
+.fw-btn-edit { color:var(--muted); }
+.fw-btn:active { transform:scale(0.97); }
+.fast-window-editor { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:10px 12px; margin-bottom:10px; }
+.fw-editor-title { font-family:'Bebas Neue',sans-serif; font-size:0.8rem; letter-spacing:2px; color:var(--fast); margin-bottom:6px; }
+.fw-editor-title + .fw-meta, .fw-editor-title + .fw-broken-pill { margin-bottom:8px; display:block; }
 .light-day-banner { background:var(--light-dim); border:1px solid var(--light); border-radius:8px; padding:11px 13px; margin-bottom:14px; display:none; }
 .light-day-banner.visible { display:block; }
 .light-banner-title { font-family:'Bebas Neue',sans-serif; font-size:0.95rem; letter-spacing:2px; color:var(--light); margin-bottom:3px; }
@@ -274,6 +292,15 @@ body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif
 
 /* RADAR CHART */
 .radar-wrap { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px; margin-bottom:16px; }
+/* ─── Reality check (Phase D) ─────────────────────────────────────────────── */
+.reality-check { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px; margin-bottom:16px; }
+.rc-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+.rc-title { font-family:'Bebas Neue',sans-serif; font-size:1rem; letter-spacing:2px; color:var(--muted); }
+.rc-title span { color:var(--text); }
+.rc-state-pill { font-family:'DM Mono',monospace; font-size:0.55rem; letter-spacing:1px; padding:3px 8px; border-radius:4px; font-weight:500; }
+.rc-row { display:flex; justify-content:space-between; align-items:center; padding:5px 0; font-family:'DM Mono',monospace; font-size:0.66rem; }
+.rc-label { color:var(--muted); }
+.rc-val { color:var(--text); font-weight:500; }
 .radar-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
 .radar-title { font-family:'Bebas Neue',sans-serif; font-size:1rem; letter-spacing:2px; color:var(--muted); }
 .radar-title span { color:var(--text); }
@@ -663,6 +690,7 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
   <div class="fast-day-banner" id="fastBanner">
     <div class="fast-banner-title">⚡ WATER FAST DAY</div>
     <div class="fast-banner-sub">Zero food today. Water + electrolytes only.<br>500ml on wake · salt water mid-morning · black coffee/green tea allowed · electrolyte tablet pre-training</div>
+    <div class="fast-banner-controls" id="fastBannerControls"></div>
   </div>
   <div class="light-day-banner" id="lightBanner">
     <div class="light-banner-title">🍽 LIGHT EATING DAY</div>
@@ -745,6 +773,8 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
     <div class="radar-svg-wrap" id="radarSvg"></div>
     <div class="radar-legend" id="radarLegend"></div>
   </div>
+  <!-- Phase D: reality-check block — populated by renderRealityCheck() -->
+  <div id="realityCheckBox"></div>
   <div class="section-title">WEIGHT <span>LOG</span></div>
   <p class="section-note">Weigh first thing morning, after toilet, before food. Same conditions every time.</p>
   <div class="weight-input-wrap">
@@ -963,7 +993,11 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
           <div>
             <label class="field-label">TDEE (cal burned/day at rest)</label>
             <input class="field-input" type="number" id="settingTdee" placeholder="2600" step="50" min="1200" max="5000" oninput="calcDuration()">
-            <p class="section-note" style="margin-top:4px;margin-bottom:0" id="tdeeAutoNote">Auto-calculated from Mifflin-St Jeor equation. Override manually if you know your actual TDEE.</p>
+            <p class="section-note" style="margin-top:4px;margin-bottom:6px" id="tdeeAutoNote">Auto-calculated from Mifflin-St Jeor equation. Override manually if you know your actual TDEE.</p>
+            <label style="display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--muted);cursor:pointer;margin-top:4px">
+              <input type="checkbox" id="settingTdeeOverride" onchange="toggleTdeeOverride(this.checked)">
+              <span>Freeze TDEE — disable weekly auto-calibration</span>
+            </label>
           </div>
         </div>
         <div class="duration-single">
@@ -1109,6 +1143,42 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
     <p id="alertMsg" style="font-size:0.82rem;color:var(--muted);line-height:1.6;margin:0 0 14px"></p>
     <div class="popup-btns">
       <button class="popup-yes" onclick="closeAlertDialog()">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ FAST WINDOW EDIT MODAL (Phase C) ══ -->
+<div class="popup-overlay" id="fastEditModal" style="z-index:9100">
+  <div class="popup-box" style="max-width:340px">
+    <h3 id="fweTitle" style="font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:2px;color:var(--accent);margin:0 0 12px">EDIT FAST</h3>
+    <input type="hidden" id="fweDateStr">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--muted);margin-bottom:4px">START DATE</div>
+        <input type="date" id="fweStartDate" class="field-input" style="width:100%">
+      </div>
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--muted);margin-bottom:4px">START TIME</div>
+        <input type="time" id="fweStartTime" class="field-input" style="width:100%">
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--muted);margin-bottom:4px">END DATE</div>
+        <input type="date" id="fweEndDate" class="field-input" style="width:100%">
+      </div>
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--muted);margin-bottom:4px">END TIME</div>
+        <input type="time" id="fweEndTime" class="field-input" style="width:100%">
+      </div>
+    </div>
+    <label style="display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--muted);margin-bottom:14px;cursor:pointer">
+      <input type="checkbox" id="fweBroken"> Mark this fast as broken
+    </label>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="popup-yes" style="flex:1;min-width:90px" onclick="saveFastEditFromModal()">SAVE</button>
+      <button class="popup-no" style="flex:1;min-width:90px" onclick="closeFastEditModal()">CANCEL</button>
+      <button class="popup-no" style="background:var(--danger);color:#fff;width:100%" onclick="deleteFastWindowFromModal()">DELETE WINDOW</button>
     </div>
   </div>
 </div>
@@ -1281,6 +1351,7 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
   import * as Radar from './modules/radar.js';
   import * as Export from './modules/export.js';
   import * as ScheduleHTML from './modules/schedule-html.js';
+  import * as Calibration from './modules/calibration.js';
 
   // Calendar group
   window.changeMonth = Calendar.changeMonth;
@@ -1311,6 +1382,12 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
   // Schedule-HTML
   window.downloadScheduleHTML = ScheduleHTML.downloadScheduleHTML;
 
+  // Calibration (Phase D — observed TDEE, weekly recalibrate, reality check)
+  window.computeObservedTDEE = Calibration.computeObservedTDEE;
+  window.getCalibrationStatus = Calibration.getCalibrationStatus;
+  window.weeklyCalibration = Calibration.weeklyCalibration;
+  window.renderRealityCheck = Calibration.renderRealityCheck;
+
   window._PH_FNMODULES_READY = true;
   window.dispatchEvent(new Event('ph:fnmodules-ready'));
 </script>
@@ -1325,6 +1402,7 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
   import * as WorkoutCard from './components/workout-card.js';
   import * as RuleCard from './components/rule-card.js';
   import * as Checklist from './components/checklist.js';
+  import * as FastWindow from './components/fast-window.js';
 
   // Workout card helpers (called from plans/*.js workoutContent templates + TODAY tab)
   window.exRow = WorkoutCard.exRow;
@@ -1351,6 +1429,27 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
   window.syncAutoStatusChecks = Checklist.syncAutoStatusChecks;
   window.refreshAutoItems = Checklist.refreshAutoItems;
   window.resetToday = Checklist.resetToday;
+
+  // Fast-window component (Phase C — start/stop/edit fast timestamps)
+  window.getFastWindows = FastWindow.getFastWindows;
+  window.getActiveFastWindow = FastWindow.getActiveFastWindow;
+  window.getMostRecentWindow = FastWindow.getMostRecentWindow;
+  window.isFastBroken = FastWindow.isFastBroken;
+  window.getFastDurationHours = FastWindow.getFastDurationHours;
+  window.startFast = FastWindow.startFast;
+  window.endFast = FastWindow.endFast;
+  window.markFastBroken = FastWindow.markFastBroken;
+  window.editFastWindow = FastWindow.editFastWindow;
+  window.deleteFastWindow = FastWindow.deleteFastWindow;
+  window.renderTodayFastUI = FastWindow.renderTodayFastUI;
+  window.startFastFromBanner = FastWindow.startFastFromBanner;
+  window.endFastFromBanner = FastWindow.endFastFromBanner;
+  window.startFastTickInterval = FastWindow.startFastTickInterval;
+  window.renderDayModalFastEditor = FastWindow.renderDayModalFastEditor;
+  window.openFastEditModal = FastWindow.openFastEditModal;
+  window.closeFastEditModal = FastWindow.closeFastEditModal;
+  window.saveFastEditFromModal = FastWindow.saveFastEditFromModal;
+  window.deleteFastWindowFromModal = FastWindow.deleteFastWindowFromModal;
 
   window._PH_COMPONENTS_READY = true;
   window.dispatchEvent(new Event('ph:components-ready'));
@@ -1503,8 +1602,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '6.3.0';
-const APP_VERSION_MSG = 'TDEE now updates automatically when you log a new weight. Lose weight → TDEE drops; gain weight → TDEE rises. No more manual auto-fill.';
+const APP_VERSION = '7.0.0';
+const APP_VERSION_MSG = 'Adaptive TDEE calibration is now live. The app compares your real intake + weight loss against the formula prediction every week and adjusts your TDEE if reality disagrees by more than 7%. New REALITY CHECK block on the TRACK tab shows predicted vs actual loss live. Manual override toggle in Settings if you want to freeze TDEE.';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
 
@@ -1551,7 +1650,7 @@ function strToDate(s) { const [y,m,d]=s.split('-').map(Number); return new Date(
 // getSettings: always returns a full settings object with defaults. Never returns null.
 // Add any new settings fields here with a default value.
 function getSettings() {
-  const defaults = { plan:'default', currentKg:null, targetKg:null, calories:null, tdee:2600, risk:'aggressive', startDate:null, age:null, height:null, sex:'male', activityLevel:'1.55', name:'', wakeTime:null, lastMealTime:null, eveningSessionTime:null, eatingWindowStart:null, supplementsEnabled:true };
+  const defaults = { plan:'default', currentKg:null, targetKg:null, calories:null, tdee:2600, risk:'aggressive', startDate:null, age:null, height:null, sex:'male', activityLevel:'1.55', name:'', wakeTime:null, lastMealTime:null, eveningSessionTime:null, eatingWindowStart:null, supplementsEnabled:true, tdeeManualOverride:false, lastCalibrationAt:null, lastCalibrationFormula:null, lastCalibrationObserved:null };
   const saved = gs(SK.settings);
   if(!saved) return defaults;
   return Object.assign({}, defaults, saved);
@@ -1849,6 +1948,21 @@ function addFoodEntry(dateStr, name, calories, protein, carbs, fat, notes) {
   ss(SK.foodLog, fl);
   updateFoodLibrary(name.trim(), parseInt(calories) || 0, pVal > 0 ? pVal : null, cVal > 0 ? cVal : null, fVal > 0 ? fVal : null);
   dispatch('FOOD_LOGGED');
+
+  // Phase C: if a fast window is active and not yet broken, prompt the user
+  // to mark this entry as breaking the fast. Cancel = fast continues (water,
+  // electrolytes, salt, black coffee, green tea — all allowed mid-fast).
+  if (typeof getActiveFastWindow === 'function') {
+    const win = getActiveFastWindow(dateStr);
+    if (win && !win.broken) {
+      showConfirm(
+        'Break this fast?',
+        `"${entry.name}" was logged during an active fast window. Tap BREAK FAST to mark the fast broken (calories will count). Cancel if this was water, salt, electrolytes, black coffee, or green tea — fast continues.`,
+        () => { markFastBroken(dateStr, entry.id, entry.ts); },
+        { yesLabel: 'BREAK FAST', danger: true }
+      );
+    }
+  }
 }
 
 function removeFoodEntry(dateStr, entryId) {
@@ -2429,7 +2543,7 @@ function switchTab(id, btn) {
   if(id==='workouts') renderWorkouts();
   if(id==='nutrition') renderNutrition();
   if(id==='rules') renderRules();
-  if(id==='track') { renderWeights(); renderTrackFoodLog(); renderRecentNotes(); renderRadar(); }
+  if(id==='track') { renderWeights(); renderTrackFoodLog(); renderRecentNotes(); renderRadar(); if(typeof renderRealityCheck === 'function') renderRealityCheck(); }
 }
 
 // ─── TODAY ───────────────────────────────────────────────────────────────────
@@ -2566,6 +2680,8 @@ function updateFastUI() {
   document.getElementById('fastBanner').classList.toggle('visible', dayType === 'fast');
   document.getElementById('lightBanner').classList.toggle('visible', dayType === 'light');
   renderTodayChecklist();
+  // Phase C: render the START/STOP/EDIT controls inside the fast banner.
+  if (typeof renderTodayFastUI === 'function') renderTodayFastUI();
 }
 
 // ─── UNIFIED DAY LOG — single source of truth ────────────────────────────────
@@ -3287,6 +3403,9 @@ function openSettings() {
   document.getElementById('settingSex').value = s.sex||'male';
   document.getElementById('settingActivityLevel').value = s.activityLevel||'1.55';
   document.getElementById('settingSupplements').checked = s.supplementsEnabled !== false;
+  // Phase D: TDEE manual override toggle (freezes weekly auto-calibration)
+  const overrideEl = document.getElementById('settingTdeeOverride');
+  if (overrideEl) overrideEl.checked = !!s.tdeeManualOverride;
   onPlanSelectChange();
   syncCustomSelect('planSelectCustom', 'planSelect');
   syncCustomSelect('riskSelectCustom', 'settingRisk');
@@ -3483,16 +3602,37 @@ function recomputeTDEE() {
   return Math.round(bmr * actMult);
 }
 
+// Phase D: settings-panel toggle handler. Flips settings.tdeeManualOverride.
+// When ON, weeklyCalibration() and recomputeTDEE() both no-op — the user's
+// manually-entered TDEE stays frozen.
+function toggleTdeeOverride(checked) {
+  const s = getSettings();
+  s.tdeeManualOverride = !!checked;
+  saveSettings(s);
+}
+
 // Phase B: applies the recomputed TDEE if it differs from the stored value
 // and dispatches TDEE_CHANGED. Returns true if a change was written.
+// Phase D: also syncs settings.currentKg to the latest weight log so the
+// settings panel display doesn't drift out of date with reality.
 function recomputeAndApplyTDEE() {
   const newTdee = recomputeTDEE();
-  if (newTdee === null) return false;
   const s = getSettings();
-  if (s.tdee === newTdee) return false;
-  s.tdee = newTdee;
+  const latestWt = getLatestWeight();
+  let changed = false;
+  let tdeeChanged = false;
+  if (latestWt && s.currentKg !== latestWt) {
+    s.currentKg = latestWt;
+    changed = true;
+  }
+  if (newTdee !== null && s.tdee !== newTdee) {
+    s.tdee = newTdee;
+    changed = true;
+    tdeeChanged = true;
+  }
+  if (!changed) return false;
   saveSettings(s);
-  dispatch('TDEE_CHANGED');
+  if (tdeeChanged) dispatch('TDEE_CHANGED');
   return true;
 }
 
@@ -4549,6 +4689,16 @@ async function runInit() {
 
   // Background: sync all localStorage to IndexedDB mirror
   setTimeout(() => idbSyncAll(), 2000);
+
+  // Phase C: kick off the live fast-window timer (refreshes every 30s).
+  if (typeof startFastTickInterval === 'function') startFastTickInterval();
+
+  // Phase D: weekly TDEE calibration. Runs once per app load; internal cadence
+  // gate (>=7 days since last calibration) prevents over-firing. Skipped if
+  // settings.tdeeManualOverride is true or if not enough data is gathered.
+  if (typeof weeklyCalibration === 'function') {
+    try { weeklyCalibration(); } catch (e) { console.warn('[calibration] failed:', e); }
+  }
 }
 
 // Entry point. runInit is now async and handles idbAutoRestore + migrations
