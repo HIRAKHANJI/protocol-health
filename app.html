@@ -1503,8 +1503,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '6.2.5';
-const APP_VERSION_MSG = 'Internal scaffolding for upcoming TDEE auto-calibration loop. No user-visible change yet.';
+const APP_VERSION = '6.3.0';
+const APP_VERSION_MSG = 'TDEE now updates automatically when you log a new weight. Lose weight → TDEE drops; gain weight → TDEE rises. No more manual auto-fill.';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
 
@@ -3119,6 +3119,7 @@ function logWeightFromToday() {
   saveDayLogField(today, { weight: val });
   input.value='';
   renderWeights();
+  recomputeAndApplyTDEE();
   dispatch('WEIGHT_LOGGED');
 }
 
@@ -3136,6 +3137,7 @@ function logWeight() {
   saveDayLogField(today, { weight: val });
   input.value='';
   renderWeights();
+  recomputeAndApplyTDEE();
   dispatch('WEIGHT_LOGGED');
 }
 
@@ -3462,6 +3464,38 @@ function computeAutoTDEE() {
   return Math.round(bmr * actMult);
 }
 
+// Phase B: DOM-free Mifflin-St Jeor recompute. Reads from settings + latest
+// weight log. Mirrors computeAutoTDEE() but does not depend on the Settings
+// panel being open. Returns null if any required input is missing or if the
+// user has frozen TDEE via the manual-override toggle (Phase D).
+function recomputeTDEE() {
+  const s = getSettings();
+  if (s.tdeeManualOverride) return null;
+  const weight = getLatestWeight();
+  const height = parseFloat(s.height);
+  const age    = parseFloat(s.age);
+  const sex    = s.sex || 'male';
+  const actMult = parseFloat(s.activityLevel) || 1.55;
+  if (!weight || !height || !age) return null;
+  const bmr = sex === 'male'
+    ? (10 * weight) + (6.25 * height) - (5 * age) + 5
+    : (10 * weight) + (6.25 * height) - (5 * age) - 161;
+  return Math.round(bmr * actMult);
+}
+
+// Phase B: applies the recomputed TDEE if it differs from the stored value
+// and dispatches TDEE_CHANGED. Returns true if a change was written.
+function recomputeAndApplyTDEE() {
+  const newTdee = recomputeTDEE();
+  if (newTdee === null) return false;
+  const s = getSettings();
+  if (s.tdee === newTdee) return false;
+  s.tdee = newTdee;
+  saveSettings(s);
+  dispatch('TDEE_CHANGED');
+  return true;
+}
+
 function autoFillTDEE() {
   const tdee = computeAutoTDEE();
   if(tdee && tdee > 0) {
@@ -3481,6 +3515,11 @@ function autoFillTDEE() {
     s.activityLevel = document.getElementById('settingActivityLevel').value || '1.55';
     s.tdee = tdee;
     saveSettings(s);
+
+    // Phase B: fix the missing-dispatch bug. autoFillTDEE previously updated
+    // settings.tdee silently — projection / goal bar / radar stayed stale
+    // until another event re-rendered them. Now any TDEE write fires the event.
+    dispatch('TDEE_CHANGED');
 
     calcDuration();
   }
