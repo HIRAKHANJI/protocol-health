@@ -992,8 +992,12 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
           </div>
           <div>
             <label class="field-label">TDEE (cal burned/day at rest)</label>
-            <input class="field-input" type="number" id="settingTdee" placeholder="2600" step="50" min="1200" max="5000" oninput="calcDuration()">
-            <p class="section-note" style="margin-top:4px;margin-bottom:6px" id="tdeeAutoNote">Auto-calculated from Mifflin-St Jeor equation. Override manually if you know your actual TDEE.</p>
+            <input class="field-input" type="number" id="settingTdee" placeholder="2600" step="50" min="1200" max="5000" oninput="calcDuration()" onchange="commitTdeeManual()">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--muted)">
+              <span>Formula: <span id="settingTdeeFormula" style="color:var(--text)">—</span> cal/day</span>
+              <button type="button" onclick="resetTdeeToFormula()" style="background:transparent;border:1px solid var(--border);color:var(--muted);font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:1px;padding:3px 8px;border-radius:4px;cursor:pointer">↺ RESET</button>
+            </div>
+            <p class="section-note" style="margin-top:6px;margin-bottom:6px" id="tdeeAutoNote">Auto-calculated from Mifflin-St Jeor equation. Override manually if you know your actual TDEE. Tap RESET to revert to formula.</p>
             <label style="display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--muted);cursor:pointer;margin-top:4px">
               <input type="checkbox" id="settingTdeeOverride" onchange="toggleTdeeOverride(this.checked)">
               <span>Freeze TDEE — disable weekly auto-calibration</span>
@@ -1387,6 +1391,9 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
   window.getCalibrationStatus = Calibration.getCalibrationStatus;
   window.weeklyCalibration = Calibration.weeklyCalibration;
   window.renderRealityCheck = Calibration.renderRealityCheck;
+  // v7.1.0 hot-fix: TDEE sanity bounds + auto-revert
+  window.checkStoredTdeeSanity = Calibration.checkStoredTdeeSanity;
+  window.autoRevertImplausibleTdee = Calibration.autoRevertImplausibleTdee;
 
   window._PH_FNMODULES_READY = true;
   window.dispatchEvent(new Event('ph:fnmodules-ready'));
@@ -1602,8 +1609,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '7.0.1';
-const APP_VERSION_MSG = 'Adaptive TDEE calibration is now live. The app compares your real intake + weight loss against the formula prediction every week and adjusts your TDEE if reality disagrees by more than 7%. New REALITY CHECK block on the TRACK tab shows predicted vs actual loss live. Manual override toggle in Settings if you want to freeze TDEE.';
+const APP_VERSION = '7.1.0';
+const APP_VERSION_MSG = 'Hot-fix: calibration sanity bounds. Sudden weight spikes from sickness or water retention no longer corrupt your TDEE. App auto-reverts implausible TDEE values on load. New RESET button in Settings if you ever need to manually restore the formula value. ADJUST and projection now handle weight noise correctly.';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
 
@@ -2957,9 +2964,34 @@ function updateProjection() {
   // Use up to last 7 weight entries
   const recent = weights.slice(0, Math.min(7, weights.length));
   const latest = recent[0];
-  const oldest = recent[recent.length-1];
-  const daySpan = Math.max(1, (strToDate(latest.date) - strToDate(oldest.date)) / 86400000);
-  const rawDailyLoss = (oldest.weight - latest.weight) / daySpan; // kg/day (positive = losing)
+
+  // v7.1.0: spike detection — if any consecutive day-to-day delta in the
+  // recent window exceeds 1.5 kg, the readings are noisy (water retention,
+  // sickness, glycogen swing) and should not drive the rate calculation.
+  // We trim spike-affected entries from the rate window but KEEP `latest`
+  // for current-weight display.
+  let rateWindow = recent.slice();
+  let spikeDetected = false;
+  for (let i = 0; i < rateWindow.length - 1; i++) {
+    const delta = Math.abs(rateWindow[i].weight - rateWindow[i+1].weight);
+    if (delta > 1.5) { spikeDetected = true; break; }
+  }
+  // If spike detected, use the OLDEST stable pair we can find — drop the most
+  // recent entries until consecutive deltas are < 1.5 kg
+  if (spikeDetected && rateWindow.length >= 3) {
+    while (rateWindow.length >= 3) {
+      const d = Math.abs(rateWindow[0].weight - rateWindow[1].weight);
+      if (d > 1.5) { rateWindow.shift(); } else { break; }
+    }
+  }
+  if (rateWindow.length < 2) rateWindow = recent.slice(0, Math.min(2, recent.length));
+  const rateLatest = rateWindow[0];
+  const oldest = rateWindow[rateWindow.length-1];
+  const daySpan = Math.max(1, (strToDate(rateLatest.date) - strToDate(oldest.date)) / 86400000);
+  let rawDailyLoss = (oldest.weight - rateLatest.weight) / daySpan; // kg/day (positive = losing)
+  // Implausibility check: any rate > 2 kg/week in either direction is likely
+  // still noisy after trimming. Heavy-favor formula in that case.
+  const rawIsImplausible = Math.abs(rawDailyLoss * 7) > 2.0;
 
   // Count fast/light days in next 7 days from today
   const lightDays = gs(SK.lightDays)||{};
@@ -3041,8 +3073,9 @@ function updateProjection() {
   const formulaRate = totalFormulaDeficit / 7;
 
   // Blend observed rate with formula rate
+  // v7.1.0: implausible observed rate (>2 kg/wk) drops weight to 0.1 — formula dominates
   const observedRate = rawDailyLoss;
-  const observedWeight = Math.min(0.75, recent.length / 10);
+  const observedWeight = rawIsImplausible ? 0.1 : Math.min(0.75, recent.length / 10);
   const blendedRate = (observedRate * observedWeight) + (formulaRate * (1 - observedWeight));
   const adjustedRate = blendedRate * complianceScore;
 
@@ -3408,6 +3441,16 @@ function openSettings() {
   // Phase D: TDEE manual override toggle (freezes weekly auto-calibration)
   const overrideEl = document.getElementById('settingTdeeOverride');
   if (overrideEl) overrideEl.checked = !!s.tdeeManualOverride;
+  // v7.1.0: show formula TDEE next to current value for diagnostic / reset reference
+  const formulaEl = document.getElementById('settingTdeeFormula');
+  if (formulaEl) {
+    const wt = getLatestWeight() || s.currentKg;
+    if (wt && s.height && s.age) {
+      formulaEl.textContent = computeFormulaTDEEAtWeight(wt, s);
+    } else {
+      formulaEl.textContent = '—';
+    }
+  }
   onPlanSelectChange();
   syncCustomSelect('planSelectCustom', 'planSelect');
   syncCustomSelect('riskSelectCustom', 'settingRisk');
@@ -3611,6 +3654,59 @@ function toggleTdeeOverride(checked) {
   const s = getSettings();
   s.tdeeManualOverride = !!checked;
   saveSettings(s);
+}
+
+// v7.1.0: persist a manual TDEE entry immediately on blur/change so the rest
+// of the UI (projection, goal bar, radar, nutrition) sees the new value
+// without waiting for CONFIRM PLAN. oninput already runs calcDuration() for
+// the live goal-calculator preview; this commits the value to settings.
+function commitTdeeManual() {
+  const raw = document.getElementById('settingTdee').value;
+  const v = parseFloat(raw);
+  if (isNaN(v) || v < 1200 || v > 5000) return;
+  const s = getSettings();
+  if (s.tdee === v) return;
+  s.tdee = v;
+  saveSettings(s);
+  dispatch('TDEE_CHANGED');
+}
+
+// v7.1.0: Pure formula TDEE for a given hypothetical weight. Used for the
+// trajectory-aware ADJUST math (BMR drops as weight drops, so a long cut
+// should average start-vs-target TDEE rather than use start-only).
+function computeFormulaTDEEAtWeight(weightKg, s) {
+  if (!s) s = getSettings();
+  const height = parseFloat(s.height);
+  const age = parseFloat(s.age);
+  if (!weightKg || !height || !age) return s.tdee || 2600;
+  const sex = s.sex || 'male';
+  const actMult = parseFloat(s.activityLevel) || 1.55;
+  const bmr = sex === 'male'
+    ? (10 * weightKg) + (6.25 * height) - (5 * age) + 5
+    : (10 * weightKg) + (6.25 * height) - (5 * age) - 161;
+  return Math.round(bmr * actMult);
+}
+
+// v7.1.0: Emergency one-tap reset for when calibration or stale data has
+// produced a wrong TDEE. Computes formula TDEE from current weight/age/height/
+// activity and writes it. Suppresses next auto-calibration for 7 days.
+function resetTdeeToFormula() {
+  const s = getSettings();
+  const weight = getLatestWeight() || s.currentKg;
+  if (!weight || !s.height || !s.age) {
+    showAlert('Cannot compute formula TDEE — need weight, height, and age in Settings first.');
+    return;
+  }
+  const formula = computeFormulaTDEEAtWeight(weight, s);
+  s.tdee = formula;
+  s.lastCalibrationAt = new Date().toISOString();
+  saveSettings(s);
+  const field = document.getElementById('settingTdee');
+  if (field) field.value = formula;
+  const formulaEl = document.getElementById('settingTdeeFormula');
+  if (formulaEl) formulaEl.textContent = formula;
+  dispatch('TDEE_CHANGED');
+  showAlert('TDEE reset to formula value: ' + formula + ' cal/day. Auto-calibration is paused for 7 days while your data stabilizes.');
 }
 
 // Phase B: applies the recomputed TDEE if it differs from the stored value
@@ -4266,7 +4362,6 @@ function calcAdjust() {
 
   const newTarget = parseFloat(document.getElementById('msTargetKg').value);
   const newCal    = parseFloat(document.getElementById('msCalories').value);
-  const tdee      = s.tdee || 2600;
 
   if(isNaN(newTarget) || isNaN(newCal)) {
     document.getElementById('adjustResult').style.display='none';
@@ -4278,6 +4373,16 @@ function calcAdjust() {
   const curW    = getLatestWeight() || startW;
   const elapsed = Math.max(1, Math.floor((new Date().getTime() - strToDate(sched.startDate).getTime()) / 86400000));
   const isBulkAdj = newTarget > startW;
+
+  // v7.1.0: trajectory-aware TDEE. As the user moves from current weight to
+  // target weight, BMR (and therefore TDEE) drifts. Using a single snapshot
+  // overestimates the deficit for cuts (TDEE drops as weight drops, so the
+  // deficit shrinks over time). We use the average of TDEE-at-current-weight
+  // and TDEE-at-target-weight as a first-order approximation.
+  const tdeeNow    = computeFormulaTDEEAtWeight(curW, s);
+  const tdeeTarget = computeFormulaTDEEAtWeight(newTarget, s);
+  const tdee       = Math.round((tdeeNow + tdeeTarget) / 2);
+
   const changed   = isBulkAdj ? Math.max(0, curW - startW) : Math.max(0, startW - curW);
   const actualRate = changed / elapsed; // kg/day observed
 
@@ -4700,6 +4805,19 @@ async function runInit() {
 
   // Phase C: kick off the live fast-window timer (refreshes every 30s).
   if (typeof startFastTickInterval === 'function') startFastTickInterval();
+
+  // v7.1.0: sanity-check the stored TDEE BEFORE running weekly calibration.
+  // If a previous calibration wrote an implausible value (e.g. after a sickness
+  // weight spike), revert to the formula TDEE and notify the user. This is
+  // the auto-recovery path — user doesn't need to manually fix it.
+  if (typeof autoRevertImplausibleTdee === 'function') {
+    try {
+      const r = autoRevertImplausibleTdee();
+      if (r && r.reverted && typeof showAlert === 'function') {
+        showAlert('TDEE auto-corrected from ' + r.oldTDEE + ' to ' + r.newTDEE + ' cal/day. The previous value was outside the safe physiological range (likely caused by a recent weight spike from sickness, water retention, or unusual eating). Auto-calibration will retry once your data stabilizes (about 14 days of consistent logging).');
+      }
+    } catch (e) { console.warn('[calibration] sanity check failed:', e); }
+  }
 
   // Phase D: weekly TDEE calibration. Runs once per app load; internal cadence
   // gate (>=7 days since last calibration) prevents over-firing. Skipped if

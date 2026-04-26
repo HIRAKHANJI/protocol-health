@@ -12,6 +12,17 @@
 //
 // Manual override (settings.tdeeManualOverride === true) freezes calibration
 // entirely. The user keeps whatever TDEE they manually entered.
+//
+// SANITY BOUNDS (v7.1.0): observed TDEE that violates physiological limits
+// is rejected. Rejection criteria:
+//   - Weekly weight change > 2 kg (sustained loss/gain at this rate is
+//     implausible without sickness/water/glycogen confounds)
+//   - Observed TDEE < BMR (formula / activityMultiplier) — physiologically
+//     impossible to sustain below BMR
+//   - Observed TDEE > formula × 1.5 — implausible burn rate
+
+const MAX_KG_CHANGE_PER_WEEK = 2.0;
+const TDEE_CEIL_RATIO = 1.5;
 
 // ─── PURE COMPUTATION ────────────────────────────────────────────────────────
 
@@ -70,6 +81,13 @@ export function computeObservedTDEE(days = 14) {
   }
   if (daysLogged < 7) {
     return { tdee: null, daysLogged, daysAvailable: spanDays, kgLoss, avgIntake: 0, spanDays, valid: false, reason: 'need-7-logs' };
+  }
+  // SANITY: weekly weight change > 2 kg is implausible without confounds
+  // (sickness, water retention, glycogen swing). Reject — calibration would
+  // produce a wildly wrong TDEE if it trusted this signal.
+  const weeklyChange = Math.abs(kgLoss) * 7 / spanDays;
+  if (weeklyChange > MAX_KG_CHANGE_PER_WEEK) {
+    return { tdee: null, daysLogged, daysAvailable: spanDays, kgLoss, avgIntake: 0, spanDays, valid: false, reason: 'spike-detected' };
   }
   const avgIntake = intakeSum / daysLogged;
   const observedTDEE = Math.round(avgIntake + (kgLoss * 7700 / spanDays));
@@ -150,6 +168,17 @@ export function weeklyCalibration() {
   if (!status.formulaTDEE || !status.observedTDEE || !status.blendedTDEE) {
     return { applied: false, reason: 'missing-inputs' };
   }
+  // SANITY: observed TDEE must be >= BMR (formula / activityMultiplier) and
+  // <= formula × 1.5. Anything outside this range is physiologically suspect
+  // and likely caused by water/sickness/logging noise. Skip applying.
+  const actMult = parseFloat(s.activityLevel) || 1.55;
+  const bmrFloor = status.formulaTDEE / actMult;
+  const ceiling = status.formulaTDEE * TDEE_CEIL_RATIO;
+  if (status.observedTDEE < bmrFloor || status.observedTDEE > ceiling) {
+    s.lastCalibrationAt = new Date().toISOString();
+    saveSettings(s);
+    return { applied: false, reason: 'observed-out-of-bounds', oldTdee: status.currentTDEE, observedTDEE: status.observedTDEE, formulaTDEE: status.formulaTDEE };
+  }
   const old = status.currentTDEE;
   const newT = status.blendedTDEE;
   const gap = Math.abs(newT - old) / old;
@@ -173,6 +202,53 @@ export function weeklyCalibration() {
     + 'Open TRACK tab and tap REALITY CHECK to see the math.';
   if (typeof showAlert === 'function') showAlert(msg);
   return { applied: true, oldTdee: old, newTdee: newT, status };
+}
+
+// v7.1.0: Detects whether the currently-stored settings.tdee is physiologically
+// implausible relative to the formula prediction. Used at app load to auto-recover
+// from a corrupted TDEE (e.g. after a sickness/water spike confused calibration).
+// Returns { ok, currentTDEE, formulaTDEE, bmrFloor, ceiling } where ok=false
+// means the value is out of bounds and should be reverted.
+export function checkStoredTdeeSanity() {
+  const s = getSettings();
+  // Skip if user explicitly froze TDEE — they're in charge of the value.
+  if (s.tdeeManualOverride) return { ok: true, reason: 'manual-override' };
+  // Compute formula TDEE directly from settings (don't go through window.recomputeTDEE
+  // since that respects the override flag and may not be loaded yet).
+  const weight = getLatestWeight();
+  const height = parseFloat(s.height);
+  const age = parseFloat(s.age);
+  if (!weight || !height || !age) return { ok: true, reason: 'no-formula-baseline' };
+  const sex = s.sex || 'male';
+  const actMult = parseFloat(s.activityLevel) || 1.55;
+  const bmr = sex === 'male'
+    ? (10 * weight) + (6.25 * height) - (5 * age) + 5
+    : (10 * weight) + (6.25 * height) - (5 * age) - 161;
+  const formulaTDEE = Math.round(bmr * actMult);
+  const bmrFloor = Math.round(bmr); // observed cannot drop below BMR sustained
+  const ceiling = Math.round(formulaTDEE * TDEE_CEIL_RATIO);
+  const currentTDEE = s.tdee || 0;
+  if (!currentTDEE) return { ok: false, reason: 'no-tdee-set', currentTDEE, formulaTDEE, bmrFloor, ceiling };
+  if (currentTDEE < bmrFloor) return { ok: false, reason: 'below-bmr', currentTDEE, formulaTDEE, bmrFloor, ceiling };
+  if (currentTDEE > ceiling) return { ok: false, reason: 'above-ceiling', currentTDEE, formulaTDEE, bmrFloor, ceiling };
+  return { ok: true, currentTDEE, formulaTDEE, bmrFloor, ceiling };
+}
+
+// v7.1.0: If the stored TDEE is implausible, reset it to formula and return
+// what was reverted. Caller should show the user a banner explaining why.
+export function autoRevertImplausibleTdee() {
+  const check = checkStoredTdeeSanity();
+  if (check.ok) return { reverted: false, ...check };
+  if (!check.formulaTDEE) return { reverted: false, ...check };
+  const s = getSettings();
+  const old = s.tdee;
+  s.tdee = check.formulaTDEE;
+  // Reset lastCalibrationAt so the next calibration cycle gets a fresh
+  // chance once the user's data stabilizes (~14 days from now).
+  s.lastCalibrationAt = new Date().toISOString();
+  saveSettings(s);
+  if (typeof dispatch === 'function') dispatch('TDEE_CHANGED');
+  return { reverted: true, oldTDEE: old, newTDEE: check.formulaTDEE, ...check };
 }
 
 // ─── REALITY CHECK BLOCK (TRACK tab) ─────────────────────────────────────────
