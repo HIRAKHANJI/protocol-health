@@ -4,6 +4,20 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 6.3.0 — 2026-04-26
+
+**Scope:** Minor (calibration project — Phase B; new auto-recompute behavior on weight log)
+**Banner:** shown — "TDEE now updates automatically when you log a new weight. Lose weight → TDEE drops; gain weight → TDEE rises. No more manual auto-fill."
+
+- **`recomputeTDEE()`** added near `computeAutoTDEE` in `app.html`. DOM-free Mifflin-St Jeor recompute that reads weight from the latest weight log and reads height/age/sex/activity multiplier from `settings`. Returns `null` if any input is missing or if `settings.tdeeManualOverride` is truthy (override flag ships in Phase D).
+- **`recomputeAndApplyTDEE()`** wrapper. Compares the recomputed TDEE to `settings.tdee`, writes if different, fires `TDEE_CHANGED` (added in Phase A). Returns true/false. Skips dispatch when no change.
+- **`logWeightFromToday()`** and **`logWeight()`** now call `recomputeAndApplyTDEE()` after `saveDayLogField()` and before the existing `dispatch('WEIGHT_LOGGED')`. Weight loss → lower TDEE; weight gain → higher TDEE. Cascades to projection, goal bar, duration bar, nutrition macros, radar.
+- **`autoFillTDEE()`** now fires `dispatch('TDEE_CHANGED')` after `saveSettings(s)`. Pre-existing bug fix: previously the function wrote `s.tdee` silently and dependent UI stayed stale until another event triggered a re-render.
+- **Phase plan:** `docs/CALIBRATION_PHASE_B_PLAN.md`.
+- **No** `sw.js` change (CACHE_NAME bumps once at merge to main).
+
+---
+
 ## Version 6.2.5 — 2026-04-26
 
 **Scope:** Patch (calibration project — Phase A scaffolding; no user-visible behavior change)
