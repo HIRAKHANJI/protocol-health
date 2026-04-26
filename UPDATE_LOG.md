@@ -4,6 +4,51 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 7.1.0 — 2026-04-26
+
+**Scope:** Minor (hot-fix for calibration corrupted by sickness-induced weight spike; multiple UX/math fixes)
+**Banner:** shown — "Hot-fix: calibration sanity bounds. Sudden weight spikes from sickness or water retention no longer corrupt your TDEE. App auto-reverts implausible TDEE values on load. New RESET button in Settings if you ever need to manually restore the formula value. ADJUST and projection now handle weight noise correctly."
+
+### Root cause
+
+A user who gained ~3 kg in 3 days from sickness/water retention triggered a calibration cascade where:
+1. computeObservedTDEE took the +3 kg as "real" weight gain → computed observedTDEE = avgIntake − 1650 cal/day
+2. weeklyCalibration applied the result, writing TDEE = ~1300 cal/day to settings (below physiological BMR floor of ~2000)
+3. updateProjection trusted the broken TDEE → predicted weight gain by Sunday
+4. ADJUST math used the broken TDEE → would have produced nonsense schedules
+
+### Fixes (6 layered protections)
+
+- **Sanity bounds in `computeObservedTDEE`** (`modules/calibration.js`) — rejects when weekly weight change exceeds 2 kg (physiological limit; sustained loss/gain at this rate without sickness/water/glycogen confounds is implausible). Returns `valid: false, reason: 'spike-detected'`.
+- **Sanity bounds in `weeklyCalibration`** — even if observed math passes the spike gate, the resulting TDEE must fall between BMR (formula ÷ activityMultiplier) and formula × 1.5. Anything outside this band is rejected, lastCalibrationAt bumps, no settings.tdee write. Returns `reason: 'observed-out-of-bounds'`.
+- **Auto-revert on load** (`autoRevertImplausibleTdee` in `modules/calibration.js`, called from `runInit`) — if the currently-stored settings.tdee is below BMR or above formula × 1.5, automatically reverts to formula TDEE on next load and shows a banner explaining why. This is the auto-recovery path that unbreaks any user already affected by the bug. Honors `settings.tdeeManualOverride` (skipped if user explicitly froze TDEE).
+- **Manual RESET button** in Settings panel (`resetTdeeToFormula`) — one-tap recovery. Also displays the formula TDEE alongside the current value: `Formula: 3103 cal/day [↺ RESET]`. Writes the formula value to settings.tdee, sets lastCalibrationAt to now (suppresses next auto-cal for 7 days while data stabilizes), shows confirmation alert.
+- **Spike handling in `updateProjection`** — detects consecutive day-to-day weight deltas > 1.5 kg (sickness, water, glycogen) and trims spike-affected entries from the rate window. Implausibility check on the trimmed rate (> 2 kg/wk) drops observedWeight from default 0.7 → 0.1, making formula dominate the projection. Stops the "predicting +0.4 kg gain by Sunday" nonsense.
+- **Trajectory-aware ADJUST** (`calcAdjust`) — for a long cut from 99 → 89 kg, BMR drops by ~100 cal as weight drops, so TDEE drops by ~155 cal at activity 1.55. Previously calcAdjust used a single TDEE snapshot which overestimated the deficit. Now uses average of `computeFormulaTDEEAtWeight(currentWeight)` and `computeFormulaTDEEAtWeight(targetWeight)` for the projection. Result is a more accurate end-date estimate.
+
+### Bonus fixes
+
+- **TDEE field commits on blur** — settings.tdee field gains `onchange="commitTdeeManual()"` which writes the value to settings and dispatches `TDEE_CHANGED` immediately, so projection / goal bar / nutrition macros refresh without needing CONFIRM PLAN. Previously a typed TDEE override only updated the goal calculator preview until CONFIRM PLAN was tapped.
+- **Formula TDEE display** in Settings — always-visible diagnostic line showing what Mifflin-St Jeor predicts at the user's current weight/age/height/activity. Useful for spotting calibration drift at a glance.
+
+### Files touched
+
+- `modules/calibration.js` — added `MAX_KG_CHANGE_PER_WEEK`, `TDEE_CEIL_RATIO` constants; sanity gate in `computeObservedTDEE`; bounds check in `weeklyCalibration`; new exports `checkStoredTdeeSanity` and `autoRevertImplausibleTdee`.
+- `app.html` — module loader exposes 2 new calibration exports; runInit calls `autoRevertImplausibleTdee()` before `weeklyCalibration()`; new functions `commitTdeeManual`, `computeFormulaTDEEAtWeight`, `resetTdeeToFormula`; settings panel gains RESET button + formula display + onchange on TDEE field; openSettings hydrates the formula display; updateProjection adds spike trimming + implausibility weight; calcAdjust uses trajectory-averaged TDEE.
+- `UPDATE_LOG.md` — this entry.
+
+### What this means for the user
+
+On next load:
+1. App detects current TDEE = 1300 is below BMR (~2000)
+2. Auto-reverts to formula TDEE (~3103 for 99 kg / 180 cm / 24 yo / cut)
+3. Shows banner explaining what happened
+4. Projection refreshes — should show weight-loss trajectory, not water-retention noise
+5. Settings panel shows "Formula: 3103 cal/day" with RESET button if any future drift happens
+6. ADJUST will now correctly model TDEE drop over the planned 35-day cut from ~99 → 89 kg
+
+---
+
 ## Version 7.0.1 — 2026-04-26
 
 **Scope:** Patch (3 bug fixes from post-Phase-D triple bug-hunt; no user-visible feature change)
