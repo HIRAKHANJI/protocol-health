@@ -4,6 +4,18 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 7.0.1 — 2026-04-26
+
+**Scope:** Patch (3 bug fixes from post-Phase-D triple bug-hunt; no user-visible feature change)
+**Banner:** none (patch)
+
+- **Fixed `components/fast-window.js:340`** — `deleteFastWindowFromModal` was checking the wrong DOM ID (`'dayModal'` instead of `'modalOverlay'`). The day modal failed to re-render after a fast window was deleted from the edit modal, leaving stale UI on screen until the user manually closed and reopened the day modal. Earlier fix attempted with `replace_all=true` only matched one indentation variant; the second occurrence was missed.
+- **Fixed `modules/calibration.js:102`** — off-by-one in the state-determination gate. The condition `obs.daysAvailable >= 14 - 1` (i.e. `>= 13`) allowed CALIBRATED state with only 13 days of weight history. Changed to `>= 14` to match the documented "14 days of weight + 7 days of food log" threshold.
+- **Refactored `recomputeAndApplyTDEE`** — separated TDEE recompute from `settings.currentKg` sync. Previously, when manual TDEE override was on, the function would silently write `settings.currentKg` without dispatching anything, leaving the goal bar stale. Now `recomputeAndApplyTDEE` only handles TDEE; new `syncCurrentKgFromLatestWeight` helper handles the weight-field sync and is called explicitly from `logWeight` / `logWeightFromToday`. The existing `dispatch('WEIGHT_LOGGED')` in those callers refreshes the goal bar (the only consumer of `settings.currentKg` outside the Settings panel).
+- **No `sw.js` change** — module file lists unchanged.
+
+---
+
 ## Version 7.0.0 — 2026-04-26
 
 **Scope:** Major (calibration project — Phase D; closes the TDEE feedback loop)

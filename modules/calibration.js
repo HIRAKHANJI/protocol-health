@@ -97,9 +97,9 @@ export function getCalibrationStatus() {
   const obs = computeObservedTDEE(14);
   const observedTDEE = obs.valid ? obs.tdee : null;
 
-  // Determine state
+  // Determine state — needs 14+ days of weight data AND 7+ logged days in window
   let state = 'GATHERING';
-  if (obs.valid && obs.daysLogged >= 7 && obs.daysAvailable >= 14 - 1) {
+  if (obs.valid && obs.daysLogged >= 7 && obs.daysAvailable >= 14) {
     state = 'CALIBRATED';
   }
 

@@ -337,7 +337,7 @@ export function deleteFastWindowFromModal() {
       deleteFastWindow(dateStr, null);
       closeFastEditModal();
       if (typeof openDayModal === 'function') {
-        const isModalOpen = document.getElementById('dayModal') && document.getElementById('dayModal').classList.contains('active');
+        const isModalOpen = document.getElementById('modalOverlay') && document.getElementById('modalOverlay').classList.contains('active');
         if (isModalOpen) openDayModal(dateStr, strToDate(dateStr));
       }
       renderTodayFastUI();

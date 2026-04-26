@@ -1602,7 +1602,7 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '7.0.0';
+const APP_VERSION = '7.0.1';
 const APP_VERSION_MSG = 'Adaptive TDEE calibration is now live. The app compares your real intake + weight loss against the formula prediction every week and adjusts your TDEE if reality disagrees by more than 7%. New REALITY CHECK block on the TRACK tab shows predicted vs actual loss live. Manual override toggle in Settings if you want to freeze TDEE.';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
@@ -3235,6 +3235,7 @@ function logWeightFromToday() {
   saveDayLogField(today, { weight: val });
   input.value='';
   renderWeights();
+  syncCurrentKgFromLatestWeight();
   recomputeAndApplyTDEE();
   dispatch('WEIGHT_LOGGED');
 }
@@ -3253,6 +3254,7 @@ function logWeight() {
   saveDayLogField(today, { weight: val });
   input.value='';
   renderWeights();
+  syncCurrentKgFromLatestWeight();
   recomputeAndApplyTDEE();
   dispatch('WEIGHT_LOGGED');
 }
@@ -3612,27 +3614,33 @@ function toggleTdeeOverride(checked) {
 }
 
 // Phase B: applies the recomputed TDEE if it differs from the stored value
-// and dispatches TDEE_CHANGED. Returns true if a change was written.
-// Phase D: also syncs settings.currentKg to the latest weight log so the
-// settings panel display doesn't drift out of date with reality.
+// and dispatches TDEE_CHANGED. Returns true if TDEE was written. Returns
+// false if no change (manual override, missing inputs, or TDEE unchanged).
+// Note: this function only handles TDEE. settings.currentKg sync is the
+// caller's responsibility (see syncCurrentKgFromLatestWeight below).
 function recomputeAndApplyTDEE() {
   const newTdee = recomputeTDEE();
+  if (newTdee === null) return false;
   const s = getSettings();
-  const latestWt = getLatestWeight();
-  let changed = false;
-  let tdeeChanged = false;
-  if (latestWt && s.currentKg !== latestWt) {
-    s.currentKg = latestWt;
-    changed = true;
-  }
-  if (newTdee !== null && s.tdee !== newTdee) {
-    s.tdee = newTdee;
-    changed = true;
-    tdeeChanged = true;
-  }
-  if (!changed) return false;
+  if (s.tdee === newTdee) return false;
+  s.tdee = newTdee;
   saveSettings(s);
-  if (tdeeChanged) dispatch('TDEE_CHANGED');
+  dispatch('TDEE_CHANGED');
+  return true;
+}
+
+// Phase D: keeps settings.currentKg in sync with the latest weight log entry.
+// Without this, the Settings panel "current weight" field drifts out of date
+// after weight logs and only refreshes when the user manually re-enters it.
+// Called from logWeight / logWeightFromToday after the weight is saved.
+// No dispatch needed — WEIGHT_LOGGED already refreshes goalBar (which is the
+// only consumer of settings.currentKg outside the Settings panel itself).
+function syncCurrentKgFromLatestWeight() {
+  const s = getSettings();
+  const latest = getLatestWeight();
+  if (!latest || s.currentKg === latest) return false;
+  s.currentKg = latest;
+  saveSettings(s);
   return true;
 }
 
