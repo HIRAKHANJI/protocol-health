@@ -1483,7 +1483,8 @@ const SK = {
   checklist: 'ph_ck_v1',   // legacy key (checklist state now lives inside dayLogs.checks — kept for compatibility)
   weights:   'ph_wt_v1',   // array of { date, weight, ts } — sorted newest-first
   dayLogs:   'ph_dl_v1',   // object keyed by dateStr — each value: { checks, weight, water, energy, notes, ts }
-  fastDays:  'ph_fd_v1',   // object keyed by dateStr — value: true if that day is a water fast
+  fastDays:  'ph_fd_v1',   // object keyed by dateStr — value: true if that day is a water fast (legacy boolean — pre-Phase-C)
+  fastWindows: 'ph_fw_v1', // object keyed by dateStr — array of { start: ISO, end: ISO|null, broken: bool, brokenBy: [foodIds] } (Phase A scaffolding; populated in Phase C)
   settings:  'ph_st_v1',   // single object: plan, currentKg, targetKg, calories, tdee, risk, startDate
   schedule:  'ph_sc_v1',   // single object: days[], startDate, totalDays, planName, startWeight
   seenVer:   'ph_sv_v1',   // string — last APP_VERSION the user dismissed the update banner for
@@ -1502,8 +1503,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '6.2.4';
-const APP_VERSION_MSG = 'Landing page content corrected: stats refreshed (85+ updates), changelog fixed, plan calorie numbers clarified as user-configurable. In-app behavior unchanged.';
+const APP_VERSION = '6.2.5';
+const APP_VERSION_MSG = 'Internal scaffolding for upcoming TDEE auto-calibration loop. No user-visible change yet.';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
 
@@ -2209,6 +2210,9 @@ const DISPATCH_MAP = {
   FOOD_LOGGED:       ['projection','goalBar','recentNotes','foodModal','todayCalStrip','nutritionMacros','radar','trackFoodLog','autoItems'],
   EXERCISE_LEVEL_CHANGED: ['workoutLevelDisplay'],
   WORKOUT_CHECKED: ['recentNotes','autoItems'],
+  // ─── Calibration project (Phase A scaffolding; producers wired in Phases B-D) ──
+  TDEE_CHANGED:        ['projection','durationBar','goalBar','nutritionMacros','radar'],
+  FAST_WINDOW_CHANGED: ['fastUI','checklist','calendarCell','projection','radar'],
 };
 
 // ─── CUSTOM DIALOGS (native confirm/alert blocked in sandboxed iframes) ──────

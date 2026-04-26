@@ -4,6 +4,22 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 6.2.5 — 2026-04-26
+
+**Scope:** Patch (calibration project — Phase A scaffolding; no user-visible behavior change)
+**Banner:** none (patch)
+
+- **New storage key `SK.fastWindows = 'ph_fw_v1'`** added to the SK object in `app.html`. Empty by default. Will hold per-day fast-window timestamps `{ start, end, broken, brokenBy }` once Phase C ships. Existing `SK.fastDays` is untouched and continues to work; calendar/checklist/radar readers fall back to the legacy boolean (interpreted as a 24-hour fast).
+- **Two new dispatch events** registered in `DISPATCH_MAP`:
+  - `TDEE_CHANGED → ['projection','durationBar','goalBar','nutritionMacros','radar']` — fired by Phase B/D when calibration writes a new TDEE.
+  - `FAST_WINDOW_CHANGED → ['fastUI','checklist','calendarCell','projection','radar']` — fired by Phase C when a fast window starts, stops, edits, or breaks.
+  No new dispatch targets — every target name already existed in the `dispatch()` switch.
+- **Schema migration v1 → v2** registered in `migrations/registry.js`. Purely additive — no data is read, transformed, or rewritten. `requiresBackup: false`. The migration only bumps the schema-version record so future migrations can build on this state.
+- **No `sw.js` change** (per CLAUDE.md feature-branch convention; CACHE_NAME bumps once at merge to main).
+- **Phase plan:** `docs/CALIBRATION_PHASE_A_PLAN.md` documents scope, files touched, smoke test, and acceptance criteria.
+
+---
+
 ## Version 6.2.4 — 2026-04-21
 
 **Scope:** Patch (landing page content corrections; app unchanged)
