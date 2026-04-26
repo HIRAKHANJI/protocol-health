@@ -16,5 +16,18 @@
 // are left unchanged in storage.
 
 export const MIGRATIONS = [
-  // No migrations registered at v5.1.0. Framework ships empty.
+  {
+    from: 1,
+    to: 2,
+    description: 'Register fast-window storage key (ph_fw_v1). No data transformation — purely additive.',
+    requiresBackup: false,
+    run: (data) => {
+      // No-op. SK.fastWindows is added in app.html. New key is empty by default.
+      // All readers continue to fall through to existing fastDays entries
+      // (interpreted as 24-hour fasts) until Phase C adds the start/stop UX.
+      return data;
+    },
+    verify: () => true,
+    reverse: (data) => data
+  }
 ];
