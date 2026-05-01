@@ -145,7 +145,7 @@ Surface the existing `MANAGE SCHEDULE → ADJUST` path from the Settings panel s
 
 ---
 
-## Phase 3 — Per-Plan Calorie Safety Floors
+## Phase 3 — Per-Plan Calorie Safety Floors / Bands
 
 **Status:** PENDING
 **Tier source:** Tier 3, item 10
@@ -155,44 +155,62 @@ Surface the existing `MANAGE SCHEDULE → ADJUST` path from the Settings panel s
 
 ### Goal
 
-Surface non-blocking warnings when the user enters a calorie ceiling below their plan's safe floor (per Section 15 of CLAUDE.md). Never block; always inform.
+Surface non-blocking warnings when the user enters a calorie ceiling outside the safe range for their active plan. The semantics differ by plan direction (cut, bulk, maintenance) — see the table below. Warnings only; never blocks computation.
+
+### Plan direction model
+
+| Plan | `goalMode` | Safety logic |
+|---|---|---|
+| LITE | `cut` | Hard floor: `1200 cal/day`. Warn if ceiling below floor. |
+| AGRO | `cut` | Hard floor: `800 cal/day` (plan ceiling 1000; absolute safety floor 800). Warn if ceiling below floor. |
+| CUT | `cut` | Hard floor: `1400 cal/day` (Helms 2014: ≥1.5 × BMR). Warn if ceiling below floor. |
+| BULK | `bulk` | Soft floor: `TDEE` (going below = accidental cut on a bulk plan). Warn if ceiling ≤ TDEE. |
+| MAINTENANCE | `maintenance` | Band: `TDEE ± 300 cal`. Warn if abs(ceiling − TDEE) > 300. |
 
 ### Scope
 
-1. Add a `minCalories` field to each plan object in `plans/*.js`:
-   - `lite.js`: 1200
-   - `agro.js`: 800 (hard floor; plan ceiling is 1000)
-   - `cut.js`: 1400
-   - `bulk.js`: TDEE-200 (computed at validation time, not static)
-   - `maintenance.js`: TDEE-300 (computed)
-2. In `calcDuration()`: after the existing risk gates, add a soft warning check. If `calcCals < activePlan.minCalories` (or computed equivalent), append a non-blocking note in the result panel:
-   - Text: `⚠ ${calcCals} cal/day is below this plan's recommended floor (${minCalories} cal). Sustain only with medical supervision.`
-3. Settings calorie field also shows the floor as a hint: `Floor for ${planName}: ${minCalories} cal`.
+1. **Add fields to each plan object in `plans/*.js`:**
+   - `lite.js`: `minCalories: 1200`, `caloriesMode: 'floor'`
+   - `agro.js`: `minCalories: 800`, `caloriesMode: 'floor'`
+   - `cut.js`: `minCalories: 1400`, `caloriesMode: 'floor'`
+   - `bulk.js`: `minCalories: null` (computed at validation: returns TDEE), `caloriesMode: 'above-tdee'`
+   - `maintenance.js`: `minCalories: null` (computed: TDEE − 300), `maxCalories: null` (computed: TDEE + 300), `caloriesMode: 'tdee-band'`
+   The `caloriesMode` discriminator lets validators dispatch on plan type without hardcoding plan keys.
+
+2. **Validation helper in `app.html`:** `validateCaloriesAgainstPlan(cals, plan, tdee)` returns `{ ok: bool, severity: 'ok'|'warn'|'critical', message: string }`. Modes:
+   - `'floor'`: warn if `cals < plan.minCalories`. Message references the plan's floor + medical-supervision note.
+   - `'above-tdee'`: warn if `cals <= tdee`. Message: "On a BULK plan, ceiling should be above TDEE; otherwise you're cutting."
+   - `'tdee-band'`: warn if `abs(cals - tdee) > 300`. Message: "MAINTENANCE keeps you within ±300 cal of TDEE."
+
+3. **Wire warnings into:**
+   - `calcDuration()` result panel — append warning under existing risk flags. Non-blocking.
+   - Settings calorie field — show floor/band hint as live caption: `Floor for ${planName}: 1200 cal` / `Above TDEE (${tdee} cal) for BULK` / `Band: ${tdee-300}–${tdee+300} for MAINTENANCE`.
 
 ### Files touched
 
-- `plans/lite.js`, `plans/agro.js`, `plans/cut.js`, `plans/bulk.js`, `plans/maintenance.js` — add `minCalories` field (number for cut/agro/lite, function for bulk/maintenance)
-- `app.html` — `calcDuration()` warning logic; settings-panel hint render in `openSettings()`; CSS for `.cal-floor-warn`
+- `plans/lite.js`, `plans/agro.js`, `plans/cut.js`, `plans/bulk.js`, `plans/maintenance.js` — add `minCalories`/`maxCalories`/`caloriesMode` fields.
+- `app.html` — `validateCaloriesAgainstPlan` helper; warning render in `calcDuration`; live hint in `openSettings`; CSS for `.cal-floor-warn`.
 
 ### Smoke test
 
-1. AGRO plan: enter calorie ceiling 700 → soft warning shown.
-2. AGRO plan: enter 1000 → no warning.
-3. CUT plan: enter 1200 → warning shown.
-4. BULK plan: warning fires only if ceiling < TDEE-200.
-5. Goal calculator never blocks computation; result still shown.
-6. Settings calorie field shows floor hint.
+1. AGRO plan: enter 700 cal → soft warning ("below 800 floor"). Enter 1000 → no warning.
+2. CUT plan: enter 1200 → warning ("below 1400 floor"). Enter 1500 → no warning.
+3. BULK plan with TDEE 3000: enter 2900 → warning ("ceiling at/below TDEE — accidental cut"). Enter 3300 → no warning.
+4. MAINTENANCE plan with TDEE 2500: enter 2100 → warning ("outside ±300 band"). Enter 2400 → no warning.
+5. Goal calculator never blocks; result still computed and shown.
+6. Settings calorie field shows correct hint per plan.
 
 ### Acceptance criteria
 
-- [ ] Warning is non-blocking (computation continues)
-- [ ] All 5 plans have `minCalories` defined (static or function)
-- [ ] Warning text is clear and references the plan
-- [ ] Floor hint visible in settings
+- [ ] All 5 plans declare appropriate `caloriesMode` + threshold field(s)
+- [ ] Validator dispatches correctly on mode (no hardcoded plan keys outside the helper)
+- [ ] Warning is non-blocking
+- [ ] Warning text plan-specific and clear
+- [ ] Settings hint matches plan mode
 
 ### Risk
 
-**Low.** New plan field is additive; existing readers ignore unknown fields. Warning is read-only display.
+**Low.** Additive plan fields; existing readers ignore unknown fields. Validator only emits messages.
 
 ---
 
@@ -375,48 +393,107 @@ If the user forgets to mark sick days, detect a likely sickness pattern (3+ cons
 
 ---
 
-## Phase 8 — Linked-Deficit Mode
+## Phase 8 — Linked Offset Mode (Plan-Direction-Aware)
 
 **Status:** PENDING
-**Tier source:** Tier 2, item 8
+**Tier source:** Tier 2, item 8 (extended for bulk/maintenance)
 **APP_VERSION target:** `7.5.0` (minor — new behaviour, opt-in, banner shown)
 **CACHE_NAME bump:** Yes.
 **Migration:** None.
 
 ### Goal
 
-Opt-in mode where calorie ceiling auto-tracks TDEE changes, maintaining a constant absolute deficit (cal). When user picks `targetDeficit = 1500 cal/day`, calorie ceiling = max(planMinCalories, TDEE - 1500). When TDEE drops, ceiling drops proportionally.
+Opt-in mode where the calorie ceiling auto-tracks TDEE changes by maintaining a constant offset relative to TDEE. The offset is **directional based on the active plan**:
+
+- **Cut plans (LITE / CUT / AGRO):** offset is a deficit. `ceiling = TDEE − deficit`. Floored at plan's `minCalories`. As TDEE drops with weight loss → ceiling drops too → user keeps the same daily deficit.
+- **BULK:** offset is a surplus. `ceiling = TDEE + surplus`. As TDEE rises with weight gain → ceiling rises → same daily surplus maintained.
+- **MAINTENANCE:** offset is a signed delta from TDEE (default 0, range typically ±200). `ceiling = TDEE + offset`. Keeps user near maintenance even as their body weight stabilises and TDEE drifts.
+
+### Plan-direction abstraction
+
+Reuse the `caloriesMode` discriminator added in Phase 3. The offset's sign is implicit by mode:
+
+| Plan mode | Offset semantic | Default | Range | Floor enforcement |
+|---|---|---|---|---|
+| `floor` (LITE/CUT/AGRO) | Deficit (positive number, subtracted) | 1500 | 0 – TDEE | `max(plan.minCalories, TDEE − offset)` |
+| `above-tdee` (BULK) | Surplus (positive number, added) | 300 | 100 – 1000 | No floor; `ceiling = TDEE + offset` |
+| `tdee-band` (MAINTENANCE) | Signed delta (can be negative) | 0 | −300 – +300 | `clamp(ceiling, TDEE−300, TDEE+300)` |
 
 ### Scope
 
-1. New settings fields: `s.linkedDeficitMode: boolean` (default false), `s.targetDeficit: number | null`.
-2. Settings panel: new toggle below TDEE field — `Link calorie ceiling to TDEE (auto-adjust on TDEE change)`. Reveals an input for `Target deficit (cal/day)` when on.
-3. When toggle is ON: calorie field becomes read-only and shows the computed value. Display text: `Auto: TDEE − deficit = X cal (locked to deficit)`.
-4. `recomputeAndApplyTDEE()` (or new `syncCalorieCeilingFromDeficit()`): when TDEE changes AND `linkedDeficitMode === true`, compute new ceiling and write `s.calories`. Floor at plan's `minCalories`.
-5. `weeklyCalibration` triggers the same recompute path.
+1. **New settings fields:**
+   - `s.linkedOffsetMode: boolean` (default false)
+   - `s.targetOffset: number | null` (units: cal/day; sign per plan mode)
+
+2. **Settings panel:** new toggle below TDEE field labelled adaptively:
+   - On cut plans: `Link calorie ceiling to TDEE (maintain a constant deficit)`
+   - On bulk: `Link calorie ceiling to TDEE (maintain a constant surplus)`
+   - On maintenance: `Link calorie ceiling to TDEE (track maintenance band)`
+
+3. **Offset input** revealed when toggle is ON, with adaptive label:
+   - Cut: `Daily deficit (cal below TDEE)` — input range 0–TDEE
+   - Bulk: `Daily surplus (cal above TDEE)` — input range 100–1000
+   - Maintenance: `Offset from TDEE (cal, can be negative)` — input range −300 to +300
+
+4. **Calorie field** becomes read-only when toggle ON. Live display shows computed value with formula:
+   - Cut: `Auto: ${tdee} − ${offset} = ${ceiling} cal (locked)`
+   - Bulk: `Auto: ${tdee} + ${offset} = ${ceiling} cal (locked)`
+   - Maintenance: `Auto: ${tdee} ${offset >= 0 ? '+' : '−'} ${abs(offset)} = ${ceiling} cal (locked)`
+
+5. **New helper `syncCalorieCeilingFromOffset()`** in `app.html`:
+   ```
+   if (!s.linkedOffsetMode) return false;
+   const plan = getActivePlan();
+   const mode = plan.caloriesMode;
+   let ceiling;
+   switch (mode) {
+     case 'floor':       ceiling = Math.max(plan.minCalories, s.tdee - s.targetOffset); break;
+     case 'above-tdee':  ceiling = s.tdee + s.targetOffset; break;
+     case 'tdee-band':   ceiling = Math.max(s.tdee - 300, Math.min(s.tdee + 300, s.tdee + s.targetOffset)); break;
+   }
+   if (s.calories !== ceiling) {
+     s.calories = ceiling;
+     saveSettings(s);
+     dispatch('CALORIES_CHANGED');
+     return true;
+   }
+   ```
+
+6. **Trigger sites:** `recomputeAndApplyTDEE` and `weeklyCalibration` both call `syncCalorieCeilingFromOffset()` after TDEE write. Plan switch (in `confirmPlan`) also recomputes if linkedOffsetMode is on (the formula changes when the plan mode changes).
+
+7. **Plan switch handling:** when user switches plans while linkedOffsetMode is ON, show a `showConfirm`: "Switching from CUT to BULK will reverse offset direction. Reset offset to plan default (300 cal surplus)?" — Yes resets, No turns linked mode off.
 
 ### Files touched
 
-- `app.html` — settings UI, toggle handler, `syncCalorieCeilingFromDeficit` helper, integration with `recomputeAndApplyTDEE` and weeklyCalibration call site, CSS for read-only state.
+- `app.html` — settings UI (adaptive toggle + input labels), `syncCalorieCeilingFromOffset` helper, integration with `recomputeAndApplyTDEE` and `weeklyCalibration`, plan-switch handling in `confirmPlan`, CSS for read-only state.
+- `getSettings()` defaults — add the two new fields.
 
 ### Smoke test
 
-1. Toggle on, deficit = 1500. Current TDEE 3382. Calorie field displays 1882 (cut floor: 1400).
-2. Drop weight by 5kg → TDEE recomputes lower → calorie field auto-drops, floored at 1400 if needed.
-3. Toggle off → field becomes editable, value preserved at last computed.
-4. Plan-floor enforcement works (won't go below `minCalories`).
+1. **CUT scenario:** Toggle on, deficit 1500. TDEE 3382. Ceiling shows 1882 (above 1400 floor). Drop weight 5 kg → TDEE drops to ~3300 → ceiling auto-drops to 1800.
+2. **BULK scenario:** Switch to BULK. Toggle on, surplus 300. TDEE 2800. Ceiling shows 3100. Weight gain → TDEE rises → ceiling rises proportionally.
+3. **MAINTENANCE scenario:** Switch to MAINTENANCE. Toggle on, offset 0. Ceiling = TDEE. Adjust offset to −150 → ceiling = TDEE − 150 (within band).
+4. **Plan switch with linked mode on:** prompt appears, user confirms reset → offset becomes plan default.
+5. **Floor enforcement (cut):** AGRO plan, deficit 5000 → ceiling clamped at 800 floor.
+6. **Toggle off:** field becomes editable, value preserved at last computed.
 
 ### Acceptance criteria
 
-- [ ] Toggle exists and persists in settings
-- [ ] Linked mode auto-updates calorie field on TDEE change
-- [ ] Floor enforcement against plan minCalories
+- [ ] Toggle + offset input both adapt their labels based on `plan.caloriesMode`
+- [ ] All 3 modes (`floor`, `above-tdee`, `tdee-band`) compute ceiling correctly
+- [ ] Floor/band/clamping respected per mode
+- [ ] TDEE_CHANGED triggers ceiling sync
+- [ ] Plan switch handled gracefully
 - [ ] Read-only visual state when linked
 - [ ] Disabling restores manual editability
 
 ### Risk
 
-**Medium.** New write path into settings.calories triggered by an existing event. Mitigation: gate behind explicit user opt-in; default off.
+**Medium.** New auto-write path into settings.calories triggered by TDEE events. Mitigation: opt-in only (default off); plan-switch protection; floor/band enforcement.
+
+### Dependencies
+
+**Requires Phase 3** (`caloriesMode` field on each plan). Cannot ship before Phase 3.
 
 ---
 
