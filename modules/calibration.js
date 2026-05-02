@@ -5,10 +5,14 @@
 // disagrees with the formula by more than 7%.
 //
 // State machine:
-//   GATHERING   — < 14 days of weight logs OR < 7 days of food logs in window
+//   GATHERING   — < 13 days of weight span OR < 7 days of food logs in window
 //                 → display formula TDEE only, do not apply observed
-//   CALIBRATED  — >= 14 days of weight + >= 7 days of food log
+//   CALIBRATED  — full 14-day weight span (13 days between earliest and
+//                 latest weight in the window) + >= 7 days of food log
 //                 → blend 70% observed + 30% formula, apply on >7% gap
+//   v7.10.0: thresholds say "13" because spanDays = (newest - oldest)/86400000
+//   maxes at days-1 for a `days`-day window. The previous "14" gate was
+//   unreachable.
 //
 // Manual override (settings.tdeeManualOverride === true) freezes calibration
 // entirely. The user keeps whatever TDEE they manually entered.
@@ -323,9 +327,13 @@ export function getCalibrationStatus() {
   const obs = computeObservedTDEE(14);
   const observedTDEE = obs.valid ? obs.tdee : null;
 
-  // Determine state — needs 14+ days of weight data AND 7+ logged days in window
+  // Determine state — needs the full 14-day window covered by weight data
+  // AND 7+ logged days in window. v7.10.0 BUG FIX: spanDays is the diff
+  // between the oldest and newest weight in a 14-day window, so its maximum
+  // possible value is 13 (today minus 13 days back). The previous gate
+  // `>= 14` was unreachable, leaving every user permanently in GATHERING.
   let state = 'GATHERING';
-  if (obs.valid && obs.daysLogged >= 7 && obs.daysAvailable >= 14) {
+  if (obs.valid && obs.daysLogged >= 7 && obs.daysAvailable >= 13) {
     state = 'CALIBRATED';
   }
 
@@ -660,20 +668,34 @@ export function checkStoredTdeeSanity() {
   return { ok: true, currentTDEE, formulaTDEE, bmrFloor, ceiling };
 }
 
-// v7.9.0: stale calibration data auto-clear. When the recorded
-// `lastCalibrationObserved` is from > 21 days ago AND fails today's sanity
-// bounds, the value is poisoned legacy data (e.g. one-off broken-fast spike
-// that got stuck because the cadence gate locked subsequent runs). Clearing
-// it lets the next calibration cycle evaluate fresh data without inheriting
-// the bad history. Returns { cleared: bool, reason, oldObserved, ageDays }.
+// v7.9.0: stale calibration data auto-clear. Originally only cleared values
+// > 21 days old AND failing sanity bounds. v7.10.0: now clears immediately
+// whenever the stored lastCalibrationObserved fails today's bounds — the
+// 21-day grace period was originally meant to avoid wiping a real one-off
+// blip, but a value that's PHYSIOLOGICALLY IMPOSSIBLE (e.g. observed=291
+// when BMR=1949) is never recoverable, only confusing. Returns
+// { cleared: bool, reason, oldObserved, ageDays }.
 const STALE_CALIBRATION_DAYS = 21;
 export function clearStaleCalibrationData() {
   const s = getSettings();
-  if (!s.lastCalibrationAt) return { cleared: false, reason: 'never-run' };
-  const lastAt = new Date(s.lastCalibrationAt).getTime();
-  const ageDays = (Date.now() - lastAt) / 86400000;
-  if (ageDays < STALE_CALIBRATION_DAYS) return { cleared: false, reason: 'recent', ageDays };
+  const lastAt = s.lastCalibrationAt ? new Date(s.lastCalibrationAt).getTime() : null;
+  const ageDays = lastAt ? (Date.now() - lastAt) / 86400000 : null;
   const lastObs = s.lastCalibrationObserved;
+  // Internal-state cleanup: outcome='never-run' but stored values present
+  // (caused by autoRevert pre-v7.10.0 setting lastCalibrationAt without
+  // clearing observed/formula, or by clearStale running between snapshot
+  // writes). Wipe the orphaned numbers AND lastCalibrationAt so the
+  // cadence gate doesn't block the next weeklyCalibration cycle — those
+  // stored values are not attached to any real calibration run.
+  if (s.lastCalibrationOutcome === 'never-run'
+      && (s.lastCalibrationObserved != null || s.lastCalibrationFormula != null
+          || s.lastCalibrationAt != null)) {
+    s.lastCalibrationObserved = null;
+    s.lastCalibrationFormula = null;
+    s.lastCalibrationAt = null;
+    saveSettings(s);
+    return { cleared: true, reason: 'orphaned-never-run-snapshot', oldObserved: lastObs };
+  }
   if (!lastObs) return { cleared: false, reason: 'no-observed' };
   // Recompute current sanity bounds against today's data
   const weight = getLatestWeight();
@@ -691,20 +713,32 @@ export function clearStaleCalibrationData() {
   const atpFactor = computeATPFactor(s, gs(SK.weights) || [], plan);
   const formulaTDEE = Math.round(bmr * weeklyAct * atpFactor);
   const ceiling = formulaTDEE * TDEE_CEIL_RATIO;
-  // Fails today's sanity? Clear it.
+  // Fails today's sanity? Clear it. v7.10.0: removed the 21-day grace
+  // period. A physiologically-impossible value (e.g. observed below BMR)
+  // is never going to "recover" — keeping it just confuses the user.
   if (lastObs < bmr || lastObs > ceiling) {
     s.lastCalibrationObserved = null;
     s.lastCalibrationFormula = null;
     s.lastCalibrationOutcome = 'never-run';
     s.lastCalibrationAt = null; // also reset cadence so next load can re-run
     saveSettings(s);
-    return { cleared: true, oldObserved: lastObs, ageDays, reason: 'stale-and-out-of-bounds' };
+    return { cleared: true, oldObserved: lastObs, ageDays, reason: 'out-of-bounds' };
+  }
+  // Optional info return for the recent-but-in-bounds case
+  if (ageDays !== null && ageDays < STALE_CALIBRATION_DAYS) {
+    return { cleared: false, reason: 'recent-and-in-bounds', ageDays };
   }
   return { cleared: false, reason: 'in-bounds' };
 }
 
 // v7.1.0: If the stored TDEE is implausible, reset it to formula and return
 // what was reverted. Caller should show the user a banner explaining why.
+// v7.10.0 fix: previously bumped lastCalibrationAt to NOW which silently
+// blocked weeklyCalibration's cadence gate for 7 days AND left the stored
+// outcome untouched (so Reality Check could keep showing 'never-run' or a
+// stale value alongside this revert). Now: clear lastCalibrationAt entirely
+// so the next cycle evaluates fresh, AND record 'reverted' as the outcome
+// with the pre-revert formula/observed snapshot for transparency.
 export function autoRevertImplausibleTdee() {
   const check = checkStoredTdeeSanity();
   if (check.ok) return { reverted: false, ...check };
@@ -712,9 +746,10 @@ export function autoRevertImplausibleTdee() {
   const s = getSettings();
   const old = s.tdee;
   s.tdee = check.formulaTDEE;
-  // Reset lastCalibrationAt so the next calibration cycle gets a fresh
-  // chance once the user's data stabilizes (~14 days from now).
-  s.lastCalibrationAt = new Date().toISOString();
+  s.lastCalibrationAt = null; // unblock cadence — let weeklyCalibration retry
+  s.lastCalibrationOutcome = 'reverted';
+  s.lastCalibrationFormula = check.formulaTDEE;
+  s.lastCalibrationObserved = null; // the pre-revert observed was bad data
   saveSettings(s);
   if (typeof dispatch === 'function') dispatch('TDEE_CHANGED');
   return { reverted: true, oldTDEE: old, newTDEE: check.formulaTDEE, ...check };
@@ -729,7 +764,10 @@ function _buildCadenceNote(status) {
     return 'Auto-calibration is OFF (you froze TDEE). Untick "Freeze TDEE" in Settings to re-enable.';
   }
   if (status.state !== 'CALIBRATED') {
-    const needWeight = Math.max(0, 14 - (status.daysAvailable || 0));
+    // v7.10.0: matches the off-by-one fix in getCalibrationStatus — 14-day
+    // window's max spanDays is 13 (today + 13 prior days). Use 13 here too
+    // so the displayed shortfall agrees with the actual gating threshold.
+    const needWeight = Math.max(0, 13 - (status.daysAvailable || 0));
     const needFood = Math.max(0, 7 - (status.daysLogged || 0));
     if (needWeight > 0 && needFood > 0) {
       return 'Gathering data — needs ' + needWeight + ' more days of weight logs and ' + needFood + ' more food-logged days.';
@@ -775,6 +813,11 @@ function _buildCadenceNote(status) {
       return 'Last run: not enough data. Next check ' + nextStr + '.';
     case 'missing-inputs':
       return 'Last run: missing inputs. Next check ' + nextStr + '.';
+    case 'reverted':
+      // v7.10.0: TDEE was auto-reverted to formula because the prior stored
+      // value was outside physiological bounds. Cadence is unblocked so
+      // calibration retries on the next load.
+      return 'TDEE was auto-corrected to formula. Calibration will retry on next app load.';
     case 'never-run':
       return 'First calibration on next app load.';
     default:

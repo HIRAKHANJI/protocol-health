@@ -4,6 +4,67 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 7.10.0 — 2026-05-02
+
+**Scope:** Minor (calibration + TDEE consistency fixes — 5 user-visible bugs)
+**Banner:** shown — "TDEE & calibration fixes. The 'GATHERING DATA' status was caused by an off-by-one bug — Reality Check can now actually become CALIBRATED. Stored TDEE now resyncs to the formula on every app load (it was drifting until you next logged a weight). AGRO's activity multiplier dropdown now shows the honest weekly average (1.55× — 4 eat days × 1.70 + 3 fast days × 1.35), instead of misleadingly showing 1.725×. Stale calibration snapshots that violate physiological bounds now auto-clear, and TDEE auto-revert no longer silently locks the calibration cadence."
+**CACHE_NAME:** v28 → v29.
+
+**Root motivation.** Owner reported five linked symptoms in v7.9.0 on real data (40+ days of weight + food + checklist logs):
+1. Reality Check stuck on "GATHERING DATA — needs 1 more day of weight logs" despite a full month of data.
+2. Stored TDEE = 3,363 cal/day = BMR × 1.725 (legacy single multiplier), even though the AGRO plan's day-type model gives 1.55× weighted (= 3,022 cal). The new model wasn't being applied to the stored value.
+3. `lastCalibrationObserved: 291` cal — physiologically impossible (below BMR), left over as orphan data, never cleared.
+4. `lastCalibrationOutcome: 'never-run'` while `lastCalibrationAt` was set to today — internal-state inconsistency that locked the calibration cadence.
+5. Activity dropdown still showing "1.725 — Very active 6-7×/week" (the legacy single value), even though the formula uses 1.55× weighted.
+
+All five trace back to model-vs-storage drift introduced in v7.9.0's day-type model rollout. v7.10.0 closes the loop.
+
+**Bug 1 — Calibration off-by-one (highest impact).**
+- `getCalibrationStatus` gated CALIBRATED on `obs.daysAvailable >= 14`. But `daysAvailable = spanDays = (newest weight − oldest weight in window) / 86400000`, capped at `days − 1` for a 14-day window. Maximum reachable value: 13. The gate was unreachable for any user.
+- Fix: gate on `>= 13`, matching the 14-day window's actual maximum span.
+- `_buildCadenceNote` had the same off-by-one in the "needs N more days" message — fixed in lockstep.
+- File: `modules/calibration.js`.
+
+**Bug 2 — Stored TDEE never resynced to current formula model.**
+- `recomputeAndApplyTDEE()` only fired on weight log. Users who upgraded to v7.9.0 (new day-type model) without immediately logging a new weight kept their old TDEE indefinitely.
+- For the owner: `s.tdee = 3,363` (= BMR × 1.725, legacy) vs. the new day-type formula's `3,022` (= BMR × 1.55, weighted).
+- Fix: added `recomputeAndApplyTDEE()` to `runInit` BEFORE the calibration steps. Every load now reconciles `s.tdee` with `_computeFormulaTDEE`, unless the user has manually frozen TDEE (override toggle still respected).
+- File: `app.html`.
+
+**Bug 3 — `autoRevertImplausibleTdee` silently locked the cadence.**
+- After reverting an out-of-bounds stored TDEE, the function set `lastCalibrationAt = NOW`, which blocked `weeklyCalibration` from running for 7 days.
+- It also did NOT update `lastCalibrationOutcome`, so Reality Check kept showing the stale outcome (often 'never-run').
+- Fix: now sets `lastCalibrationAt = null` (cadence unblocked), `lastCalibrationOutcome = 'reverted'`, and snapshots the formula value for transparency. Added matching cadence-note case ("TDEE was auto-corrected to formula. Calibration will retry on next app load.").
+- File: `modules/calibration.js`.
+
+**Bug 4 — `clearStaleCalibrationData` too lenient.**
+- Required `lastCalibrationAt` to be > 21 days old before clearing physiologically-impossible stored values. A value below BMR is never going to "recover" — keeping it just confuses the user.
+- Also did not detect the orphan-state pattern: `outcome='never-run'` BUT `lastCalibrationObserved` populated (the symptom on the owner's data).
+- Fix: removed the 21-day grace period for out-of-bounds values. Added an explicit orphan-cleanup branch: when `outcome='never-run'` AND any calibration snapshot fields are populated, wipe them all (including `lastCalibrationAt`) so the next cycle evaluates fresh.
+- File: `modules/calibration.js`.
+
+**Bug 5 — Activity multiplier dropdown defaulted to the wrong value.**
+- `PLAN_ACTIVITY_DEFAULTS.agro = '1.725'` in app.html. But the AGRO formula uses `(4 eat × 1.70 + 3 fast × 1.35) / 7 = 1.55`. The dropdown showed "Very active 1.725" while the formula silently used 1.55 — a 10% misrepresentation.
+- Fix: realigned every plan's dropdown default to its weekly-weighted average. AGRO is the only meaningful change (1.725 → 1.55); the others were already aligned within the dropdown's resolution.
+- The TDEE auto-note in the Settings panel now spells out the breakdown for any plan with `activityByDayType`: e.g. "AGRO uses per-day-type activity: 4 eat × 1.70 + 3 fast × 1.35 = weekly avg 1.55×. Dropdown is informational; the formula uses the weighted average."
+- File: `app.html`.
+
+**Files touched:**
+- `modules/calibration.js` — off-by-one fix, autoRevert outcome tracking, stale-data cleanup tightening.
+- `app.html` — TDEE resync at init, PLAN_ACTIVITY_DEFAULTS realignment, TDEE auto-note rewrite.
+- `index.html` — hero badge → v7.10.0.
+- `sw.js` — CACHE_NAME → v29.
+- `CLAUDE.md` — version references updated.
+
+**Behaviour after upgrade for the owner's data (illustrative).**
+- `s.tdee`: 3,363 → recomputed at load → 3,022 (BMR × 1.55, day-type weighted).
+- `lastCalibrationObserved` 291 (orphan) → cleared.
+- `lastCalibrationFormula` 3,453 (orphan) → cleared.
+- `lastCalibrationAt` orphan → cleared, weeklyCalibration runs fresh.
+- weeklyCalibration evaluates: state = CALIBRATED (off-by-one fix), observedTDEE = 1,328, fails sanity check (below BMR 1,950), records `outcome='rejected-out-of-bounds'`. `s.tdee` stays at 3,022 (formula). Reality Check honestly reports the rejection so the owner can investigate the underlying data (post-fast weight depletion in the window).
+
+---
+
 ## Version 7.9.0 — 2026-05-02
 
 **Scope:** Minor (TDEE estimation accuracy upgrade — Phases A-E from the second roadmap, all bundled)

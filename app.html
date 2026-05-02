@@ -1727,8 +1727,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '7.9.0';
-const APP_VERSION_MSG = 'Major TDEE accuracy upgrade. Plans now use per-day-type activity multipliers (eat-day vs fast-day) instead of one number applied to every day. Adaptive thermogenesis factor models the natural metabolic slowdown after weeks of cutting. Reality Check shows the full breakdown so you can see exactly where your TDEE comes from. Three calibration bugs fixed at the same time. Auto-corrects stale data on first load.';
+const APP_VERSION = '7.10.0';
+const APP_VERSION_MSG = 'TDEE & calibration fixes. The "GATHERING DATA" status was caused by an off-by-one bug — Reality Check can now actually become CALIBRATED. Stored TDEE now resyncs to the formula on every app load (it was drifting until you next logged a weight). AGRO\'s activity multiplier dropdown now shows the honest weekly average (1.55× — 4 eat days × 1.70 + 3 fast days × 1.35), instead of misleadingly showing 1.725×. Stale calibration snapshots that violate physiological bounds now auto-clear, and TDEE auto-revert no longer silently locks the calibration cadence.';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
 
@@ -3716,12 +3716,32 @@ function onPlanSelectChange() {
   const actDefault = PLAN_ACTIVITY_DEFAULTS[val] || '1.55';
   document.getElementById('settingActivityLevel').value = actDefault;
   syncCustomSelect('activitySelectCustom', 'settingActivityLevel');
-  // Update TDEE note for AGRO
+  // Update TDEE note. v7.10.0: when the plan declares activityByDayType,
+  // honestly explain that the formula uses a weekly-weighted average across
+  // eat / fast / light days \u2014 not the single dropdown value. The dropdown
+  // value is now seeded to the weighted average so the displayed multiplier
+  // matches what's actually used.
   const noteEl = document.getElementById('tdeeAutoNote');
   if(noteEl) {
-    noteEl.textContent = val === 'agro'
-      ? 'AGRO plan uses 1.725\u00d7 multiplier (very active: double sessions + active job). Adjust if your job is sedentary.'
-      : 'Auto-calculated from Mifflin-St Jeor equation. Override manually if you know your actual TDEE.';
+    const planObj = PLANS[val] || PLANS.default;
+    const adt = planObj && planObj.activityByDayType;
+    if (adt) {
+      const fastN = planObj.fastDaysPerWeek || 0;
+      const lightN = planObj.lightDaysPerWeek || 0;
+      const eatN = Math.max(0, 7 - fastN - lightN);
+      const e = (typeof adt.eatDay === 'number') ? adt.eatDay : 1.55;
+      const f = (typeof adt.fastDay === 'number') ? adt.fastDay : 1.35;
+      const l = (typeof adt.lightDay === 'number') ? adt.lightDay : 1.40;
+      const weighted = ((eatN*e + fastN*f + lightN*l) / 7);
+      const parts = [eatN + ' eat \u00d7 ' + e.toFixed(2)];
+      if (fastN > 0) parts.push(fastN + ' fast \u00d7 ' + f.toFixed(2));
+      if (lightN > 0) parts.push(lightN + ' light \u00d7 ' + l.toFixed(2));
+      noteEl.textContent = planObj.name + ' uses per-day-type activity: '
+        + parts.join(' + ') + ' = weekly avg '
+        + weighted.toFixed(2) + '\u00d7. Dropdown is informational; the formula uses the weighted average.';
+    } else {
+      noteEl.textContent = 'Auto-calculated from Mifflin-St Jeor equation. Override manually if you know your actual TDEE.';
+    }
   }
   autoFillTDEE();
   updateTimingUI(val);
@@ -3840,12 +3860,20 @@ function setCurrentWeight() {
 // ─── TDEE AUTO-CALCULATION (Mifflin-St Jeor) ────────────────────────────────
 // Computes TDEE from age, height, sex, weight, and activity level.
 // Returns null if any required field is missing.
+// v7.10.0: legacy single-multiplier dropdown defaults — these now MIRROR the
+// weekly-weighted average implied by each plan's activityByDayType so the
+// dropdown shows the value actually used by the formula. AGRO previously
+// defaulted to 1.725 ("very active 6-7x/week") which was ONLY accurate for
+// eat-day training sessions; the formula already weights it across 4 eat
+// days × 1.70 + 3 fast days × 1.35 = 1.55, so the dropdown now shows that.
+// The legacy value is still used as a fallback when a plan has no
+// activityByDayType declared. See onPlanSelectChange for the breakdown note.
 const PLAN_ACTIVITY_DEFAULTS = {
-  default:     '1.375',
-  agro:        '1.725',
-  cut:         '1.55',
-  bulk:        '1.55',
-  maintenance: '1.375'
+  default:     '1.375', // LITE weekly avg ≈ 1.30, rounded to nearest dropdown step
+  agro:        '1.55',  // AGRO weekly avg = 1.55 (4 eat × 1.70 + 3 fast × 1.35)
+  cut:         '1.55',  // CUT eat-day = 1.55, no fast days
+  bulk:        '1.55',  // BULK weekly avg ≈ 1.51 (5 eat × 1.55 + 2 light × 1.40)
+  maintenance: '1.375'  // MAINT weekly avg ≈ 1.36 (6 eat × 1.375 + 1 light × 1.30)
 };
 
 // ─── v7.9.0: TDEE MODEL UPGRADE ─────────────────────────────────────────────
@@ -5556,6 +5584,17 @@ async function runInit() {
 
   // Phase C: kick off the live fast-window timer (refreshes every 30s).
   if (typeof startFastTickInterval === 'function') startFastTickInterval();
+
+  // v7.10.0: sync stored TDEE with current formula model BEFORE any other
+  // calibration step. Without this, a stored TDEE computed under an older
+  // model (e.g. v7.8 single-multiplier 1.725 for AGRO) survives indefinitely
+  // because recomputeAndApplyTDEE only fired on weight log and the cadence
+  // gate locked weeklyCalibration. Now: every load reconciles s.tdee with
+  // the live _computeFormulaTDEE output (day-type weighted activity + ATP),
+  // unless the user has manually frozen TDEE via the override toggle.
+  if (typeof recomputeAndApplyTDEE === 'function') {
+    try { recomputeAndApplyTDEE(); } catch (e) { console.warn('[init] TDEE resync failed:', e); }
+  }
 
   // v7.9.0 BUG FIX: clear stale calibration data BEFORE the sanity-revert
   // and weekly-calibration steps. If the stored lastCalibrationObserved is
