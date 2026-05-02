@@ -4,6 +4,49 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 7.8.0 — 2026-04-28
+
+**Scope:** Minor (Phase 12 of calibration roadmap — multi-day fast sessions, with v3→v4 migration; data restructure)
+**Banner:** shown — "Multi-day fasts now work properly. Start a fast Friday evening, end Monday morning — one session covers all days, no duplicate windows. Tap START FAST during an active session does nothing (no more confused state). Data restructure migrated automatically with auto-backup. Calendar and Reality Check unchanged in look — the fix is under the hood plus the Edit Times modal now labels multi-day spans clearly."
+
+**Goal.** Solve the multi-day fast bug surfaced earlier (Sat-Sun fast spanning Fri 6PM → Mon 9AM creating duplicate windows on Sat AND Sun, double-counting in calibration). Replace the per-date window model from Phase C with a date-agnostic session abstraction. One continuous fast = one session, regardless of how many calendar dates it spans.
+
+**Storage:**
+
+- **New SK key:** `SK.fastSessions = 'ph_fs_v1'`. Array of `{ id, start, end, broken, brokenBy[], dates[], legacy? }`. `dates[]` computed from start/end (or now if active); a date is included if the session was active for any portion of that local-time calendar day.
+- **`SK.fastWindows`** (Phase A/C) becomes vestigial — kept in storage post-migration for rollback compat, no longer read by new code. New writes only go to `fastSessions`.
+- **Migration v3 → v4** in `migrations/registry.js`. `requiresBackup: true` (auto-backup runs before migration applies). Two-step backfill:
+  1. Convert each existing `fastWindows[date]` entry to a session with `dates: [date]`. Dedupe via `(date|start|end)` signature.
+  2. For each `fastDays[date]` without coverage from step 1, create a 24-hour legacy session with `legacy: true`. Consecutive fast days **NOT auto-merged** — without timestamp data, can't infer continuity. User can manually merge later via the day-modal session editor.
+  - Verify function: every `fastDays` entry must be covered by at least one session; no session may have an empty `dates[]`.
+  - Reverse: drops `fastSessions`. `fastWindows` and `fastDays` were never touched.
+
+**API restructure (`components/fast-window.js`, full rewrite):**
+
+- **New session-level API (primary surface):** `getActiveSession()` (date-agnostic, one global active session at a time), `getSessionsForDate(dateStr)`, `getMostRecentSessionForDate(dateStr)`, `startFastSession()`, `endFastSession()`, `markSessionBroken(foodEntryId, foodTs)`, `editSession(sessionId, startISO, endISO, broken)`, `deleteSession(sessionId)`. All recompute `dates[]` from start/end on every write.
+- **Backward-compat shims (Phase C names preserved):** `getFastWindows`, `getActiveFastWindow`, `getMostRecentWindow`, `isFastBroken`, `getFastDurationHours`, `startFast`, `endFast`, `markFastBroken`, `editFastWindow`, `deleteFastWindow`. All delegate to the session API. Phase C onclick handlers (`onclick="startFast()"`, `onclick="markFastBroken('${dateStr}', ...)"`) keep working without HTML changes.
+- **`getFastDurationHours(dateStr)`** now correctly slices each multi-day session by the local-time calendar boundaries of that date — a Fri 6PM → Mon 9AM session contributes 6h to Friday's count, 24h to Saturday's, 24h to Sunday's, 9h to Monday's (not 63h to all four). Fixes calibration math that previously could double-count via duplicate windows.
+
+**UX changes:**
+
+- **TODAY tab fast banner:** active session shows "FASTING X h Y m" with the start time labelled `Started Fri 18:00` for multi-day sessions (vs `Started 18:00` for same-day). Tapping `▶ START FAST` during an active session is a no-op (active session is global; no duplicate created).
+- **Live timer interval:** reads global active session via `getActiveSession()` — works correctly across multi-day sessions even when "today" rolls over.
+- **Day modal Edit Times:** shows session-level info. When a session spans multiple dates, displays `⏱ Multi-day fast: spans N days` and the full Fri-→-Mon date+time range. Edit applies to the entire session, not a date-scoped slice.
+- **Edit Modal title** when editing a multi-day session: appends `(multi-day session — covers N dates)`.
+- **Legacy sessions** (created from pre-Phase-12 fastDays without timestamp data): day modal shows `Backfilled from pre-Phase-12 data — edit times to set the actual fast window.` to encourage manual cleanup.
+
+**Backward compat verified:**
+
+- Calibration math (`modules/calibration.js`) unchanged — it reads `gs(SK.fastDays)` directly to gate fast-day intake counting, never uses `getFastWindows`. Phase 12 doesn't touch fastDays storage. So calibration continues to work identically.
+- Calendar coloring (`modules/calendar.js`) uses `isFastBroken(dateStr)` shim — still returns correct boolean.
+- `addFoodEntry` break-fast prompt uses `getActiveFastWindow()` — now returns the global active session regardless of date. Logging food on Saturday during a Fri-started session correctly fires the break-fast prompt.
+
+**APP_VERSION 7.7.0 → 7.8.0** (minor — banner shown; data restructure with `requiresBackup: true` migration). **No `sw.js` change.**
+
+**Roadmap:** `PENDING_IMPLEMENTATIONS.md` Phase 12 — IN PROGRESS until owner confirms PR merge.
+
+---
+
 ## Version 7.7.0 — 2026-04-28
 
 **Scope:** Minor (Phase 11 of calibration roadmap — backup history tracking, with v2→v3 migration)

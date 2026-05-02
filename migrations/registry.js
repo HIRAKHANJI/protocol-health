@@ -43,5 +43,92 @@ export const MIGRATIONS = [
     },
     verify: () => true,
     reverse: (data) => data
+  },
+  {
+    from: 3,
+    to: 4,
+    description: 'Multi-day fast sessions: backfill SK.fastSessions from existing fastWindows + fastDays. Phase 12 (v7.8.0).',
+    requiresBackup: true,
+    run: (data) => {
+      const fwKey = 'ph_fw_v1';
+      const fdKey = 'ph_fd_v1';
+      const fsKey = 'ph_fs_v1';
+      const fw = data[fwKey] || {};
+      const fd = data[fdKey] || {};
+      const sessions = [];
+      const seenSig = new Set();
+      const baseTs = Date.now();
+
+      // Step A: convert each existing fastWindows entry to a session.
+      // Dedupe by (date|start|end) signature in case Phase C ever
+      // double-wrote a window across dates.
+      let serial = 0;
+      const fwDates = Object.keys(fw).sort();
+      for (const date of fwDates) {
+        const arr = Array.isArray(fw[date]) ? fw[date] : [];
+        for (const win of arr) {
+          if (!win || typeof win !== 'object') continue;
+          const sig = date + '|' + (win.start || '') + '|' + (win.end || '');
+          if (seenSig.has(sig)) continue;
+          seenSig.add(sig);
+          sessions.push({
+            id: 'fs_mig_' + baseTs + '_' + (serial++),
+            start: win.start || (date + 'T00:00:00.000Z'),
+            end:   win.end   || (date + 'T23:59:59.999Z'),
+            broken: !!win.broken,
+            brokenBy: Array.isArray(win.brokenBy) ? win.brokenBy.slice() : [],
+            dates: [date],
+            legacy: false
+          });
+        }
+      }
+
+      // Step B: for each fastDays entry without a session covering it,
+      // create a 24-hour legacy session. Consecutive fast days are NOT
+      // auto-merged — without timestamp data we can't infer continuity.
+      // User can manually merge later via the day-modal session editor.
+      const coveredDates = new Set();
+      sessions.forEach(s => (s.dates || []).forEach(d => coveredDates.add(d)));
+      const fdDates = Object.keys(fd).sort();
+      for (const date of fdDates) {
+        if (!fd[date]) continue;
+        if (coveredDates.has(date)) continue;
+        sessions.push({
+          id: 'fs_legacy_' + date.replace(/-/g, ''),
+          start: date + 'T00:00:00.000Z',
+          end:   date + 'T23:59:59.999Z',
+          broken: false,
+          brokenBy: [],
+          dates: [date],
+          legacy: true
+        });
+        coveredDates.add(date);
+      }
+
+      data[fsKey] = sessions;
+      return data;
+    },
+    verify: (data) => {
+      const fd = data['ph_fd_v1'] || {};
+      const sessions = data['ph_fs_v1'] || [];
+      // Every fastDays entry must be covered by at least one session
+      const coveredDates = new Set();
+      sessions.forEach(s => (s.dates || []).forEach(d => coveredDates.add(d)));
+      for (const date of Object.keys(fd)) {
+        if (!fd[date]) continue;
+        if (!coveredDates.has(date)) return false;
+      }
+      // Every session must have a non-empty dates[] array
+      for (const s of sessions) {
+        if (!Array.isArray(s.dates) || s.dates.length === 0) return false;
+      }
+      return true;
+    },
+    reverse: (data) => {
+      // Reverse: drop fastSessions. fastWindows + fastDays were never
+      // touched by run() so they're unchanged in storage.
+      delete data['ph_fs_v1'];
+      return data;
+    }
   }
 ];
