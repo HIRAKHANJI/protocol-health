@@ -324,6 +324,13 @@ body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif
 .activity-infer-text { font-family:'DM Mono',monospace; font-size:0.6rem; color:var(--muted); line-height:1.5; flex:1; }
 .activity-infer-apply-btn { background:transparent; border:1px solid rgba(78,205,196,0.6); color:#4ecdc4; font-family:'DM Mono',monospace; font-size:0.6rem; letter-spacing:1px; padding:4px 10px; border-radius:4px; cursor:pointer; flex-shrink:0; }
 .activity-infer-apply-btn:active { transform:scale(0.97); }
+/* Phase 11 (v7.7.0): backup history list */
+.backup-history-list { margin-top:10px; padding:10px 13px; background:var(--surface); border:1px solid var(--border); border-radius:8px; font-family:'DM Mono',monospace; }
+.backup-history-header { font-size:0.6rem; color:var(--muted); letter-spacing:1px; margin-bottom:6px; }
+.backup-history-row { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:4px 0; font-size:0.62rem; color:var(--text); border-top:1px solid var(--border); }
+.backup-history-row:first-of-type { border-top:none; }
+.bh-when { color:var(--text); flex-shrink:0; }
+.bh-name { color:var(--muted); font-size:0.55rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:60%; text-align:right; }
 /* Phase 5 (v7.3.0): sickness toggle (TODAY tab + day modal) + calendar icon overlay */
 .sick-toggle-row { display:flex; align-items:center; gap:8px; padding:8px 10px; background:var(--surface); border:1px solid var(--border); border-radius:6px; cursor:pointer; font-family:'DM Mono',monospace; font-size:0.7rem; color:var(--muted); }
 .sick-toggle-row input[type=checkbox] { width:16px; height:16px; accent-color:var(--accent2); flex-shrink:0; }
@@ -1140,6 +1147,8 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
         </div>
         <input type="file" id="restoreFileInput" accept=".json" style="display:none" onchange="restoreData(event)">
         <div id="backupStatus" style="display:none;margin-top:10px;padding:10px 13px;border-radius:8px;font-family:'DM Mono',monospace;font-size:0.7rem;line-height:1.6"></div>
+        <!-- Phase 11 (v7.7.0): last 5 backup events for cadence visibility -->
+        <div id="backupHistoryList" class="backup-history-list" style="display:none"></div>
         <div id="storageHealth" style="margin-top:10px;padding:10px 13px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--muted);line-height:1.8"></div>
         <div style="margin-top:10px;padding:10px 13px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-family:'DM Mono',monospace">
           <div style="font-size:0.6rem;color:var(--muted);letter-spacing:1px;margin-bottom:4px">SCHEMA</div>
@@ -1693,6 +1702,7 @@ const SK = {
   lightDays: 'ph_ld_v1',   // object keyed by dateStr — value: true if that day is a light eating day
   swDismissedVer: 'ph_sw_v1', // string — last SW cache version the user dismissed the reload banner for
   backupTs: 'ph_bts_v1', // number — timestamp of last backup (for reminder banner)
+  backupHistory: 'ph_bh_v1', // array of last 5 backup events: [{ ts, filename }]  (Phase 11, v7.7.0)
   schemaVersion: 'ph_sch_v1' // object — schema record: { schemaVersion, migrationsApplied[], lastMigration, establishedAt, establishedFrom }
 };
 
@@ -1702,8 +1712,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '7.6.1';
-const APP_VERSION_MSG = 'Backup files now include a SHA-256 integrity checksum. On restore, the app verifies the checksum and warns if the file looks corrupted or tampered. Older backups still restore cleanly with a note about the older format. Silent infrastructure — no behaviour change unless an integrity issue is detected.';
+const APP_VERSION = '7.7.0';
+const APP_VERSION_MSG = 'Settings → Data Management now shows your last 5 backup events with relative-time labels (Today 2:14 PM, Yesterday, 3 days ago). Helps you see backup cadence at a glance and remember when you last saved your data.';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
 
@@ -3628,6 +3638,9 @@ function openSettings() {
   // Phase 9 (v7.6.0): render adaptive activity multiplier diagnostic row.
   // Hidden when insufficient data or sickness pattern active.
   if (typeof renderActivityInference === 'function') renderActivityInference();
+
+  // Phase 11 (v7.7.0): render last 5 backup events. Hidden if no history.
+  if (typeof renderBackupHistory === 'function') renderBackupHistory();
 }
 
 function closeSettings() { document.getElementById('settingsOverlay').classList.remove('active'); }
@@ -5138,7 +5151,48 @@ async function backupData() {
   URL.revokeObjectURL(url);
 
   ss(SK.backupTs, String(Date.now()));
+  // Phase 11 (v7.7.0): track last 5 backup events for cadence visibility
+  const _historyArr = gs(SK.backupHistory) || [];
+  _historyArr.unshift({ ts: Date.now(), filename: a.download });
+  while (_historyArr.length > 5) _historyArr.pop();
+  ss(SK.backupHistory, _historyArr);
+  if (typeof renderBackupHistory === 'function') renderBackupHistory();
   showBackupStatus('✓ Backup downloaded. Save it somewhere safe — Google Drive, email to yourself, etc.', 'var(--green)');
+}
+
+// Phase 11 (v7.7.0): formats a UNIX timestamp as a relative-time label.
+// Today, 2:14 PM · Yesterday, 8:00 AM · 3 days ago · 2 weeks ago · etc.
+function _fmtRelativeTime(ts) {
+  if (!ts || typeof ts !== 'number') return 'unknown time';
+  const d = new Date(ts);
+  const now = new Date();
+  const today = new Date(now); today.setHours(0,0,0,0);
+  const that = new Date(d); that.setHours(0,0,0,0);
+  const dayDiff = Math.round((today.getTime() - that.getTime()) / 86400000);
+  const timeStr = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  if (dayDiff === 0) return 'Today, ' + timeStr;
+  if (dayDiff === 1) return 'Yesterday, ' + timeStr;
+  if (dayDiff > 1 && dayDiff < 7) return dayDiff + ' days ago, ' + timeStr;
+  if (dayDiff >= 7 && dayDiff < 14) return '1 week ago';
+  if (dayDiff >= 14 && dayDiff < 30) return Math.floor(dayDiff / 7) + ' weeks ago';
+  if (dayDiff >= 30 && dayDiff < 365) return Math.floor(dayDiff / 30) + ' month' + (Math.floor(dayDiff/30) === 1 ? '' : 's') + ' ago';
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+// Phase 11 (v7.7.0): renders the last 5 backup events as a compact list
+// in Settings → Data Management. Hidden when no history exists yet.
+function renderBackupHistory() {
+  const el = document.getElementById('backupHistoryList');
+  if (!el) return;
+  const arr = gs(SK.backupHistory) || [];
+  if (!arr.length) {
+    el.style.display = 'none';
+    el.innerHTML = '';
+    return;
+  }
+  el.style.display = 'block';
+  el.innerHTML = '<div class="backup-history-header">RECENT BACKUPS</div>'
+    + arr.map(e => `<div class="backup-history-row"><span class="bh-when">${_fmtRelativeTime(e.ts)}</span><span class="bh-name">${e.filename || 'protocol-health-backup.json'}</span></div>`).join('');
 }
 
 // exportMigrationLog: downloads the current ph_sch_v1 schema record as JSON.
