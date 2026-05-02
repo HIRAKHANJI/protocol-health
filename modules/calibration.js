@@ -23,6 +23,75 @@
 
 const MAX_KG_CHANGE_PER_WEEK = 2.0;
 const TDEE_CEIL_RATIO = 1.5;
+const CALIBRATION_CADENCE_DAYS = 7;
+
+// ─── DAY BREAKDOWN (Phase 1 — Reality Check display) ────────────────────────
+// Separates "period average" (incl. fast days at 0) from "eating-day average"
+// (only days the user actually ate). Same window as computeObservedTDEE.
+// Useful for human-readable display so users don't see "Avg 812 cal" without
+// understanding that 6 of those days were fasts.
+export function getDayBreakdown(days = 14) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const windowStart = new Date(today);
+  windowStart.setDate(windowStart.getDate() - days + 1);
+  const weights = (gs(SK.weights) || []).slice();
+  const foodLog = gs(SK.foodLog) || {};
+  const fastDays = gs(SK.fastDays) || {};
+  const inWindow = weights.filter(w => {
+    const d = strToDate(w.date);
+    return d >= windowStart && d <= today;
+  });
+  if (inWindow.length < 2) {
+    return { totalDays: 0, eatingDayCount: 0, eatingDayIntakeSum: 0, eatingDayAvg: 0,
+             fastDayCount: 0, brokenFastCount: 0, fastDayIntakeSum: 0,
+             unloggedEatingDayCount: 0, periodAvg: 0, spanDays: 0 };
+  }
+  inWindow.sort((a, b) => a.date.localeCompare(b.date));
+  const oldestDate = strToDate(inWindow[0].date);
+  const newestDate = strToDate(inWindow[inWindow.length - 1].date);
+  const spanDays = Math.round((newestDate - oldestDate) / 86400000);
+
+  let eatingDayCount = 0, eatingDayIntakeSum = 0;
+  let fastDayCount = 0, brokenFastCount = 0, fastDayIntakeSum = 0;
+  let unloggedEatingDayCount = 0;
+  let totalDays = 0;
+  let periodIntakeSum = 0, periodIntakeDays = 0;
+
+  for (let d = new Date(oldestDate); d <= newestDate; d.setDate(d.getDate() + 1)) {
+    const ds = dateToStr(d);
+    const fl = foodLog[ds];
+    const isFast = !!fastDays[ds];
+    const dayCal = (fl && fl.length) ? fl.reduce((sum, e) => sum + (parseInt(e.calories) || 0), 0) : 0;
+    totalDays++;
+    if (isFast) {
+      fastDayCount++;
+      if (fl && fl.length > 0) {
+        brokenFastCount++;
+        fastDayIntakeSum += dayCal;
+        periodIntakeSum += dayCal;
+        periodIntakeDays++;
+      } else {
+        // Real fast: 0 intake, counted in period avg
+        periodIntakeDays++;
+      }
+    } else if (fl && fl.length > 0) {
+      eatingDayCount++;
+      eatingDayIntakeSum += dayCal;
+      periodIntakeSum += dayCal;
+      periodIntakeDays++;
+    } else {
+      unloggedEatingDayCount++;
+    }
+  }
+
+  const eatingDayAvg = eatingDayCount > 0 ? Math.round(eatingDayIntakeSum / eatingDayCount) : 0;
+  const periodAvg = periodIntakeDays > 0 ? Math.round(periodIntakeSum / periodIntakeDays) : 0;
+
+  return { totalDays, spanDays,
+           eatingDayCount, eatingDayIntakeSum, eatingDayAvg,
+           fastDayCount, brokenFastCount, fastDayIntakeSum,
+           unloggedEatingDayCount, periodAvg };
+}
 
 // ─── PURE COMPUTATION ────────────────────────────────────────────────────────
 
@@ -132,6 +201,16 @@ export function getCalibrationStatus() {
     ? ((observedTDEE - formulaTDEE) / formulaTDEE) * 100
     : 0;
 
+  // Phase 1: cadence + breakdown info for human-readable display
+  const breakdown = getDayBreakdown(14);
+  const lastAt = s.lastCalibrationAt ? new Date(s.lastCalibrationAt).getTime() : null;
+  const nowMs = Date.now();
+  const nextCalibrationAt = lastAt ? new Date(lastAt + CALIBRATION_CADENCE_DAYS * 86400000) : null;
+  const daysUntilNextCheck = nextCalibrationAt
+    ? Math.max(0, Math.ceil((nextCalibrationAt.getTime() - nowMs) / 86400000))
+    : 0;
+  const lastCalibrationOutcome = s.lastCalibrationOutcome || (lastAt ? 'unknown' : 'never-run');
+
   return {
     state,
     formulaTDEE,
@@ -145,7 +224,15 @@ export function getCalibrationStatus() {
     avgIntake: obs.avgIntake,
     spanDays: obs.spanDays,
     obsReason: obs.reason,
-    overrideOn: !!s.tdeeManualOverride
+    overrideOn: !!s.tdeeManualOverride,
+    // Phase 1 additions
+    breakdown,
+    lastCalibrationAt: lastAt ? new Date(lastAt) : null,
+    nextCalibrationAt,
+    daysUntilNextCheck,
+    lastCalibrationOutcome,
+    lastCalibrationFormula: s.lastCalibrationFormula || null,
+    lastCalibrationObserved: s.lastCalibrationObserved || null
   };
 }
 
@@ -158,14 +245,21 @@ export function weeklyCalibration() {
   // Cadence gate — once per 7 days
   const lastAt = s.lastCalibrationAt ? new Date(s.lastCalibrationAt).getTime() : 0;
   const ageMs = Date.now() - lastAt;
-  if (lastAt && ageMs < 7 * 24 * 3600 * 1000) {
+  if (lastAt && ageMs < CALIBRATION_CADENCE_DAYS * 24 * 3600 * 1000) {
     return { applied: false, reason: 'too-soon' };
   }
   const status = getCalibrationStatus();
   if (status.state !== 'CALIBRATED') {
+    // Record the gathering outcome so Reality Check can explain it
+    s.lastCalibrationAt = new Date().toISOString();
+    s.lastCalibrationOutcome = 'gathering';
+    saveSettings(s);
     return { applied: false, reason: 'gathering' };
   }
   if (!status.formulaTDEE || !status.observedTDEE || !status.blendedTDEE) {
+    s.lastCalibrationAt = new Date().toISOString();
+    s.lastCalibrationOutcome = 'missing-inputs';
+    saveSettings(s);
     return { applied: false, reason: 'missing-inputs' };
   }
   // SANITY: observed TDEE must be >= BMR (formula / activityMultiplier) and
@@ -176,6 +270,9 @@ export function weeklyCalibration() {
   const ceiling = status.formulaTDEE * TDEE_CEIL_RATIO;
   if (status.observedTDEE < bmrFloor || status.observedTDEE > ceiling) {
     s.lastCalibrationAt = new Date().toISOString();
+    s.lastCalibrationFormula = status.formulaTDEE;
+    s.lastCalibrationObserved = status.observedTDEE;
+    s.lastCalibrationOutcome = 'rejected-out-of-bounds';
     saveSettings(s);
     return { applied: false, reason: 'observed-out-of-bounds', oldTdee: status.currentTDEE, observedTDEE: status.observedTDEE, formulaTDEE: status.formulaTDEE };
   }
@@ -187,10 +284,12 @@ export function weeklyCalibration() {
   s.lastCalibrationFormula = status.formulaTDEE;
   s.lastCalibrationObserved = status.observedTDEE;
   if (gap < 0.07) {
+    s.lastCalibrationOutcome = 'within-threshold';
     saveSettings(s);
     return { applied: false, reason: 'within-threshold', oldTdee: old, newTdee: newT };
   }
   s.tdee = newT;
+  s.lastCalibrationOutcome = 'applied';
   saveSettings(s);
   dispatch('TDEE_CHANGED');
   // Surface the change to the user
@@ -251,7 +350,49 @@ export function autoRevertImplausibleTdee() {
   return { reverted: true, oldTDEE: old, newTDEE: check.formulaTDEE, ...check };
 }
 
-// ─── REALITY CHECK BLOCK (TRACK tab) ─────────────────────────────────────────
+// ─── REALITY CHECK BLOCK (TRACK tab) — Phase 1 rewrite ──────────────────────
+
+// Builds the cadence-status note shown under "Currently using". Plain English,
+// tells the user exactly why the displayed TDEE is/isn't tracking observed.
+function _buildCadenceNote(status) {
+  if (status.overrideOn) {
+    return 'Auto-calibration is OFF (you froze TDEE). Untick "Freeze TDEE" in Settings to re-enable.';
+  }
+  if (status.state !== 'CALIBRATED') {
+    const needWeight = Math.max(0, 14 - (status.daysAvailable || 0));
+    const needFood = Math.max(0, 7 - (status.daysLogged || 0));
+    if (needWeight > 0 && needFood > 0) {
+      return 'Gathering data — needs ' + needWeight + ' more days of weight logs and ' + needFood + ' more food-logged days.';
+    } else if (needWeight > 0) {
+      return 'Gathering data — needs ' + needWeight + ' more days of weight logs.';
+    } else if (needFood > 0) {
+      return 'Gathering data — needs ' + needFood + ' more food-logged days in the last 14.';
+    }
+    return 'Gathering data.';
+  }
+  // State is CALIBRATED — show next-check info or last-run outcome
+  const nextDateStr = status.nextCalibrationAt
+    ? status.nextCalibrationAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    : null;
+  const inDays = status.daysUntilNextCheck;
+  const nextStr = inDays === 0 ? 'on next app load' : ('in ' + inDays + ' day' + (inDays === 1 ? '' : 's') + (nextDateStr ? ' (' + nextDateStr + ')' : ''));
+  switch (status.lastCalibrationOutcome) {
+    case 'applied':
+      return 'Last run: applied. Next check ' + nextStr + '.';
+    case 'within-threshold':
+      return 'Last run: within ±7%, no change. Next check ' + nextStr + '.';
+    case 'rejected-out-of-bounds':
+      return 'Last run: rejected — observed ' + (status.lastCalibrationObserved || '?') + ' cal outside safe range. Next check ' + nextStr + '.';
+    case 'gathering':
+      return 'Last run: not enough data. Next check ' + nextStr + '.';
+    case 'missing-inputs':
+      return 'Last run: missing inputs. Next check ' + nextStr + '.';
+    case 'never-run':
+      return 'First calibration on next app load.';
+    default:
+      return 'Next check ' + nextStr + '.';
+  }
+}
 
 export function renderRealityCheck() {
   const box = document.getElementById('realityCheckBox');
@@ -286,15 +427,13 @@ export function renderRealityCheck() {
 
   const stateColor = status.state === 'CALIBRATED' ? 'var(--accent)' : 'var(--accent2)';
   const stateLabel = status.state === 'CALIBRATED' ? 'CALIBRATED' : 'GATHERING DATA';
-  const overrideNote = status.overrideOn
-    ? '<div class="rc-row" style="color:var(--accent2);font-style:italic">⚠ Manual TDEE override is ON — auto-calibration is paused.</div>'
-    : '';
 
-  const gatheringExplain = status.state !== 'CALIBRATED'
-    ? '<div class="rc-row" style="color:var(--muted);font-size:0.6rem;line-height:1.5;border-top:1px solid var(--border);padding-top:6px;margin-top:4px">'
-      + 'Calibration needs at least 14 days of weight logs + 7 days of food logs in the last 14 days. '
-      + 'Currently: ' + status.daysLogged + ' food-logged days, ' + (status.daysAvailable || 0) + ' days of weight history.'
-      + '</div>'
+  // Phase 1: structured intake breakdown — period vs eating-day vs fast count
+  const bd = status.breakdown || {};
+  const intakeBlock = (bd.totalDays > 0)
+    ? `<div class="rc-row"><span class="rc-label">Eating-day avg</span><span class="rc-val">${fmtCal(bd.eatingDayAvg)}</span></div>
+       <div class="rc-row"><span class="rc-label">Period avg (incl. fasts)</span><span class="rc-val">${fmtCal(bd.periodAvg)}</span></div>
+       <div class="rc-row"><span class="rc-label">Fast days</span><span class="rc-val">${bd.fastDayCount} of ${bd.totalDays}${bd.brokenFastCount > 0 ? ' · ' + bd.brokenFastCount + ' broken' : ''}</span></div>`
     : '';
 
   const obsLine = status.observedTDEE
@@ -305,27 +444,30 @@ export function renderRealityCheck() {
     : '';
   const usingLine = `<div class="rc-row"><span class="rc-label">Currently using</span><span class="rc-val" style="color:${stateColor}">${fmtCal(status.currentTDEE)}</span></div>`;
 
+  // Phase 1: cadence note replaces the generic "gathering" line
+  const cadenceNote = `<div class="rc-cadence-note">${_buildCadenceNote(status)}</div>`;
+
   const lossLines = (predictedLoss != null)
     ? `<div class="rc-row"><span class="rc-label">Predicted loss (${status.spanDays}d)</span><span class="rc-val">${fmtKg(predictedLoss)}</span></div>
        <div class="rc-row"><span class="rc-label">Actual loss (${status.spanDays}d)</span><span class="rc-val">${fmtKg(actualLoss)}</span></div>
        <div class="rc-row"><span class="rc-label">Gap</span><span class="rc-val" style="color:${gapColor}">${gapText}</span></div>`
     : '';
 
-  const intakeLine = status.avgIntake
-    ? `<div class="rc-row"><span class="rc-label">Avg intake (${status.daysLogged} logged days)</span><span class="rc-val">${fmtCal(status.avgIntake)}</span></div>`
-    : '';
-
   box.innerHTML = `<div class="reality-check">
     <div class="rc-header">
       <span class="rc-title">REALITY <span>CHECK</span></span>
-      <span class="rc-state-pill" style="background:${stateColor};color:#000">${stateLabel}</span>
+      <span class="rc-header-actions">
+        <span class="rc-state-pill" style="background:${stateColor};color:#000">${stateLabel}</span>
+        <button class="rc-explain-btn" type="button" onclick="openRealityExplain()" aria-label="What does this mean?">ⓘ Explain</button>
+      </span>
     </div>
-    ${lossLines}
-    ${intakeLine}
-    ${formLine}
-    ${obsLine}
-    ${usingLine}
-    ${overrideNote}
-    ${gatheringExplain}
+    ${lossLines ? '<div class="rc-section">' + lossLines + '</div>' : ''}
+    ${intakeBlock ? '<div class="rc-section">' + intakeBlock + '</div>' : ''}
+    <div class="rc-section">
+      ${formLine}
+      ${obsLine}
+      ${usingLine}
+      ${cadenceNote}
+    </div>
   </div>`;
 }

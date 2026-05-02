@@ -4,6 +4,34 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 7.2.0 — 2026-04-28
+
+**Scope:** Minor (Phase 1 of calibration roadmap — Reality Check display clarity)
+**Banner:** shown — "Reality Check redesigned for clarity. Eating-day average now shown separately from period average (which includes fast days). Calibration cadence visible: see exactly when the next check happens and why the last one was applied/rejected/skipped. New ⓘ Explain button opens a plain-English guide to what every number means."
+
+**Root motivation.** The Reality Check block was mathematically correct but humanly confusing. Owner's actual data showed `Avg intake (12 logged days): 812 cal` which looked alarmingly low; in fact 6 of those 12 days were fasts counted at 0, dragging the average down. Plus `Currently using 3382 / Observed 2352` left no explanation for why the displayed TDEE didn't match the observed value (cadence gate preventing apply). Phase 1 fixes the labels and surfaces the why.
+
+**Changes:**
+
+- **`modules/calibration.js`** — three additions and one rewrite:
+  - **New `getDayBreakdown(days=14)`** helper. Splits intake into `eatingDayAvg` (non-fast days only), `periodAvg` (all included days), `fastDayCount`, `brokenFastCount`, `unloggedEatingDayCount`. Used purely for display; doesn't change TDEE math.
+  - **`getCalibrationStatus()`** extended with cadence + breakdown fields: `breakdown` (from above), `lastCalibrationAt` (Date), `nextCalibrationAt` (Date), `daysUntilNextCheck` (number), `lastCalibrationOutcome` (string from new settings field), `lastCalibrationFormula`, `lastCalibrationObserved`.
+  - **`weeklyCalibration()`** now writes `s.lastCalibrationOutcome` at every evaluation branch — `'applied' | 'within-threshold' | 'rejected-out-of-bounds' | 'gathering' | 'missing-inputs'`. Cadence gate uses new `CALIBRATION_CADENCE_DAYS = 7` constant.
+  - **`renderRealityCheck()`** rewritten with three structured sections (loss / intake / TDEE) and a cadence note that explains in plain English when the next check happens or why the last one didn't apply. New helper `_buildCadenceNote(status)` produces the message based on outcome.
+
+- **`app.html`** — wiring + UI:
+  - `getSettings()` defaults gain `lastCalibrationOutcome: 'never-run'`. Backward-compatible via existing `Object.assign({}, defaults, saved)` pattern; existing user data unaffected.
+  - Module loader exposes `Calibration.getDayBreakdown` to `window.getDayBreakdown`.
+  - New **Reality Check Explain Modal** (`#realityExplainModal`) using the existing `popup-overlay` pattern at z-index 9100. Six sections: What this shows / Predicted vs Actual / Eating-day vs Period avg / Formula vs Observed TDEE / When calibration applies / What you can do.
+  - New top-level functions `openRealityExplain()` / `closeRealityExplain()` registered.
+  - New CSS classes: `.rc-section` (groups intake/TDEE/loss), `.rc-cadence-note` (italic explanation under TDEE block), `.rc-header-actions` (right-side group for state pill + explain button), `.rc-explain-btn` (small pill-style button), `.rc-explain-section` / `.rc-explain-h` / `.rc-explain-p` / `.rc-explain-p em` for the modal content.
+
+**No data migration.** New `lastCalibrationOutcome` field defaults via getSettings; backups round-trip cleanly.
+**No `sw.js` change** in this commit — bumps with merge to main per feature-branch convention.
+**Roadmap:** `PENDING_IMPLEMENTATIONS.md` Phase 1 — IN PROGRESS until owner confirms PR merge.
+
+---
+
 ## Version 7.1.0 — 2026-04-26
 
 **Scope:** Minor (hot-fix for calibration corrupted by sickness-induced weight spike; multiple UX/math fixes)

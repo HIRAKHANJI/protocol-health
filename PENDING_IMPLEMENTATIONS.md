@@ -48,7 +48,7 @@ Final state after Phase 13: `APP_VERSION ≈ 7.7.x`, `CACHE_NAME ≈ v32-34`, `s
 
 ## Phase 1 — Reality Check Display Clarity
 
-**Status:** PENDING
+**Status:** IN PROGRESS
 **Tier source:** Tier 1, items 1-3
 **APP_VERSION target:** `7.2.0` (minor — visible UI improvement, banner shown)
 **CACHE_NAME bump:** Yes — must bump on next merge to main even though no new files are added (pure logic update inside an existing file).

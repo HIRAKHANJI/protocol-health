@@ -301,6 +301,17 @@ body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif
 .rc-row { display:flex; justify-content:space-between; align-items:center; padding:5px 0; font-family:'DM Mono',monospace; font-size:0.66rem; }
 .rc-label { color:var(--muted); }
 .rc-val { color:var(--text); font-weight:500; }
+/* Phase 1 (v7.2.0): Reality Check structural sections + cadence + explain link */
+.rc-header-actions { display:flex; align-items:center; gap:6px; }
+.rc-explain-btn { background:transparent; border:1px solid var(--border); color:var(--muted); font-family:'DM Mono',monospace; font-size:0.55rem; letter-spacing:1px; padding:3px 8px; border-radius:4px; cursor:pointer; }
+.rc-explain-btn:active { transform:scale(0.97); }
+.rc-section { padding:6px 0; border-top:1px solid var(--border); }
+.rc-section:first-of-type { border-top:none; padding-top:0; }
+.rc-cadence-note { font-family:'DM Mono',monospace; font-size:0.6rem; color:var(--muted); line-height:1.5; margin-top:6px; padding-top:6px; border-top:1px dashed var(--border); }
+.rc-explain-section { margin-bottom:12px; }
+.rc-explain-h { font-family:'Bebas Neue',sans-serif; font-size:0.78rem; letter-spacing:1.5px; color:var(--accent); margin-bottom:4px; }
+.rc-explain-p { font-family:'DM Sans',sans-serif; font-size:0.7rem; color:var(--text); line-height:1.55; margin:0; }
+.rc-explain-p em { color:var(--accent2); font-style:italic; }
 .radar-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
 .radar-title { font-family:'Bebas Neue',sans-serif; font-size:1rem; letter-spacing:2px; color:var(--muted); }
 .radar-title span { color:var(--text); }
@@ -1151,6 +1162,40 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
   </div>
 </div>
 
+<!-- ══ REALITY CHECK EXPLAIN MODAL (Phase 1, v7.2.0) ══ -->
+<div class="popup-overlay" id="realityExplainModal" style="z-index:9100">
+  <div class="popup-box" style="max-width:380px;max-height:80vh;overflow-y:auto;text-align:left">
+    <h3 style="font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:2px;color:var(--accent);margin:0 0 12px">REALITY CHECK — EXPLAINED</h3>
+    <div class="rc-explain-section">
+      <div class="rc-explain-h">What this shows</div>
+      <p class="rc-explain-p">Compares what the math predicts you'd lose against what your scale actually showed over the last 14 days. The gap reveals whether your TDEE estimate is accurate.</p>
+    </div>
+    <div class="rc-explain-section">
+      <div class="rc-explain-h">Predicted vs Actual loss</div>
+      <p class="rc-explain-p">Predicted = (Formula TDEE − average intake) × span ÷ 7700. Actual = scale weight at start − scale weight today. A gap of −40% means you lost 40% less than predicted; −15% to +15% is normal noise; beyond that suggests your real burn rate differs from formula.</p>
+    </div>
+    <div class="rc-explain-section">
+      <div class="rc-explain-h">Eating-day avg vs Period avg</div>
+      <p class="rc-explain-p">Eating-day avg = calories you eat on days you actually eat. Period avg includes fast days (counted as 0 cal), pulling the number down. Both are correct — they answer different questions. Use eating-day avg to gauge your meal sizes; period avg drives the TDEE math.</p>
+    </div>
+    <div class="rc-explain-section">
+      <div class="rc-explain-h">Formula vs Observed TDEE</div>
+      <p class="rc-explain-p">Formula TDEE = Mifflin-St Jeor × your activity multiplier (set during onboarding). Observed TDEE = derived from your actual intake + actual weight change using CICO. They differ when your real activity drops below the multiplier (sick days, travel, low-energy weeks) or when adaptive thermogenesis kicks in on a sustained deficit.</p>
+    </div>
+    <div class="rc-explain-section">
+      <div class="rc-explain-h">When calibration applies</div>
+      <p class="rc-explain-p">Auto-calibration runs once per 7 days. It applies a 70/30 blend of observed/formula <em>only if</em> the gap is greater than 7% AND the observed value is within physiologically safe bounds (above your BMR, below formula × 1.5). Otherwise it skips and tries again next cycle.</p>
+    </div>
+    <div class="rc-explain-section">
+      <div class="rc-explain-h">What you can do</div>
+      <p class="rc-explain-p">Tap RESET in Settings if TDEE drifts wrong. Use the FREEZE TDEE toggle to stop auto-calibration and pin your number. Sickness/water-spike protection is built in (Phase 7+) to keep the math honest during disrupted weeks.</p>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button class="popup-yes" style="flex:1" onclick="closeRealityExplain()">GOT IT</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══ FAST WINDOW EDIT MODAL (Phase C) ══ -->
 <div class="popup-overlay" id="fastEditModal" style="z-index:9100">
   <div class="popup-box" style="max-width:340px">
@@ -1394,6 +1439,8 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
   // v7.1.0 hot-fix: TDEE sanity bounds + auto-revert
   window.checkStoredTdeeSanity = Calibration.checkStoredTdeeSanity;
   window.autoRevertImplausibleTdee = Calibration.autoRevertImplausibleTdee;
+  // v7.2.0 Phase 1: day breakdown helper for Reality Check display
+  window.getDayBreakdown = Calibration.getDayBreakdown;
 
   window._PH_FNMODULES_READY = true;
   window.dispatchEvent(new Event('ph:fnmodules-ready'));
@@ -1609,8 +1656,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '7.1.0';
-const APP_VERSION_MSG = 'Hot-fix: calibration sanity bounds. Sudden weight spikes from sickness or water retention no longer corrupt your TDEE. App auto-reverts implausible TDEE values on load. New RESET button in Settings if you ever need to manually restore the formula value. ADJUST and projection now handle weight noise correctly.';
+const APP_VERSION = '7.2.0';
+const APP_VERSION_MSG = 'Reality Check redesigned for clarity. Eating-day average now shown separately from period average (which includes fast days). Calibration cadence visible: see exactly when the next check happens and why the last one was applied/rejected/skipped. New ⓘ Explain button opens a plain-English guide to what every number means.';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
 
@@ -1657,7 +1704,7 @@ function strToDate(s) { const [y,m,d]=s.split('-').map(Number); return new Date(
 // getSettings: always returns a full settings object with defaults. Never returns null.
 // Add any new settings fields here with a default value.
 function getSettings() {
-  const defaults = { plan:'default', currentKg:null, targetKg:null, calories:null, tdee:2600, risk:'aggressive', startDate:null, age:null, height:null, sex:'male', activityLevel:'1.55', name:'', wakeTime:null, lastMealTime:null, eveningSessionTime:null, eatingWindowStart:null, supplementsEnabled:true, tdeeManualOverride:false, lastCalibrationAt:null, lastCalibrationFormula:null, lastCalibrationObserved:null };
+  const defaults = { plan:'default', currentKg:null, targetKg:null, calories:null, tdee:2600, risk:'aggressive', startDate:null, age:null, height:null, sex:'male', activityLevel:'1.55', name:'', wakeTime:null, lastMealTime:null, eveningSessionTime:null, eatingWindowStart:null, supplementsEnabled:true, tdeeManualOverride:false, lastCalibrationAt:null, lastCalibrationFormula:null, lastCalibrationObserved:null, lastCalibrationOutcome:'never-run' };
   const saved = gs(SK.settings);
   if(!saved) return defaults;
   return Object.assign({}, defaults, saved);
@@ -3645,6 +3692,16 @@ function recomputeTDEE() {
     ? (10 * weight) + (6.25 * height) - (5 * age) + 5
     : (10 * weight) + (6.25 * height) - (5 * age) - 161;
   return Math.round(bmr * actMult);
+}
+
+// Phase 1 (v7.2.0): Reality Check explainer modal handlers
+function openRealityExplain() {
+  const m = document.getElementById('realityExplainModal');
+  if (m) m.classList.add('active');
+}
+function closeRealityExplain() {
+  const m = document.getElementById('realityExplainModal');
+  if (m) m.classList.remove('active');
 }
 
 // Phase D: settings-panel toggle handler. Flips settings.tdeeManualOverride.
