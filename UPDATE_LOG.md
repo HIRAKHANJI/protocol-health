@@ -4,6 +4,47 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 7.2.2 — 2026-04-28
+
+**Scope:** Patch (Phase 3 of calibration roadmap — plan-direction-aware calorie safety hints/warnings)
+**Banner:** none (patch — silent; advisory UI only)
+
+**Goal.** Surface non-blocking warnings when the calorie ceiling falls outside the safe range for the active plan. Semantics differ by plan direction (cut = floor, bulk = above-TDEE, maintenance = TDEE band). Never blocks the goal calculator; always informs.
+
+**Plan direction model:**
+
+| Plan | `caloriesMode` | Threshold logic |
+|---|---|---|
+| LITE | `floor` | warn if ceiling < `minCalories: 1200` |
+| AGRO | `floor` | warn if ceiling < `minCalories: 800` |
+| CUT | `floor` | warn if ceiling < `minCalories: 1400` |
+| BULK | `above-tdee` | warn if ceiling ≤ TDEE (computed dynamically) |
+| MAINTENANCE | `tdee-band` | warn if abs(ceiling − TDEE) > 300 (band computed dynamically) |
+
+**Changes:**
+
+- **`plans/lite.js`, `plans/agro.js`, `plans/cut.js`, `plans/bulk.js`, `plans/maintenance.js`** — each plan object gains `caloriesMode` + threshold field(s):
+  - Static numeric `minCalories` for cut plans
+  - `null` for bulk + maintenance (computed from TDEE at validation time)
+  - Maintenance also gets `maxCalories: null` for the upper bound
+- **`app.html`:**
+  - **New helper `validateCaloriesAgainstPlan(cals, plan, tdee)`** dispatches on `plan.caloriesMode`. Returns `{ ok, severity, message }`. No hardcoded plan keys outside the helper.
+  - **New `renderCalorieSafetyWarning(cals, plan, tdee)`** writes the warning to the goal-calculator result panel `#calcCalorieSafety`. Hidden when validation passes.
+  - **New `renderCaloriesHint()`** writes a live floor/band hint under the Settings calorie field `#caloriesHint`. Reads current plan + current TDEE input value (or settings fallback).
+  - **`calcDuration()`** calls `renderCalorieSafetyWarning(calcCals, plan, tdee)` just before showing the result panel.
+  - **`openSettings()`** calls `renderCaloriesHint()` after hydrating fields.
+  - **`onPlanSelectChange()`** calls `renderCaloriesHint()` to refresh on plan switch.
+  - **Settings calorie field oninput** also calls `renderCaloriesHint()` (in addition to `calcDuration`) so hint reflects live edits.
+  - **Settings TDEE field oninput** also calls `renderCaloriesHint()` (TDEE changes shift the band/threshold for bulk + maintenance plans).
+  - New CSS: `.cal-floor-hint` (small muted text under the field), `.cal-floor-warn` (orange-tinted warning panel in result block).
+  - New DOM: `#caloriesHint` div under settings calorie field, `#calcCalorieSafety` div in goal-calculator result panel.
+
+**No data migration.** New plan fields are additive; existing plan readers ignore unknown fields. No `sw.js` change.
+
+**Roadmap:** `PENDING_IMPLEMENTATIONS.md` Phase 3 — IN PROGRESS until owner confirms PR merge.
+
+---
+
 ## Version 7.2.1 — 2026-04-28
 
 **Scope:** Patch (Phase 2 of calibration roadmap — quick-access ADJUST link in Settings)

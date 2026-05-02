@@ -15,6 +15,12 @@ export const agro = {
     lightDaysDow: [],
     macroSplit: { base:[50,30,20], rest:[58,22,20], preFast:[46,34,20], stall:[56,24,20], satiety:[58,22,20] },
     proteinFloorMultiplier: 1.3,
+    // Phase 3 (v7.2.2): plan-direction-aware calorie safety bounds.
+    // 'floor' mode → warn if calorie ceiling drops below minCalories.
+    // 800 cal is the AGRO absolute safety floor (plan ceiling is 1000;
+    // pushing below 800 risks rapid lean mass loss even with high protein).
+    caloriesMode: 'floor',
+    minCalories: 800,
 
     defaultTimes: { wakeTime:'05:30', lastMealTime:'18:00', eveningSessionTime:'17:00', eatingWindowStart:'11:00' },
 
