@@ -153,7 +153,10 @@ Surface the existing `MANAGE SCHEDULE → ADJUST` path from the Settings panel s
 
 ## Phase 3 — Per-Plan Calorie Safety Floors / Bands
 
-**Status:** IN PROGRESS
+**Status:** ✅ COMPLETED — DO NOT MODIFY
+**Merge commit:** `d809711` (PR #121)
+**Merged:** 2026-04-28
+**Pinned APP_VERSION:** `7.2.2`
 **Tier source:** Tier 3, item 10
 **APP_VERSION target:** `7.2.2` (patch — non-blocking validation)
 **CACHE_NAME bump:** Yes (next merge to main).
@@ -222,7 +225,7 @@ Surface non-blocking warnings when the user enters a calorie ceiling outside the
 
 ## Phase 4 — Spike-Trim Port to Radar + ADJUST
 
-**Status:** PENDING
+**Status:** IN PROGRESS
 **Tier source:** Tier 2, items 5-6
 **APP_VERSION target:** `7.2.3` (patch — math correctness, no new feature)
 **CACHE_NAME bump:** Yes.
