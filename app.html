@@ -316,6 +316,12 @@ body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif
 .cal-floor-hint { font-family:'DM Mono',monospace; font-size:0.6rem; color:var(--muted); margin-top:4px; line-height:1.5; }
 .cal-floor-hint:empty { display:none; }
 .cal-floor-warn { font-size:0.7rem; color:var(--accent2); margin-top:6px; padding:7px 10px; border-radius:6px; background:rgba(255,152,0,0.1); border:1px solid rgba(255,152,0,0.35); line-height:1.55; }
+/* Phase 5 (v7.3.0): sickness toggle (TODAY tab + day modal) + calendar icon overlay */
+.sick-toggle-row { display:flex; align-items:center; gap:8px; padding:8px 10px; background:var(--surface); border:1px solid var(--border); border-radius:6px; cursor:pointer; font-family:'DM Mono',monospace; font-size:0.7rem; color:var(--muted); }
+.sick-toggle-row input[type=checkbox] { width:16px; height:16px; accent-color:var(--accent2); flex-shrink:0; }
+.sick-toggle-row input[type=checkbox]:checked + span { color:var(--text); }
+.cal-cell.cal-sick { /* keeps base color from compliance class; icon overlay distinguishes it */ }
+.cal-sick-icon { position:absolute; top:2px; right:3px; font-size:0.7rem; line-height:1; opacity:0.85; pointer-events:none; }
 .radar-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
 .radar-title { font-family:'Bebas Neue',sans-serif; font-size:1rem; letter-spacing:2px; color:var(--muted); }
 .radar-title span { color:var(--text); }
@@ -715,6 +721,11 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
     <input class="weight-input" type="number" id="todayWeightInput" placeholder="Weight (kg)" step="0.1" min="40" max="250" style="font-size:0.8rem;padding:9px 12px">
     <button class="log-btn" onclick="logWeightFromToday()" style="font-size:0.8rem;padding:9px 14px">LOG</button>
   </div>
+  <!-- Phase 5 (v7.3.0): TODAY sickness toggle. Hydrated by syncTodaySickToggle(). -->
+  <label class="sick-toggle-row" style="margin-bottom:10px">
+    <input type="checkbox" id="tSick" onchange="toggleSickDay(todayStr(), this.checked)">
+    <span>🤒 Mark today as sick / disrupted</span>
+  </label>
   <button class="food-log-btn" id="foodLogBtn" onclick="openFoodModal()">
     <span class="food-btn-label">FOOD LOG</span>
     <span id="todayCalStripVal" style="font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--muted)">TAP TO LOG</span>
@@ -1666,8 +1677,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '7.2.3';
-const APP_VERSION_MSG = 'Spike protection extended. Weight-trend radar axis and ADJUST math now ignore sickness/water spikes the same way the projection already did. A single big day-to-day jump (>1.5kg) no longer tanks your radar score or poisons schedule recalculation.';
+const APP_VERSION = '7.3.0';
+const APP_VERSION_MSG = 'You can now mark any day as sick / disrupted with a 🤒 toggle on the TODAY tab and in the calendar day modal. Marked days show a small icon in the corner of their calendar cell. Phase 6 will use this flag to exclude sick days from the calibration math, so a bad week of sickness or travel no longer corrupts your TDEE.';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
 
@@ -2746,6 +2757,12 @@ function updateFastUI() {
   renderTodayChecklist();
   // Phase C: render the START/STOP/EDIT controls inside the fast banner.
   if (typeof renderTodayFastUI === 'function') renderTodayFastUI();
+  // Phase 5 (v7.3.0): hydrate today's sickness toggle from storage
+  const tSick = document.getElementById('tSick');
+  if (tSick) {
+    const log = (gs(SK.dayLogs)||{})[today] || {};
+    tSick.checked = !!log.sick;
+  }
 }
 
 // ─── UNIFIED DAY LOG — single source of truth ────────────────────────────────
@@ -2767,6 +2784,20 @@ function saveDayLogField(dateStr, fields) {
   if(!all[dateStr]) all[dateStr] = {};
   Object.assign(all[dateStr], fields);
   ss(SK.dayLogs, all);
+}
+
+// Phase 5 (v7.3.0): toggle the sickness flag on a day. Live-saves and dispatches
+// DAY_SAVED so the calendar updates immediately. Used by the day modal AND the
+// TODAY tab toggle. Phase 6 will use this flag to exclude sick days from
+// observed-TDEE calibration math.
+function toggleSickDay(dateStr, checked) {
+  saveDayLogField(dateStr, { sick: !!checked });
+  // Keep the TODAY toggle and day-modal toggle in sync if both exist
+  const todayBox = document.getElementById('tSick');
+  const modalBox = document.getElementById('mSick');
+  if (todayBox && dateStr === todayStr()) todayBox.checked = !!checked;
+  if (modalBox) modalBox.checked = !!checked;
+  dispatch('DAY_SAVED');
 }
 
 // getValidCheckCompletion: completion ratio for a given date.

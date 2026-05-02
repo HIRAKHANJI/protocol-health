@@ -112,9 +112,13 @@ export function renderCalendar() {
       } else if(isPlanDay){cls+=' cal-missed';missed++;}
     }
 
+    // Phase 5 (v7.3.0): sickness flag — corner icon overlay (does NOT change cell color)
+    const _sick = !!(log && log.sick);
+    if (_sick) cls += ' cal-sick';
+
     const cell = document.createElement('div');
     cell.className = cls;
-    cell.innerHTML = `<span class="cal-num">${d}</span>${wt?`<span class="cal-wt">${wt}kg</span>`:''}`;
+    cell.innerHTML = `<span class="cal-num">${d}</span>${wt?`<span class="cal-wt">${wt}kg</span>`:''}${_sick?'<span class="cal-sick-icon" aria-label="Marked as sick">🤒</span>':''}`;
     cell.onclick = ()=>openDayModal(dateStr,dt);
     grid.appendChild(cell);
   }
@@ -354,6 +358,11 @@ export function openDayModal(dateStr, dt) {
         ${energyOptions.map(o=>`<div class="custom-select-option${o.value===energyVal?' selected':''}" data-value="${o.value}" onclick="selectCustomOption('energySelectCustom','mEnergy',this)">${o.label}</div>`).join('')}
       </div>
     </div></div>
+    <!-- Phase 5 (v7.3.0): sickness flag — excluded by Phase 6 calibration -->
+    <label class="sick-toggle-row">
+      <input type="checkbox" id="mSick" ${log.sick?'checked':''} onchange="toggleSickDay('${dateStr}', this.checked)">
+      <span>🤒 Mark this day as sick / disrupted</span>
+    </label>
     <div class="field-group"><label class="field-label">Notes</label>
     <textarea class="field-input" id="mNotes" placeholder="How did today go?">${log.notes||''}</textarea></div>
     <button class="save-btn" onclick="saveDayLog('${dateStr}')">SAVE DAY</button>`;

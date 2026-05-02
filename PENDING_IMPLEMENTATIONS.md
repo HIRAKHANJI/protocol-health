@@ -225,7 +225,10 @@ Surface non-blocking warnings when the user enters a calorie ceiling outside the
 
 ## Phase 4 — Spike-Trim Port to Radar + ADJUST
 
-**Status:** IN PROGRESS
+**Status:** ✅ COMPLETED — DO NOT MODIFY
+**Merge commit:** `ac7b051` (PR #122)
+**Merged:** 2026-04-28
+**Pinned APP_VERSION:** `7.2.3`
 **Tier source:** Tier 2, items 5-6
 **APP_VERSION target:** `7.2.3` (patch — math correctness, no new feature)
 **CACHE_NAME bump:** Yes.
@@ -272,7 +275,7 @@ This completes the spike-protection rollout; currently only the projection has i
 
 ## Phase 5 — Sickness Flag (UI + Storage)
 
-**Status:** PENDING
+**Status:** IN PROGRESS
 **Tier source:** Tier 4, item 16
 **APP_VERSION target:** `7.3.0` (minor — new user-facing feature, banner shown)
 **CACHE_NAME bump:** Yes.

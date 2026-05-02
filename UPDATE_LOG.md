@@ -4,6 +4,35 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 7.3.0 — 2026-04-28
+
+**Scope:** Minor (Phase 5 of calibration roadmap — sickness flag UI + storage)
+**Banner:** shown — "You can now mark any day as sick / disrupted with a 🤒 toggle on the TODAY tab and in the calendar day modal. Marked days show a small icon in the corner of their calendar cell. Phase 6 will use this flag to exclude sick days from the calibration math, so a bad week of sickness or travel no longer corrupts your TDEE."
+
+**Goal.** Pure additive UI surface. Lets the user manually flag any day as sick or disrupted. No math consumer ships in this phase — Phase 6 wires it into calibration. Phase 5 is the storage + UX foundation.
+
+**Storage:**
+
+- Field: `dayLogs[date].sick: boolean` (defaults to `false`/absent on read).
+- Backup: automatic — already nested inside `dayLogs[date]` which is fully serialised by the existing backup iteration.
+- No new SK key, no migration.
+
+**Changes:**
+
+- **`modules/calendar.js`:**
+  - `openDayModal` adds a sickness checkbox row right above the Notes field. Hydrated from `log.sick`. Live-saves via `toggleSickDay(dateStr, this.checked)` onchange — no need to tap SAVE DAY.
+  - `renderCalendar` reads `log.sick` per cell; when truthy, adds the `cal-sick` class and renders a small `🤒` icon overlay positioned in the top-right corner. Cell base color (compliance / fast / partial) is preserved — the icon is an additional indicator, not a replacement.
+- **`app.html`:**
+  - **New top-level handler `toggleSickDay(dateStr, checked)`:** writes via `saveDayLogField(dateStr, { sick: !!checked })`, syncs both checkboxes (TODAY + day-modal) if both are present, dispatches `DAY_SAVED` so the calendar refreshes immediately.
+  - **TODAY tab** gains its own sickness toggle row (`#tSick`) inserted between the weight-log row and the food-log button. Hydrated by `updateFastUI()` (which already runs on TODAY render and on tab switch).
+  - **CSS:** new `.sick-toggle-row` (compact pill-style row, orange accent on checkbox), `.cal-sick` (placeholder class for future styling hooks), `.cal-sick-icon` (absolute-positioned emoji corner overlay). `.cal-cell` already had `position:relative` so no change needed there.
+
+**No new dispatch event** — reuses existing `DAY_SAVED`. **No new SK key.** **No migration.** **No `sw.js` change.**
+
+**Roadmap:** `PENDING_IMPLEMENTATIONS.md` Phase 5 — IN PROGRESS until owner confirms PR merge.
+
+---
+
 ## Version 7.2.3 — 2026-04-28
 
 **Scope:** Patch (Phase 4 of calibration roadmap — spike-trim port to radar + ADJUST)
