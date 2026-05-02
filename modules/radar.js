@@ -176,9 +176,20 @@ export function computeRadarMetrics(days) {
       return diff >= 0 && diff <= days;
     });
     if (windowWeights.length >= 2) {
-      const newest = windowWeights[0].weight;
-      const oldest = windowWeights[windowWeights.length - 1].weight;
-      const dailyChange = (oldest - newest) / Math.max(1, (strToDate(windowWeights[0].date) - strToDate(windowWeights[windowWeights.length-1].date)) / 86400000);
+      // Phase 4 (v7.2.3): use shared spike-trim helper so a sickness/water
+      // spike doesn't tank the weight-trend score (same protection as projection).
+      // Falls back to raw oldest/newest when helper isn't available.
+      let dailyChange;
+      let isImplausible = false;
+      if (typeof getSpikeTrimmedWeights === 'function') {
+        const trim = getSpikeTrimmedWeights(windowWeights);
+        dailyChange = trim.rawDailyLoss;     // positive = losing
+        isImplausible = trim.rawIsImplausible;
+      } else {
+        const newest = windowWeights[0].weight;
+        const oldest = windowWeights[windowWeights.length - 1].weight;
+        dailyChange = (oldest - newest) / Math.max(1, (strToDate(windowWeights[0].date) - strToDate(windowWeights[windowWeights.length-1].date)) / 86400000);
+      }
       const dailyProgress = isBulkRadar ? -dailyChange : dailyChange;
       const targetRate = 0.15;
       if (dailyProgress >= targetRate) weightTrend = 100;
@@ -191,6 +202,11 @@ export function computeRadarMetrics(days) {
       if (weightTrend !== null && windowWeights.length < 7) {
         const confidence = windowWeights.length / 7;
         weightTrend = Math.round(weightTrend * confidence);
+      }
+      // Phase 4 (v7.2.3): if spike-trim flagged implausible rate, drop confidence
+      // further — the trimmed signal is still likely water/sickness noise.
+      if (weightTrend !== null && isImplausible) {
+        weightTrend = Math.round(weightTrend * 0.5);
       }
     }
   }

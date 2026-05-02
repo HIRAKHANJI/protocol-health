@@ -1666,8 +1666,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '7.2.2';
-const APP_VERSION_MSG = 'Calorie ceiling now shows plan-aware safety hints. Cut plans warn below their floor (LITE 1200, AGRO 800, CUT 1400). BULK warns if ceiling drops at or below TDEE (accidental cut). MAINTENANCE warns if outside TDEE ± 300. All warnings are advisory — never blocks your computation.';
+const APP_VERSION = '7.2.3';
+const APP_VERSION_MSG = 'Spike protection extended. Weight-trend radar axis and ADJUST math now ignore sickness/water spikes the same way the projection already did. A single big day-to-day jump (>1.5kg) no longer tanks your radar score or poisons schedule recalculation.';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
 
@@ -2931,6 +2931,58 @@ function getLatestWeight() {
   return w.length ? w[0].weight : (getSettings().currentKg||null);
 }
 
+// ─── SPIKE-TRIM HELPER (Phase 4, v7.2.3) ────────────────────────────────────
+// Reusable weight-spike protection. Originally inline in updateProjection
+// (v7.1.0). Now extracted so the radar WEIGHT TREND axis and calcAdjust
+// share the same noise-rejection logic.
+//
+// Input: weights array, NEWEST-FIRST (matches SK.weights storage order).
+// Behaviour:
+//   1. Detect any consecutive day-to-day delta > spikeKg (default 1.5 kg).
+//   2. If spike detected, shift entries off the front (most-recent) until
+//      the new front-pair delta is below the threshold. Preserves at least
+//      2 entries so a rate can still be computed.
+//   3. Compute rawDailyLoss from trimmed window (positive = losing).
+//   4. Flag rawIsImplausible if |rawDailyLoss × 7| > maxKgPerWeek (default 2.0)
+//      — used by callers to drop confidence weight on the observed signal.
+//
+// Returns: { rateWindow, trimmedCount, spikeDetected, rawDailyLoss,
+//            rawIsImplausible, daySpan, rateLatest, oldest }
+// All fields populated even when input is too short to trim — callers
+// should still check rateWindow.length before computing rates.
+function getSpikeTrimmedWeights(weights, opts) {
+  opts = opts || {};
+  const SPIKE_KG = (opts.spikeKg != null) ? opts.spikeKg : 1.5;
+  const MAX_KG_PER_WEEK = (opts.maxKgPerWeek != null) ? opts.maxKgPerWeek : 2.0;
+  const arr = Array.isArray(weights) ? weights.slice() : [];
+  if (arr.length < 2) {
+    return { rateWindow: arr, trimmedCount: 0, spikeDetected: false,
+             rawDailyLoss: 0, rawIsImplausible: false, daySpan: 0,
+             rateLatest: arr[0] || null, oldest: arr[arr.length - 1] || null };
+  }
+  let rateWindow = arr;
+  let spikeDetected = false;
+  for (let i = 0; i < rateWindow.length - 1; i++) {
+    const delta = Math.abs(rateWindow[i].weight - rateWindow[i+1].weight);
+    if (delta > SPIKE_KG) { spikeDetected = true; break; }
+  }
+  let trimmedCount = 0;
+  if (spikeDetected && rateWindow.length >= 3) {
+    while (rateWindow.length >= 3) {
+      const d = Math.abs(rateWindow[0].weight - rateWindow[1].weight);
+      if (d > SPIKE_KG) { rateWindow.shift(); trimmedCount++; } else { break; }
+    }
+  }
+  if (rateWindow.length < 2) rateWindow = arr.slice(0, Math.min(2, arr.length));
+  const rateLatest = rateWindow[0];
+  const oldest = rateWindow[rateWindow.length - 1];
+  const daySpan = Math.max(1, (strToDate(rateLatest.date) - strToDate(oldest.date)) / 86400000);
+  const rawDailyLoss = (oldest.weight - rateLatest.weight) / daySpan;
+  const rawIsImplausible = Math.abs(rawDailyLoss * 7) > MAX_KG_PER_WEEK;
+  return { rateWindow, trimmedCount, spikeDetected, rawDailyLoss,
+           rawIsImplausible, daySpan, rateLatest, oldest };
+}
+
 // updateGoalBar: calculates % progress from start weight to target and fills the bar.
 // Start weight = oldest logged entry (not settings.currentKg) — avoids bar resetting
 // if the user updates settings later with a lower current weight.
@@ -3022,33 +3074,16 @@ function updateProjection() {
   const recent = weights.slice(0, Math.min(7, weights.length));
   const latest = recent[0];
 
-  // v7.1.0: spike detection — if any consecutive day-to-day delta in the
-  // recent window exceeds 1.5 kg, the readings are noisy (water retention,
-  // sickness, glycogen swing) and should not drive the rate calculation.
-  // We trim spike-affected entries from the rate window but KEEP `latest`
-  // for current-weight display.
-  let rateWindow = recent.slice();
-  let spikeDetected = false;
-  for (let i = 0; i < rateWindow.length - 1; i++) {
-    const delta = Math.abs(rateWindow[i].weight - rateWindow[i+1].weight);
-    if (delta > 1.5) { spikeDetected = true; break; }
-  }
-  // If spike detected, use the OLDEST stable pair we can find — drop the most
-  // recent entries until consecutive deltas are < 1.5 kg
-  if (spikeDetected && rateWindow.length >= 3) {
-    while (rateWindow.length >= 3) {
-      const d = Math.abs(rateWindow[0].weight - rateWindow[1].weight);
-      if (d > 1.5) { rateWindow.shift(); } else { break; }
-    }
-  }
-  if (rateWindow.length < 2) rateWindow = recent.slice(0, Math.min(2, recent.length));
-  const rateLatest = rateWindow[0];
-  const oldest = rateWindow[rateWindow.length-1];
-  const daySpan = Math.max(1, (strToDate(rateLatest.date) - strToDate(oldest.date)) / 86400000);
-  let rawDailyLoss = (oldest.weight - rateLatest.weight) / daySpan; // kg/day (positive = losing)
-  // Implausibility check: any rate > 2 kg/week in either direction is likely
-  // still noisy after trimming. Heavy-favor formula in that case.
-  const rawIsImplausible = Math.abs(rawDailyLoss * 7) > 2.0;
+  // Phase 4 (v7.2.3): spike-trim + implausibility check via the shared helper
+  // (extracted from the original v7.1.0 inline logic). Same behaviour, now
+  // also reused by radar WEIGHT TREND axis and calcAdjust.
+  const _trim = getSpikeTrimmedWeights(recent);
+  const rateWindow = _trim.rateWindow;
+  const rateLatest = _trim.rateLatest;
+  const oldest = _trim.oldest;
+  const daySpan = _trim.daySpan;
+  const rawDailyLoss = _trim.rawDailyLoss;
+  const rawIsImplausible = _trim.rawIsImplausible;
 
   // Count fast/light days in next 7 days from today
   const lightDays = gs(SK.lightDays)||{};
@@ -4544,7 +4579,16 @@ function calcAdjust() {
   }
 
   const startW  = sched.startWeight || s.currentKg || 0;
-  const curW    = getLatestWeight() || startW;
+  // Phase 4 (v7.2.3): use spike-trimmed current weight so a same-day water/
+  // sickness spike doesn't poison the trajectory math. Falls back to raw
+  // latest, then to startW, when no weights or no spike present.
+  const _adjWeights = (gs(SK.weights) || []).slice(0, 7);
+  const _adjTrim = (typeof getSpikeTrimmedWeights === 'function')
+    ? getSpikeTrimmedWeights(_adjWeights)
+    : null;
+  const curW = (_adjTrim && _adjTrim.rateLatest && _adjTrim.rateLatest.weight)
+    ? _adjTrim.rateLatest.weight
+    : (getLatestWeight() || startW);
   const elapsed = Math.max(1, Math.floor((new Date().getTime() - strToDate(sched.startDate).getTime()) / 86400000));
   const isBulkAdj = newTarget > startW;
 

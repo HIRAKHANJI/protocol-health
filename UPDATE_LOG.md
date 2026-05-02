@@ -4,6 +4,27 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 7.2.3 — 2026-04-28
+
+**Scope:** Patch (Phase 4 of calibration roadmap — spike-trim port to radar + ADJUST)
+**Banner:** none (patch — math correctness, no new feature)
+
+**Goal.** Finish the v7.1.0 spike-protection rollout. Previously only `updateProjection()` had spike trimming. The radar's WEIGHT TREND axis still used raw newest/oldest weights (so a single +3kg sickness spike could crash the axis to red), and `calcAdjust()` used raw `getLatestWeight()` for `currentWeight` (so opening ADJUST during a water-spike day would feed bad data to the schedule recalculation).
+
+**Changes:**
+
+- **`app.html` — new shared helper `getSpikeTrimmedWeights(weights, opts)`** placed next to `getLatestWeight`. Extracted byte-identical from the original v7.1.0 inline logic in `updateProjection`. Inputs: weights array (newest-first), optional `{ spikeKg = 1.5, maxKgPerWeek = 2.0 }`. Returns `{ rateWindow, trimmedCount, spikeDetected, rawDailyLoss, rawIsImplausible, daySpan, rateLatest, oldest }`.
+- **`updateProjection()` refactored** to call the helper instead of carrying its own inline logic. Behaviour bit-identical (same defaults, same trim algorithm).
+- **`calcAdjust()`** — `curW` resolution now goes through the spike-trim helper. If a spike is detected, `curW` becomes the trimmed-latest (the most recent stable reading) instead of raw `getLatestWeight()`. Falls back to `getLatestWeight()` then `startW` if helper isn't available or no weights exist. Every other field in `calcAdjust` (`startW`, `elapsed`, `actualRate`, etc.) unchanged.
+- **`modules/radar.js` WEIGHT TREND axis** uses `getSpikeTrimmedWeights(windowWeights)` for `dailyChange` calculation. Existing dampener (sparse-data confidence) preserved. New: when spike-trim flags `rawIsImplausible`, the axis confidence drops further (×0.5) — even the trimmed signal can still be water/sickness noise, so the score reflects that uncertainty.
+- **Backward-compat fallback** in radar.js: if `getSpikeTrimmedWeights` isn't defined (paranoid defensive), the original raw newest/oldest math runs. No behaviour regression.
+
+**No data shape change.** No new dispatch event. No new SK key. No `sw.js` change.
+
+**Roadmap:** `PENDING_IMPLEMENTATIONS.md` Phase 4 — IN PROGRESS until owner confirms PR merge.
+
+---
+
 ## Version 7.2.2 — 2026-04-28
 
 **Scope:** Patch (Phase 3 of calibration roadmap — plan-direction-aware calorie safety hints/warnings)
