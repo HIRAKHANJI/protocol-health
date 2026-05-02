@@ -9,17 +9,17 @@ if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.s
   window.location.replace('app.html');
 }
 </script>
-<title>Protocol Health · v6.2.4 — free, offline, anywhere</title>
+<title>Protocol Health · v7.8.1 — adaptive TDEE, multi-day fasts, free</title>
 <meta name="description" content="Free fitness protocol PWA. Installs like a native app. Five training plans. Zero equipment. Zero accounts. Your data stays on your device.">
 <meta name="theme-color" content="#0a0a0a">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="apple-touch-icon" href="PH_LOGO_192.png">
-<link rel="stylesheet" href="assets/landing.css?v=6.2.4">
-<link rel="stylesheet" href="assets/landing-sections.css?v=6.2.4">
-<link rel="stylesheet" href="assets/landing-demos.css?v=6.2.4">
-<link rel="stylesheet" href="assets/landing-v5.css?v=6.2.4">
-<link rel="stylesheet" href="assets/install-guide.css?v=6.2.4">
+<link rel="stylesheet" href="assets/landing.css?v=7.8.1">
+<link rel="stylesheet" href="assets/landing-sections.css?v=7.8.1">
+<link rel="stylesheet" href="assets/landing-demos.css?v=7.8.1">
+<link rel="stylesheet" href="assets/landing-v5.css?v=7.8.1">
+<link rel="stylesheet" href="assets/install-guide.css?v=7.8.1">
 </head>
 <body>
 
@@ -31,7 +31,7 @@ if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.s
   <a href="#" class="nav-logo">
     <img src="PH_ARROWS_LOGO.png" alt="">
     <div class="brand">PROTOCOL <span>HEALTH</span></div>
-    <div class="ver">v6.2.4</div>
+    <div class="ver">v7.8.1</div>
   </a>
   <div class="nav-links">
     <a href="#anywhere">ANYWHERE</a>
@@ -49,7 +49,7 @@ if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.s
   <div class="hero-copy">
     <div class="hero-badge">
       <span class="dot"></span>
-      v6.2.4 · FREE · OFFLINE · NO ACCOUNT
+      v7.8.1 · FREE · OFFLINE · NO ACCOUNT
     </div>
     <h1>
       <span class="outlined">YOUR</span> <span class="accent">PROTOCOL.</span><br>
@@ -101,7 +101,7 @@ if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.s
 <div class="stats-bar reveal">
   <div class="stats-inner">
     <div class="stat"><div class="v" data-counter="5">0</div><div class="l">PLANS</div></div>
-    <div class="stat"><div class="v" data-counter="85" data-suffix="+">0</div><div class="l">UPDATES</div></div>
+    <div class="stat"><div class="v" data-counter="100" data-suffix="+">0</div><div class="l">UPDATES</div></div>
     <div class="stat"><div class="v">100%</div><div class="l">OFFLINE</div></div>
     <div class="stat"><div class="v stat-free">FREE</div><div class="l">FOREVER</div></div>
   </div>
@@ -558,8 +558,8 @@ if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.s
 <section class="changelog" id="changelog">
   <div class="section-head reveal">
     <div class="section-tag">CHANGELOG</div>
-    <h2 class="section-title">The <span class="accent">v6</span> release.</h2>
-    <p class="section-desc">Ships only when it adds real capability.</p>
+    <h2 class="section-title">The <span class="accent">v7</span> release. Adaptive TDEE, sickness-aware, multi-day fasts.</h2>
+    <p class="section-desc">13 phases of calibration + stability work. Ships only when it adds real capability.</p>
   </div>
 
   <div class="changelog-wrap">
@@ -567,15 +567,76 @@ if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.s
       <div class="cl-dot current"></div>
       <div class="cl-body">
         <div class="cl-head">
-          <div class="cl-ver">v6.2.4</div>
+          <div class="cl-ver">v7.8</div>
           <div class="cl-date">CURRENT · APR 2026</div>
-          <div class="cl-tag">PATCH</div>
+          <div class="cl-tag">MINOR</div>
         </div>
-        <h4>Redesigned landing + animated install guide</h4>
+        <h4>Multi-day fasts, properly</h4>
         <ul>
-          <li>New landing page with animated device mockups for Android, iOS, and Desktop</li>
-          <li>Install button opens a 3-tab guide that auto-advances through each platform's install flow</li>
-          <li>Stats, changelog, and content refreshed; plan calorie numbers now clearly labeled as user-configurable</li>
+          <li>Start Friday evening, end Monday morning — one session covers all days, no duplicate windows</li>
+          <li>Tap START FAST during an active session does nothing (no more confused state)</li>
+          <li>Day modal labels multi-day spans clearly with full date+time range</li>
+          <li>Each weekly calibration writes a snapshot to a 90-entry rolling history (foundation for future trend features)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="cl-entry reveal">
+      <div class="cl-dot"></div>
+      <div class="cl-body">
+        <div class="cl-head">
+          <div class="cl-ver">v7.6</div>
+          <div class="cl-date">APR 2026</div>
+          <div class="cl-tag">MINOR</div>
+        </div>
+        <h4>Adaptive activity multiplier + linked offset mode</h4>
+        <ul>
+          <li>After 28+ days of clean data, the app infers your true activity multiplier from observed TDEE / BMR</li>
+          <li>Diagnostic shown next to your current activity level with an APPLY button if there's a meaningful gap</li>
+          <li>Capped to plan default ± 0.2 to prevent wild swings</li>
+          <li>New "link calorie ceiling to TDEE" toggle keeps your daily deficit (or surplus, for bulk) constant as TDEE drifts</li>
+          <li>Backup files now carry a SHA-256 integrity checksum; restore warns if a file looks corrupted or tampered</li>
+          <li>Settings shows your last 5 backups with relative-time labels</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="cl-entry reveal">
+      <div class="cl-dot"></div>
+      <div class="cl-body">
+        <div class="cl-head">
+          <div class="cl-ver">v7.3 – v7.4</div>
+          <div class="cl-date">APR 2026</div>
+          <div class="cl-tag">MINOR</div>
+        </div>
+        <h4>Sickness-aware calibration</h4>
+        <ul>
+          <li>Mark any day as sick / disrupted with a 🤒 toggle on TODAY tab and in the calendar day modal</li>
+          <li>Calendar cells show a small icon in the corner for flagged days</li>
+          <li>Calibration excludes sick days from observed-TDEE math automatically</li>
+          <li>Auto-pause when 3+ consecutive disrupted days appear in your 14-day window — bad weeks no longer corrupt your TDEE</li>
+          <li>Reality Check shows the exclusion breakdown (sick, low compliance) and explains when next calibration runs</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="cl-entry reveal">
+      <div class="cl-dot"></div>
+      <div class="cl-body">
+        <div class="cl-head">
+          <div class="cl-ver">v7.0 – v7.2</div>
+          <div class="cl-date">APR 2026</div>
+          <div class="cl-tag">MAJOR</div>
+        </div>
+        <h4>Adaptive TDEE calibration loop</h4>
+        <ul>
+          <li>Weekly compares formula TDEE against real-world burn rate from your intake + weight loss</li>
+          <li>Adjusts your TDEE to a 70/30 blend when reality and formula disagree by more than 7%</li>
+          <li>Sanity bounds reject impossible values (below BMR, above formula × 1.5) — sickness/water spikes can't corrupt your TDEE</li>
+          <li>Auto-revert on load if a previous calibration wrote a bad value; "Reset to formula" button as escape hatch</li>
+          <li>Reality Check block on TRACK tab shows predicted vs actual loss live with plain-English explainer</li>
+          <li>Spike-trim protects projection, radar, and ADJUST math from sudden 3kg water-retention jumps</li>
+          <li>Plan-aware calorie safety floors and bands (cut floor, bulk above-TDEE, maintenance band)</li>
         </ul>
       </div>
     </div>
@@ -801,7 +862,7 @@ if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.s
     </a>
     <a href="#" class="btn-ghost" onclick="openInstall(); return false;">INSTALL GUIDE</a>
   </div>
-  <div class="note">v6.2.4 · Installable PWA · Offline ready</div>
+  <div class="note">v7.8.1 · Installable PWA · Offline ready</div>
 </section>
 
 <!-- FOOTER -->
@@ -814,8 +875,8 @@ if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.s
       </div>
       <p>Installable PWA. On your device. No cloud.</p>
       <div class="footer-stats">
-        <div><span class="v">v6.2.4</span><span class="l">CURRENT</span></div>
-        <div><span class="v">85+</span><span class="l">SHIPPED</span></div>
+        <div><span class="v">v7.8.1</span><span class="l">CURRENT</span></div>
+        <div><span class="v">100+</span><span class="l">SHIPPED</span></div>
         <div><span class="v">0</span><span class="l">APIS</span></div>
       </div>
     </div>
@@ -845,7 +906,7 @@ if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.s
   </div>
 
   <div class="footer-bottom">
-    <div>© 2026 PROTOCOL HEALTH · v6.2.4 · ALL RIGHTS RESERVED</div>
+    <div>© 2026 PROTOCOL HEALTH · v7.8.1 · ALL RIGHTS RESERVED</div>
     <div class="fb-tags">
       <span>NO ACCOUNTS</span>
       <span>NO CLOUD</span>
@@ -1113,8 +1174,8 @@ if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.s
 
 <!-- Scripts -->
 <script src="assets/landing.js"></script>
-<script src="assets/landing-v5.js?v=6.2.4"></script>
-<script src="assets/install-guide.js?v=6.2.4"></script>
+<script src="assets/landing-v5.js?v=7.8.1"></script>
+<script src="assets/install-guide.js?v=7.8.1"></script>
 
 </body>
 </html>

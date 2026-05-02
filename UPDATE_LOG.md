@@ -4,6 +4,63 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 7.8.1 — 2026-04-28
+
+**Scope:** Patch (Phase 13 of calibration roadmap — activity history foundation, with v4→v5 migration; landing-page version refresh)
+**Banner:** none (patch — silent observation; no behaviour change beyond writing snapshots)
+
+**Goal.** Closes the 13-phase calibration roadmap. Each `weeklyCalibration` cycle now writes a structured snapshot to `SK.activityHistory` so future trend-analysis features have a clean dataset to work from. Pure observation; no UI in this phase.
+
+**Storage:**
+
+- **New SK key:** `SK.activityHistory = 'ph_ah_v1'`. Array capped at 90 entries (oldest dropped on overflow). Each entry:
+  ```js
+  {
+    date: 'YYYY-MM-DD',          // calibration run date
+    ts: number,                   // exact timestamp
+    outcome: string,              // 'gathering' | 'missing-inputs' |
+                                  // 'sickness-pattern-detected' |
+                                  // 'rejected-out-of-bounds' |
+                                  // 'within-threshold' | 'applied'
+    formulaTDEE: number | null,
+    observedTDEE: number | null,
+    ratio: number | null,         // observedTDEE / formulaTDEE
+    daysAvailable: number,
+    daysLogged: number,
+    excludedSick: number,
+    excludedLowCompliance: number,
+    sicknessPatternDetected: boolean,
+    longestRun: number,           // longest consecutive disrupted days
+    oldTdee: number | null,       // pre-calibration TDEE
+    newTdee: number | null        // post-calibration TDEE
+  }
+  ```
+- **Migration v4 → v5** in `migrations/registry.js`. No-op data transformation (`requiresBackup: false`). Reverse handler drops the key. Schema version bumps from 4 to 5 on next load.
+- **Cap:** 90 entries (~21 months at the weekly cadence; ~3 months at daily).
+
+**Changes:**
+
+- **`modules/calibration.js`:**
+  - **New constant `ACTIVITY_HISTORY_CAP = 90`** + private helper `_appendActivitySnapshot(snapshot)` — writes to `SK.activityHistory`, trims to cap, no dispatch (silent).
+  - **`weeklyCalibration` extended:** new `_baseSnapshot()` template inside the function (closure over the local `status`) populates common fields. Each evaluation branch (`gathering`, `missing-inputs`, `sickness-pattern-detected`, `rejected-out-of-bounds`, `within-threshold`, `applied`) calls `_appendActivitySnapshot(Object.assign(_baseSnapshot(), { outcome, ...extras }))`. The two non-evaluation branches (`manual-override`, `too-soon`) skip the snapshot since they represent "no cycle ran".
+- **`app.html`:**
+  - `SK.activityHistory: 'ph_ah_v1'` added.
+
+**Landing page (`index.html`) — comprehensive version refresh** (separate concern bundled in this commit per owner request):
+
+- **Title** and **`<meta>` cache-bust query strings** for all 5 CSS + 2 JS asset references: `?v=6.2.4` → `?v=7.8.1`.
+- **Hero badge** version string `v6.2.4` → `v7.8.1` (DOM `.ver` element + `v6.2.4 · FREE · OFFLINE · NO ACCOUNT` line).
+- **Stats counter** "85+ UPDATES / 85+ SHIPPED" → "100+ UPDATES / 100+ SHIPPED" (we've shipped 14 versions across the calibration roadmap; the "100+" is honest given the v5/v6/v7 cumulative count).
+- **Changelog section title** "The v6 release" → "The v7 release. Adaptive TDEE, sickness-aware, multi-day fasts."
+- **Changelog entries prepended** for the calibration project: v7.8 (multi-day fasts), v7.6 (calibration loop), v7.3 (sickness-aware), v7.1 (sanity bounds hot-fix). Older v6.x entries kept for context.
+- **Footer note** + **install-guide note** + **closing copyright line** all bumped to v7.8.1.
+
+**Backward compat.** No new dispatch event, no `sw.js` change. Existing user data untouched. The `activityHistory` array is empty until the next calibration cycle runs.
+
+**Roadmap:** `PENDING_IMPLEMENTATIONS.md` Phase 13 — IN PROGRESS until owner confirms PR merge. Final phase of the 13-phase calibration & stability roadmap.
+
+---
+
 ## Version 7.8.0 — 2026-04-28
 
 **Scope:** Minor (Phase 12 of calibration roadmap — multi-day fast sessions, with v3→v4 migration; data restructure)
