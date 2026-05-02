@@ -24,6 +24,29 @@
 const MAX_KG_CHANGE_PER_WEEK = 2.0;
 const TDEE_CEIL_RATIO = 1.5;
 const CALIBRATION_CADENCE_DAYS = 7;
+const LOW_COMPLIANCE_PCT = 30;
+
+// Phase 6 (v7.4.0): shared exclusion check for calibration math.
+// A day is excluded from the intake/observed-TDEE calculation when:
+//   1. The user explicitly flagged it sick (dayLogs[ds].sick === true), OR
+//   2. Checklist completion fell below LOW_COMPLIANCE_PCT (default 30%) AND
+//      the day actually had a checklist rendered (vc.total > 0). Days with
+//      nothing rendered fall through to the unlogged branch instead.
+// Returns 'sick' | 'low-compliance' | null. The kgLoss / spanDays attribution
+// is unchanged — we still attribute weight change to the full window. Only
+// intake-side aggregation excludes affected days, so observed TDEE reflects
+// what the user's body burns on representative (non-disrupted) days.
+function _getDayExclusion(ds, dayLogs) {
+  const dayLog = dayLogs[ds] || {};
+  if (dayLog.sick === true) return 'sick';
+  if (typeof getValidCheckCompletion === 'function') {
+    const vc = getValidCheckCompletion(ds);
+    if (vc && vc.total > 0 && (vc.pct || 0) < LOW_COMPLIANCE_PCT) {
+      return 'low-compliance';
+    }
+  }
+  return null;
+}
 
 // ─── DAY BREAKDOWN (Phase 1 — Reality Check display) ────────────────────────
 // Separates "period average" (incl. fast days at 0) from "eating-day average"
@@ -37,6 +60,7 @@ export function getDayBreakdown(days = 14) {
   const weights = (gs(SK.weights) || []).slice();
   const foodLog = gs(SK.foodLog) || {};
   const fastDays = gs(SK.fastDays) || {};
+  const dayLogs = gs(SK.dayLogs) || {};
   const inWindow = weights.filter(w => {
     const d = strToDate(w.date);
     return d >= windowStart && d <= today;
@@ -44,7 +68,8 @@ export function getDayBreakdown(days = 14) {
   if (inWindow.length < 2) {
     return { totalDays: 0, eatingDayCount: 0, eatingDayIntakeSum: 0, eatingDayAvg: 0,
              fastDayCount: 0, brokenFastCount: 0, fastDayIntakeSum: 0,
-             unloggedEatingDayCount: 0, periodAvg: 0, spanDays: 0 };
+             unloggedEatingDayCount: 0, periodAvg: 0, spanDays: 0,
+             excludedSick: 0, excludedLowCompliance: 0, excludedTotal: 0 };
   }
   inWindow.sort((a, b) => a.date.localeCompare(b.date));
   const oldestDate = strToDate(inWindow[0].date);
@@ -56,6 +81,8 @@ export function getDayBreakdown(days = 14) {
   let unloggedEatingDayCount = 0;
   let totalDays = 0;
   let periodIntakeSum = 0, periodIntakeDays = 0;
+  // Phase 6 (v7.4.0): exclusion counters consistent with computeObservedTDEE
+  let excludedSick = 0, excludedLowCompliance = 0;
 
   for (let d = new Date(oldestDate); d <= newestDate; d.setDate(d.getDate() + 1)) {
     const ds = dateToStr(d);
@@ -63,6 +90,13 @@ export function getDayBreakdown(days = 14) {
     const isFast = !!fastDays[ds];
     const dayCal = (fl && fl.length) ? fl.reduce((sum, e) => sum + (parseInt(e.calories) || 0), 0) : 0;
     totalDays++;
+    // Phase 6: exclusion gate runs before day-type classification so eating/
+    // fast counts only reflect non-excluded days. Sick days never appear in
+    // the breakdown counts; low-compliance days same. They surface in the
+    // excludedSick / excludedLowCompliance counters instead.
+    const exclusion = _getDayExclusion(ds, dayLogs);
+    if (exclusion === 'sick') { excludedSick++; continue; }
+    if (exclusion === 'low-compliance') { excludedLowCompliance++; continue; }
     if (isFast) {
       fastDayCount++;
       if (fl && fl.length > 0) {
@@ -86,11 +120,13 @@ export function getDayBreakdown(days = 14) {
 
   const eatingDayAvg = eatingDayCount > 0 ? Math.round(eatingDayIntakeSum / eatingDayCount) : 0;
   const periodAvg = periodIntakeDays > 0 ? Math.round(periodIntakeSum / periodIntakeDays) : 0;
+  const excludedTotal = excludedSick + excludedLowCompliance;
 
   return { totalDays, spanDays,
            eatingDayCount, eatingDayIntakeSum, eatingDayAvg,
            fastDayCount, brokenFastCount, fastDayIntakeSum,
-           unloggedEatingDayCount, periodAvg };
+           unloggedEatingDayCount, periodAvg,
+           excludedSick, excludedLowCompliance, excludedTotal };
 }
 
 // ─── PURE COMPUTATION ────────────────────────────────────────────────────────
@@ -108,13 +144,18 @@ export function computeObservedTDEE(days = 14) {
   const weights = (gs(SK.weights) || []).slice();
   const foodLog = gs(SK.foodLog) || {};
   const fastDays = gs(SK.fastDays) || {};
+  const dayLogs = gs(SK.dayLogs) || {};
   // Filter weights to window
   const inWindow = weights.filter(w => {
     const d = strToDate(w.date);
     return d >= windowStart && d <= today;
   });
+  // Common empty-result template — keeps return shape consistent across all
+  // early-exit branches (Phase 6 added excludedSick/excludedLowCompliance).
+  const empty = { tdee: null, daysLogged: 0, daysAvailable: 0, kgLoss: 0, avgIntake: 0, spanDays: 0,
+                  excludedSick: 0, excludedLowCompliance: 0, valid: false };
   if (inWindow.length < 2) {
-    return { tdee: null, daysLogged: 0, daysAvailable: 0, kgLoss: 0, avgIntake: 0, spanDays: 0, valid: false, reason: 'need-2-weights' };
+    return Object.assign({}, empty, { reason: 'need-2-weights' });
   }
   // Sort oldest → newest
   inWindow.sort((a, b) => a.date.localeCompare(b.date));
@@ -124,17 +165,24 @@ export function computeObservedTDEE(days = 14) {
   const newestDate = strToDate(newest.date);
   const spanDays = Math.round((newestDate - oldestDate) / 86400000);
   if (spanDays < 7) {
-    return { tdee: null, daysLogged: 0, daysAvailable: spanDays, kgLoss: 0, avgIntake: 0, spanDays, valid: false, reason: 'span-too-short' };
+    return Object.assign({}, empty, { daysAvailable: spanDays, spanDays, reason: 'span-too-short' });
   }
   const kgLoss = oldest.weight - newest.weight; // positive = loss
 
   // Iterate days in span. For each, compute included intake.
   let intakeSum = 0;
   let daysLogged = 0;
+  // Phase 6 (v7.4.0): exclusion counters
+  let excludedSick = 0, excludedLowCompliance = 0;
   for (let d = new Date(oldestDate); d <= newestDate; d.setDate(d.getDate() + 1)) {
     const ds = dateToStr(d);
     const fl = foodLog[ds];
     const isFast = !!fastDays[ds];
+    // Phase 6: exclusion gate — sick flag OR sub-30% checklist completion.
+    // Excluded days don't contribute to intake or daysLogged.
+    const exclusion = _getDayExclusion(ds, dayLogs);
+    if (exclusion === 'sick') { excludedSick++; continue; }
+    if (exclusion === 'low-compliance') { excludedLowCompliance++; continue; }
     if (fl && fl.length > 0) {
       // Logged eating day OR broken fast (food was logged)
       const dayCal = fl.reduce((sum, e) => sum + (parseInt(e.calories) || 0), 0);
@@ -145,22 +193,23 @@ export function computeObservedTDEE(days = 14) {
       intakeSum += 0;
       daysLogged++;
     } else {
-      // Unlogged eating day — exclude from average
+      // Unlogged eating day — exclude from average (existing behaviour)
     }
   }
   if (daysLogged < 7) {
-    return { tdee: null, daysLogged, daysAvailable: spanDays, kgLoss, avgIntake: 0, spanDays, valid: false, reason: 'need-7-logs' };
+    return Object.assign({}, empty, { daysLogged, daysAvailable: spanDays, kgLoss, spanDays, excludedSick, excludedLowCompliance, reason: 'need-7-logs' });
   }
   // SANITY: weekly weight change > 2 kg is implausible without confounds
   // (sickness, water retention, glycogen swing). Reject — calibration would
   // produce a wildly wrong TDEE if it trusted this signal.
   const weeklyChange = Math.abs(kgLoss) * 7 / spanDays;
   if (weeklyChange > MAX_KG_CHANGE_PER_WEEK) {
-    return { tdee: null, daysLogged, daysAvailable: spanDays, kgLoss, avgIntake: 0, spanDays, valid: false, reason: 'spike-detected' };
+    return Object.assign({}, empty, { daysLogged, daysAvailable: spanDays, kgLoss, spanDays, excludedSick, excludedLowCompliance, reason: 'spike-detected' });
   }
   const avgIntake = intakeSum / daysLogged;
   const observedTDEE = Math.round(avgIntake + (kgLoss * 7700 / spanDays));
-  return { tdee: observedTDEE, daysLogged, daysAvailable: spanDays, kgLoss, avgIntake: Math.round(avgIntake), spanDays, valid: true, reason: 'ok' };
+  return { tdee: observedTDEE, daysLogged, daysAvailable: spanDays, kgLoss, avgIntake: Math.round(avgIntake), spanDays,
+           excludedSick, excludedLowCompliance, valid: true, reason: 'ok' };
 }
 
 // Composes formula TDEE + observed TDEE + computed blend. Used by both the
@@ -232,7 +281,11 @@ export function getCalibrationStatus() {
     daysUntilNextCheck,
     lastCalibrationOutcome,
     lastCalibrationFormula: s.lastCalibrationFormula || null,
-    lastCalibrationObserved: s.lastCalibrationObserved || null
+    lastCalibrationObserved: s.lastCalibrationObserved || null,
+    // Phase 6 additions: sickness + low-compliance exclusion counters
+    excludedSick: obs.excludedSick || 0,
+    excludedLowCompliance: obs.excludedLowCompliance || 0,
+    excludedTotal: (obs.excludedSick || 0) + (obs.excludedLowCompliance || 0)
   };
 }
 
@@ -429,11 +482,23 @@ export function renderRealityCheck() {
   const stateLabel = status.state === 'CALIBRATED' ? 'CALIBRATED' : 'GATHERING DATA';
 
   // Phase 1: structured intake breakdown — period vs eating-day vs fast count
+  // Phase 6 addition: excluded-days row (sick / low-compliance) when count > 0
   const bd = status.breakdown || {};
+  const excludedRow = (bd.excludedTotal && bd.excludedTotal > 0)
+    ? `<div class="rc-row"><span class="rc-label">Days excluded</span><span class="rc-val">${bd.excludedTotal}${
+        (bd.excludedSick > 0 || bd.excludedLowCompliance > 0)
+          ? ' · ' + [
+              bd.excludedSick > 0 ? bd.excludedSick + ' sick' : null,
+              bd.excludedLowCompliance > 0 ? bd.excludedLowCompliance + ' low compliance' : null
+            ].filter(Boolean).join(', ')
+          : ''
+      }</span></div>`
+    : '';
   const intakeBlock = (bd.totalDays > 0)
     ? `<div class="rc-row"><span class="rc-label">Eating-day avg</span><span class="rc-val">${fmtCal(bd.eatingDayAvg)}</span></div>
        <div class="rc-row"><span class="rc-label">Period avg (incl. fasts)</span><span class="rc-val">${fmtCal(bd.periodAvg)}</span></div>
-       <div class="rc-row"><span class="rc-label">Fast days</span><span class="rc-val">${bd.fastDayCount} of ${bd.totalDays}${bd.brokenFastCount > 0 ? ' · ' + bd.brokenFastCount + ' broken' : ''}</span></div>`
+       <div class="rc-row"><span class="rc-label">Fast days</span><span class="rc-val">${bd.fastDayCount} of ${bd.totalDays}${bd.brokenFastCount > 0 ? ' · ' + bd.brokenFastCount + ' broken' : ''}</span></div>
+       ${excludedRow}`
     : '';
 
   const obsLine = status.observedTDEE
