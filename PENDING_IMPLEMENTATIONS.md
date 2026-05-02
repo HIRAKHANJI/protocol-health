@@ -570,7 +570,10 @@ After 28+ days of clean data, infer the user's effective activity multiplier fro
 
 ## Phase 10 — Backup Integrity Checksum
 
-**Status:** IN PROGRESS
+**Status:** ✅ COMPLETED — DO NOT MODIFY
+**Merge commit:** `cbeb31e` (PR #128)
+**Merged:** 2026-04-28
+**Pinned APP_VERSION:** `7.6.1`
 **Tier source:** Tier 3, item 11
 **APP_VERSION target:** `7.6.1` (patch — silent infrastructure)
 **CACHE_NAME bump:** Yes.
@@ -612,7 +615,7 @@ Add SHA-256 checksum of the `data` field to backup files. On restore, verify che
 
 ## Phase 11 — Backup History Tracking
 
-**Status:** PENDING
+**Status:** IN PROGRESS
 **Tier source:** Tier 3, item 12
 **APP_VERSION target:** `7.7.0` (minor — new feature with migration)
 **CACHE_NAME bump:** Yes.

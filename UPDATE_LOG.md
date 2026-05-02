@@ -4,6 +4,39 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 7.7.0 — 2026-04-28
+
+**Scope:** Minor (Phase 11 of calibration roadmap — backup history tracking, with v2→v3 migration)
+**Banner:** shown — "Settings → Data Management now shows your last 5 backup events with relative-time labels (Today 2:14 PM, Yesterday, 3 days ago). Helps you see backup cadence at a glance and remember when you last saved your data."
+
+**Goal.** Surface backup cadence so the owner can see at a glance when they last saved their data — without digging through their downloads folder. Tracks the last 5 backup events.
+
+**Storage:**
+
+- **New SK key:** `SK.backupHistory = 'ph_bh_v1'`. Array of `{ ts: number, filename: string }`. Capped at 5 entries (oldest dropped).
+- **New migration v2 → v3:** registers the new key. No-op data transformation (the key is empty by default; populated organically by `backupData()` going forward). `requiresBackup: false`.
+- **Schema version** bumps from 2 to 3 on next app load.
+
+**Changes:**
+
+- **`app.html`:**
+  - `SK` object gains `backupHistory: 'ph_bh_v1'`.
+  - `backupData()` pushes a new entry on each successful download: `{ ts: Date.now(), filename: a.download }`. Trims to last 5. Calls `renderBackupHistory()` to refresh the UI block immediately.
+  - **New helper `_fmtRelativeTime(ts)`:** formats UNIX timestamp as `Today, 2:14 PM` / `Yesterday, 8:00 AM` / `3 days ago, 5:00 PM` / `1 week ago` / `N weeks ago` / `N months ago` / absolute date for older. Uses local timezone for date math (matches existing `dateToStr` convention).
+  - **New helper `renderBackupHistory()`:** populates `#backupHistoryList`. Hidden when array is empty. Shows "RECENT BACKUPS" header + per-entry row with relative-time on the left and filename on the right (truncated with ellipsis).
+  - **Settings UI:** new `#backupHistoryList` div inserted in Data Management section, between the BACKUP/RESTORE buttons + status row and the storage health block.
+  - `openSettings()` calls `renderBackupHistory()` for hydration on each open.
+  - **CSS:** `.backup-history-list` (compact panel matching schema-version block style), `.backup-history-header`, `.backup-history-row`, `.bh-when`, `.bh-name` (filename truncated with ellipsis to fit narrow screens).
+- **`migrations/registry.js`:** new migration object `{ from: 2, to: 3, ... }` appended after the v1→v2 fast-windows entry. Both are no-op transforms; just register schema state.
+
+**Backward compat.** Existing users see an empty backup-history list until they make their first backup with this version. The migration is purely additive and `requiresBackup: false`. Backup files already include the new key automatically since `backupData()` iterates `SK` for the dump.
+
+**No `sw.js` change.** No new dispatch event.
+
+**Roadmap:** `PENDING_IMPLEMENTATIONS.md` Phase 11 — IN PROGRESS until owner confirms PR merge.
+
+---
+
 ## Version 7.6.1 — 2026-04-28
 
 **Scope:** Patch (Phase 10 of calibration roadmap — backup integrity checksum)

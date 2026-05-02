@@ -29,5 +29,19 @@ export const MIGRATIONS = [
     },
     verify: () => true,
     reverse: (data) => data
+  },
+  {
+    from: 2,
+    to: 3,
+    description: 'Register backup-history storage key (ph_bh_v1). No data transformation — purely additive.',
+    requiresBackup: false,
+    run: (data) => {
+      // No-op. SK.backupHistory is added in app.html. The key is empty by
+      // default; backupData() pushes entries on each successful download
+      // and trims to the last 5. Phase 11 (v7.7.0).
+      return data;
+    },
+    verify: () => true,
+    reverse: (data) => data
   }
 ];
