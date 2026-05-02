@@ -4,6 +4,55 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 7.10.1 — 2026-05-02
+
+**Scope:** Patch (2 bugs surfaced by a high-strictness 6-agent codebase audit)
+**Banner:** silent (patch-level, per Section 12 versioning rule)
+**CACHE_NAME:** unchanged on feature branch (v29 still); will bump once at merge to main per Section 11.
+
+**Audit context.** A 6-agent professional audit covering math correctness, date/time, dispatcher + storage integrity, plan/schedule logic, UI fail modes, and service-worker/init order returned ~80 findings across all severities. After verification, the vast majority were false positives or design-by-spec behaviour (e.g., the math agent's "dimensional analysis" claims were wrong by inspection — `Math.ceil(totalCalChange / (kgPerWeek * 7700 / 7))` correctly produces days). Two real bugs survived verification.
+
+**Bug 1 — `migrations/runner.js` schema record date-keys used UTC.**
+- `establishedAt` (line 43) and `exportedAt` on auto-backups (line 77) were built from `new Date().toISOString().slice(0, 10)`, which returns the UTC date.
+- A user west of UTC running migrations during their local evening would get tomorrow's UTC date stored in their schema record. Cosmetic for `establishedAt`, but `exportedAt` is the user-facing date on every auto-backup filename and metadata.
+- CLAUDE.md Section 5 forbids `toISOString()` for date keys — the rule existed precisely for this case; the migration runner was the one place still violating it.
+- Fix: added a self-contained `_localDateStr(d)` helper at the top of `migrations/runner.js` that builds `YYYY-MM-DD` from local-time `getFullYear/getMonth/getDate`. Replaced both `toISOString().slice(0, 10)` call sites with `_localDateStr()`. Self-contained so it doesn't depend on the inline classic script's `dateToStr` having loaded first (the migration runner module evaluates before runInit calls into it).
+- File: `migrations/runner.js`.
+
+**Bug 2 — `saveDayLog` in the day modal didn't sync `currentKg` or recompute TDEE.**
+- `logWeight` and `logWeightFromToday` (the TODAY tab + TRACK tab inputs) both call `syncCurrentKgFromLatestWeight()` and `recomputeAndApplyTDEE()` after writing the weight log. `saveDayLog` (the day modal SAVE button, also a weight-write path) skipped both.
+- Symptom: user opens the day modal on today, types a fresh weight, taps SAVE — `SK.weights` is updated, the weight history list re-renders, but `settings.currentKg` keeps the old weight and `settings.tdee` keeps the old TDEE. Goal calculator and projection use stale weight until next app load.
+- Fix: added the same two helper calls (typeof-guarded for module-load order safety) in the same position as `logWeight`. The helpers are no-ops when the saved weight isn't the latest, so editing past dates remains safe.
+- File: `modules/calendar.js`.
+
+**Findings discounted as false positives or design-by-spec:**
+- Math agent's "dimensional analysis errors" in `calcAdjust` — verified by hand: `Math.ceil(totalCalChange / (safeKgPerWeek * 7700 / 7))` correctly produces days; agent's proposed "fix" would have produced 210,000 days for a 4-week goal.
+- "Mutable date in for-loop" in 4 files — none of the loop variables are aliased after the loop; the pattern is style-only.
+- `fast-window.js` "UTC time parsing" — `new Date("YYYY-MM-DDTHH:mm")` is parsed as LOCAL time per ECMAScript spec; round-trip through `toISOString()` preserves the same instant.
+- `export.js:65` Math.round vs Math.floor — verified across DST scenarios; round produces correct day counts (47-hour spans round to 2, +1 = 3 days correctly), Math.floor would actually be wrong.
+- "FULL_DAYS undefined race in visibilitychange" — `const` is hoisted; the listener body executes when the event fires, by which time the entire script has parsed.
+- "Day modal allows future weight logging" — the `if(isFuture)` branch in `openDayModal` only renders schedule-info; weight/water/notes/checklist fields are gated to the `else` branch.
+- `_wexCounter` reset — both call sites (`renderWorkouts` at app.html:3312 and the day-modal workout panel at calendar.js:435,481) correctly call `_resetExRowInstances()` before AND after rendering.
+- `restoreData` "bypasses migrations" — verified false: `_commitBackupRestore` writes `SK.schemaVersion` from the backup, so a backup with older schema causes runMigrations to replay on next load.
+- `FOOD_LOGGED` radar conditional — by-design: TRACK-tab-only render is intentional; switchTab calls `renderRadar()` when entering TRACK.
+- Patch bumps don't show banner — by-design per CLAUDE.md Section 12.
+- `CACHE_NAME` on patch deploys — by-design per CLAUDE.md Section 11; deploys to main always bump.
+
+**Audit issues left for future work (documented, not fixed):**
+- `getValidCheckCompletion` uses current plan's `checklistFast` for historical fast days marked under a previous plan. Real but minor — fixing properly requires storing per-day-log plan history (larger refactor).
+- `autoSetPlanFastDays/LightDays` re-marks dates the user manually unset on schedule extension. Distinguishing "absent because never set" from "absent because user unset" needs a different storage shape.
+- `ss()` returns no success/fail signal; multi-write user actions can partially succeed under quota pressure. Needs a return-value refactor across the codebase.
+- Various UX polish (modal tap-outside warns on unsaved, dropdown sync flicker, button tap-target sizes).
+
+**Files touched:**
+- `migrations/runner.js` — added `_localDateStr` helper, replaced two `toISOString().slice(0,10)` call sites.
+- `modules/calendar.js` — `saveDayLog` weight-write path now mirrors `logWeight`'s helper-call sequence.
+- `index.html` — hero badge → v7.10.1.
+- `app.html` — APP_VERSION + APP_VERSION_MSG.
+- `CLAUDE.md` — version references updated.
+
+---
+
 ## Version 7.10.0 — 2026-05-02
 
 **Scope:** Minor (calibration + TDEE consistency fixes — 5 user-visible bugs)

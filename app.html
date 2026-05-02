@@ -1727,8 +1727,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '7.10.0';
-const APP_VERSION_MSG = 'TDEE & calibration fixes. The "GATHERING DATA" status was caused by an off-by-one bug — Reality Check can now actually become CALIBRATED. Stored TDEE now resyncs to the formula on every app load (it was drifting until you next logged a weight). AGRO\'s activity multiplier dropdown now shows the honest weekly average (1.55× — 4 eat days × 1.70 + 3 fast days × 1.35), instead of misleadingly showing 1.725×. Stale calibration snapshots that violate physiological bounds now auto-clear, and TDEE auto-revert no longer silently locks the calibration cadence.';
+const APP_VERSION = '7.10.1';
+const APP_VERSION_MSG = 'Patch: schema record date-key now uses local time (not UTC, which corrupted establishedAt/exportedAt for users west of UTC). Saving weight via the day modal now syncs settings.currentKg and recomputes TDEE — same as the TODAY/TRACK weight inputs.';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
 

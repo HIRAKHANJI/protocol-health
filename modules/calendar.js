@@ -593,6 +593,13 @@ export function saveDayLog(dateStr) {
     ss(SK.weights, weights);
     saveDayLogField(dateStr, { weight: wt });
     renderWeights();
+    // v7.10.1: parity with logWeight / logWeightFromToday — when saveDayLog
+    // writes the latest weight, settings.currentKg and TDEE must resync, or
+    // the goal calculator + projection keep using stale weight. Both helpers
+    // are no-ops when the saved weight isn't the latest, so the past-date
+    // edit path is safe.
+    if (typeof syncCurrentKgFromLatestWeight === 'function') syncCurrentKgFromLatestWeight();
+    if (typeof recomputeAndApplyTDEE === 'function') recomputeAndApplyTDEE();
     dispatch('WEIGHT_LOGGED');
   }
   closeModal();
