@@ -4,6 +4,26 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 7.2.1 — 2026-04-28
+
+**Scope:** Patch (Phase 2 of calibration roadmap — quick-access ADJUST link in Settings)
+**Banner:** none (patch — no popup; small UI add)
+
+**Goal.** Surface the existing `MANAGE SCHEDULE → ADJUST` flow from the Settings panel. Previously, adjusting an active schedule required navigating to MONTHS tab → tapping `⚙ MANAGE SCHEDULE`. Phase 2 adds a one-tap shortcut from Settings.
+
+**Changes:**
+
+- **`app.html` Settings panel HTML:** new button `↗ ADJUST CURRENT SCHEDULE` (`#settingsAdjustLink`) inserted under the goal-calculator section, after the `ADD TO SCHEDULE` button. Styled with the orange `--accent2-warm` palette (`#ff8855`) to match the existing Manage Schedule button on MONTHS tab. `display:none` by default; revealed only when a schedule is active.
+- **`openSettings()`** extended to toggle the new link's visibility based on `gs(SK.schedule)` — visible if schedule exists, hidden otherwise.
+- **New top-level function `adjustCurrentScheduleFromSettings()`:** closes the Settings overlay then calls `openManageSchedule()`. The existing `openManageSchedule` already pre-fills `msTargetKg` from `s.targetKg` and `msCalories` from `s.calories`, so the user lands directly on a populated ADJUST view ready to edit.
+- **No changes** to `openManageSchedule` itself — its existing pre-fill behaviour was already correct. This phase is purely about discoverability: a Settings-panel entry point so the owner doesn't need to remember the MONTHS tab path.
+
+**No new modules.** No new CSS classes (button reuses existing `.reset-btn` styling). No new dispatch events. No data shape change. No `sw.js` change in this commit.
+
+**Roadmap:** `PENDING_IMPLEMENTATIONS.md` Phase 2 — IN PROGRESS until owner confirms PR merge.
+
+---
+
 ## Version 7.2.0 — 2026-04-28
 
 **Scope:** Minor (Phase 1 of calibration roadmap — Reality Check display clarity)
