@@ -4,6 +4,33 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 7.6.1 — 2026-04-28
+
+**Scope:** Patch (Phase 10 of calibration roadmap — backup integrity checksum)
+**Banner:** none (patch — silent infrastructure; only surfaces if an integrity mismatch is detected on restore)
+
+**Goal.** Add SHA-256 integrity verification to backup files so corrupted or tampered restores are detected before they can write bad data into storage. Old backups (no checksum field) continue to work — the verification is purely additive.
+
+**Changes:**
+
+- **`app.html`:**
+  - **New helper `sha256Hex(str)`:** async function returning the lowercase hex digest of the input via `crypto.subtle.digest('SHA-256', ...)`. Returns `null` if Web Crypto is unavailable (very old browsers, non-secure contexts) — caller skips checksum gracefully rather than failing.
+  - **`backupData()` is now `async`:** before stringifying the final backup, computes `sha256Hex(JSON.stringify(backup.data))` and stores `'sha256:<64-hex>'` in `backup.checksum`. Hash is over the canonical stringified `data` field only — metadata changes (appVersion bumps, exportedAt edits) don't invalidate the checksum, but data tampering does. Skipped silently if Web Crypto unavailable.
+  - **`restoreData()`:** the inner `reader.onload` callback wraps logic in an async IIFE so it can `await sha256Hex`. New checksum-verification step:
+    - `verified`: checksum present and matches → normal RESTORE confirm dialog.
+    - `mismatch`: checksum present but data doesn't match → **danger-tinted "INTEGRITY CHECK FAILED" dialog** with explicit "RESTORE ANYWAY" override.
+    - `absent`: no checksum field (older backup) → normal dialog with note `(older backup format — no integrity check available)`.
+    - `compute-failed`: hash function returned null → normal dialog with note `(could not verify integrity — Web Crypto unavailable)`.
+  - **New helper `_commitBackupRestore(backup, keys, exported)`:** factored from the inline restore body so the verified path and the integrity-override path share the same write logic. No behaviour change to the restore body itself.
+
+**Backward compat.** Backups created with prior versions (no `checksum` field) restore exactly as before — just with an extra note in the confirm dialog. New backups are still readable by older versions of the app since the `checksum` field is ignored by older `restoreData` (it's only validated when present).
+
+**No new SK key. No migration. No new dispatch event. No `sw.js` change.**
+
+**Roadmap:** `PENDING_IMPLEMENTATIONS.md` Phase 10 — IN PROGRESS until owner confirms PR merge.
+
+---
+
 ## Version 7.6.0 — 2026-04-28
 
 **Scope:** Minor (Phase 9 of calibration roadmap — adaptive activity multiplier diagnostic)

@@ -523,7 +523,10 @@ Reuse the `caloriesMode` discriminator added in Phase 3. The offset's sign is im
 
 ## Phase 9 — Adaptive Activity Multiplier
 
-**Status:** IN PROGRESS
+**Status:** ✅ COMPLETED — DO NOT MODIFY
+**Merge commit:** `e7b8081` (PR #127)
+**Merged:** 2026-04-28
+**Pinned APP_VERSION:** `7.6.0`
 **Tier source:** Tier 2, item 9
 **APP_VERSION target:** `7.6.0` (minor — new diagnostic, banner shown)
 **CACHE_NAME bump:** Yes.
@@ -567,7 +570,7 @@ After 28+ days of clean data, infer the user's effective activity multiplier fro
 
 ## Phase 10 — Backup Integrity Checksum
 
-**Status:** PENDING
+**Status:** IN PROGRESS
 **Tier source:** Tier 3, item 11
 **APP_VERSION target:** `7.6.1` (patch — silent infrastructure)
 **CACHE_NAME bump:** Yes.
