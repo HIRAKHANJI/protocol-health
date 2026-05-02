@@ -615,7 +615,10 @@ Add SHA-256 checksum of the `data` field to backup files. On restore, verify che
 
 ## Phase 11 — Backup History Tracking
 
-**Status:** IN PROGRESS
+**Status:** ✅ COMPLETED — DO NOT MODIFY
+**Merge commit:** `fe591ea` (PR #129)
+**Merged:** 2026-04-28
+**Pinned APP_VERSION:** `7.7.0`
 **Tier source:** Tier 3, item 12
 **APP_VERSION target:** `7.7.0` (minor — new feature with migration)
 **CACHE_NAME bump:** Yes.
@@ -659,7 +662,7 @@ Track the last 5 backup events with timestamp + filename. Display in Settings �
 
 ## Phase 12 — Multi-Day Fast Sessions (Supersedes Original Bootstrap Scope)
 
-**Status:** PENDING
+**Status:** IN PROGRESS
 **Tier source:** Tier 4, item 15 (substantially expanded for multi-day fast support)
 **APP_VERSION target:** `7.8.0` (minor — new feature with data restructure, banner shown)
 **CACHE_NAME bump:** Yes.
