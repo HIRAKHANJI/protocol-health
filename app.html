@@ -316,6 +316,9 @@ body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif
 .cal-floor-hint { font-family:'DM Mono',monospace; font-size:0.6rem; color:var(--muted); margin-top:4px; line-height:1.5; }
 .cal-floor-hint:empty { display:none; }
 .cal-floor-warn { font-size:0.7rem; color:var(--accent2); margin-top:6px; padding:7px 10px; border-radius:6px; background:rgba(255,152,0,0.1); border:1px solid rgba(255,152,0,0.35); line-height:1.55; }
+/* Phase 8 (v7.5.0): linked offset mode visual cues */
+.field-input[readonly] { background:rgba(200,245,66,0.06); border-color:rgba(200,245,66,0.25); cursor:not-allowed; }
+#linkedOffsetRow { padding-left:8px; border-left:2px solid rgba(200,245,66,0.3); }
 /* Phase 5 (v7.3.0): sickness toggle (TODAY tab + day modal) + calendar icon overlay */
 .sick-toggle-row { display:flex; align-items:center; gap:8px; padding:8px 10px; background:var(--surface); border:1px solid var(--border); border-radius:6px; cursor:pointer; font-family:'DM Mono',monospace; font-size:0.7rem; color:var(--muted); }
 .sick-toggle-row input[type=checkbox] { width:16px; height:16px; accent-color:var(--accent2); flex-shrink:0; }
@@ -1030,6 +1033,16 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
               <input type="checkbox" id="settingTdeeOverride" onchange="toggleTdeeOverride(this.checked)">
               <span>Freeze TDEE — disable weekly auto-calibration</span>
             </label>
+            <!-- Phase 8 (v7.5.0): linked offset mode — auto-track TDEE changes -->
+            <label style="display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--muted);cursor:pointer;margin-top:4px">
+              <input type="checkbox" id="settingLinkedOffset" onchange="toggleLinkedOffsetMode(this.checked)">
+              <span id="linkedOffsetToggleLabel">Link calorie ceiling to TDEE (auto-adjust on TDEE change)</span>
+            </label>
+            <div id="linkedOffsetRow" style="display:none;margin-top:6px;margin-left:24px">
+              <label class="field-label" id="linkedOffsetInputLabel" style="font-size:0.6rem">Daily offset (cal)</label>
+              <input class="field-input" type="number" id="settingTargetOffset" step="50" placeholder="1500" oninput="onLinkedOffsetInput()" style="font-size:0.7rem;padding:6px 8px">
+              <p class="section-note" id="linkedOffsetNote" style="margin-top:4px;margin-bottom:0;font-size:0.58rem">When linked, your calorie ceiling auto-tracks TDEE — change in TDEE updates ceiling without manual edit. Untick to take back manual control.</p>
+            </div>
           </div>
         </div>
         <div class="duration-single">
@@ -1677,8 +1690,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '7.4.1';
-const APP_VERSION_MSG = 'Calibration auto-pauses when 3+ consecutive disrupted days appear in your 14-day window. Safety net for when you forget to mark sick days — no more sickness/travel weeks corrupting your TDEE. Reality Check explains when calibration is paused and why.';
+const APP_VERSION = '7.5.0';
+const APP_VERSION_MSG = 'New Settings toggle: link calorie ceiling to TDEE. Pick a target deficit (cut), surplus (bulk), or band offset (maintenance). When TDEE moves, the ceiling auto-adjusts to keep the same offset. Lose 5kg → TDEE drops → ceiling drops too, deficit stays constant. Off by default; opt-in.';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
 
@@ -1725,7 +1738,7 @@ function strToDate(s) { const [y,m,d]=s.split('-').map(Number); return new Date(
 // getSettings: always returns a full settings object with defaults. Never returns null.
 // Add any new settings fields here with a default value.
 function getSettings() {
-  const defaults = { plan:'default', currentKg:null, targetKg:null, calories:null, tdee:2600, risk:'aggressive', startDate:null, age:null, height:null, sex:'male', activityLevel:'1.55', name:'', wakeTime:null, lastMealTime:null, eveningSessionTime:null, eatingWindowStart:null, supplementsEnabled:true, tdeeManualOverride:false, lastCalibrationAt:null, lastCalibrationFormula:null, lastCalibrationObserved:null, lastCalibrationOutcome:'never-run' };
+  const defaults = { plan:'default', currentKg:null, targetKg:null, calories:null, tdee:2600, risk:'aggressive', startDate:null, age:null, height:null, sex:'male', activityLevel:'1.55', name:'', wakeTime:null, lastMealTime:null, eveningSessionTime:null, eatingWindowStart:null, supplementsEnabled:true, tdeeManualOverride:false, lastCalibrationAt:null, lastCalibrationFormula:null, lastCalibrationObserved:null, lastCalibrationOutcome:'never-run', linkedOffsetMode:false, targetOffset:null };
   const saved = gs(SK.settings);
   if(!saved) return defaults;
   return Object.assign({}, defaults, saved);
@@ -3595,6 +3608,10 @@ function openSettings() {
 
   // Phase 3 (v7.2.2): render the live plan-aware calorie hint under the field
   if (typeof renderCaloriesHint === 'function') renderCaloriesHint();
+
+  // Phase 8 (v7.5.0): hydrate the linked-offset toggle, input, labels, and
+  // calorie-field readonly state from current settings + active plan.
+  if (typeof updateLinkedOffsetUI === 'function') updateLinkedOffsetUI();
 }
 
 function closeSettings() { document.getElementById('settingsOverlay').classList.remove('active'); }
@@ -3666,6 +3683,26 @@ function onPlanSelectChange() {
   updateTimingUI(val);
   // Phase 3 (v7.2.2): hint depends on active plan — re-render on plan switch
   if (typeof renderCaloriesHint === 'function') renderCaloriesHint();
+  // Phase 8 (v7.5.0): if user already had linkedOffsetMode on AND the new
+  // plan has a different caloriesMode (cut→bulk, bulk→maintenance, etc.),
+  // reset offset to the new plan's default since the sign/range flip.
+  // Then refresh the labels + input bounds.
+  const _s8 = getSettings();
+  if (_s8.linkedOffsetMode) {
+    const _newPlan = PLANS[val] || PLANS.default;
+    const _curOffset = (typeof _s8.targetOffset === 'number') ? _s8.targetOffset : null;
+    const _defaultForNew = defaultOffsetForPlan(_newPlan);
+    // Reset when current offset is missing OR direction-incompatible:
+    // cut→bulk = sign flip; tdee-band only allows ± 300 range.
+    let resetNeeded = (_curOffset === null);
+    if (!resetNeeded && _newPlan.caloriesMode === 'tdee-band' && Math.abs(_curOffset) > 300) resetNeeded = true;
+    if (!resetNeeded && _newPlan.caloriesMode === 'above-tdee' && _curOffset > 1000) resetNeeded = true;
+    if (resetNeeded) {
+      _s8.targetOffset = _defaultForNew;
+      saveSettings(_s8);
+    }
+  }
+  if (typeof updateLinkedOffsetUI === 'function') updateLinkedOffsetUI();
 }
 
 // updateTimingUI: shows/hides eating window start based on plan's fasting, shows plan defaults
@@ -3809,6 +3846,145 @@ function toggleTdeeOverride(checked) {
   saveSettings(s);
 }
 
+// ─── Phase 8 (v7.5.0): Linked Offset Mode helpers ──────────────────────────
+// Plan-direction-aware default offset:
+//   floor (cut plans): 1500 deficit
+//   above-tdee (bulk): 300 surplus
+//   tdee-band (maintenance): 0 (centered on TDEE)
+function defaultOffsetForPlan(plan) {
+  if (!plan || !plan.caloriesMode) return 1500;
+  switch (plan.caloriesMode) {
+    case 'floor':      return 1500;
+    case 'above-tdee': return 300;
+    case 'tdee-band':  return 0;
+    default:           return 1500;
+  }
+}
+
+// Compute new calorie ceiling per plan.caloriesMode, write it, dispatch.
+// Returns true if a change was made. Floor/band/clamp logic per plan mode.
+// Called from recomputeAndApplyTDEE and weeklyCalibration after TDEE changes.
+function syncCalorieCeilingFromOffset() {
+  const s = getSettings();
+  if (!s.linkedOffsetMode) return false;
+  const plan = (typeof getActivePlan === 'function') ? getActivePlan() : null;
+  if (!plan || !plan.caloriesMode) return false;
+  const tdee = s.tdee || 2600;
+  const offset = (typeof s.targetOffset === 'number' && !isNaN(s.targetOffset))
+    ? s.targetOffset
+    : defaultOffsetForPlan(plan);
+  let newCeiling;
+  switch (plan.caloriesMode) {
+    case 'floor': {
+      const floor = (typeof plan.minCalories === 'number') ? plan.minCalories : 1200;
+      newCeiling = Math.max(floor, tdee - offset);
+      break;
+    }
+    case 'above-tdee':
+      newCeiling = tdee + offset;
+      break;
+    case 'tdee-band':
+      newCeiling = Math.max(tdee - 300, Math.min(tdee + 300, tdee + offset));
+      break;
+    default:
+      return false;
+  }
+  newCeiling = Math.round(newCeiling);
+  if (s.calories === newCeiling) return false;
+  s.calories = newCeiling;
+  saveSettings(s);
+  dispatch('CALORIES_CHANGED');
+  return true;
+}
+
+// Updates the offset row's labels + input bounds + visibility based on
+// active plan + current toggle state. Also locks/unlocks the calorie field.
+function updateLinkedOffsetUI() {
+  const s = getSettings();
+  const plan = (typeof getActivePlan === 'function') ? getActivePlan() : null;
+  const toggleEl = document.getElementById('settingLinkedOffset');
+  const rowEl = document.getElementById('linkedOffsetRow');
+  const labelEl = document.getElementById('linkedOffsetToggleLabel');
+  const inputLabelEl = document.getElementById('linkedOffsetInputLabel');
+  const offsetInput = document.getElementById('settingTargetOffset');
+  const calField = document.getElementById('settingCalories');
+  if (toggleEl) toggleEl.checked = !!s.linkedOffsetMode;
+  if (rowEl) rowEl.style.display = s.linkedOffsetMode ? 'block' : 'none';
+  if (plan && plan.caloriesMode) {
+    let toggleText = 'Link calorie ceiling to TDEE';
+    let inputText  = 'Offset (cal)';
+    let inputMin = 0, inputMax = 5000;
+    switch (plan.caloriesMode) {
+      case 'floor':
+        toggleText = 'Link calorie ceiling to TDEE (maintain a constant deficit)';
+        inputText  = 'Daily deficit (cal below TDEE)';
+        inputMin = 100; inputMax = 3000;
+        break;
+      case 'above-tdee':
+        toggleText = 'Link calorie ceiling to TDEE (maintain a constant surplus)';
+        inputText  = 'Daily surplus (cal above TDEE)';
+        inputMin = 100; inputMax = 1000;
+        break;
+      case 'tdee-band':
+        toggleText = 'Link calorie ceiling to TDEE (track maintenance band)';
+        inputText  = 'Offset from TDEE (cal, can be negative)';
+        inputMin = -300; inputMax = 300;
+        break;
+    }
+    if (labelEl) labelEl.textContent = toggleText;
+    if (inputLabelEl) inputLabelEl.textContent = inputText;
+    if (offsetInput) {
+      offsetInput.min = inputMin;
+      offsetInput.max = inputMax;
+      offsetInput.step = 50;
+      const current = (typeof s.targetOffset === 'number' && !isNaN(s.targetOffset))
+        ? s.targetOffset
+        : defaultOffsetForPlan(plan);
+      offsetInput.value = current;
+    }
+  }
+  if (calField) {
+    if (s.linkedOffsetMode) calField.setAttribute('readonly', 'readonly');
+    else calField.removeAttribute('readonly');
+  }
+}
+
+function toggleLinkedOffsetMode(checked) {
+  const s = getSettings();
+  s.linkedOffsetMode = !!checked;
+  if (s.linkedOffsetMode && (typeof s.targetOffset !== 'number' || isNaN(s.targetOffset))) {
+    const plan = (typeof getActivePlan === 'function') ? getActivePlan() : null;
+    s.targetOffset = defaultOffsetForPlan(plan);
+  }
+  saveSettings(s);
+  updateLinkedOffsetUI();
+  if (s.linkedOffsetMode) {
+    syncCalorieCeilingFromOffset();
+    const calField = document.getElementById('settingCalories');
+    const fresh = getSettings();
+    if (calField) calField.value = fresh.calories || '';
+    if (typeof calcDuration === 'function') calcDuration();
+    if (typeof renderCaloriesHint === 'function') renderCaloriesHint();
+  }
+}
+
+function onLinkedOffsetInput() {
+  const raw = document.getElementById('settingTargetOffset').value;
+  const v = parseFloat(raw);
+  if (isNaN(v)) return;
+  const s = getSettings();
+  s.targetOffset = Math.round(v);
+  saveSettings(s);
+  if (s.linkedOffsetMode) {
+    syncCalorieCeilingFromOffset();
+    const calField = document.getElementById('settingCalories');
+    const fresh = getSettings();
+    if (calField) calField.value = fresh.calories || '';
+    if (typeof calcDuration === 'function') calcDuration();
+    if (typeof renderCaloriesHint === 'function') renderCaloriesHint();
+  }
+}
+
 // v7.1.0: persist a manual TDEE entry immediately on blur/change so the rest
 // of the UI (projection, goal bar, radar, nutrition) sees the new value
 // without waiting for CONFIRM PLAN. oninput already runs calcDuration() for
@@ -3875,6 +4051,9 @@ function recomputeAndApplyTDEE() {
   s.tdee = newTdee;
   saveSettings(s);
   dispatch('TDEE_CHANGED');
+  // Phase 8 (v7.5.0): if linked offset mode is on, recompute calorie ceiling
+  // off the new TDEE. Helper no-ops when toggle is off.
+  if (typeof syncCalorieCeilingFromOffset === 'function') syncCalorieCeilingFromOffset();
   return true;
 }
 

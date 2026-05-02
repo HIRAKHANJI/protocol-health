@@ -4,6 +4,44 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 7.5.0 — 2026-04-28
+
+**Scope:** Minor (Phase 8 of calibration roadmap — Linked Offset Mode, plan-direction-aware)
+**Banner:** shown — "New Settings toggle: link calorie ceiling to TDEE. Pick a target deficit (cut), surplus (bulk), or band offset (maintenance). When TDEE moves, the ceiling auto-adjusts to keep the same offset. Lose 5kg → TDEE drops → ceiling drops too, deficit stays constant. Off by default; opt-in."
+
+**Goal.** Opt-in mode where calorie ceiling auto-tracks TDEE changes by maintaining a constant offset relative to TDEE. Plan-direction-aware so the same toggle works for cut, bulk, and maintenance plans without redesign per plan.
+
+**Plan-direction model** (uses `caloriesMode` discriminator from Phase 3):
+
+| Plan mode | Offset semantic | Default | Range | Floor / clamp |
+|---|---|---|---|---|
+| `floor` (LITE/CUT/AGRO) | Deficit (positive, subtracted) | 1500 | 100–3000 | `max(plan.minCalories, TDEE − offset)` |
+| `above-tdee` (BULK) | Surplus (positive, added) | 300 | 100–1000 | `TDEE + offset` (no upper clamp) |
+| `tdee-band` (MAINTENANCE) | Signed delta | 0 | −300 to +300 | `clamp(TDEE − 300, TDEE + 300, TDEE + offset)` |
+
+**Changes:**
+
+- **Settings defaults** in `getSettings()` gain `linkedOffsetMode: false, targetOffset: null`.
+- **Settings panel UI:** new toggle row directly under the existing "Freeze TDEE" row. When ON, an indented offset-input row reveals beneath. Toggle label, input label, input min/max all adapt to active plan's `caloriesMode`. The calorie ceiling field gets `readonly` attribute when linked + a subtle green-tinted background as visual cue.
+- **New helpers in `app.html`:**
+  - `defaultOffsetForPlan(plan)` returns 1500 / 300 / 0 by mode.
+  - `syncCalorieCeilingFromOffset()` computes new ceiling per plan mode, writes `s.calories`, dispatches `CALORIES_CHANGED`. No-op when toggle off. Floor/band/clamp enforcement built in.
+  - `updateLinkedOffsetUI()` adapts toggle label, input label, input bounds, current value, and calorie-field readonly state. Called from `openSettings` and `onPlanSelectChange`.
+  - `toggleLinkedOffsetMode(checked)` flips the flag, picks default offset on first enable, syncs ceiling immediately, refreshes UI.
+  - `onLinkedOffsetInput()` debounced offset-change handler — saves and re-syncs ceiling.
+- **Plan switch handling** in `onPlanSelectChange`: if `linkedOffsetMode` is ON and the new plan's `caloriesMode` would make the current offset out-of-range (e.g. switching to BULK from CUT with deficit 1500 — sign flips to surplus territory), the offset auto-resets to the new plan's default. Then UI refreshes labels + bounds.
+- **Auto-sync trigger sites:**
+  - `recomputeAndApplyTDEE()` (every weight log) calls `syncCalorieCeilingFromOffset()` after TDEE write.
+  - `weeklyCalibration()` (in `modules/calibration.js`) calls `syncCalorieCeilingFromOffset()` after applying a new TDEE.
+  - Both helpers no-op when toggle is off, so existing user behaviour is unchanged unless they opt in.
+- **CSS:** `.field-input[readonly]` (subtle green-tint, not-allowed cursor) + `#linkedOffsetRow` (indented + green left-border to visually link to the toggle).
+
+**Backward compat.** `linkedOffsetMode: false` default means existing users see no change until they tap the toggle. `targetOffset: null` defaults to plan-appropriate value on first enable. No migration. No new SK key. No `sw.js` change.
+
+**Roadmap:** `PENDING_IMPLEMENTATIONS.md` Phase 8 — IN PROGRESS until owner confirms PR merge.
+
+---
+
 ## Version 7.4.1 — 2026-04-28
 
 **Scope:** Patch (Phase 7 of calibration roadmap — sickness pattern auto-detection)

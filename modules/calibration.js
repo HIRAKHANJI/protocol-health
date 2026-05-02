@@ -398,6 +398,8 @@ export function weeklyCalibration() {
   s.lastCalibrationOutcome = 'applied';
   saveSettings(s);
   dispatch('TDEE_CHANGED');
+  // Phase 8 (v7.5.0): linked offset mode auto-tracks TDEE — recompute ceiling
+  if (typeof syncCalorieCeilingFromOffset === 'function') syncCalorieCeilingFromOffset();
   // Surface the change to the user
   const direction = newT > old ? 'increased' : 'decreased';
   const msg = 'TDEE ' + direction + ' from ' + old + ' to ' + newT + ' cal/day.\n\n'

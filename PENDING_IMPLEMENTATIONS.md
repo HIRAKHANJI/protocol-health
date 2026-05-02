@@ -372,7 +372,10 @@ Calibration math respects the sickness flag from Phase 5, plus an additional aut
 
 ## Phase 7 — Sickness Pattern Auto-Detection
 
-**Status:** IN PROGRESS
+**Status:** ✅ COMPLETED — DO NOT MODIFY
+**Merge commit:** `87684cd` (PR #125)
+**Merged:** 2026-04-28
+**Pinned APP_VERSION:** `7.4.1`
 **Tier source:** Tier 3, item 13
 **APP_VERSION target:** `7.4.1` (patch — defensive, silent)
 **CACHE_NAME bump:** Yes.
@@ -413,7 +416,7 @@ If the user forgets to mark sick days, detect a likely sickness pattern (3+ cons
 
 ## Phase 8 — Linked Offset Mode (Plan-Direction-Aware)
 
-**Status:** PENDING
+**Status:** IN PROGRESS
 **Tier source:** Tier 2, item 8 (extended for bulk/maintenance)
 **APP_VERSION target:** `7.5.0` (minor — new behaviour, opt-in, banner shown)
 **CACHE_NAME bump:** Yes.
