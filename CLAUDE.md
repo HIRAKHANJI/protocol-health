@@ -6,30 +6,6 @@
 
 ---
 
-## 0. ACTIVE WORK PROTOCOL — READ THIS FIRST
-
-**This section overrides default behaviour for any prompt that requests implementation, continuation, "the next phase", or any equivalent instruction relating to ongoing roadmap work.**
-
-There is a canonical roadmap document at the repo root: **`PENDING_IMPLEMENTATIONS.md`**.
-
-When the owner prompts for work, your single responsibility is:
-
-1. **Read `PENDING_IMPLEMENTATIONS.md` in full** before doing anything else.
-2. **Find the next phase whose status is `PENDING`** (top-down).
-3. **Implement only that phase.** Do not bundle, skip, or extend scope.
-4. **Follow the per-phase checklist** at the bottom of `PENDING_IMPLEMENTATIONS.md` (commit conventions, version bumps, sw.js rules, smoke tests).
-5. **Stop after commit + push.** Report the completion summary and the next phase name + one-line scope. Ask permission before starting the next phase.
-6. **Do not edit completed phases.** Their bodies are immutable. Only the status header gets the `✅ COMPLETED — DO NOT MODIFY` marker, merge commit hash, date, and pinned APP_VERSION when the owner confirms merge.
-7. **Branch:** continue using `claude/add-workout-exercises-KjRRh`. After the owner merges a phase PR to `main`, sync the branch (`git fetch origin && git merge origin/main`) before starting the next phase.
-
-If the owner's prompt is unrelated to the roadmap (e.g. unrelated bug fix, feature question, document review) — handle it normally and ignore this section. The protocol activates only for roadmap-progress prompts.
-
-If the prompt is ambiguous (e.g. "continue", "go", "next"), default to the roadmap protocol and clarify only if `PENDING_IMPLEMENTATIONS.md` doesn't exist or is fully completed.
-
-**Never** invent phases. **Never** combine phases. **Never** skip the stop point. **Never** modify a completed phase's body.
-
----
-
 ## 1. What This App Is and Why It Exists
 
 Protocol Health is a personal fitness tracking PWA built from scratch to match one specific protocol — not adapted from a template, not built for a general audience. Every existing fitness tracker was either too generic, required a subscription, demanded gym access, or could not be configured precisely enough. This app exists because none of them were good enough.
