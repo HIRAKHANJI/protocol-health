@@ -108,7 +108,10 @@ Make the Reality Check block on the TRACK tab understandable to a human. The mat
 
 ## Phase 2 — Quick-Access ADJUST in Settings
 
-**Status:** IN PROGRESS
+**Status:** ✅ COMPLETED — DO NOT MODIFY
+**Merge commit:** `d34775f` (PR #120)
+**Merged:** 2026-04-28
+**Pinned APP_VERSION:** `7.2.1`
 **Tier source:** Tier 1, item 4
 **APP_VERSION target:** `7.2.1` (patch — small UI add)
 **CACHE_NAME bump:** No (sw.js untouched on feature branch; bumps with Phase 3 if available, otherwise on next merge to main).
@@ -150,7 +153,7 @@ Surface the existing `MANAGE SCHEDULE → ADJUST` path from the Settings panel s
 
 ## Phase 3 — Per-Plan Calorie Safety Floors / Bands
 
-**Status:** PENDING
+**Status:** IN PROGRESS
 **Tier source:** Tier 3, item 10
 **APP_VERSION target:** `7.2.2` (patch — non-blocking validation)
 **CACHE_NAME bump:** Yes (next merge to main).

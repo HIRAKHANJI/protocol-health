@@ -312,6 +312,10 @@ body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif
 .rc-explain-h { font-family:'Bebas Neue',sans-serif; font-size:0.78rem; letter-spacing:1.5px; color:var(--accent); margin-bottom:4px; }
 .rc-explain-p { font-family:'DM Sans',sans-serif; font-size:0.7rem; color:var(--text); line-height:1.55; margin:0; }
 .rc-explain-p em { color:var(--accent2); font-style:italic; }
+/* Phase 3 (v7.2.2): plan-aware calorie safety hint + warning */
+.cal-floor-hint { font-family:'DM Mono',monospace; font-size:0.6rem; color:var(--muted); margin-top:4px; line-height:1.5; }
+.cal-floor-hint:empty { display:none; }
+.cal-floor-warn { font-size:0.7rem; color:var(--accent2); margin-top:6px; padding:7px 10px; border-radius:6px; background:rgba(255,152,0,0.1); border:1px solid rgba(255,152,0,0.35); line-height:1.55; }
 .radar-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
 .radar-title { font-family:'Bebas Neue',sans-serif; font-size:1rem; letter-spacing:2px; color:var(--muted); }
 .radar-title span { color:var(--text); }
@@ -999,11 +1003,13 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
         <div class="duration-inputs">
           <div>
             <label class="field-label">Daily calories (override)</label>
-            <input class="field-input" type="number" id="settingCalories" placeholder="auto" step="50" min="0" max="5000" oninput="calcDuration()">
+            <input class="field-input" type="number" id="settingCalories" placeholder="auto" step="50" min="0" max="5000" oninput="calcDuration();renderCaloriesHint()">
+            <!-- Phase 3 (v7.2.2): live plan-aware floor/band hint -->
+            <div id="caloriesHint" class="cal-floor-hint"></div>
           </div>
           <div>
             <label class="field-label">TDEE (cal burned/day at rest)</label>
-            <input class="field-input" type="number" id="settingTdee" placeholder="2600" step="50" min="1200" max="5000" oninput="calcDuration()" onchange="commitTdeeManual()">
+            <input class="field-input" type="number" id="settingTdee" placeholder="2600" step="50" min="1200" max="5000" oninput="calcDuration();renderCaloriesHint()" onchange="commitTdeeManual()">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--muted)">
               <span>Formula: <span id="settingTdeeFormula" style="color:var(--text)">—</span> cal/day</span>
               <button type="button" onclick="resetTdeeToFormula()" style="background:transparent;border:1px solid var(--border);color:var(--muted);font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:1px;padding:3px 8px;border-radius:4px;cursor:pointer">↺ RESET</button>
@@ -1064,6 +1070,8 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
           </div>
           <div id="calcFlag" style="margin-top:8px;padding:7px 10px;border-radius:6px;font-size:0.75rem;font-weight:700;letter-spacing:1px;display:none"></div>
           <div id="calcWarning" style="font-size:0.72rem;color:var(--muted);margin-top:6px;line-height:1.6;display:none"></div>
+          <!-- Phase 3 (v7.2.2): plan-direction-aware calorie safety warning (non-blocking) -->
+          <div id="calcCalorieSafety" class="cal-floor-warn" style="display:none"></div>
           <div id="calcActualNote" style="font-size:0.65rem;color:var(--accent2);margin-top:6px;font-family:'DM Mono',monospace;display:none"></div>
           <div id="calcComplianceNote" style="font-size:0.6rem;color:var(--muted);margin-top:6px;font-family:'DM Mono',monospace;line-height:1.6;display:none"></div>
           <div id="calcMacroViability" style="font-size:0.68rem;color:var(--muted);margin-top:6px;line-height:1.6;font-family:'DM Mono',monospace;display:none;padding:8px 10px;border-radius:6px;background:var(--surface2);border:1px solid var(--border)"></div>
@@ -1658,8 +1666,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '7.2.1';
-const APP_VERSION_MSG = 'Quick-access ADJUST link added to the Settings panel. When a schedule is active, you can now adjust your target weight and calorie ceiling without leaving Settings — tap the new ↗ ADJUST CURRENT SCHEDULE button under the goal calculator.';
+const APP_VERSION = '7.2.2';
+const APP_VERSION_MSG = 'Calorie ceiling now shows plan-aware safety hints. Cut plans warn below their floor (LITE 1200, AGRO 800, CUT 1400). BULK warns if ceiling drops at or below TDEE (accidental cut). MAINTENANCE warns if outside TDEE ± 300. All warnings are advisory — never blocks your computation.';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
 
@@ -3518,6 +3526,9 @@ function openSettings() {
     const sched = gs(SK.schedule);
     adjustLinkEl.style.display = sched ? 'block' : 'none';
   }
+
+  // Phase 3 (v7.2.2): render the live plan-aware calorie hint under the field
+  if (typeof renderCaloriesHint === 'function') renderCaloriesHint();
 }
 
 function closeSettings() { document.getElementById('settingsOverlay').classList.remove('active'); }
@@ -3587,6 +3598,8 @@ function onPlanSelectChange() {
   }
   autoFillTDEE();
   updateTimingUI(val);
+  // Phase 3 (v7.2.2): hint depends on active plan — re-render on plan switch
+  if (typeof renderCaloriesHint === 'function') renderCaloriesHint();
 }
 
 // updateTimingUI: shows/hides eating window start based on plan's fasting, shows plan defaults
@@ -3861,6 +3874,89 @@ function autoFillTDEE() {
 //
 // Outputs: ACHIEVABLE / AGGRESSIVE / UNREALISTIC flag, cal/day, kg/week,
 // projected end date, and diet deficit needed.
+// Phase 3 (v7.2.2): plan-direction-aware calorie safety validator.
+// Dispatches on plan.caloriesMode to handle cut/bulk/maintenance differently.
+// Returns { ok, severity ('ok'|'warn'), message } — never blocks; only informs.
+function validateCaloriesAgainstPlan(cals, plan, tdee) {
+  if (!plan || !plan.caloriesMode || cals == null || isNaN(cals)) {
+    return { ok: true, severity: 'ok', message: '' };
+  }
+  const planName = plan.name || 'this plan';
+  switch (plan.caloriesMode) {
+    case 'floor': {
+      const floor = plan.minCalories;
+      if (floor == null) return { ok: true, severity: 'ok', message: '' };
+      if (cals < floor) {
+        return { ok: false, severity: 'warn',
+          message: '⚠ ' + Math.round(cals) + ' cal/day is below the recommended floor for ' + planName + ' (' + floor + ' cal). Sustaining intake this low risks lean mass loss and adherence drops; only safe with medical supervision.' };
+      }
+      return { ok: true, severity: 'ok', message: '' };
+    }
+    case 'above-tdee': {
+      const t = (typeof tdee === 'number' && tdee > 0) ? tdee : null;
+      if (t == null) return { ok: true, severity: 'ok', message: '' };
+      if (cals <= t) {
+        return { ok: false, severity: 'warn',
+          message: '⚠ ' + Math.round(cals) + ' cal/day is at or below your TDEE (' + t + ' cal). On a BULK plan the ceiling should sit above TDEE — otherwise you are accidentally cutting.' };
+      }
+      return { ok: true, severity: 'ok', message: '' };
+    }
+    case 'tdee-band': {
+      const t = (typeof tdee === 'number' && tdee > 0) ? tdee : null;
+      if (t == null) return { ok: true, severity: 'ok', message: '' };
+      const delta = cals - t;
+      if (Math.abs(delta) > 300) {
+        const dir = delta > 0 ? 'above' : 'below';
+        return { ok: false, severity: 'warn',
+          message: '⚠ ' + Math.round(cals) + ' cal/day is ' + Math.round(Math.abs(delta)) + ' cal ' + dir + ' your TDEE (' + t + '). MAINTENANCE keeps you within ±300 cal of TDEE.' };
+      }
+      return { ok: true, severity: 'ok', message: '' };
+    }
+    default:
+      return { ok: true, severity: 'ok', message: '' };
+  }
+}
+
+// Renders the safety warning block in the goal-calculator result panel.
+function renderCalorieSafetyWarning(cals, plan, tdee) {
+  const el = document.getElementById('calcCalorieSafety');
+  if (!el) return;
+  const r = validateCaloriesAgainstPlan(cals, plan, tdee);
+  if (r.ok) {
+    el.style.display = 'none';
+    el.textContent = '';
+  } else {
+    el.style.display = 'block';
+    el.textContent = r.message;
+  }
+}
+
+// Renders the live floor/band hint under the Settings calorie field.
+// Reads current plan + current TDEE input value (or falls back to settings).
+function renderCaloriesHint() {
+  const el = document.getElementById('caloriesHint');
+  if (!el) return;
+  const planVal = document.getElementById('planSelect') ? document.getElementById('planSelect').value : null;
+  const plan = (typeof PLANS !== 'undefined' && planVal && PLANS[planVal]) ? PLANS[planVal] : null;
+  if (!plan || !plan.caloriesMode) { el.textContent = ''; el.style.display = 'none'; return; }
+  const tdeeInput = document.getElementById('settingTdee');
+  const tdee = tdeeInput ? (parseFloat(tdeeInput.value) || (getSettings().tdee || 2600)) : (getSettings().tdee || 2600);
+  let hint = '';
+  switch (plan.caloriesMode) {
+    case 'floor':
+      hint = 'Floor for ' + plan.name + ': ' + plan.minCalories + ' cal/day';
+      break;
+    case 'above-tdee':
+      hint = 'Bulk: keep ceiling above TDEE (' + tdee + ' cal)';
+      break;
+    case 'tdee-band':
+      hint = 'Maintenance band: ' + (tdee - 300) + '–' + (tdee + 300) + ' cal (TDEE ' + tdee + ' ± 300)';
+      break;
+  }
+  el.textContent = hint;
+  el.style.display = hint ? 'block' : 'none';
+}
+
 function calcDuration() {
   const curKg  = parseFloat(document.getElementById('settingCurrentKg').value);
   const tgtKg  = parseFloat(document.getElementById('settingTargetKg').value);
@@ -4209,6 +4305,10 @@ function calcDuration() {
 
   useCalsBtn.style.display = 'block';
   applyNutrBtn.style.display = 'block';
+
+  // Phase 3 (v7.2.2): plan-direction-aware calorie safety check (non-blocking)
+  renderCalorieSafetyWarning(calcCals, plan, tdee);
+
   resultEl.classList.add('visible');
   schedBtn.classList.add('visible');
 

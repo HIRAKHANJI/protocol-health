@@ -15,6 +15,12 @@ export const lite = {
     lightDaysDow: [],
     macroSplit: { base:[30,45,25], rest:[35,40,25], preFast:[30,45,25], stall:[35,40,25], satiety:[35,40,25] },
     proteinFloorMultiplier: 1.0,
+    // Phase 3 (v7.2.2): plan-direction-aware calorie safety bounds.
+    // 'floor' mode → warn if calorie ceiling drops below minCalories.
+    // 1200 cal is the general safe minimum for sustained eating without
+    // medical supervision (Helms 2014; lower risks lean mass loss + adherence drops).
+    caloriesMode: 'floor',
+    minCalories: 1200,
 
     // Default timing values — used when user hasn't set custom times in Settings
     defaultTimes: { wakeTime:'05:30', lastMealTime:'18:00', eveningSessionTime:'17:00', eatingWindowStart:'11:00' },

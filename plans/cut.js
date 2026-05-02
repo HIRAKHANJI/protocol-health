@@ -15,6 +15,11 @@ export const cut = {
   lightDaysDow: [],
   macroSplit: { base:[40,35,25], rest:[45,30,25], preFast:[40,35,25], stall:[45,30,25], satiety:[45,30,25] },
   proteinFloorMultiplier: 1.6,
+  // Phase 3 (v7.2.2): plan-direction-aware calorie safety bounds.
+  // 'floor' mode → warn if calorie ceiling drops below minCalories.
+  // 1400 cal aligns with Helms 2014 (>= 1.5 × BMR for sustained cuts).
+  caloriesMode: 'floor',
+  minCalories: 1400,
 
   defaultTimes: { wakeTime:'06:00', lastMealTime:'20:00', eveningSessionTime:'18:00', eatingWindowStart:null },
 

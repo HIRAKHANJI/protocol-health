@@ -15,6 +15,12 @@ export const maintenance = {
   lightDaysDow: [0],  // Sunday — weekly light eating day for digestive reset
   macroSplit: { base:[30,45,25], rest:[35,40,25], preFast:[30,45,25], stall:[35,40,25], satiety:[35,40,25] },
   proteinFloorMultiplier: 1.2,
+  // Phase 3 (v7.2.2): plan-direction-aware calorie safety bounds.
+  // 'tdee-band' mode → warn if calorie ceiling falls outside TDEE ± 300 cal.
+  // Both bounds computed dynamically by validateCaloriesAgainstPlan.
+  caloriesMode: 'tdee-band',
+  minCalories: null,
+  maxCalories: null,
 
   defaultTimes: { wakeTime:'07:00', lastMealTime:'20:00', eveningSessionTime:'18:00', eatingWindowStart:null },
 
