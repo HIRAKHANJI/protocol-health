@@ -1702,8 +1702,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '7.6.0';
-const APP_VERSION_MSG = 'New diagnostic in Settings: after 28+ days of clean data, the app infers your true effective activity multiplier from observed TDEE / BMR. Shown next to your current activity level with an APPLY button if there is a meaningful gap. Capped to plan default ± 0.2 to prevent wild swings. Pure read-only diagnostic until you tap APPLY.';
+const APP_VERSION = '7.6.1';
+const APP_VERSION_MSG = 'Backup files now include a SHA-256 integrity checksum. On restore, the app verifies the checksum and warns if the file looks corrupted or tampered. Older backups still restore cleanly with a note about the older format. Silent infrastructure — no behaviour change unless an integrity issue is detected.';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
 
@@ -5079,7 +5079,31 @@ document.getElementById('scheduleChoiceOverlay').addEventListener('click', e=>{
 //   - Runs full UI refresh (same sequence as init)
 
 // backupData: downloads all app data as a JSON file
-function backupData() {
+// Phase 10 (v7.6.1): SHA-256 hex digest using Web Crypto API.
+// Used to seal the backup `data` field with an integrity checksum so restore
+// can detect corruption or tampering. Returns null on failure (old browsers
+// without crypto.subtle, secure-context restrictions, etc.) — backup proceeds
+// without checksum in that case rather than failing.
+async function sha256Hex(str) {
+  if (!(globalThis.crypto && globalThis.crypto.subtle && typeof globalThis.crypto.subtle.digest === 'function')) {
+    return null;
+  }
+  try {
+    const buf = new TextEncoder().encode(String(str));
+    const hashBuf = await globalThis.crypto.subtle.digest('SHA-256', buf);
+    const bytes = new Uint8Array(hashBuf);
+    let hex = '';
+    for (let i = 0; i < bytes.length; i++) {
+      const h = bytes[i].toString(16);
+      hex += (h.length === 1) ? '0' + h : h;
+    }
+    return hex;
+  } catch (e) {
+    return null;
+  }
+}
+
+async function backupData() {
   const backup = {
     version: 'ph_v1',
     schemaVersion: (typeof window.getSchemaVersion === 'function' ? window.getSchemaVersion() : 1) || 1,
@@ -5092,6 +5116,14 @@ function backupData() {
     const val = gs(storageKey);
     if(val !== null) backup.data[key] = val;
   });
+
+  // Phase 10 (v7.6.1): seal data with SHA-256 checksum so restore can verify
+  // integrity. Hash the canonical stringified data (NOT the entire backup —
+  // we want to detect data tampering even if metadata is rewritten). Format:
+  // 'sha256:<64-hex>'. Skipped silently if Web Crypto isn't available.
+  const dataJson = JSON.stringify(backup.data);
+  const dataHash = await sha256Hex(dataJson);
+  if (dataHash) backup.checksum = 'sha256:' + dataHash;
 
   const json = JSON.stringify(backup, null, 2);
   const blob = new Blob([json], { type: 'application/json' });
@@ -5125,8 +5157,42 @@ function exportMigrationLog() {
   URL.revokeObjectURL(url);
 }
 
+// Phase 10 (v7.6.1): inner restore commit, factored out so the integrity-
+// check confirm dialog and the normal confirm dialog can share the same
+// write path. Called only after user confirms.
+function _commitBackupRestore(backup, keys, exported) {
+  const skippedKeys = [];
+  Object.entries(backup.data).forEach(([key, val]) => {
+    const storageKey = SK[key];
+    if(storageKey) ss(storageKey, val);
+    else skippedKeys.push(key);
+  });
+  // Full UI refresh via dispatcher
+  const s = getSettings();
+  document.getElementById('planSelect').value = s.plan || 'default';
+  document.getElementById('settingRisk').value = s.risk || 'aggressive';
+  document.getElementById('settingSex').value = s.sex || 'male';
+  document.getElementById('settingActivityLevel').value = s.activityLevel || '1.55';
+  applyPlanUI(s.plan||'default');
+  syncCustomSelect('planSelectCustom','planSelect');
+  syncCustomSelect('riskSelectCustom','settingRisk');
+  syncCustomSelect('sexSelectCustom','settingSex');
+  syncCustomSelect('activitySelectCustom','settingActivityLevel');
+  dispatch('PLAN_CHANGED');
+  dispatch('WEIGHT_LOGGED');
+  dispatch('SCHEDULE_SET');
+  dispatch('FOOD_LOGGED');
+  dispatch('FAST_DAY_TOGGLED');
+  if(typeof EXERCISE_PROGRESSIONS !== 'undefined') dispatch('EXERCISE_LEVEL_CHANGED');
+  const skippedNote = skippedKeys.length ? ` (${skippedKeys.length} key${skippedKeys.length>1?'s':''} from a newer app version could not be restored: ${skippedKeys.join(', ')})` : '';
+  showBackupStatus(`✓ Restored ${keys.length} data sets from backup (${exported}). All data reloaded.${skippedNote}`, 'var(--green)');
+}
+
 // restoreData: triggered by the hidden file input when a file is picked.
 // Validates the file, confirms with user, writes all keys, refreshes UI.
+// Phase 10 (v7.6.1): adds SHA-256 integrity verification when backup has
+// a `checksum` field. Older backups (no field) restore normally with a
+// note about the older format.
 function restoreData(event) {
   const file = event.target.files[0];
   if(!file) return;
@@ -5135,76 +5201,84 @@ function restoreData(event) {
 
   const reader = new FileReader();
   reader.onload = (e) => {
-    try {
-      const backup = JSON.parse(e.target.result);
+    // Wrap the integrity check in an async IIFE so we can await sha256Hex.
+    (async () => {
+      try {
+        const backup = JSON.parse(e.target.result);
 
-      // Validate structure
-      if(!backup.version || !backup.data) {
-        showBackupStatus('✗ Invalid backup file. Must be a Protocol Health backup JSON.', 'var(--danger)');
-        return;
-      }
-      if(!backup.version.startsWith('ph_')) {
-        showBackupStatus('✗ File does not appear to be a Protocol Health backup.', 'var(--danger)');
-        return;
-      }
+        // Validate structure
+        if(!backup.version || !backup.data) {
+          showBackupStatus('✗ Invalid backup file. Must be a Protocol Health backup JSON.', 'var(--danger)');
+          return;
+        }
+        if(!backup.version.startsWith('ph_')) {
+          showBackupStatus('✗ File does not appear to be a Protocol Health backup.', 'var(--danger)');
+          return;
+        }
 
-      // Count what we're restoring
-      const keys = Object.keys(backup.data);
-      if(!keys.length) {
-        showBackupStatus('✗ Backup file contains no data.', 'var(--danger)');
-        return;
-      }
+        // Count what we're restoring
+        const keys = Object.keys(backup.data);
+        if(!keys.length) {
+          showBackupStatus('✗ Backup file contains no data.', 'var(--danger)');
+          return;
+        }
 
-      // Guard: reject backups from a future schema version the current app can't handle.
-      // Old backups (no schemaVersion) are treated as v1 and always pass.
-      const incomingSchema = backup.schemaVersion || 1;
-      const currentSchema = (typeof window.getSchemaVersion === 'function' ? window.getSchemaVersion() : 1) || 1;
-      if (incomingSchema > currentSchema) {
-        showBackupStatus(
-          `✗ This backup is from schema v${incomingSchema}; current app uses v${currentSchema}. Update the app first.`,
-          'var(--danger)'
-        );
-        return;
-      }
+        // Guard: reject backups from a future schema version the current app can't handle.
+        const incomingSchema = backup.schemaVersion || 1;
+        const currentSchema = (typeof window.getSchemaVersion === 'function' ? window.getSchemaVersion() : 1) || 1;
+        if (incomingSchema > currentSchema) {
+          showBackupStatus(
+            `✗ This backup is from schema v${incomingSchema}; current app uses v${currentSchema}. Update the app first.`,
+            'var(--danger)'
+          );
+          return;
+        }
 
-      // Confirm before overwriting
-      const exported = backup.exportedAt ? strToDate(backup.exportedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : 'unknown date';
-      showConfirm(
-        'RESTORE BACKUP',
-        `This will overwrite ALL current app data with the backup from ${exported}. This cannot be undone.`,
-        () => {
-          // Write all keys back to localStorage, track unknown keys
-          const skippedKeys = [];
-          Object.entries(backup.data).forEach(([key, val]) => {
-            const storageKey = SK[key];
-            if(storageKey) ss(storageKey, val);
-            else skippedKeys.push(key);
-          });
-          // Full UI refresh via dispatcher
-          const s = getSettings();
-          document.getElementById('planSelect').value = s.plan || 'default';
-          document.getElementById('settingRisk').value = s.risk || 'aggressive';
-          document.getElementById('settingSex').value = s.sex || 'male';
-          document.getElementById('settingActivityLevel').value = s.activityLevel || '1.55';
-          applyPlanUI(s.plan||'default');
-          syncCustomSelect('planSelectCustom','planSelect');
-          syncCustomSelect('riskSelectCustom','settingRisk');
-          syncCustomSelect('sexSelectCustom','settingSex');
-          syncCustomSelect('activitySelectCustom','settingActivityLevel');
-          dispatch('PLAN_CHANGED');
-          dispatch('WEIGHT_LOGGED');
-          dispatch('SCHEDULE_SET');
-          dispatch('FOOD_LOGGED');
-          dispatch('FAST_DAY_TOGGLED');
-          if(typeof EXERCISE_PROGRESSIONS !== 'undefined') dispatch('EXERCISE_LEVEL_CHANGED');
-          const skippedNote = skippedKeys.length ? ` (${skippedKeys.length} key${skippedKeys.length>1?'s':''} from a newer app version could not be restored: ${skippedKeys.join(', ')})` : '';
-          showBackupStatus(`✓ Restored ${keys.length} data sets from backup (${exported}). All data reloaded.${skippedNote}`, 'var(--green)');
-        },
-        { yesLabel: 'RESTORE', danger: true }
-      );
-    } catch(err) {
-      showBackupStatus('✗ Could not read file. Make sure it is a valid JSON backup file.', 'var(--danger)');
-    }
+        // Phase 10 (v7.6.1): verify integrity checksum if present.
+        // 'verified' = checksum present and matches.
+        // 'mismatch' = checksum present but data doesn't match → integrity warning.
+        // 'absent'   = no checksum field → older backup format, restore normally.
+        // 'compute-failed' = unable to compute (old browser); treat as absent.
+        let checksumStatus = 'absent';
+        if (backup.checksum && typeof backup.checksum === 'string') {
+          const computed = await sha256Hex(JSON.stringify(backup.data));
+          if (computed) {
+            const expected = 'sha256:' + computed;
+            checksumStatus = (backup.checksum === expected) ? 'verified' : 'mismatch';
+          } else {
+            checksumStatus = 'compute-failed';
+          }
+        }
+
+        const exported = backup.exportedAt
+          ? strToDate(backup.exportedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})
+          : 'unknown date';
+
+        if (checksumStatus === 'mismatch') {
+          // Danger path — checksum failed. User has explicit override.
+          showConfirm(
+            'INTEGRITY CHECK FAILED',
+            `The backup's checksum doesn't match its data. The file may be corrupted or tampered with. Restore anyway? (Backup from ${exported})`,
+            () => { _commitBackupRestore(backup, keys, exported); },
+            { yesLabel: 'RESTORE ANYWAY', danger: true }
+          );
+        } else {
+          // Normal path — verified, absent, or compute-failed all proceed
+          // to the standard confirm. Format note clarifies which case applies.
+          let formatNote = '';
+          if (checksumStatus === 'absent') formatNote = ' (older backup format — no integrity check available)';
+          else if (checksumStatus === 'compute-failed') formatNote = ' (could not verify integrity — Web Crypto unavailable)';
+          showConfirm(
+            'RESTORE BACKUP',
+            `This will overwrite ALL current app data with the backup from ${exported}.${formatNote} This cannot be undone.`,
+            () => { _commitBackupRestore(backup, keys, exported); },
+            { yesLabel: 'RESTORE', danger: true }
+          );
+        }
+      } catch(err) {
+        showBackupStatus('✗ Could not read file. Make sure it is a valid JSON backup file.', 'var(--danger)');
+      }
+    })();
   };
   reader.readAsText(file);
 }
