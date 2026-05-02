@@ -4,6 +4,43 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 7.6.0 — 2026-04-28
+
+**Scope:** Minor (Phase 9 of calibration roadmap — adaptive activity multiplier diagnostic)
+**Banner:** shown — "New diagnostic in Settings: after 28+ days of clean data, the app infers your true effective activity multiplier from observed TDEE / BMR. Shown next to your current activity level with an APPLY button if there is a meaningful gap. Capped to plan default ± 0.2 to prevent wild swings. Pure read-only diagnostic until you tap APPLY."
+
+**Goal.** Surface a data-driven activity-multiplier inference so users can correct the formula's blind assumption that real activity always matches the dropdown they picked at onboarding. Pure diagnostic by default; the APPLY button is the only path that writes to settings.
+
+**Math.** `effective = observedTDEE / BMR`, then clamped to plan default ± 0.2 (e.g. AGRO default 1.725 → cap range 1.525–1.925). Rounded to 3 decimals for stable display + storage equality.
+
+**Validity gates** (any failure hides the row entirely):
+- Settings has `weight`, `height`, `age` (BMR baseline)
+- 28+ days of weight data (`computeObservedTDEE(28)` window)
+- 14+ logged days inside that window
+- No active sickness pattern in last 14 days (`_detectSicknessPattern`)
+- BMR > 0 (sanity)
+
+**Changes:**
+
+- **`modules/calibration.js`:**
+  - **New `inferActivityMultiplier()` export.** Returns `{ valid, effective, rawEffective, current, gap, daysOfData, daysLogged, planDefault, lowerCap, upperCap, capped, bmr, observedTDEE, reason }`. Constants: `ACTIVITY_INFER_CAP_DELTA = 0.2`, `ACTIVITY_INFER_MIN_DAYS = 28`, `ACTIVITY_INFER_MIN_LOGS = 14`.
+- **`app.html`:**
+  - Module loader exposes `inferActivityMultiplier` to `window`.
+  - Settings panel: new `#activityInferRow` block immediately under the activity-level custom dropdown. Empty `<span>` for the diagnostic text + APPLY button.
+  - **New helpers:**
+    - `renderActivityInference()` queries `inferActivityMultiplier()`, hides the row when invalid, populates text + button visibility (APPLY hidden when gap < 5%).
+    - `applyInferredActivityLevel()` writes `s.activityLevel = effective`, updates the hidden native select + custom dropdown trigger to show "Custom: 1.624 (inferred)", calls `autoFillTDEE()` to recompute formula TDEE with the new multiplier, dispatches `TDEE_CHANGED`, refreshes the inference row, shows confirmation alert.
+  - Hydrated by `openSettings()` and re-rendered on `onPlanSelectChange()` (plan default changes the cap range).
+  - **CSS:** `.activity-infer-row` (teal-tinted compact row, flex layout), `.activity-infer-text` (small mono muted), `.activity-infer-apply-btn` (teal outline pill, opacity dimmed when value was capped).
+
+**No new dispatch event** (reuses `TDEE_CHANGED`). **No new SK key.** **No migration.** **No `sw.js` change.**
+
+**Backward-compat:** existing users see no change unless they have 28+ days of clean data. The row stays hidden by default.
+
+**Roadmap:** `PENDING_IMPLEMENTATIONS.md` Phase 9 — IN PROGRESS until owner confirms PR merge.
+
+---
+
 ## Version 7.5.0 — 2026-04-28
 
 **Scope:** Minor (Phase 8 of calibration roadmap — Linked Offset Mode, plan-direction-aware)

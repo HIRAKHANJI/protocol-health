@@ -319,6 +319,11 @@ body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif
 /* Phase 8 (v7.5.0): linked offset mode visual cues */
 .field-input[readonly] { background:rgba(200,245,66,0.06); border-color:rgba(200,245,66,0.25); cursor:not-allowed; }
 #linkedOffsetRow { padding-left:8px; border-left:2px solid rgba(200,245,66,0.3); }
+/* Phase 9 (v7.6.0): adaptive activity multiplier diagnostic row */
+.activity-infer-row { display:none; align-items:center; justify-content:space-between; gap:8px; margin-top:6px; padding:6px 10px; background:rgba(78,205,196,0.08); border:1px solid rgba(78,205,196,0.25); border-radius:6px; }
+.activity-infer-text { font-family:'DM Mono',monospace; font-size:0.6rem; color:var(--muted); line-height:1.5; flex:1; }
+.activity-infer-apply-btn { background:transparent; border:1px solid rgba(78,205,196,0.6); color:#4ecdc4; font-family:'DM Mono',monospace; font-size:0.6rem; letter-spacing:1px; padding:4px 10px; border-radius:4px; cursor:pointer; flex-shrink:0; }
+.activity-infer-apply-btn:active { transform:scale(0.97); }
 /* Phase 5 (v7.3.0): sickness toggle (TODAY tab + day modal) + calendar icon overlay */
 .sick-toggle-row { display:flex; align-items:center; gap:8px; padding:8px 10px; background:var(--surface); border:1px solid var(--border); border-radius:6px; cursor:pointer; font-family:'DM Mono',monospace; font-size:0.7rem; color:var(--muted); }
 .sick-toggle-row input[type=checkbox] { width:16px; height:16px; accent-color:var(--accent2); flex-shrink:0; }
@@ -1013,6 +1018,11 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
               <div class="custom-select-option" data-value="1.9" onclick="selectCustomOption('activitySelectCustom','settingActivityLevel',this)">Extremely active (physical job + training)</div>
             </div>
           </div>
+          <!-- Phase 9 (v7.6.0): adaptive activity multiplier diagnostic -->
+          <div id="activityInferRow" class="activity-infer-row" style="display:none">
+            <span class="activity-infer-text" id="activityInferText"></span>
+            <button class="activity-infer-apply-btn" type="button" onclick="applyInferredActivityLevel()" id="activityInferApplyBtn">↻ APPLY</button>
+          </div>
         </div>
         <div class="duration-inputs">
           <div>
@@ -1475,6 +1485,8 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
   window.autoRevertImplausibleTdee = Calibration.autoRevertImplausibleTdee;
   // v7.2.0 Phase 1: day breakdown helper for Reality Check display
   window.getDayBreakdown = Calibration.getDayBreakdown;
+  // v7.6.0 Phase 9: adaptive activity multiplier inference
+  window.inferActivityMultiplier = Calibration.inferActivityMultiplier;
 
   window._PH_FNMODULES_READY = true;
   window.dispatchEvent(new Event('ph:fnmodules-ready'));
@@ -1690,8 +1702,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '7.5.0';
-const APP_VERSION_MSG = 'New Settings toggle: link calorie ceiling to TDEE. Pick a target deficit (cut), surplus (bulk), or band offset (maintenance). When TDEE moves, the ceiling auto-adjusts to keep the same offset. Lose 5kg → TDEE drops → ceiling drops too, deficit stays constant. Off by default; opt-in.';
+const APP_VERSION = '7.6.0';
+const APP_VERSION_MSG = 'New diagnostic in Settings: after 28+ days of clean data, the app infers your true effective activity multiplier from observed TDEE / BMR. Shown next to your current activity level with an APPLY button if there is a meaningful gap. Capped to plan default ± 0.2 to prevent wild swings. Pure read-only diagnostic until you tap APPLY.';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
 
@@ -3612,6 +3624,10 @@ function openSettings() {
   // Phase 8 (v7.5.0): hydrate the linked-offset toggle, input, labels, and
   // calorie-field readonly state from current settings + active plan.
   if (typeof updateLinkedOffsetUI === 'function') updateLinkedOffsetUI();
+
+  // Phase 9 (v7.6.0): render adaptive activity multiplier diagnostic row.
+  // Hidden when insufficient data or sickness pattern active.
+  if (typeof renderActivityInference === 'function') renderActivityInference();
 }
 
 function closeSettings() { document.getElementById('settingsOverlay').classList.remove('active'); }
@@ -3703,6 +3719,8 @@ function onPlanSelectChange() {
     }
   }
   if (typeof updateLinkedOffsetUI === 'function') updateLinkedOffsetUI();
+  // Phase 9 (v7.6.0): plan default changes the inference cap → re-render
+  if (typeof renderActivityInference === 'function') renderActivityInference();
 }
 
 // updateTimingUI: shows/hides eating window start based on plan's fasting, shows plan defaults
@@ -3966,6 +3984,66 @@ function toggleLinkedOffsetMode(checked) {
     if (typeof calcDuration === 'function') calcDuration();
     if (typeof renderCaloriesHint === 'function') renderCaloriesHint();
   }
+}
+
+// ─── Phase 9 (v7.6.0): Adaptive Activity Multiplier UI ─────────────────────
+// Renders the inference diagnostic row under the activity-level dropdown.
+// Hidden when not enough data or when a sickness pattern is active. Shows
+// the inferred effective multiplier, the gap vs current, and an APPLY button
+// when there's a meaningful difference (>= 5%).
+function renderActivityInference() {
+  const row = document.getElementById('activityInferRow');
+  const text = document.getElementById('activityInferText');
+  const btn = document.getElementById('activityInferApplyBtn');
+  if (!row || !text || !btn) return;
+  if (typeof inferActivityMultiplier !== 'function') {
+    row.style.display = 'none';
+    return;
+  }
+  const r = inferActivityMultiplier();
+  if (!r || !r.valid) {
+    row.style.display = 'none';
+    return;
+  }
+  const eff = r.effective.toFixed(3);
+  const cur = r.current.toFixed(3);
+  const gapAbs = Math.abs(r.gap || 0);
+  // Hide button if gap is trivial (< 5%) — informational only in that case
+  const showApply = gapAbs >= 5;
+  const cappedNote = r.capped ? ' (capped to plan ± 0.2)' : '';
+  text.textContent = 'Inferred effective: ' + eff + ' (vs current ' + cur + ')'
+    + cappedNote + ' · ' + r.daysOfData + ' days data';
+  btn.style.display = showApply ? 'inline-block' : 'none';
+  // If capped: muted button color hint that the inferred value was clamped
+  btn.style.opacity = r.capped ? '0.75' : '1';
+  row.style.display = 'flex';
+}
+
+// APPLY button handler: writes settings.activityLevel = effective, dispatches
+// TDEE_CHANGED to refresh all consumers (projection, goal bar, radar, etc.),
+// and refreshes the Settings dropdown to show the new value.
+function applyInferredActivityLevel() {
+  if (typeof inferActivityMultiplier !== 'function') return;
+  const r = inferActivityMultiplier();
+  if (!r || !r.valid) return;
+  // Map the effective value to the closest dropdown option for display.
+  // Multiplier dropdown options: 1.2, 1.375, 1.55, 1.725, 1.9 — but we store
+  // the precise inferred value and surface a tooltip hint about which step
+  // it's closest to. For clarity in the dropdown trigger, set value to the
+  // exact inferred number (custom dropdown handles non-step values cleanly).
+  const s = getSettings();
+  s.activityLevel = String(r.effective);
+  saveSettings(s);
+  // Update the hidden native select + custom dropdown trigger
+  const sel = document.getElementById('settingActivityLevel');
+  if (sel) sel.value = String(r.effective);
+  const trigger = document.getElementById('activitySelectTrigger');
+  if (trigger) trigger.textContent = 'Custom: ' + r.effective.toFixed(3) + ' (inferred)';
+  // Refresh dependent UI
+  if (typeof autoFillTDEE === 'function') autoFillTDEE();
+  dispatch('TDEE_CHANGED');
+  if (typeof renderActivityInference === 'function') renderActivityInference();
+  showAlert('Activity multiplier set to ' + r.effective.toFixed(3) + ' (inferred from your last ' + r.daysOfData + ' days). TDEE recomputed.');
 }
 
 function onLinkedOffsetInput() {
