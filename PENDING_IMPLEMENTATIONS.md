@@ -1,5 +1,9 @@
 # Pending Implementations — Calibration & Stability Roadmap
 
+**Status:** ✅ **PROJECT COMPLETED** (2026-04-28). All 13 phases shipped and merged. End state: APP_VERSION 7.8.1, schemaVersion 5, 4 migrations applied. Closed-out cache bump (CACHE_NAME v26 → v27) shipped 2026-04-28 to invalidate stale installed-PWA caches that had been frozen at v7.1.0.
+
+**This file is now historical.** No further phases. CLAUDE.md no longer references this document. Retained for audit trail only.
+
 **Source of truth for all post-v7.1.0 calibration/stability work.** Created 2026-04-28.
 
 ---
@@ -848,7 +852,10 @@ Verify: every `fastDays` date has at least one session covering it; no session h
 
 ## Phase 13 — Activity History Tracking (Foundation)
 
-**Status:** IN PROGRESS
+**Status:** ✅ COMPLETED — DO NOT MODIFY
+**Merge commit:** `735b543` (PR #131)
+**Merged:** 2026-04-28
+**Pinned APP_VERSION:** `7.8.1`
 **Tier source:** Tier 4, item 14
 **APP_VERSION target:** `7.8.1` (patch with migration; observation only) — bumped from `7.7.2` due to Phase 12 version expansion
 **CACHE_NAME bump:** Yes.
