@@ -145,7 +145,7 @@ Surface the existing `MANAGE SCHEDULE → ADJUST` path from the Settings panel s
 
 ---
 
-## Phase 3 — Per-Plan Calorie Safety Floors
+## Phase 3 — Per-Plan Calorie Safety Floors / Bands
 
 **Status:** PENDING
 **Tier source:** Tier 3, item 10
@@ -155,44 +155,62 @@ Surface the existing `MANAGE SCHEDULE → ADJUST` path from the Settings panel s
 
 ### Goal
 
-Surface non-blocking warnings when the user enters a calorie ceiling below their plan's safe floor (per Section 15 of CLAUDE.md). Never block; always inform.
+Surface non-blocking warnings when the user enters a calorie ceiling outside the safe range for their active plan. The semantics differ by plan direction (cut, bulk, maintenance) — see the table below. Warnings only; never blocks computation.
+
+### Plan direction model
+
+| Plan | `goalMode` | Safety logic |
+|---|---|---|
+| LITE | `cut` | Hard floor: `1200 cal/day`. Warn if ceiling below floor. |
+| AGRO | `cut` | Hard floor: `800 cal/day` (plan ceiling 1000; absolute safety floor 800). Warn if ceiling below floor. |
+| CUT | `cut` | Hard floor: `1400 cal/day` (Helms 2014: ≥1.5 × BMR). Warn if ceiling below floor. |
+| BULK | `bulk` | Soft floor: `TDEE` (going below = accidental cut on a bulk plan). Warn if ceiling ≤ TDEE. |
+| MAINTENANCE | `maintenance` | Band: `TDEE ± 300 cal`. Warn if abs(ceiling − TDEE) > 300. |
 
 ### Scope
 
-1. Add a `minCalories` field to each plan object in `plans/*.js`:
-   - `lite.js`: 1200
-   - `agro.js`: 800 (hard floor; plan ceiling is 1000)
-   - `cut.js`: 1400
-   - `bulk.js`: TDEE-200 (computed at validation time, not static)
-   - `maintenance.js`: TDEE-300 (computed)
-2. In `calcDuration()`: after the existing risk gates, add a soft warning check. If `calcCals < activePlan.minCalories` (or computed equivalent), append a non-blocking note in the result panel:
-   - Text: `⚠ ${calcCals} cal/day is below this plan's recommended floor (${minCalories} cal). Sustain only with medical supervision.`
-3. Settings calorie field also shows the floor as a hint: `Floor for ${planName}: ${minCalories} cal`.
+1. **Add fields to each plan object in `plans/*.js`:**
+   - `lite.js`: `minCalories: 1200`, `caloriesMode: 'floor'`
+   - `agro.js`: `minCalories: 800`, `caloriesMode: 'floor'`
+   - `cut.js`: `minCalories: 1400`, `caloriesMode: 'floor'`
+   - `bulk.js`: `minCalories: null` (computed at validation: returns TDEE), `caloriesMode: 'above-tdee'`
+   - `maintenance.js`: `minCalories: null` (computed: TDEE − 300), `maxCalories: null` (computed: TDEE + 300), `caloriesMode: 'tdee-band'`
+   The `caloriesMode` discriminator lets validators dispatch on plan type without hardcoding plan keys.
+
+2. **Validation helper in `app.html`:** `validateCaloriesAgainstPlan(cals, plan, tdee)` returns `{ ok: bool, severity: 'ok'|'warn'|'critical', message: string }`. Modes:
+   - `'floor'`: warn if `cals < plan.minCalories`. Message references the plan's floor + medical-supervision note.
+   - `'above-tdee'`: warn if `cals <= tdee`. Message: "On a BULK plan, ceiling should be above TDEE; otherwise you're cutting."
+   - `'tdee-band'`: warn if `abs(cals - tdee) > 300`. Message: "MAINTENANCE keeps you within ±300 cal of TDEE."
+
+3. **Wire warnings into:**
+   - `calcDuration()` result panel — append warning under existing risk flags. Non-blocking.
+   - Settings calorie field — show floor/band hint as live caption: `Floor for ${planName}: 1200 cal` / `Above TDEE (${tdee} cal) for BULK` / `Band: ${tdee-300}–${tdee+300} for MAINTENANCE`.
 
 ### Files touched
 
-- `plans/lite.js`, `plans/agro.js`, `plans/cut.js`, `plans/bulk.js`, `plans/maintenance.js` — add `minCalories` field (number for cut/agro/lite, function for bulk/maintenance)
-- `app.html` — `calcDuration()` warning logic; settings-panel hint render in `openSettings()`; CSS for `.cal-floor-warn`
+- `plans/lite.js`, `plans/agro.js`, `plans/cut.js`, `plans/bulk.js`, `plans/maintenance.js` — add `minCalories`/`maxCalories`/`caloriesMode` fields.
+- `app.html` — `validateCaloriesAgainstPlan` helper; warning render in `calcDuration`; live hint in `openSettings`; CSS for `.cal-floor-warn`.
 
 ### Smoke test
 
-1. AGRO plan: enter calorie ceiling 700 → soft warning shown.
-2. AGRO plan: enter 1000 → no warning.
-3. CUT plan: enter 1200 → warning shown.
-4. BULK plan: warning fires only if ceiling < TDEE-200.
-5. Goal calculator never blocks computation; result still shown.
-6. Settings calorie field shows floor hint.
+1. AGRO plan: enter 700 cal → soft warning ("below 800 floor"). Enter 1000 → no warning.
+2. CUT plan: enter 1200 → warning ("below 1400 floor"). Enter 1500 → no warning.
+3. BULK plan with TDEE 3000: enter 2900 → warning ("ceiling at/below TDEE — accidental cut"). Enter 3300 → no warning.
+4. MAINTENANCE plan with TDEE 2500: enter 2100 → warning ("outside ±300 band"). Enter 2400 → no warning.
+5. Goal calculator never blocks; result still computed and shown.
+6. Settings calorie field shows correct hint per plan.
 
 ### Acceptance criteria
 
-- [ ] Warning is non-blocking (computation continues)
-- [ ] All 5 plans have `minCalories` defined (static or function)
-- [ ] Warning text is clear and references the plan
-- [ ] Floor hint visible in settings
+- [ ] All 5 plans declare appropriate `caloriesMode` + threshold field(s)
+- [ ] Validator dispatches correctly on mode (no hardcoded plan keys outside the helper)
+- [ ] Warning is non-blocking
+- [ ] Warning text plan-specific and clear
+- [ ] Settings hint matches plan mode
 
 ### Risk
 
-**Low.** New plan field is additive; existing readers ignore unknown fields. Warning is read-only display.
+**Low.** Additive plan fields; existing readers ignore unknown fields. Validator only emits messages.
 
 ---
 
@@ -375,48 +393,107 @@ If the user forgets to mark sick days, detect a likely sickness pattern (3+ cons
 
 ---
 
-## Phase 8 — Linked-Deficit Mode
+## Phase 8 — Linked Offset Mode (Plan-Direction-Aware)
 
 **Status:** PENDING
-**Tier source:** Tier 2, item 8
+**Tier source:** Tier 2, item 8 (extended for bulk/maintenance)
 **APP_VERSION target:** `7.5.0` (minor — new behaviour, opt-in, banner shown)
 **CACHE_NAME bump:** Yes.
 **Migration:** None.
 
 ### Goal
 
-Opt-in mode where calorie ceiling auto-tracks TDEE changes, maintaining a constant absolute deficit (cal). When user picks `targetDeficit = 1500 cal/day`, calorie ceiling = max(planMinCalories, TDEE - 1500). When TDEE drops, ceiling drops proportionally.
+Opt-in mode where the calorie ceiling auto-tracks TDEE changes by maintaining a constant offset relative to TDEE. The offset is **directional based on the active plan**:
+
+- **Cut plans (LITE / CUT / AGRO):** offset is a deficit. `ceiling = TDEE − deficit`. Floored at plan's `minCalories`. As TDEE drops with weight loss → ceiling drops too → user keeps the same daily deficit.
+- **BULK:** offset is a surplus. `ceiling = TDEE + surplus`. As TDEE rises with weight gain → ceiling rises → same daily surplus maintained.
+- **MAINTENANCE:** offset is a signed delta from TDEE (default 0, range typically ±200). `ceiling = TDEE + offset`. Keeps user near maintenance even as their body weight stabilises and TDEE drifts.
+
+### Plan-direction abstraction
+
+Reuse the `caloriesMode` discriminator added in Phase 3. The offset's sign is implicit by mode:
+
+| Plan mode | Offset semantic | Default | Range | Floor enforcement |
+|---|---|---|---|---|
+| `floor` (LITE/CUT/AGRO) | Deficit (positive number, subtracted) | 1500 | 0 – TDEE | `max(plan.minCalories, TDEE − offset)` |
+| `above-tdee` (BULK) | Surplus (positive number, added) | 300 | 100 – 1000 | No floor; `ceiling = TDEE + offset` |
+| `tdee-band` (MAINTENANCE) | Signed delta (can be negative) | 0 | −300 – +300 | `clamp(ceiling, TDEE−300, TDEE+300)` |
 
 ### Scope
 
-1. New settings fields: `s.linkedDeficitMode: boolean` (default false), `s.targetDeficit: number | null`.
-2. Settings panel: new toggle below TDEE field — `Link calorie ceiling to TDEE (auto-adjust on TDEE change)`. Reveals an input for `Target deficit (cal/day)` when on.
-3. When toggle is ON: calorie field becomes read-only and shows the computed value. Display text: `Auto: TDEE − deficit = X cal (locked to deficit)`.
-4. `recomputeAndApplyTDEE()` (or new `syncCalorieCeilingFromDeficit()`): when TDEE changes AND `linkedDeficitMode === true`, compute new ceiling and write `s.calories`. Floor at plan's `minCalories`.
-5. `weeklyCalibration` triggers the same recompute path.
+1. **New settings fields:**
+   - `s.linkedOffsetMode: boolean` (default false)
+   - `s.targetOffset: number | null` (units: cal/day; sign per plan mode)
+
+2. **Settings panel:** new toggle below TDEE field labelled adaptively:
+   - On cut plans: `Link calorie ceiling to TDEE (maintain a constant deficit)`
+   - On bulk: `Link calorie ceiling to TDEE (maintain a constant surplus)`
+   - On maintenance: `Link calorie ceiling to TDEE (track maintenance band)`
+
+3. **Offset input** revealed when toggle is ON, with adaptive label:
+   - Cut: `Daily deficit (cal below TDEE)` — input range 0–TDEE
+   - Bulk: `Daily surplus (cal above TDEE)` — input range 100–1000
+   - Maintenance: `Offset from TDEE (cal, can be negative)` — input range −300 to +300
+
+4. **Calorie field** becomes read-only when toggle ON. Live display shows computed value with formula:
+   - Cut: `Auto: ${tdee} − ${offset} = ${ceiling} cal (locked)`
+   - Bulk: `Auto: ${tdee} + ${offset} = ${ceiling} cal (locked)`
+   - Maintenance: `Auto: ${tdee} ${offset >= 0 ? '+' : '−'} ${abs(offset)} = ${ceiling} cal (locked)`
+
+5. **New helper `syncCalorieCeilingFromOffset()`** in `app.html`:
+   ```
+   if (!s.linkedOffsetMode) return false;
+   const plan = getActivePlan();
+   const mode = plan.caloriesMode;
+   let ceiling;
+   switch (mode) {
+     case 'floor':       ceiling = Math.max(plan.minCalories, s.tdee - s.targetOffset); break;
+     case 'above-tdee':  ceiling = s.tdee + s.targetOffset; break;
+     case 'tdee-band':   ceiling = Math.max(s.tdee - 300, Math.min(s.tdee + 300, s.tdee + s.targetOffset)); break;
+   }
+   if (s.calories !== ceiling) {
+     s.calories = ceiling;
+     saveSettings(s);
+     dispatch('CALORIES_CHANGED');
+     return true;
+   }
+   ```
+
+6. **Trigger sites:** `recomputeAndApplyTDEE` and `weeklyCalibration` both call `syncCalorieCeilingFromOffset()` after TDEE write. Plan switch (in `confirmPlan`) also recomputes if linkedOffsetMode is on (the formula changes when the plan mode changes).
+
+7. **Plan switch handling:** when user switches plans while linkedOffsetMode is ON, show a `showConfirm`: "Switching from CUT to BULK will reverse offset direction. Reset offset to plan default (300 cal surplus)?" — Yes resets, No turns linked mode off.
 
 ### Files touched
 
-- `app.html` — settings UI, toggle handler, `syncCalorieCeilingFromDeficit` helper, integration with `recomputeAndApplyTDEE` and weeklyCalibration call site, CSS for read-only state.
+- `app.html` — settings UI (adaptive toggle + input labels), `syncCalorieCeilingFromOffset` helper, integration with `recomputeAndApplyTDEE` and `weeklyCalibration`, plan-switch handling in `confirmPlan`, CSS for read-only state.
+- `getSettings()` defaults — add the two new fields.
 
 ### Smoke test
 
-1. Toggle on, deficit = 1500. Current TDEE 3382. Calorie field displays 1882 (cut floor: 1400).
-2. Drop weight by 5kg → TDEE recomputes lower → calorie field auto-drops, floored at 1400 if needed.
-3. Toggle off → field becomes editable, value preserved at last computed.
-4. Plan-floor enforcement works (won't go below `minCalories`).
+1. **CUT scenario:** Toggle on, deficit 1500. TDEE 3382. Ceiling shows 1882 (above 1400 floor). Drop weight 5 kg → TDEE drops to ~3300 → ceiling auto-drops to 1800.
+2. **BULK scenario:** Switch to BULK. Toggle on, surplus 300. TDEE 2800. Ceiling shows 3100. Weight gain → TDEE rises → ceiling rises proportionally.
+3. **MAINTENANCE scenario:** Switch to MAINTENANCE. Toggle on, offset 0. Ceiling = TDEE. Adjust offset to −150 → ceiling = TDEE − 150 (within band).
+4. **Plan switch with linked mode on:** prompt appears, user confirms reset → offset becomes plan default.
+5. **Floor enforcement (cut):** AGRO plan, deficit 5000 → ceiling clamped at 800 floor.
+6. **Toggle off:** field becomes editable, value preserved at last computed.
 
 ### Acceptance criteria
 
-- [ ] Toggle exists and persists in settings
-- [ ] Linked mode auto-updates calorie field on TDEE change
-- [ ] Floor enforcement against plan minCalories
+- [ ] Toggle + offset input both adapt their labels based on `plan.caloriesMode`
+- [ ] All 3 modes (`floor`, `above-tdee`, `tdee-band`) compute ceiling correctly
+- [ ] Floor/band/clamping respected per mode
+- [ ] TDEE_CHANGED triggers ceiling sync
+- [ ] Plan switch handled gracefully
 - [ ] Read-only visual state when linked
 - [ ] Disabling restores manual editability
 
 ### Risk
 
-**Medium.** New write path into settings.calories triggered by an existing event. Mitigation: gate behind explicit user opt-in; default off.
+**Medium.** New auto-write path into settings.calories triggered by TDEE events. Mitigation: opt-in only (default off); plan-switch protection; floor/band enforcement.
+
+### Dependencies
+
+**Requires Phase 3** (`caloriesMode` field on each plan). Cannot ship before Phase 3.
 
 ---
 
@@ -550,49 +627,186 @@ Track the last 5 backup events with timestamp + filename. Display in Settings �
 
 ---
 
-## Phase 12 — Bootstrap fastWindows from fastDays
+## Phase 12 — Multi-Day Fast Sessions (Supersedes Original Bootstrap Scope)
 
 **Status:** PENDING
-**Tier source:** Tier 4, item 15
-**APP_VERSION target:** `7.7.1` (patch with migration)
+**Tier source:** Tier 4, item 15 (substantially expanded for multi-day fast support)
+**APP_VERSION target:** `7.8.0` (minor — new feature with data restructure, banner shown)
 **CACHE_NAME bump:** Yes.
-**Migration:** v3 → v4 — for each existing `fastDays[date]` entry without a corresponding `fastWindows[date]` entry, create a default 24-hour window.
+**Migration:** v3 → v4 — introduce `SK.fastSessions`; backfill from existing `SK.fastWindows` AND `SK.fastDays`.
+
+### Why this phase changed
+
+The original Phase 12 scope ("bootstrap fastWindows from fastDays") assumed every fast fits within a single calendar date. That assumption fails for fasts that span multiple days. Real example from owner's protocol:
+
+- **Wednesday fast (single-day):** Tue 6 PM → Thu 9 AM. ~28h centered on Wed. Calendar marks Wed as fast day. Phase C works fine — one window stored under "Wed" with timestamps spanning Tue–Thu. Tail-ends are not marked fast days.
+- **Saturday + Sunday fast (multi-day):** Fri 6 PM → Mon 9 AM. ~63h spanning Sat AND Sun, both marked as fast days. Phase C breaks:
+  1. Tap START on Sat → window stored under Sat
+  2. Sun morning, app forgets Sat's session is still active for Sun (different date key) → if user taps START again, **duplicate window created on Sun**
+  3. Mon morning end → endFast writes to whichever date the user happens to be on — Sat's window stays "active" forever
+  4. Calibration math reads both Sat's and Sun's windows separately → **double-counts the same fast hours**
+  5. Calendar coloring inconsistent — Sat and Sun handled by different windows that may have different broken/end states
 
 ### Goal
 
-Backfill the `fastWindows` storage so the calibration math has timestamp data even for fast days the user never explicitly started/stopped. The legacy fallback path remains intact; this just promotes legacy entries into the new structure once.
+Introduce a proper **fast session** abstraction: a single object representing one continuous fast, regardless of how many calendar dates it spans. `fastWindows[date]` becomes a derived view (read-only). Sessions are the source of truth.
+
+### Data model
+
+**New SK key:** `SK.fastSessions = 'ph_fs_v1'`
+
+**Shape:** array of session objects:
+```js
+{
+  id: 'fs_<timestamp>_<random>',     // unique identifier
+  start: ISO_string,                  // when fast began
+  end: ISO_string | null,             // when fast ended (null = active)
+  broken: boolean,                    // user marked broken or food logged during
+  brokenBy: [foodEntryId, ...],       // which food entry/entries broke it (if applicable)
+  dates: [YYYY-MM-DD, ...],           // calendar dates this session covers
+  legacy: boolean (optional)          // true if backfilled from pre-Phase-12 data
+}
+```
+
+**`dates` semantics:** computed from `start` and `end` (or `now()` if active). A date is included if the session was active for ≥ 1 hour on that date. Recomputed when `end` is set.
+
+**`fastWindows` after Phase 12:** kept for backward-compatible reads via a derived helper `getFastWindowsForDate(dateStr)` that scans `fastSessions` and returns matching session(s) for that date. Direct writes to `fastWindows` removed; new writes go through session helpers.
 
 ### Scope
 
-1. Migration v3→v4 in `migrations/registry.js`:
-   - For each date in `fastDays` where `fastWindows[date]` is empty/absent:
-     - Create entry: `[{ start: '${date}T00:00:00.000Z', end: '${date}T23:59:59.999Z', broken: false, brokenBy: [], legacy: true }]`
-   - Set `requiresBackup: true` (data shape change).
-2. Verify function: confirms post-state has fastWindows entry for every fastDays entry.
-3. Reverse function: clears windows where `legacy: true`.
+**1. New session helpers in `components/fast-window.js` (replacing per-date logic):**
+
+- `getActiveSession()` — returns the most recent session with `end === null && !broken`, regardless of date.
+- `getSessionsForDate(dateStr)` — returns all sessions whose `dates[]` includes `dateStr`.
+- `startFastSession()` — creates new session in `fastSessions` with `start = now`, `end = null`, `dates = [todayStr()]`. Returns existing active session unchanged if one exists (no duplicate).
+- `endFastSession()` — sets `session.end = now`, recomputes `session.dates` based on actual span. Dispatches `FAST_WINDOW_CHANGED`.
+- `markSessionBroken(foodEntryId, foodTs)` — marks the active session broken; sets end to food timestamp; recomputes dates.
+- `editSession(sessionId, startISO, endISO, broken)` — retroactive edit; recomputes dates.
+- `deleteSession(sessionId)` — removes session entirely.
+
+**2. Backward-compat helpers (so Phase C UX still works):**
+
+- `getActiveFastWindow(dateStr)` — alias for `getActiveSession()`, ignores dateStr argument (sessions are date-agnostic).
+- `getFastWindows(dateStr)` — derives from `getSessionsForDate(dateStr)`.
+- `startFast(dateStr)` / `endFast(dateStr)` / `markFastBroken(dateStr, foodEntryId, foodTs)` — thin wrappers around the session helpers (dateStr ignored where it doesn't apply).
+
+**3. Migration v3→v4 in `migrations/registry.js`:**
+
+`requiresBackup: true` — major data restructure.
+
+```js
+run(data) {
+  const sessions = [];
+  const seenWindows = new Set();
+  // Step A: convert each existing fastWindows entry to a session
+  const fw = data['ph_fw_v1'] || {};
+  for (const date of Object.keys(fw)) {
+    for (const win of fw[date]) {
+      const sig = `${date}|${win.start}|${win.end}`;
+      if (seenWindows.has(sig)) continue;  // dedupe duplicates from Phase C bug
+      seenWindows.add(sig);
+      sessions.push({
+        id: 'fs_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8),
+        start: win.start || `${date}T00:00:00.000Z`,
+        end:   win.end   || `${date}T23:59:59.999Z`,
+        broken: !!win.broken,
+        brokenBy: win.brokenBy || [],
+        dates: [date],
+        legacy: false
+      });
+    }
+  }
+  // Step B: for each fastDays entry without a covering session, create a 24h legacy session
+  const fd = data['ph_fd_v1'] || {};
+  const coveredDates = new Set();
+  sessions.forEach(s => s.dates.forEach(d => coveredDates.add(d)));
+  for (const date of Object.keys(fd)) {
+    if (!fd[date]) continue;
+    if (coveredDates.has(date)) continue;
+    sessions.push({
+      id: 'fs_legacy_' + date.replace(/-/g, ''),
+      start: `${date}T00:00:00.000Z`,
+      end:   `${date}T23:59:59.999Z`,
+      broken: false,
+      brokenBy: [],
+      dates: [date],
+      legacy: true
+    });
+  }
+  data['ph_fs_v1'] = sessions;
+  return data;
+}
+```
+
+Verify: every `fastDays` date has at least one session covering it; no session has empty `dates`.
+
+**Note on consecutive fast days:** the migration does NOT auto-merge consecutive fast days into single multi-day sessions. Without timestamp data, we can't know whether the user did Sat and Sun as one continuous fast or as two separate fasts. Each gets its own session; user can manually merge later via the day-modal editor (post-migration UX, future enhancement).
+
+**4. UX changes:**
+
+- **TODAY tab fast banner:** when an active session exists (regardless of which day was active when started), show: `Fasting since Fri 6 PM (28h elapsed)`. The "covers dates" is implicit; user just sees one ongoing fast.
+- **Calendar:** day modal on a date that's part of a multi-day session shows: `Part of a multi-day fast: Fri 6 PM → Mon 9 AM (63h)`. Edit opens a session-level editor.
+- **Day modal "Edit Fast Times":** opens an editor for the session that covers this date. Editing changes affect ALL dates the session covers. New "Delete this session" button removes it entirely.
+- **Adding a fast on a date inside an existing session:** prevented. Shows: `This date is already part of an active fast (started DD MMM at HH:MM). Use the existing session.`
+
+**5. Calibration math (modules/calibration.js):**
+
+- Replace `getFastWindows(date)` reads with `getSessionsForDate(date)`.
+- Total fast hours per session counted ONCE across all dates the session covers (not per spanning date).
+- For intake attribution on a date inside a session: if session is broken, sum food log entries for that date (same as today's logic). If session is intact, intake = 0 for that date.
+- Spike-trim and observation logic unchanged (they read intake, not fast structure).
+
+**6. SW cache + version:**
+
+- `sw.js` CACHE_NAME bumps (already required for any merge).
+- Files added to cache list: none new (fast-window.js already in cache from Phase C).
 
 ### Files touched
 
-- `migrations/registry.js` — migration object.
+- `app.html` — `SK.fastSessions` added; module-loader exposes new session helpers.
+- `migrations/registry.js` — v3→v4 migration object with backfill logic.
+- `components/fast-window.js` — heavy refactor: session helpers replace per-date helpers; backward-compat shims preserved for Phase C onclick callers.
+- `modules/calendar.js` — day-modal session editor block.
+- `modules/calibration.js` — calibration reads via session API.
+- `sw.js` — CACHE_NAME bump.
 
 ### Smoke test
 
-1. Owner's current backup: 30 fastDays entries. After migration, 30 fastWindows entries (all marked `legacy: true`).
-2. Calendar still colours past fast days correctly.
-3. Day modal on a past fast day shows "Legacy fast day — start/end backfilled to 00:00–23:59".
-4. Calibration math now uses these windows for span/duration calculations.
+1. **Migration:** owner's existing 30 `fastDays` + empty `fastWindows` → after migration, 30 legacy sessions in `fastSessions`, each with `dates=[date]`, `legacy: true`. Auto-backup downloaded. No data loss.
+2. **Wednesday-style single-day fast (new):** TODAY (Wed) tap START → session created with `start = Wed 6PM`, `dates = ["Wed"]`. Wed evening tap END → `dates` recomputed (still just ["Wed"] if span < 24h before midnight; or extended).
+3. **Cross-midnight overnight (Tue 6PM start, Wed 9AM end):** session.dates = ["Tue", "Wed"] (covers both calendar dates). Wed shows as fast day in calendar; Tue too if marked.
+4. **Multi-day Sat+Sun:** Fri 6PM tap START → session created with `dates=["Fri"]`. Sat morning open app → banner says `Fasting since Fri 6 PM (XXh elapsed)`. Tapping START on Sat does NOTHING (active session exists). Sun morning same. Mon 9AM tap END → `session.end = now`, `session.dates = ["Fri", "Sat", "Sun", "Mon"]`. Calendar: Sat + Sun colored fast (per existing fastDays); Fri + Mon may show partial via intake.
+5. **No duplicates:** verify only one session per fast across all dates.
+6. **Calibration:** with the multi-day session, fast duration counted once. Observed TDEE math correctly attributes fast period.
+7. **Day modal on Sun (mid-fast):** shows session info, edit opens session editor (not date-specific window editor).
+8. **Edit session start:** changing Fri 6PM → Fri 4PM updates the session globally; all spanning dates reflect the change.
+9. **Backup→restore round-trip:** sessions preserved.
 
 ### Acceptance criteria
 
-- [ ] All fastDays have matching fastWindows post-migration
-- [ ] `legacy: true` flag preserved for distinction
-- [ ] Auto-backup downloaded before migration runs (`requiresBackup: true`)
-- [ ] No visual regression on calendar
-- [ ] Day modal labels legacy windows clearly
+- [ ] `SK.fastSessions` populated post-migration for all existing fastDays + fastWindows
+- [ ] No data loss; auto-backup downloaded before migration runs
+- [ ] Single active-session model: tapping START during active session is a no-op
+- [ ] Multi-day spans handled without duplicate windows
+- [ ] Calendar coloring correct across all spanning dates
+- [ ] Calibration math counts each fast once
+- [ ] Day modal shows session-aware information
+- [ ] Backward-compat read shims preserved for Phase C onclick callers
+- [ ] No regression in single-day fasts (Wednesday-style)
 
 ### Risk
 
-**Low.** Bulk write but well-bounded. `requiresBackup: true` enforces user safety net.
+**Medium-high.** Major data restructure with read-shim layer. Mitigations:
+- `requiresBackup: true` enforces user safety net before migration runs
+- Backward-compat shims preserve all Phase C onclick handlers
+- Migration is idempotent (safe to re-run)
+- Verify function ensures every fastDays has session coverage
+- Sessions array is append-only post-migration; no in-place mutations of legacy data
+
+### Dependencies
+
+- **Affects:** Phase 13 (activity history snapshot — should also include sessionId for traceability if tied to a fast).
+- **Independent of:** Phases 1–11 (none read fast structure in a way that conflicts).
 
 ---
 
@@ -600,7 +814,7 @@ Backfill the `fastWindows` storage so the calibration math has timestamp data ev
 
 **Status:** PENDING
 **Tier source:** Tier 4, item 14
-**APP_VERSION target:** `7.7.2` (patch with migration; observation only)
+**APP_VERSION target:** `7.8.1` (patch with migration; observation only) — bumped from `7.7.2` due to Phase 12 version expansion
 **CACHE_NAME bump:** Yes.
 **Migration:** v4 → v5 adds new SK key `activityHistory`.
 
@@ -646,14 +860,14 @@ Lay the foundation for future per-day activity inference. Each calibration cycle
 
 | Surface | State |
 |---|---|
-| `APP_VERSION` | `7.7.2` |
+| `APP_VERSION` | `7.8.1` |
 | `CACHE_NAME` | `~v32-34` (one bump per phase that needed it) |
 | `schemaVersion` | `5` |
-| New SK keys added | `backupHistory`, `activityHistory` |
-| New migrations | v2→v3, v3→v4, v4→v5 |
+| New SK keys added | `backupHistory` (Phase 11), `fastSessions` (Phase 12), `activityHistory` (Phase 13) |
+| New migrations | v2→v3 (backupHistory), v3→v4 (fastSessions backfill), v4→v5 (activityHistory) |
 | New files | `components/` may gain a sickness-toggle helper if extracted (Phase 5); no other new module files necessary |
-| New dispatch events | None (existing `TDEE_CHANGED`, `FAST_WINDOW_CHANGED`, etc. cover everything) |
-| Behavioural changes | All 13 phases land. Calibration is sickness-aware, spike-resistant, plan-floor-respecting, integrity-checksummed, history-tracked. |
+| New dispatch events | None (existing `TDEE_CHANGED`, `FAST_WINDOW_CHANGED`, etc. cover everything; sessions reuse `FAST_WINDOW_CHANGED`) |
+| Behavioural changes | All 13 phases land. Calibration is sickness-aware, spike-resistant, plan-floor-respecting, integrity-checksummed, history-tracked. Fasts support multi-day spans with no duplication. |
 
 ---
 
