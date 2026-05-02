@@ -1492,6 +1492,9 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
   // v7.1.0 hot-fix: TDEE sanity bounds + auto-revert
   window.checkStoredTdeeSanity = Calibration.checkStoredTdeeSanity;
   window.autoRevertImplausibleTdee = Calibration.autoRevertImplausibleTdee;
+  // v7.9.0: stale-calibration auto-clear + ATP factor exposed for diagnostics
+  window.clearStaleCalibrationData = Calibration.clearStaleCalibrationData;
+  window.computeATPFactor = Calibration.computeATPFactor;
   // v7.2.0 Phase 1: day breakdown helper for Reality Check display
   window.getDayBreakdown = Calibration.getDayBreakdown;
   // v7.6.0 Phase 9: adaptive activity multiplier inference
@@ -1724,8 +1727,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '7.8.1';
-const APP_VERSION_MSG = 'Final phase of the calibration project: silent observation foundation. Each weekly calibration cycle now writes a snapshot to a rolling history (capped at 90 entries). No UI in this release — it just accumulates so future smart-trend features have clean data to work from.';
+const APP_VERSION = '7.9.0';
+const APP_VERSION_MSG = 'Major TDEE accuracy upgrade. Plans now use per-day-type activity multipliers (eat-day vs fast-day) instead of one number applied to every day. Adaptive thermogenesis factor models the natural metabolic slowdown after weeks of cutting. Reality Check shows the full breakdown so you can see exactly where your TDEE comes from. Three calibration bugs fixed at the same time. Auto-corrects stale data on first load.';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
 
@@ -1772,7 +1775,7 @@ function strToDate(s) { const [y,m,d]=s.split('-').map(Number); return new Date(
 // getSettings: always returns a full settings object with defaults. Never returns null.
 // Add any new settings fields here with a default value.
 function getSettings() {
-  const defaults = { plan:'default', currentKg:null, targetKg:null, calories:null, tdee:2600, risk:'aggressive', startDate:null, age:null, height:null, sex:'male', activityLevel:'1.55', name:'', wakeTime:null, lastMealTime:null, eveningSessionTime:null, eatingWindowStart:null, supplementsEnabled:true, tdeeManualOverride:false, lastCalibrationAt:null, lastCalibrationFormula:null, lastCalibrationObserved:null, lastCalibrationOutcome:'never-run', linkedOffsetMode:false, targetOffset:null };
+  const defaults = { plan:'default', currentKg:null, targetKg:null, calories:null, tdee:2600, risk:'aggressive', startDate:null, age:null, height:null, sex:'male', activityLevel:'1.55', activityByDayType:null, name:'', wakeTime:null, lastMealTime:null, eveningSessionTime:null, eatingWindowStart:null, supplementsEnabled:true, tdeeManualOverride:false, lastCalibrationAt:null, lastCalibrationFormula:null, lastCalibrationObserved:null, lastCalibrationOutcome:'never-run', linkedOffsetMode:false, targetOffset:null };
   const saved = gs(SK.settings);
   if(!saved) return defaults;
   return Object.assign({}, defaults, saved);
@@ -3796,6 +3799,13 @@ function confirmPlan() {
   s.eatingWindowStart = document.getElementById('settingEatingWindowStart').value || null;
   s.supplementsEnabled = document.getElementById('settingSupplements').checked;
   saveSettings(s);
+  // v7.9.0 BUG FIX: if linked-offset mode is on, the linked value MUST win
+  // over any manually-typed calorie ceiling captured above. Re-run sync
+  // after persisting the form so the linked-mode-managed value overrides
+  // a stale manual value the user never refreshed.
+  if (s.linkedOffsetMode && typeof syncCalorieCeilingFromOffset === 'function') {
+    syncCalorieCeilingFromOffset();
+  }
   applyPlanUI(val);
   dispatch('PLAN_CHANGED');
   dispatch('CALORIES_CHANGED');
@@ -3838,36 +3848,106 @@ const PLAN_ACTIVITY_DEFAULTS = {
   maintenance: '1.375'
 };
 
+// ─── v7.9.0: TDEE MODEL UPGRADE ─────────────────────────────────────────────
+// Replaces the single-static-multiplier model with a weekly-weighted
+// per-day-type activity model + adaptive thermogenesis factor.
+//
+//   TDEE = BMR(weight, height, age, sex)
+//        × weeklyWeightedActivity(plan, settings)
+//        × ATPFactor(settings, weights, plan)
+//
+// All three TDEE compute sites (computeAutoTDEE, recomputeTDEE,
+// computeFormulaTDEEAtWeight) delegate to the same _computeFormulaTDEE
+// helper so the formula stays consistent across the app.
+//
+// Plan-aware: each plan declares activityByDayType with eat-day, fast-day,
+// and/or light-day multipliers. Falls back to legacy s.activityLevel
+// uniform multiplier when plan doesn't declare one — preserves backward
+// compat for any future plans that opt out.
+
+// Pure Mifflin-St Jeor BMR. No activity, no ATP — the raw baseline.
+function _mifflinBMR(weight, height, age, sex) {
+  if (!weight || !height || !age) return null;
+  return (sex === 'male')
+    ? (10 * weight) + (6.25 * height) - (5 * age) + 5
+    : (10 * weight) + (6.25 * height) - (5 * age) - 161;
+}
+
+// Returns the weekly-weighted activity multiplier. Uses (in priority order):
+//   1. settings.activityByDayType — user override (advanced; not yet UI-exposed)
+//   2. plan.activityByDayType — plan default
+//   3. settings.activityLevel — legacy uniform multiplier (full back-compat)
+function getWeeklyAvgActivity(plan, settings) {
+  if (!settings) settings = getSettings();
+  if (!plan) plan = (typeof getActivePlan === 'function') ? getActivePlan() : null;
+  const userMap = settings && settings.activityByDayType;
+  const planMap = plan && plan.activityByDayType;
+  const map = (userMap && typeof userMap === 'object') ? userMap : planMap;
+  // No day-type model declared → legacy uniform fallback
+  if (!map || typeof map !== 'object') {
+    return parseFloat(settings.activityLevel) || 1.55;
+  }
+  const fastDays = (plan && typeof plan.fastDaysPerWeek === 'number') ? plan.fastDaysPerWeek : 0;
+  const lightDays = (plan && typeof plan.lightDaysPerWeek === 'number') ? plan.lightDaysPerWeek : 0;
+  const eatDays = Math.max(0, 7 - fastDays - lightDays);
+  // Per-day-type fallbacks if a key is missing from the map
+  const eatMult = (typeof map.eatDay === 'number') ? map.eatDay : 1.55;
+  const fastMult = (typeof map.fastDay === 'number') ? map.fastDay : 1.35;
+  const lightMult = (typeof map.lightDay === 'number') ? map.lightDay : 1.40;
+  return ((eatDays * eatMult) + (fastDays * fastMult) + (lightDays * lightMult)) / 7;
+}
+
+// Unified formula TDEE compute used by every consumer in the app.
+// Returns Math.round value (cal/day), or null if any input missing.
+// `weight` is required so callers can ask "what would TDEE be at weight X"
+// (used by calcAdjust trajectory math). Plan + settings looked up if not
+// passed. Uses computeATPFactor exposed by modules/calibration.js when
+// available (loaded after app.html boot, so the typeof guard is necessary).
+function _computeFormulaTDEE(weight, settings, plan) {
+  if (!settings) settings = getSettings();
+  if (!plan) plan = (typeof getActivePlan === 'function') ? getActivePlan() : null;
+  const height = parseFloat(settings.height);
+  const age    = parseFloat(settings.age);
+  const sex    = settings.sex || 'male';
+  const bmr = _mifflinBMR(weight, height, age, sex);
+  if (bmr == null) return null;
+  const weeklyAct = getWeeklyAvgActivity(plan, settings);
+  const atp = (typeof computeATPFactor === 'function')
+    ? computeATPFactor(settings, gs(SK.weights) || [], plan)
+    : 1.0;
+  return Math.round(bmr * weeklyAct * atp);
+}
+
 function computeAutoTDEE() {
+  // Reads from Settings DOM inputs (used by the AUTO-FILL TDEE button).
+  // For activity multiplier, prefers the active plan's day-type model when
+  // present; the legacy DOM activity dropdown becomes the override path
+  // (s.activityLevel). The DOM dropdown's value is captured into settings
+  // by autoFillTDEE / confirmPlan, so day-type model still wins via plan
+  // unless user has explicit s.activityByDayType.
   const weight = parseFloat(document.getElementById('settingCurrentKg').value) || getLatestWeight();
   const height = parseFloat(document.getElementById('settingHeight').value);
   const age    = parseFloat(document.getElementById('settingAge').value);
   const sex    = document.getElementById('settingSex').value;
-  const actMult = parseFloat(document.getElementById('settingActivityLevel').value) || 1.55;
-  if(!weight || !height || !age || !sex) return null;
-  const bmr = sex === 'male'
-    ? (10 * weight) + (6.25 * height) - (5 * age) + 5
-    : (10 * weight) + (6.25 * height) - (5 * age) - 161;
-  return Math.round(bmr * actMult);
+  if (!weight || !height || !age || !sex) return null;
+  // Build a transient settings shape that reflects the current Settings panel
+  // input values so the recompute reflects unsaved DOM edits.
+  const transient = Object.assign({}, getSettings(), {
+    height, age, sex,
+    activityLevel: document.getElementById('settingActivityLevel').value || '1.55'
+  });
+  return _computeFormulaTDEE(weight, transient, null);
 }
 
 // Phase B: DOM-free Mifflin-St Jeor recompute. Reads from settings + latest
-// weight log. Mirrors computeAutoTDEE() but does not depend on the Settings
-// panel being open. Returns null if any required input is missing or if the
+// weight log. Returns null if any required input is missing or if the
 // user has frozen TDEE via the manual-override toggle (Phase D).
 function recomputeTDEE() {
   const s = getSettings();
   if (s.tdeeManualOverride) return null;
   const weight = getLatestWeight();
-  const height = parseFloat(s.height);
-  const age    = parseFloat(s.age);
-  const sex    = s.sex || 'male';
-  const actMult = parseFloat(s.activityLevel) || 1.55;
-  if (!weight || !height || !age) return null;
-  const bmr = sex === 'male'
-    ? (10 * weight) + (6.25 * height) - (5 * age) + 5
-    : (10 * weight) + (6.25 * height) - (5 * age) - 161;
-  return Math.round(bmr * actMult);
+  if (!weight) return null;
+  return _computeFormulaTDEE(weight, s, null);
 }
 
 // Phase 1 (v7.2.0): Reality Check explainer modal handlers
@@ -4051,15 +4131,35 @@ function applyInferredActivityLevel() {
   if (typeof inferActivityMultiplier !== 'function') return;
   const r = inferActivityMultiplier();
   if (!r || !r.valid) return;
-  // Map the effective value to the closest dropdown option for display.
-  // Multiplier dropdown options: 1.2, 1.375, 1.55, 1.725, 1.9 — but we store
-  // the precise inferred value and surface a tooltip hint about which step
-  // it's closest to. For clarity in the dropdown trigger, set value to the
-  // exact inferred number (custom dropdown handles non-step values cleanly).
   const s = getSettings();
-  s.activityLevel = String(r.effective);
+  const plan = (typeof getActivePlan === 'function') ? getActivePlan() : null;
+  // v7.9.0: when the active plan declares per-day-type multipliers, scale
+  // those values proportionally so the new weekly weighted average equals
+  // the inferred effective. This preserves the eat-day vs fast-day RATIO
+  // the plan declares, while shifting the overall level. If the plan has
+  // no day-type model, fall back to writing s.activityLevel (legacy path).
+  const planMap = plan && plan.activityByDayType;
+  if (planMap && typeof planMap === 'object') {
+    const fastDays = (typeof plan.fastDaysPerWeek === 'number') ? plan.fastDaysPerWeek : 0;
+    const lightDays = (typeof plan.lightDaysPerWeek === 'number') ? plan.lightDaysPerWeek : 0;
+    const eatDays = Math.max(0, 7 - fastDays - lightDays);
+    const eatM = (typeof planMap.eatDay === 'number') ? planMap.eatDay : 1.55;
+    const fastM = (typeof planMap.fastDay === 'number') ? planMap.fastDay : 1.35;
+    const lightM = (typeof planMap.lightDay === 'number') ? planMap.lightDay : 1.40;
+    const planWeekly = (eatDays * eatM + fastDays * fastM + lightDays * lightM) / 7;
+    if (planWeekly > 0) {
+      const ratio = r.effective / planWeekly;
+      s.activityByDayType = {};
+      if (typeof planMap.eatDay === 'number')   s.activityByDayType.eatDay   = parseFloat((planMap.eatDay * ratio).toFixed(3));
+      if (typeof planMap.fastDay === 'number')  s.activityByDayType.fastDay  = parseFloat((planMap.fastDay * ratio).toFixed(3));
+      if (typeof planMap.lightDay === 'number') s.activityByDayType.lightDay = parseFloat((planMap.lightDay * ratio).toFixed(3));
+    }
+  } else {
+    // Legacy fallback: no day-type model on this plan
+    s.activityLevel = String(r.effective);
+  }
   saveSettings(s);
-  // Update the hidden native select + custom dropdown trigger
+  // Update the hidden native select + custom dropdown trigger for visibility
   const sel = document.getElementById('settingActivityLevel');
   if (sel) sel.value = String(r.effective);
   const trigger = document.getElementById('activitySelectTrigger');
@@ -4068,7 +4168,7 @@ function applyInferredActivityLevel() {
   if (typeof autoFillTDEE === 'function') autoFillTDEE();
   dispatch('TDEE_CHANGED');
   if (typeof renderActivityInference === 'function') renderActivityInference();
-  showAlert('Activity multiplier set to ' + r.effective.toFixed(3) + ' (inferred from your last ' + r.daysOfData + ' days). TDEE recomputed.');
+  showAlert('Activity scaled to inferred ' + r.effective.toFixed(3) + ' weekly average (from your last ' + r.daysOfData + ' days). Per-day-type multipliers adjusted proportionally. TDEE recomputed.');
 }
 
 function onLinkedOffsetInput() {
@@ -4106,8 +4206,13 @@ function commitTdeeManual() {
 // v7.1.0: Pure formula TDEE for a given hypothetical weight. Used for the
 // trajectory-aware ADJUST math (BMR drops as weight drops, so a long cut
 // should average start-vs-target TDEE rather than use start-only).
+// v7.9.0: now goes through _computeFormulaTDEE so it picks up day-type
+// activity + ATP factor like every other TDEE consumer.
 function computeFormulaTDEEAtWeight(weightKg, s) {
   if (!s) s = getSettings();
+  const result = _computeFormulaTDEE(weightKg, s, null);
+  if (result != null) return result;
+  // Backward-compat fallback for missing inputs (height/age/sex)
   const height = parseFloat(s.height);
   const age = parseFloat(s.age);
   if (!weightKg || !height || !age) return s.tdee || 2600;
@@ -5451,6 +5556,15 @@ async function runInit() {
 
   // Phase C: kick off the live fast-window timer (refreshes every 30s).
   if (typeof startFastTickInterval === 'function') startFastTickInterval();
+
+  // v7.9.0 BUG FIX: clear stale calibration data BEFORE the sanity-revert
+  // and weekly-calibration steps. If the stored lastCalibrationObserved is
+  // > 21 days old AND fails today's sanity bounds, it's poisoned legacy
+  // data (e.g. one-off broken-fast spike that the cadence gate then locked
+  // in for weeks). Clearing it lets the next cycle evaluate fresh.
+  if (typeof clearStaleCalibrationData === 'function') {
+    try { clearStaleCalibrationData(); } catch (e) { console.warn('[calibration] stale-clear failed:', e); }
+  }
 
   // v7.1.0: sanity-check the stored TDEE BEFORE running weekly calibration.
   // If a previous calibration wrote an implausible value (e.g. after a sickness

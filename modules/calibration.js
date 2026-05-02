@@ -250,23 +250,75 @@ export function computeObservedTDEE(days = 14) {
            excludedSick, excludedLowCompliance, valid: true, reason: 'ok' };
 }
 
+// v7.9.0: Adaptive thermogenesis (ATP) factor. Cumulative deficit reduces
+// TDEE beyond what BMR-from-weight-loss alone predicts (Trexler 2014, PMC
+// 3943438: 5-10% sustained reduction). Plan-aware: only cut plans accumulate
+// ATP. Returns a multiplier in [0.85, 1.0]. 1.0 = no adaptation; 0.85 = max
+// observed in literature for sustained aggressive deficits.
+export function computeATPFactor(settings, weights, plan) {
+  const goalMode = (plan && plan.goalMode) || 'cut';
+  if (goalMode !== 'cut') return 1.0;
+  if (!Array.isArray(weights) || weights.length < 2) return 1.0;
+  if (!settings || !settings.startDate) return 1.0;
+
+  // Cumulative loss = first → latest weight. Use start-of-schedule weight
+  // when available so brief sickness/water spikes don't reset the baseline.
+  // Weights are stored newest-first in SK.weights.
+  const sortedAsc = weights.slice().sort((a, b) => a.date.localeCompare(b.date));
+  const startWeight = sortedAsc[0].weight;
+  const currentWeight = sortedAsc[sortedAsc.length - 1].weight;
+  const cumulativeLoss = startWeight - currentWeight;
+  if (cumulativeLoss < 1.0) return 1.0; // No real loss yet → no ATP
+
+  const startDate = strToDate(settings.startDate);
+  const today = new Date(); today.setHours(0,0,0,0);
+  const days = Math.max(1, Math.round((today.getTime() - startDate.getTime()) / 86400000));
+  const weeks = days / 7;
+  if (weeks < 2) return 1.0; // ATP needs sustained deficit; ignore first 2 weeks
+
+  // Loss rate (kg/week); used to scale ATP rate
+  const lossRate = (cumulativeLoss * 7) / days;
+
+  // ATP curve: ~5% per 4 weeks at moderate (<1 kg/wk), scaling linearly up
+  // to ~10% per 4 weeks at aggressive (>=1.5 kg/wk). Capped at 15% lifetime.
+  const aggressionFactor = Math.max(0, Math.min(1, (lossRate - 0.5) / 1.0));
+  const ratePerFourWeeks = 0.05 + (aggressionFactor * 0.05);
+  const totalATP = Math.min(0.15, ratePerFourWeeks * (weeks / 4));
+  return Math.max(0.85, 1 - totalATP);
+}
+
+// v7.9.0: returns the active plan from window scope, or null. Helper because
+// calibration.js runs in module scope and needs plan-aware activity math.
+function _getActivePlanForCalibration() {
+  if (typeof getActivePlan === 'function') return getActivePlan();
+  return null;
+}
+
 // Composes formula TDEE + observed TDEE + computed blend. Used by both the
 // reality-check display and the weekly calibration apply step.
+// v7.9.0: formula TDEE now uses weekly-weighted activity + ATP factor.
+// Exposes the breakdown components so Reality Check can display them.
 export function getCalibrationStatus() {
   const s = getSettings();
-  // Formula TDEE — same Mifflin-St Jeor logic as recomputeTDEE() in app.html,
-  // duplicated here so this module can run before that helper is loaded.
+  const plan = _getActivePlanForCalibration();
+  // Formula TDEE — v7.9.0 model. Components broken out for the breakdown UI.
   let formulaTDEE = null;
+  let bmr = null;
+  let weeklyAvgActivity = 1.55;
+  let atpFactor = 1.0;
   const weight = getLatestWeight();
   const height = parseFloat(s.height);
   const age = parseFloat(s.age);
   const sex = s.sex || 'male';
-  const actMult = parseFloat(s.activityLevel) || 1.55;
   if (weight && height && age) {
-    const bmr = sex === 'male'
+    bmr = sex === 'male'
       ? (10 * weight) + (6.25 * height) - (5 * age) + 5
       : (10 * weight) + (6.25 * height) - (5 * age) - 161;
-    formulaTDEE = Math.round(bmr * actMult);
+    weeklyAvgActivity = (typeof getWeeklyAvgActivity === 'function')
+      ? getWeeklyAvgActivity(plan, s)
+      : (parseFloat(s.activityLevel) || 1.55);
+    atpFactor = computeATPFactor(s, gs(SK.weights) || [], plan);
+    formulaTDEE = Math.round(bmr * weeklyAvgActivity * atpFactor);
   }
   const obs = computeObservedTDEE(14);
   const observedTDEE = obs.valid ? obs.tdee : null;
@@ -296,7 +348,34 @@ export function getCalibrationStatus() {
   const daysUntilNextCheck = nextCalibrationAt
     ? Math.max(0, Math.ceil((nextCalibrationAt.getTime() - nowMs) / 86400000))
     : 0;
-  const lastCalibrationOutcome = s.lastCalibrationOutcome || (lastAt ? 'unknown' : 'never-run');
+  // v7.9.0 BUG FIX: distinguish 'never-run' (default) from "ran but outcome
+  // not recorded" (legacy data pre-Phase-1). Old code used `||` which treats
+  // 'never-run' as truthy and never falls through. Now: only fall through
+  // when the stored outcome is genuinely missing or the default placeholder.
+  const hasRealOutcome = s.lastCalibrationOutcome
+    && s.lastCalibrationOutcome !== 'never-run';
+  const lastCalibrationOutcome = hasRealOutcome
+    ? s.lastCalibrationOutcome
+    : (lastAt ? 'unknown' : 'never-run');
+
+  // v7.9.0: TDEE breakdown components for Reality Check display
+  const fastDaysPerWeek = (plan && typeof plan.fastDaysPerWeek === 'number') ? plan.fastDaysPerWeek : 0;
+  const lightDaysPerWeek = (plan && typeof plan.lightDaysPerWeek === 'number') ? plan.lightDaysPerWeek : 0;
+  const eatDaysPerWeek = Math.max(0, 7 - fastDaysPerWeek - lightDaysPerWeek);
+  const planActivityMap = (plan && plan.activityByDayType) || null;
+  const userActivityMap = s.activityByDayType || null;
+  const activeMap = userActivityMap || planActivityMap;
+  const tdeeBreakdown = {
+    bmr: bmr != null ? Math.round(bmr) : null,
+    weeklyAvgActivity: parseFloat((weeklyAvgActivity || 0).toFixed(3)),
+    atpFactor: parseFloat((atpFactor || 1.0).toFixed(3)),
+    eatDayActivity: activeMap && typeof activeMap.eatDay === 'number' ? activeMap.eatDay : null,
+    fastDayActivity: activeMap && typeof activeMap.fastDay === 'number' ? activeMap.fastDay : null,
+    lightDayActivity: activeMap && typeof activeMap.lightDay === 'number' ? activeMap.lightDay : null,
+    eatDaysPerWeek, fastDaysPerWeek, lightDaysPerWeek,
+    usingDayTypeModel: !!activeMap,
+    legacyActivityLevel: (!activeMap) ? (parseFloat(s.activityLevel) || 1.55) : null
+  };
 
   return {
     state,
@@ -325,7 +404,9 @@ export function getCalibrationStatus() {
     excludedLowCompliance: obs.excludedLowCompliance || 0,
     excludedTotal: (obs.excludedSick || 0) + (obs.excludedLowCompliance || 0),
     // Phase 7 addition: sickness pattern auto-detection
-    sicknessPattern: _detectSicknessPattern(14)
+    sicknessPattern: _detectSicknessPattern(14),
+    // v7.9.0 addition: TDEE breakdown components for Reality Check display
+    tdeeBreakdown
   };
 }
 
@@ -388,11 +469,13 @@ export function weeklyCalibration() {
     _appendActivitySnapshot(Object.assign(_baseSnapshot(), { outcome: 'missing-inputs' }));
     return { applied: false, reason: 'missing-inputs' };
   }
-  // SANITY: observed TDEE must be >= BMR (formula / activityMultiplier) and
-  // <= formula × 1.5. Anything outside this range is physiologically suspect
-  // and likely caused by water/sickness/logging noise. Skip applying.
-  const actMult = parseFloat(s.activityLevel) || 1.55;
-  const bmrFloor = status.formulaTDEE / actMult;
+  // SANITY: observed TDEE must be >= raw BMR and <= formula × 1.5.
+  // Anything outside this range is physiologically suspect and likely
+  // caused by water/sickness/logging noise. Skip applying.
+  // v7.9.0 fix: floor uses raw Mifflin BMR from breakdown (not formula
+  // ÷ multiplier — that division is wrong when the formula already
+  // includes ATP factor). Old math could produce floor lower than BMR.
+  const bmrFloor = (status.tdeeBreakdown && status.tdeeBreakdown.bmr) || (status.formulaTDEE * 0.55);
   const ceiling = status.formulaTDEE * TDEE_CEIL_RATIO;
   if (status.observedTDEE < bmrFloor || status.observedTDEE > ceiling) {
     s.lastCalibrationAt = new Date().toISOString();
@@ -504,14 +587,21 @@ export function inferActivityMultiplier() {
   }
   const observedTDEE = obs.tdee;
   const rawEffective = observedTDEE / bmr;
-  // Clamp to plan default ± 0.2. Cap names mirror Mifflin × multiplier
+  // Clamp to plan default ± delta. Cap names mirror Mifflin × multiplier
   // convention so downstream code can reapply to settings.activityLevel.
+  // v7.9.0 (Fix D): plans with fast days have a wider cap range (± 0.35)
+  // because the weekly weighted multiplier diverges substantially from
+  // the legacy single-value default (e.g. AGRO 1.725 → ~1.55 weighted).
+  // Plans without fast days keep the tighter ± 0.20 cap.
   const planDefault = (typeof PLAN_ACTIVITY_DEFAULTS !== 'undefined'
     && PLAN_ACTIVITY_DEFAULTS[s.plan] != null)
     ? parseFloat(PLAN_ACTIVITY_DEFAULTS[s.plan])
     : 1.55;
-  const lowerCap = planDefault - ACTIVITY_INFER_CAP_DELTA;
-  const upperCap = planDefault + ACTIVITY_INFER_CAP_DELTA;
+  const planObj = (typeof PLANS !== 'undefined') ? (PLANS[s.plan] || PLANS.default) : null;
+  const fastDaysPerWeek = (planObj && typeof planObj.fastDaysPerWeek === 'number') ? planObj.fastDaysPerWeek : 0;
+  const capDelta = fastDaysPerWeek > 0 ? 0.35 : ACTIVITY_INFER_CAP_DELTA;
+  const lowerCap = planDefault - capDelta;
+  const upperCap = planDefault + capDelta;
   const cappedEffective = Math.max(lowerCap, Math.min(upperCap, rawEffective));
   // Round to 3 decimals for stable display + storage equality checks
   const effective = Math.round(cappedEffective * 1000) / 1000;
@@ -549,11 +639,18 @@ export function checkStoredTdeeSanity() {
   const age = parseFloat(s.age);
   if (!weight || !height || !age) return { ok: true, reason: 'no-formula-baseline' };
   const sex = s.sex || 'male';
-  const actMult = parseFloat(s.activityLevel) || 1.55;
   const bmr = sex === 'male'
     ? (10 * weight) + (6.25 * height) - (5 * age) + 5
     : (10 * weight) + (6.25 * height) - (5 * age) - 161;
-  const formulaTDEE = Math.round(bmr * actMult);
+  // v7.9.0: formula TDEE uses weekly-weighted activity + ATP factor when
+  // available; falls back to the legacy single-value uniform multiplier
+  // when day-type model isn't declared.
+  const plan = _getActivePlanForCalibration();
+  const weeklyAct = (typeof getWeeklyAvgActivity === 'function')
+    ? getWeeklyAvgActivity(plan, s)
+    : (parseFloat(s.activityLevel) || 1.55);
+  const atpFactor = computeATPFactor(s, gs(SK.weights) || [], plan);
+  const formulaTDEE = Math.round(bmr * weeklyAct * atpFactor);
   const bmrFloor = Math.round(bmr); // observed cannot drop below BMR sustained
   const ceiling = Math.round(formulaTDEE * TDEE_CEIL_RATIO);
   const currentTDEE = s.tdee || 0;
@@ -561,6 +658,49 @@ export function checkStoredTdeeSanity() {
   if (currentTDEE < bmrFloor) return { ok: false, reason: 'below-bmr', currentTDEE, formulaTDEE, bmrFloor, ceiling };
   if (currentTDEE > ceiling) return { ok: false, reason: 'above-ceiling', currentTDEE, formulaTDEE, bmrFloor, ceiling };
   return { ok: true, currentTDEE, formulaTDEE, bmrFloor, ceiling };
+}
+
+// v7.9.0: stale calibration data auto-clear. When the recorded
+// `lastCalibrationObserved` is from > 21 days ago AND fails today's sanity
+// bounds, the value is poisoned legacy data (e.g. one-off broken-fast spike
+// that got stuck because the cadence gate locked subsequent runs). Clearing
+// it lets the next calibration cycle evaluate fresh data without inheriting
+// the bad history. Returns { cleared: bool, reason, oldObserved, ageDays }.
+const STALE_CALIBRATION_DAYS = 21;
+export function clearStaleCalibrationData() {
+  const s = getSettings();
+  if (!s.lastCalibrationAt) return { cleared: false, reason: 'never-run' };
+  const lastAt = new Date(s.lastCalibrationAt).getTime();
+  const ageDays = (Date.now() - lastAt) / 86400000;
+  if (ageDays < STALE_CALIBRATION_DAYS) return { cleared: false, reason: 'recent', ageDays };
+  const lastObs = s.lastCalibrationObserved;
+  if (!lastObs) return { cleared: false, reason: 'no-observed' };
+  // Recompute current sanity bounds against today's data
+  const weight = getLatestWeight();
+  const height = parseFloat(s.height);
+  const age = parseFloat(s.age);
+  if (!weight || !height || !age) return { cleared: false, reason: 'no-baseline' };
+  const sex = s.sex || 'male';
+  const bmr = sex === 'male'
+    ? (10 * weight) + (6.25 * height) - (5 * age) + 5
+    : (10 * weight) + (6.25 * height) - (5 * age) - 161;
+  const plan = _getActivePlanForCalibration();
+  const weeklyAct = (typeof getWeeklyAvgActivity === 'function')
+    ? getWeeklyAvgActivity(plan, s)
+    : (parseFloat(s.activityLevel) || 1.55);
+  const atpFactor = computeATPFactor(s, gs(SK.weights) || [], plan);
+  const formulaTDEE = Math.round(bmr * weeklyAct * atpFactor);
+  const ceiling = formulaTDEE * TDEE_CEIL_RATIO;
+  // Fails today's sanity? Clear it.
+  if (lastObs < bmr || lastObs > ceiling) {
+    s.lastCalibrationObserved = null;
+    s.lastCalibrationFormula = null;
+    s.lastCalibrationOutcome = 'never-run';
+    s.lastCalibrationAt = null; // also reset cadence so next load can re-run
+    saveSettings(s);
+    return { cleared: true, oldObserved: lastObs, ageDays, reason: 'stale-and-out-of-bounds' };
+  }
+  return { cleared: false, reason: 'in-bounds' };
 }
 
 // v7.1.0: If the stored TDEE is implausible, reset it to formula and return
@@ -713,6 +853,42 @@ export function renderRealityCheck() {
        <div class="rc-row"><span class="rc-label">Gap</span><span class="rc-val" style="color:${gapColor}">${gapText}</span></div>`
     : '';
 
+  // v7.9.0: TDEE BREAKDOWN section — shows BMR + activity (per-day-type
+  // when plan declares it) + ATP factor + effective formula TDEE. Replaces
+  // the opaque "Formula TDEE: 3,382" line with a transparent decomposition.
+  const tb = status.tdeeBreakdown || {};
+  let breakdownBlock = '';
+  if (tb.bmr) {
+    const fmtMult = v => (v == null) ? '—' : '×' + (Math.round(v * 100) / 100).toFixed(2);
+    const atpPct = tb.atpFactor < 1 ? ' (−' + Math.round((1 - tb.atpFactor) * 100) + '%)' : '';
+    const dayTypeRows = [];
+    if (tb.usingDayTypeModel) {
+      if (tb.eatDayActivity != null && tb.eatDaysPerWeek > 0) {
+        dayTypeRows.push(`<div class="rc-row"><span class="rc-label">Eat-day activity</span><span class="rc-val">${fmtMult(tb.eatDayActivity)} <span style="color:var(--muted);font-size:0.85em">(${tb.eatDaysPerWeek}d/wk)</span></span></div>`);
+      }
+      if (tb.fastDayActivity != null && tb.fastDaysPerWeek > 0) {
+        dayTypeRows.push(`<div class="rc-row"><span class="rc-label">Fast-day activity</span><span class="rc-val">${fmtMult(tb.fastDayActivity)} <span style="color:var(--muted);font-size:0.85em">(${tb.fastDaysPerWeek}d/wk)</span></span></div>`);
+      }
+      if (tb.lightDayActivity != null && tb.lightDaysPerWeek > 0) {
+        dayTypeRows.push(`<div class="rc-row"><span class="rc-label">Light-day activity</span><span class="rc-val">${fmtMult(tb.lightDayActivity)} <span style="color:var(--muted);font-size:0.85em">(${tb.lightDaysPerWeek}d/wk)</span></span></div>`);
+      }
+      dayTypeRows.push(`<div class="rc-row"><span class="rc-label">Weekly avg activity</span><span class="rc-val" style="color:var(--accent)">${fmtMult(tb.weeklyAvgActivity)}</span></div>`);
+    } else {
+      // Legacy single-multiplier fallback for plans without day-type model
+      dayTypeRows.push(`<div class="rc-row"><span class="rc-label">Activity multiplier</span><span class="rc-val">${fmtMult(tb.legacyActivityLevel || tb.weeklyAvgActivity)}</span></div>`);
+    }
+    const atpRow = tb.atpFactor < 1
+      ? `<div class="rc-row"><span class="rc-label">Adaptive thermo</span><span class="rc-val" style="color:var(--accent2)">${fmtMult(tb.atpFactor)}${atpPct}</span></div>`
+      : `<div class="rc-row"><span class="rc-label">Adaptive thermo</span><span class="rc-val" style="color:var(--muted)">none yet</span></div>`;
+    breakdownBlock = `<div class="rc-section">
+      <div class="rc-row"><span class="rc-label" style="color:var(--accent);font-family:'Bebas Neue',sans-serif;letter-spacing:1.2px">TDEE BREAKDOWN</span></div>
+      <div class="rc-row"><span class="rc-label">BMR (Mifflin)</span><span class="rc-val">${fmtCal(tb.bmr)}</span></div>
+      ${dayTypeRows.join('')}
+      ${atpRow}
+      <div class="rc-row" style="border-top:1px dashed var(--border);padding-top:6px;margin-top:4px"><span class="rc-label">Effective formula TDEE</span><span class="rc-val" style="color:var(--accent)">${fmtCal(status.formulaTDEE)}</span></div>
+    </div>`;
+  }
+
   box.innerHTML = `<div class="reality-check">
     <div class="rc-header">
       <span class="rc-title">REALITY <span>CHECK</span></span>
@@ -723,6 +899,7 @@ export function renderRealityCheck() {
     </div>
     ${lossLines ? '<div class="rc-section">' + lossLines + '</div>' : ''}
     ${intakeBlock ? '<div class="rc-section">' + intakeBlock + '</div>' : ''}
+    ${breakdownBlock}
     <div class="rc-section">
       ${formLine}
       ${obsLine}

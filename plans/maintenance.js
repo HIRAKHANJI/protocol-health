@@ -21,6 +21,11 @@ export const maintenance = {
   caloriesMode: 'tdee-band',
   minCalories: null,
   maxCalories: null,
+  // v7.9.0: per-day-type activity multipliers. MAINTENANCE is a gentle
+  // habit-building plan with 1 weekly light day (Sun) for digestive reset.
+  // Eat-day = lightly active baseline; light day = sedentary-leaning
+  // recovery. Weekly weighted: 6×1.375 + 1×1.30 = 1.36.
+  activityByDayType: { eatDay: 1.375, lightDay: 1.30 },
 
   defaultTimes: { wakeTime:'07:00', lastMealTime:'20:00', eveningSessionTime:'18:00', eatingWindowStart:null },
 

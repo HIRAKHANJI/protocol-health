@@ -4,6 +4,83 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 7.9.0 — 2026-05-02
+
+**Scope:** Minor (TDEE estimation accuracy upgrade — Phases A-E from the second roadmap, all bundled)
+**Banner:** shown — "Major TDEE accuracy upgrade. Plans now use per-day-type activity multipliers (eat-day vs fast-day) instead of one number applied to every day. Adaptive thermogenesis factor models the natural metabolic slowdown after weeks of cutting. Reality Check shows the full breakdown so you can see exactly where your TDEE comes from. Three calibration bugs fixed at the same time. Auto-corrects stale data on first load."
+**CACHE_NAME:** v27 → v28 (forces installed PWAs to fetch the new TDEE model).
+
+**Root motivation.** Owner found an 18% TDEE overestimate (3,363 vs reality ~2,758) caused by two architectural gaps: a single static activity multiplier applied uniformly to every day-of-week (wrong for plans with fast days), and zero modeling of adaptive thermogenesis after weeks of sustained deficit. Plus three latent bugs that were preventing self-correction. v7.9.0 fixes all five at once. Plan-aware, user-configurable, NO hardcoded user-specific tuning — works for any user on any plan.
+
+**Phase A — Per-day-type activity multipliers.** Each plan now declares an `activityByDayType` object:
+
+| Plan | eatDay | fastDay | lightDay | Weekly weighted avg | Old uniform | Δ |
+|---|---|---|---|---|---|---|
+| LITE     | 1.375 | 1.20 | — | 1.30 | 1.375 | −5.5% |
+| AGRO     | 1.70  | 1.35 | — | **1.55** | **1.725** | **−10.1%** |
+| CUT      | 1.55  | —    | — | 1.55 | 1.55 | 0% |
+| BULK     | 1.55  | —    | 1.40 | 1.51 | 1.55 | −2.6% |
+| MAINTENANCE | 1.375 | — | 1.30 | 1.36 | 1.375 | −1.1% |
+
+New helper `getWeeklyAvgActivity(plan, settings)` computes weighted weekly multiplier. Priority: `settings.activityByDayType` (user override) → `plan.activityByDayType` (plan default) → `settings.activityLevel` (legacy fallback). New unified compute helper `_computeFormulaTDEE(weight, settings, plan)` is used by every TDEE consumer in the app: `computeAutoTDEE`, `recomputeTDEE`, `computeFormulaTDEEAtWeight`, plus the calibration module's `getCalibrationStatus` and `checkStoredTdeeSanity`.
+
+**Phase B — Adaptive thermogenesis factor.** New exported helper `computeATPFactor(settings, weights, plan)` in `modules/calibration.js`. Returns multiplier in [0.85, 1.0]. Plan-aware: only cut plans accumulate ATP (bulk/maintenance always return 1.0). Math: cumulative kg loss × duration → loss rate → ATP curve. ~5% per 4 weeks at moderate (<1 kg/wk), scaling to ~10% per 4 weeks at aggressive (≥1.5 kg/wk). Capped at 15% lifetime. Skipped for first 2 weeks (ATP needs sustained deficit). Reference: [Trexler 2014, PMC 3943438](https://pmc.ncbi.nlm.nih.gov/articles/PMC3943438/).
+
+**Phase C — Three latent bug fixes:**
+
+1. **`lastCalibrationOutcome` fallback bug** (`modules/calibration.js:299`). Old code: `s.lastCalibrationOutcome || (lastAt ? 'unknown' : 'never-run')` — the `||` short-circuits when stored value is `'never-run'` (truthy string), so the fallback to `'unknown'` for legacy data with `lastCalibrationAt` set never ran. Owner's data had `lastCalibrationOutcome: 'never-run'` despite `lastCalibrationAt: '2026-05-02'` → cadence note read "First calibration on next app load" forever. **Fix:** distinguish "real outcome stored" from "default placeholder + actually ran" via explicit `s.lastCalibrationOutcome !== 'never-run'` check.
+
+2. **`confirmPlan` linked-mode override bug** (`app.html:3798 area`). Tapping CONFIRM PLAN with `linkedOffsetMode = true` would write the manually-typed calorie field to `s.calories`, overwriting the linked-mode-managed value. **Fix:** if linked mode is on, re-run `syncCalorieCeilingFromOffset()` after the form persist so the linked value wins.
+
+3. **Stale calibration data auto-clear** — new `clearStaleCalibrationData()` exported helper. If `lastCalibrationObserved` is from > 21 days ago AND fails today's sanity bounds, the value is poisoned legacy data (e.g. one-off broken-fast spike that the cadence gate then locked in). Clears `lastCalibrationObserved`, `lastCalibrationFormula`, `lastCalibrationOutcome`, AND `lastCalibrationAt` so the next cycle evaluates fresh. Called from `runInit` BEFORE `autoRevertImplausibleTdee`. For owner: this clears the `lastCalibrationObserved: 291` that's been blocking calibration for two weeks.
+
+**Phase D — Wider activity-inference cap for fast-day plans.** `inferActivityMultiplier` cap was `± 0.20` for all plans. With the new day-type model, plans like AGRO with 3 fast days have a weekly-weighted multiplier ~10% below the legacy default, putting the inferred value at the edge of the cap. **Fix:** plans with `fastDaysPerWeek > 0` get `± 0.35` cap; plans without fast days keep `± 0.20`.
+
+**Phase E — Reality Check TDEE BREAKDOWN section.** New section in the Reality Check block that shows the full TDEE decomposition:
+```
+TDEE BREAKDOWN
+BMR (Mifflin):         1,943 cal
+Eat-day activity:      ×1.70  (4d/wk)
+Fast-day activity:     ×1.35  (3d/wk)
+Weekly avg activity:   ×1.55
+Adaptive thermo:       ×0.90  (−10%)
+─────────────────────────────────
+Effective formula TDEE: 2,710 cal
+```
+
+For plans without `activityByDayType` (legacy fallback path), the breakdown collapses to a single "Activity multiplier" line. ATP row shows "none yet" when factor = 1.0. Hidden entirely when BMR can't be computed (missing settings).
+
+**Sanity bounds correction (incidental fix).** `weeklyCalibration` previously computed `bmrFloor = formulaTDEE / actMult` — wrong when `formulaTDEE` already includes ATP factor (the division leaves an extra `÷ atpFactor` that produces too-low floor). v7.9.0 reads `bmrFloor` from `tdeeBreakdown.bmr` directly (raw Mifflin BMR), which is the correct physiological floor.
+
+**`applyInferredActivityLevel` upgrade.** Tapping APPLY on the Activity Inference diagnostic now scales the plan's day-type multipliers proportionally (preserving eat:fast ratio) so the new weekly weighted average equals the inferred value. Writes `s.activityByDayType` override. Falls back to writing `s.activityLevel` for plans without day-type model.
+
+**Files touched:**
+- `plans/lite.js`, `plans/agro.js`, `plans/cut.js`, `plans/bulk.js`, `plans/maintenance.js` — each gains `activityByDayType` map.
+- `app.html` — new `_mifflinBMR`, `getWeeklyAvgActivity`, `_computeFormulaTDEE` helpers; `computeAutoTDEE`, `recomputeTDEE`, `computeFormulaTDEEAtWeight` refactored to use them; `applyInferredActivityLevel` upgraded for day-type model; `confirmPlan` re-syncs linked mode; `runInit` calls `clearStaleCalibrationData` before `autoRevertImplausibleTdee`; settings defaults gain `activityByDayType: null`; module loader exposes new exports.
+- `modules/calibration.js` — `computeATPFactor` (new export); `getCalibrationStatus` uses new model + exposes `tdeeBreakdown` field; `weeklyCalibration` uses `tdeeBreakdown.bmr` for sanity floor; `inferActivityMultiplier` adds plan-specific cap; `checkStoredTdeeSanity` uses new model; `clearStaleCalibrationData` (new export); `_getActivePlanForCalibration` private helper; `renderRealityCheck` adds TDEE BREAKDOWN block; `lastCalibrationOutcome` fallback fixed.
+- `sw.js` — CACHE_NAME bumped to v28.
+
+**Backward compat:**
+- Plans without `activityByDayType` continue to work via legacy `s.activityLevel` fallback.
+- `s.activityLevel` is preserved (used as fallback + still exposed via dropdown).
+- All existing user data (settings, weights, fastSessions, dayLogs) untouched.
+- No new SK keys, no migrations.
+- Old TDEE consumers continue to work — they all read `s.tdee` which is updated through the same write paths.
+
+**Effect on owner's data (verified math):**
+- Old: BMR 1,949 × 1.725 (uniform) = **3,363 cal**
+- New: BMR 1,949 × 1.55 (weekly-weighted AGRO) × 0.90 (ATP, 40d at 1.85 kg/wk) = **2,719 cal**
+- Diff: −644 cal/day, matches owner's external analysis (2,758) within ~40 cal.
+
+**Effect on other plan users:**
+- LITE: small drop (~−5%) from per-day-type weighted avg.
+- CUT: no change (no fast days; weekly == single multiplier).
+- BULK: small drop (~−3%) from light-day weighting.
+- MAINTENANCE: tiny drop (~−1%).
+- All plans: ATP factor = 1.0 until 2+ weeks of sustained loss, only kicks in for cuts.
+
+---
+
 ## Version 7.8.1 — 2026-04-28
 
 **Scope:** Patch (Phase 13 of calibration roadmap — activity history foundation, with v4→v5 migration; landing-page version refresh)

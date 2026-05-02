@@ -21,6 +21,11 @@ export const lite = {
     // medical supervision (Helms 2014; lower risks lean mass loss + adherence drops).
     caloriesMode: 'floor',
     minCalories: 1200,
+    // v7.9.0: per-day-type activity multipliers. Replaces single uniform
+    // s.activityLevel for plans that declare this map. Eat-day = chair
+    // exercises / tai chi / pilates / walking; fast-day = recovery, no
+    // training. Weekly weighted: 4×1.375 + 3×1.20 = 1.30.
+    activityByDayType: { eatDay: 1.375, fastDay: 1.20 },
 
     // Default timing values — used when user hasn't set custom times in Settings
     defaultTimes: { wakeTime:'05:30', lastMealTime:'18:00', eveningSessionTime:'17:00', eatingWindowStart:'11:00' },

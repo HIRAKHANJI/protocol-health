@@ -21,6 +21,11 @@ export const agro = {
     // pushing below 800 risks rapid lean mass loss even with high protein).
     caloriesMode: 'floor',
     minCalories: 800,
+    // v7.9.0: per-day-type activity multipliers. AGRO is bimodal — hard
+    // training + walking on eat days; recovery + lighter activity on fast
+    // days. Weekly weighted: 4×1.70 + 3×1.35 = 1.55. Replaces the static
+    // 1.725 default which was correct only for training days, not the mix.
+    activityByDayType: { eatDay: 1.70, fastDay: 1.35 },
 
     defaultTimes: { wakeTime:'05:30', lastMealTime:'18:00', eveningSessionTime:'17:00', eatingWindowStart:'11:00' },
 
