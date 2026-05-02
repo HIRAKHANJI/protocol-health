@@ -411,6 +411,83 @@ export function weeklyCalibration() {
   return { applied: true, oldTdee: old, newTdee: newT, status };
 }
 
+// ─── ADAPTIVE ACTIVITY MULTIPLIER (Phase 9, v7.6.0) ─────────────────────────
+// Infers the user's effective activity multiplier from observed TDEE / BMR.
+// Only valid after 28+ days of weight data, 14+ logged days, and no active
+// sickness pattern. Capped to plan default ± 0.2 to prevent wild swings —
+// the inference is informational; user explicitly applies via Settings UI.
+const ACTIVITY_INFER_CAP_DELTA = 0.2;
+const ACTIVITY_INFER_MIN_DAYS = 28;
+const ACTIVITY_INFER_MIN_LOGS = 14;
+
+export function inferActivityMultiplier() {
+  const s = getSettings();
+  const weight = getLatestWeight();
+  const height = parseFloat(s.height);
+  const age = parseFloat(s.age);
+  if (!weight || !height || !age) {
+    return { valid: false, reason: 'missing-baseline' };
+  }
+  // Use a 28-day window for stability (vs the 14-day calibration window).
+  // BMR scales linearly with weight; activity inference benefits from a
+  // longer span to dampen day-to-day noise and short-term adaptation effects.
+  const obs = computeObservedTDEE(ACTIVITY_INFER_MIN_DAYS);
+  if (!obs.valid) {
+    return { valid: false, reason: obs.reason || 'observation-invalid',
+             daysAvailable: obs.daysAvailable || 0, daysLogged: obs.daysLogged || 0 };
+  }
+  if (obs.daysAvailable < ACTIVITY_INFER_MIN_DAYS) {
+    return { valid: false, reason: 'need-28-days', daysAvailable: obs.daysAvailable, daysLogged: obs.daysLogged };
+  }
+  if (obs.daysLogged < ACTIVITY_INFER_MIN_LOGS) {
+    return { valid: false, reason: 'need-14-logs', daysAvailable: obs.daysAvailable, daysLogged: obs.daysLogged };
+  }
+  // No active sickness pattern — pattern indicates the data window is poisoned
+  // by disrupted days, so the inference would be misleading.
+  const pattern = _detectSicknessPattern(14);
+  if (pattern.detected) {
+    return { valid: false, reason: 'sickness-pattern-active',
+             daysAvailable: obs.daysAvailable, daysLogged: obs.daysLogged,
+             longestRun: pattern.longestRun };
+  }
+  const sex = s.sex || 'male';
+  const bmr = sex === 'male'
+    ? (10 * weight) + (6.25 * height) - (5 * age) + 5
+    : (10 * weight) + (6.25 * height) - (5 * age) - 161;
+  if (!bmr || bmr <= 0) {
+    return { valid: false, reason: 'bmr-invalid' };
+  }
+  const observedTDEE = obs.tdee;
+  const rawEffective = observedTDEE / bmr;
+  // Clamp to plan default ± 0.2. Cap names mirror Mifflin × multiplier
+  // convention so downstream code can reapply to settings.activityLevel.
+  const planDefault = (typeof PLAN_ACTIVITY_DEFAULTS !== 'undefined'
+    && PLAN_ACTIVITY_DEFAULTS[s.plan] != null)
+    ? parseFloat(PLAN_ACTIVITY_DEFAULTS[s.plan])
+    : 1.55;
+  const lowerCap = planDefault - ACTIVITY_INFER_CAP_DELTA;
+  const upperCap = planDefault + ACTIVITY_INFER_CAP_DELTA;
+  const cappedEffective = Math.max(lowerCap, Math.min(upperCap, rawEffective));
+  // Round to 3 decimals for stable display + storage equality checks
+  const effective = Math.round(cappedEffective * 1000) / 1000;
+  const current = parseFloat(s.activityLevel) || 1.55;
+  const gap = current > 0 ? ((effective - current) / current) * 100 : 0;
+  return {
+    valid: true,
+    effective,
+    rawEffective: Math.round(rawEffective * 1000) / 1000,
+    current,
+    gap,
+    daysOfData: obs.daysAvailable,
+    daysLogged: obs.daysLogged,
+    planDefault,
+    lowerCap, upperCap,
+    capped: rawEffective !== cappedEffective,
+    bmr: Math.round(bmr),
+    observedTDEE
+  };
+}
+
 // v7.1.0: Detects whether the currently-stored settings.tdee is physiologically
 // implausible relative to the formula prediction. Used at app load to auto-recover
 // from a corrupted TDEE (e.g. after a sickness/water spike confused calibration).

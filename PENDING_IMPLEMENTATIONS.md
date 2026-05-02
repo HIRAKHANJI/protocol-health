@@ -416,7 +416,10 @@ If the user forgets to mark sick days, detect a likely sickness pattern (3+ cons
 
 ## Phase 8 — Linked Offset Mode (Plan-Direction-Aware)
 
-**Status:** IN PROGRESS
+**Status:** ✅ COMPLETED — DO NOT MODIFY
+**Merge commit:** `c7a7214` (PR #126)
+**Merged:** 2026-04-28
+**Pinned APP_VERSION:** `7.5.0`
 **Tier source:** Tier 2, item 8 (extended for bulk/maintenance)
 **APP_VERSION target:** `7.5.0` (minor — new behaviour, opt-in, banner shown)
 **CACHE_NAME bump:** Yes.
@@ -520,7 +523,7 @@ Reuse the `caloriesMode` discriminator added in Phase 3. The offset's sign is im
 
 ## Phase 9 — Adaptive Activity Multiplier
 
-**Status:** PENDING
+**Status:** IN PROGRESS
 **Tier source:** Tier 2, item 9
 **APP_VERSION target:** `7.6.0` (minor — new diagnostic, banner shown)
 **CACHE_NAME bump:** Yes.
