@@ -130,5 +130,23 @@ export const MIGRATIONS = [
       delete data['ph_fs_v1'];
       return data;
     }
+  },
+  {
+    from: 4,
+    to: 5,
+    description: 'Register activity-history storage key (ph_ah_v1). No data transformation — silent observation foundation. Phase 13 (v7.8.1).',
+    requiresBackup: false,
+    run: (data) => {
+      // No-op. SK.activityHistory is added in app.html. The key is empty by
+      // default; weeklyCalibration() pushes a snapshot per evaluation cycle
+      // (capped at 90 entries). Future phases may surface this data via UI
+      // to power smarter calibration / trend analysis.
+      return data;
+    },
+    verify: () => true,
+    reverse: (data) => {
+      delete data['ph_ah_v1'];
+      return data;
+    }
   }
 ];

@@ -342,11 +342,29 @@ export function weeklyCalibration() {
     return { applied: false, reason: 'too-soon' };
   }
   const status = getCalibrationStatus();
+  // Phase 13 (v7.8.1): build a snapshot template that each exit branch
+  // augments with branch-specific fields (oldTdee/newTdee, etc.).
+  const _baseSnapshot = () => ({
+    date: todayStr(),
+    ts: Date.now(),
+    formulaTDEE: status.formulaTDEE || null,
+    observedTDEE: status.observedTDEE || null,
+    ratio: (status.formulaTDEE && status.observedTDEE) ? (status.observedTDEE / status.formulaTDEE) : null,
+    daysAvailable: status.daysAvailable || 0,
+    daysLogged: status.daysLogged || 0,
+    excludedSick: status.excludedSick || 0,
+    excludedLowCompliance: status.excludedLowCompliance || 0,
+    sicknessPatternDetected: !!(status.sicknessPattern && status.sicknessPattern.detected),
+    longestRun: (status.sicknessPattern && status.sicknessPattern.longestRun) || 0,
+    oldTdee: null,
+    newTdee: null
+  });
   if (status.state !== 'CALIBRATED') {
     // Record the gathering outcome so Reality Check can explain it
     s.lastCalibrationAt = new Date().toISOString();
     s.lastCalibrationOutcome = 'gathering';
     saveSettings(s);
+    _appendActivitySnapshot(Object.assign(_baseSnapshot(), { outcome: 'gathering' }));
     return { applied: false, reason: 'gathering' };
   }
   // Phase 7 (v7.4.1): sickness pattern auto-detection. Even when the user
@@ -358,6 +376,7 @@ export function weeklyCalibration() {
     s.lastCalibrationAt = new Date().toISOString();
     s.lastCalibrationOutcome = 'sickness-pattern-detected';
     saveSettings(s);
+    _appendActivitySnapshot(Object.assign(_baseSnapshot(), { outcome: 'sickness-pattern-detected' }));
     return { applied: false, reason: 'sickness-pattern-detected',
              longestRun: status.sicknessPattern.longestRun,
              runDates: status.sicknessPattern.runDates };
@@ -366,6 +385,7 @@ export function weeklyCalibration() {
     s.lastCalibrationAt = new Date().toISOString();
     s.lastCalibrationOutcome = 'missing-inputs';
     saveSettings(s);
+    _appendActivitySnapshot(Object.assign(_baseSnapshot(), { outcome: 'missing-inputs' }));
     return { applied: false, reason: 'missing-inputs' };
   }
   // SANITY: observed TDEE must be >= BMR (formula / activityMultiplier) and
@@ -380,6 +400,9 @@ export function weeklyCalibration() {
     s.lastCalibrationObserved = status.observedTDEE;
     s.lastCalibrationOutcome = 'rejected-out-of-bounds';
     saveSettings(s);
+    _appendActivitySnapshot(Object.assign(_baseSnapshot(), {
+      outcome: 'rejected-out-of-bounds', oldTdee: status.currentTDEE
+    }));
     return { applied: false, reason: 'observed-out-of-bounds', oldTdee: status.currentTDEE, observedTDEE: status.observedTDEE, formulaTDEE: status.formulaTDEE };
   }
   const old = status.currentTDEE;
@@ -392,12 +415,18 @@ export function weeklyCalibration() {
   if (gap < 0.07) {
     s.lastCalibrationOutcome = 'within-threshold';
     saveSettings(s);
+    _appendActivitySnapshot(Object.assign(_baseSnapshot(), {
+      outcome: 'within-threshold', oldTdee: old, newTdee: newT
+    }));
     return { applied: false, reason: 'within-threshold', oldTdee: old, newTdee: newT };
   }
   s.tdee = newT;
   s.lastCalibrationOutcome = 'applied';
   saveSettings(s);
   dispatch('TDEE_CHANGED');
+  _appendActivitySnapshot(Object.assign(_baseSnapshot(), {
+    outcome: 'applied', oldTdee: old, newTdee: newT
+  }));
   // Phase 8 (v7.5.0): linked offset mode auto-tracks TDEE — recompute ceiling
   if (typeof syncCalorieCeilingFromOffset === 'function') syncCalorieCeilingFromOffset();
   // Surface the change to the user
@@ -419,6 +448,22 @@ export function weeklyCalibration() {
 const ACTIVITY_INFER_CAP_DELTA = 0.2;
 const ACTIVITY_INFER_MIN_DAYS = 28;
 const ACTIVITY_INFER_MIN_LOGS = 14;
+// Phase 13 (v7.8.1): activity history capped at 90 entries (~21 months
+// at the weekly cadence; ~3 months at daily). Foundation for future
+// trend-analysis features; no UI in this phase.
+const ACTIVITY_HISTORY_CAP = 90;
+
+// Append a calibration snapshot to SK.activityHistory. Capped at
+// ACTIVITY_HISTORY_CAP entries (oldest dropped). Called from weeklyCalibration
+// at every evaluation branch — even when nothing was applied — so the history
+// reflects the full sequence of attempted calibrations.
+function _appendActivitySnapshot(snapshot) {
+  if (!snapshot || typeof snapshot !== 'object') return;
+  const arr = gs(SK.activityHistory) || [];
+  arr.push(snapshot);
+  while (arr.length > ACTIVITY_HISTORY_CAP) arr.shift();
+  ss(SK.activityHistory, arr);
+}
 
 export function inferActivityMultiplier() {
   const s = getSettings();

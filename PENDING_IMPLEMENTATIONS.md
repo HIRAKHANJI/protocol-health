@@ -662,7 +662,10 @@ Track the last 5 backup events with timestamp + filename. Display in Settings �
 
 ## Phase 12 — Multi-Day Fast Sessions (Supersedes Original Bootstrap Scope)
 
-**Status:** IN PROGRESS
+**Status:** ✅ COMPLETED — DO NOT MODIFY
+**Merge commit:** `e0b3a1b` (PR #130)
+**Merged:** 2026-04-28
+**Pinned APP_VERSION:** `7.8.0`
 **Tier source:** Tier 4, item 15 (substantially expanded for multi-day fast support)
 **APP_VERSION target:** `7.8.0` (minor — new feature with data restructure, banner shown)
 **CACHE_NAME bump:** Yes.
@@ -845,7 +848,7 @@ Verify: every `fastDays` date has at least one session covering it; no session h
 
 ## Phase 13 — Activity History Tracking (Foundation)
 
-**Status:** PENDING
+**Status:** IN PROGRESS
 **Tier source:** Tier 4, item 14
 **APP_VERSION target:** `7.8.1` (patch with migration; observation only) — bumped from `7.7.2` due to Phase 12 version expansion
 **CACHE_NAME bump:** Yes.
