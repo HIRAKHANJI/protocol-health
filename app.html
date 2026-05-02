@@ -1677,8 +1677,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '7.4.0';
-const APP_VERSION_MSG = 'Calibration is now sickness-aware. Days you mark sick (🤒) and days where checklist completion fell below 30% are excluded from observed-TDEE math. Bad weeks of sickness or travel no longer corrupt your TDEE estimate. The Reality Check shows the exclusion breakdown so you can see exactly what was skipped.';
+const APP_VERSION = '7.4.1';
+const APP_VERSION_MSG = 'Calibration auto-pauses when 3+ consecutive disrupted days appear in your 14-day window. Safety net for when you forget to mark sick days — no more sickness/travel weeks corrupting your TDEE. Reality Check explains when calibration is paused and why.';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
 

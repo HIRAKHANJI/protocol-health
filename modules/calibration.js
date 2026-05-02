@@ -48,6 +48,44 @@ function _getDayExclusion(ds, dayLogs) {
   return null;
 }
 
+// Phase 7 (v7.4.1): sickness pattern auto-detection. Safety net for users
+// who don't manually flag sick days. Scans the last `days` calendar dates
+// for any run of `requiredConsecutive`+ consecutive disrupted days
+// (sick OR low-compliance per _getDayExclusion). When such a run exists,
+// weeklyCalibration defers applying — even if the gap exceeds 7% and
+// observed is within sanity bounds — because the data window is poisoned
+// by a likely sickness/travel/disruption period.
+//
+// Returns { detected, longestRun, runDates }. detected=true when at least
+// one qualifying run exists. longestRun is the length (in days) of the
+// longest qualifying run found. runDates is the date strings in that run.
+const SICKNESS_PATTERN_REQUIRED_CONSECUTIVE = 3;
+function _detectSicknessPattern(days, requiredConsecutive) {
+  days = days || 14;
+  requiredConsecutive = requiredConsecutive || SICKNESS_PATTERN_REQUIRED_CONSECUTIVE;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const dayLogs = gs(SK.dayLogs) || {};
+  let longestRun = [];
+  let currentRun = [];
+  // Walk oldest → newest across the window
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(today); d.setDate(d.getDate() - i);
+    const ds = dateToStr(d);
+    const exclusion = _getDayExclusion(ds, dayLogs);
+    if (exclusion) {
+      currentRun.push(ds);
+      if (currentRun.length > longestRun.length) longestRun = currentRun.slice();
+    } else {
+      currentRun = [];
+    }
+  }
+  return {
+    detected: longestRun.length >= requiredConsecutive,
+    longestRun: longestRun.length,
+    runDates: longestRun.length >= requiredConsecutive ? longestRun : []
+  };
+}
+
 // ─── DAY BREAKDOWN (Phase 1 — Reality Check display) ────────────────────────
 // Separates "period average" (incl. fast days at 0) from "eating-day average"
 // (only days the user actually ate). Same window as computeObservedTDEE.
@@ -285,7 +323,9 @@ export function getCalibrationStatus() {
     // Phase 6 additions: sickness + low-compliance exclusion counters
     excludedSick: obs.excludedSick || 0,
     excludedLowCompliance: obs.excludedLowCompliance || 0,
-    excludedTotal: (obs.excludedSick || 0) + (obs.excludedLowCompliance || 0)
+    excludedTotal: (obs.excludedSick || 0) + (obs.excludedLowCompliance || 0),
+    // Phase 7 addition: sickness pattern auto-detection
+    sicknessPattern: _detectSicknessPattern(14)
   };
 }
 
@@ -308,6 +348,19 @@ export function weeklyCalibration() {
     s.lastCalibrationOutcome = 'gathering';
     saveSettings(s);
     return { applied: false, reason: 'gathering' };
+  }
+  // Phase 7 (v7.4.1): sickness pattern auto-detection. Even when the user
+  // hasn't manually flagged days, 3+ consecutive disrupted days inside the
+  // 14-day window is a strong signal that the calibration data is poisoned
+  // by sickness/travel/disruption. Defer this cycle — pattern will clear
+  // naturally once the user has 3+ consecutive non-disrupted days.
+  if (status.sicknessPattern && status.sicknessPattern.detected) {
+    s.lastCalibrationAt = new Date().toISOString();
+    s.lastCalibrationOutcome = 'sickness-pattern-detected';
+    saveSettings(s);
+    return { applied: false, reason: 'sickness-pattern-detected',
+             longestRun: status.sicknessPattern.longestRun,
+             runDates: status.sicknessPattern.runDates };
   }
   if (!status.formulaTDEE || !status.observedTDEE || !status.blendedTDEE) {
     s.lastCalibrationAt = new Date().toISOString();
@@ -429,6 +482,16 @@ function _buildCadenceNote(status) {
     : null;
   const inDays = status.daysUntilNextCheck;
   const nextStr = inDays === 0 ? 'on next app load' : ('in ' + inDays + ' day' + (inDays === 1 ? '' : 's') + (nextDateStr ? ' (' + nextDateStr + ')' : ''));
+  // Phase 7 (v7.4.1): if a sickness pattern exists right now, flag it
+  // proactively — calibration will defer next cycle even if cadence elapses.
+  // Fires regardless of whether the LAST run was deferred for the same reason
+  // (a fresh pattern can appear between calibration cycles).
+  if (status.sicknessPattern && status.sicknessPattern.detected
+      && status.lastCalibrationOutcome !== 'sickness-pattern-detected') {
+    return 'Calibration will pause — sickness pattern detected ('
+      + status.sicknessPattern.longestRun + ' consecutive disrupted days). '
+      + 'Will retry once pattern clears. Next check ' + nextStr + '.';
+  }
   switch (status.lastCalibrationOutcome) {
     case 'applied':
       return 'Last run: applied. Next check ' + nextStr + '.';
@@ -436,6 +499,14 @@ function _buildCadenceNote(status) {
       return 'Last run: within ±7%, no change. Next check ' + nextStr + '.';
     case 'rejected-out-of-bounds':
       return 'Last run: rejected — observed ' + (status.lastCalibrationObserved || '?') + ' cal outside safe range. Next check ' + nextStr + '.';
+    case 'sickness-pattern-detected':
+      // Phase 7: prior cycle deferred. If pattern still active, mention; else note ready to retry.
+      if (status.sicknessPattern && status.sicknessPattern.detected) {
+        return 'Last run: deferred — sickness pattern detected ('
+          + status.sicknessPattern.longestRun + ' consecutive disrupted days). '
+          + 'Will retry once pattern clears. Next check ' + nextStr + '.';
+      }
+      return 'Last run: deferred for sickness pattern. Pattern has cleared — next check ' + nextStr + '.';
     case 'gathering':
       return 'Last run: not enough data. Next check ' + nextStr + '.';
     case 'missing-inputs':
