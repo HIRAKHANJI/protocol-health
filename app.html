@@ -1074,6 +1074,8 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
         </div>
         <button class="schedule-btn" id="scheduleBtn" onclick="promptSchedule('exact')">ADD TO SCHEDULE</button>
         <button class="schedule-btn" id="scheduleBtnReal" onclick="promptSchedule('realistic')" style="display:none;background:transparent;border:1px solid var(--accent2);color:var(--accent2)">ADD REALISTIC TO SCHEDULE</button>
+        <!-- Phase 2 (v7.2.1): quick-access ADJUST link — visible only when a schedule is active -->
+        <button class="reset-btn" id="settingsAdjustLink" onclick="adjustCurrentScheduleFromSettings()" style="display:none;margin-top:8px;border-color:#ff8855;color:#ff8855">↗ ADJUST CURRENT SCHEDULE</button>
       </div>
 
       <!-- SUPPLEMENTS -->
@@ -1656,8 +1658,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '7.2.0';
-const APP_VERSION_MSG = 'Reality Check redesigned for clarity. Eating-day average now shown separately from period average (which includes fast days). Calibration cadence visible: see exactly when the next check happens and why the last one was applied/rejected/skipped. New ⓘ Explain button opens a plain-English guide to what every number means.';
+const APP_VERSION = '7.2.1';
+const APP_VERSION_MSG = 'Quick-access ADJUST link added to the Settings panel. When a schedule is active, you can now adjust your target weight and calorie ceiling without leaving Settings — tap the new ↗ ADJUST CURRENT SCHEDULE button under the goal calculator.';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
 
@@ -3509,9 +3511,24 @@ function openSettings() {
   const schemaV = (typeof window.getSchemaVersion === 'function') ? window.getSchemaVersion() : null;
   const schemaEl = document.getElementById('schemaVersionDisplay');
   if (schemaEl) schemaEl.textContent = `Schema v${schemaV != null ? schemaV : '?'}`;
+
+  // Phase 2 (v7.2.1): show quick-access ADJUST link only when a schedule is active
+  const adjustLinkEl = document.getElementById('settingsAdjustLink');
+  if (adjustLinkEl) {
+    const sched = gs(SK.schedule);
+    adjustLinkEl.style.display = sched ? 'block' : 'none';
+  }
 }
 
 function closeSettings() { document.getElementById('settingsOverlay').classList.remove('active'); }
+
+// Phase 2 (v7.2.1): closes Settings panel and opens Manage Schedule modal.
+// openManageSchedule() already pre-fills target + calorie inputs from settings,
+// so user lands on a populated ADJUST view ready to edit.
+function adjustCurrentScheduleFromSettings() {
+  closeSettings();
+  if (typeof openManageSchedule === 'function') openManageSchedule();
+}
 
 function renderStorageHealth() {
   const el = document.getElementById('storageHealth');
