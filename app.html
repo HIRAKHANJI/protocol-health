@@ -1677,8 +1677,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '7.3.0';
-const APP_VERSION_MSG = 'You can now mark any day as sick / disrupted with a 🤒 toggle on the TODAY tab and in the calendar day modal. Marked days show a small icon in the corner of their calendar cell. Phase 6 will use this flag to exclude sick days from the calibration math, so a bad week of sickness or travel no longer corrupts your TDEE.';
+const APP_VERSION = '7.4.0';
+const APP_VERSION_MSG = 'Calibration is now sickness-aware. Days you mark sick (🤒) and days where checklist completion fell below 30% are excluded from observed-TDEE math. Bad weeks of sickness or travel no longer corrupt your TDEE estimate. The Reality Check shows the exclusion breakdown so you can see exactly what was skipped.';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
 

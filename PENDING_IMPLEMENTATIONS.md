@@ -275,7 +275,10 @@ This completes the spike-protection rollout; currently only the projection has i
 
 ## Phase 5 — Sickness Flag (UI + Storage)
 
-**Status:** IN PROGRESS
+**Status:** ✅ COMPLETED — DO NOT MODIFY
+**Merge commit:** `28e4977` (PR #123)
+**Merged:** 2026-04-28
+**Pinned APP_VERSION:** `7.3.0`
 **Tier source:** Tier 4, item 16
 **APP_VERSION target:** `7.3.0` (minor — new user-facing feature, banner shown)
 **CACHE_NAME bump:** Yes.
@@ -322,7 +325,7 @@ Allow the user to manually flag a day as "sick / disrupted". This flag is read b
 
 ## Phase 6 — Sickness-Aware Calibration
 
-**Status:** PENDING
+**Status:** IN PROGRESS
 **Tier source:** Tier 2, item 7 (extended by Phase 5)
 **APP_VERSION target:** `7.4.0` (minor — math change, banner shown)
 **CACHE_NAME bump:** Yes.

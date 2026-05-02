@@ -4,6 +4,37 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 7.4.0 — 2026-04-28
+
+**Scope:** Minor (Phase 6 of calibration roadmap — sickness-aware calibration math)
+**Banner:** shown — "Calibration is now sickness-aware. Days you mark sick (🤒) and days where checklist completion fell below 30% are excluded from observed-TDEE math. Bad weeks of sickness or travel no longer corrupt your TDEE estimate. The Reality Check shows the exclusion breakdown so you can see exactly what was skipped."
+
+**Goal.** Wire the Phase 5 sickness flag into the calibration math. Days flagged sick OR with very low checklist completion (likely a disrupted day, even if user forgot to mark it) are excluded from `computeObservedTDEE`'s intake aggregation. The kgLoss / spanDays attribution is unchanged; only intake-side aggregation is filtered. Prevents a bad week from skewing your TDEE estimate downward.
+
+**Exclusion gate:**
+
+A day is excluded when:
+1. `dayLogs[ds].sick === true` (Phase 5 manual flag), OR
+2. `getValidCheckCompletion(ds).pct < 30` AND `vc.total > 0` (compliance gate; only applies if a checklist was actually rendered for that day — purely unlogged days fall through to existing "unlogged" branch).
+
+Threshold: `LOW_COMPLIANCE_PCT = 30`.
+
+**Changes:**
+
+- **`modules/calibration.js`:**
+  - **New private helper `_getDayExclusion(ds, dayLogs)`** returns `'sick' | 'low-compliance' | null`. Single source of truth for exclusion logic — used by both `getDayBreakdown` and `computeObservedTDEE` so display + math stay consistent.
+  - **`getDayBreakdown` updated:** exclusion gate runs before day-type classification. Excluded days don't appear in `eatingDayCount` / `fastDayCount` / `unloggedEatingDayCount`. New return fields: `excludedSick`, `excludedLowCompliance`, `excludedTotal`.
+  - **`computeObservedTDEE` updated:** exclusion gate runs before intake aggregation. Excluded days don't add to `intakeSum` / `daysLogged`. New return fields: `excludedSick`, `excludedLowCompliance`. Refactored early-exit branches to use a shared `empty` template so all return paths have a consistent shape (still backward-compat — unknown fields ignored by callers).
+  - **`getCalibrationStatus` extended:** passes through `excludedSick`, `excludedLowCompliance`, `excludedTotal` to consumers.
+  - **`renderRealityCheck` extended:** new "Days excluded" row appears in the intake block when `excludedTotal > 0`. Format: `Days excluded: 3 · 1 sick, 2 low compliance`. Hidden entirely when zero exclusions.
+- **`app.html` APP_VERSION 7.3.0 → 7.4.0** with the banner message above. No new dispatch event. No new SK key. No migration. No `sw.js` change.
+
+**Effect on existing user data.** Any day where `dayLogs[ds].sick === true` (Phase 5 flag) will now be excluded from observed-TDEE. For your current data: if you mark Apr 24-26 sick (sickness window from the audit), observed TDEE recomputes higher (closer to formula), since those broken-fast days at 1648/1416 cal stop dragging the math. Reality Check displays "Days excluded: 3 · 3 sick" so you can see what changed.
+
+**Roadmap:** `PENDING_IMPLEMENTATIONS.md` Phase 6 — IN PROGRESS until owner confirms PR merge.
+
+---
+
 ## Version 7.3.0 — 2026-04-28
 
 **Scope:** Minor (Phase 5 of calibration roadmap — sickness flag UI + storage)
