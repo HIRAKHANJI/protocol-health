@@ -21,6 +21,11 @@ export const bulk = {
   // dynamically by validateCaloriesAgainstPlan as TDEE itself.
   caloriesMode: 'above-tdee',
   minCalories: null,
+  // v7.9.0: per-day-type activity multipliers. BULK has 2 light eating
+  // days/week (Sun/Wed for gut recovery) which are also reduced-training
+  // days. Eat-day multiplier matches moderate hypertrophy training; light
+  // day reflects lower output. Weekly weighted: 5×1.55 + 2×1.40 = 1.51.
+  activityByDayType: { eatDay: 1.55, lightDay: 1.40 },
 
   defaultTimes: { wakeTime:'07:00', lastMealTime:'20:00', eveningSessionTime:'18:00', eatingWindowStart:null },
 

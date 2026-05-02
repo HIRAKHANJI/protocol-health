@@ -20,6 +20,10 @@ export const cut = {
   // 1400 cal aligns with Helms 2014 (>= 1.5 × BMR for sustained cuts).
   caloriesMode: 'floor',
   minCalories: 1400,
+  // v7.9.0: per-day-type activity multipliers. CUT has no fast days, so
+  // every day is an eat day. Multiplier matches "moderate" baseline (3-5
+  // training days/week + walking + life). Weekly weighted: 7×1.55 = 1.55.
+  activityByDayType: { eatDay: 1.55 },
 
   defaultTimes: { wakeTime:'06:00', lastMealTime:'20:00', eveningSessionTime:'18:00', eatingWindowStart:null },
 
