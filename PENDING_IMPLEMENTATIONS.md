@@ -325,7 +325,10 @@ Allow the user to manually flag a day as "sick / disrupted". This flag is read b
 
 ## Phase 6 — Sickness-Aware Calibration
 
-**Status:** IN PROGRESS
+**Status:** ✅ COMPLETED — DO NOT MODIFY
+**Merge commit:** `9835741` (PR #124)
+**Merged:** 2026-04-28
+**Pinned APP_VERSION:** `7.4.0`
 **Tier source:** Tier 2, item 7 (extended by Phase 5)
 **APP_VERSION target:** `7.4.0` (minor — math change, banner shown)
 **CACHE_NAME bump:** Yes.
@@ -369,7 +372,7 @@ Calibration math respects the sickness flag from Phase 5, plus an additional aut
 
 ## Phase 7 — Sickness Pattern Auto-Detection
 
-**Status:** PENDING
+**Status:** IN PROGRESS
 **Tier source:** Tier 3, item 13
 **APP_VERSION target:** `7.4.1` (patch — defensive, silent)
 **CACHE_NAME bump:** Yes.

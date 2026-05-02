@@ -4,6 +4,32 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 7.4.1 — 2026-04-28
+
+**Scope:** Patch (Phase 7 of calibration roadmap — sickness pattern auto-detection)
+**Banner:** none (patch — defensive math; UI surfaces in Reality Check cadence note)
+
+**Goal.** Safety net for users who don't manually flag sick days. When 3+ consecutive disrupted days (sick OR sub-30% compliance) appear inside the 14-day calibration window, `weeklyCalibration` defers applying — even if observed math otherwise passes. Pattern clears naturally once the user has 3+ consecutive non-disrupted days.
+
+**Changes:**
+
+- **`modules/calibration.js`:**
+  - **New helper `_detectSicknessPattern(days = 14, requiredConsecutive = 3)`:** walks the last `days` calendar dates oldest→newest, calling `_getDayExclusion` per date. Tracks the longest consecutive run of excluded days. Returns `{ detected, longestRun, runDates }`. Constant `SICKNESS_PATTERN_REQUIRED_CONSECUTIVE = 3` defines the threshold.
+  - **`getCalibrationStatus` extended:** new `sicknessPattern` field exposed so display code can surface the pattern proactively (before next calibration cycle runs).
+  - **`weeklyCalibration` adds a new gate** between the state-CALIBRATED check and the missing-inputs check. When `status.sicknessPattern.detected === true`, sets `lastCalibrationAt = now`, writes `lastCalibrationOutcome = 'sickness-pattern-detected'`, returns `{ applied: false, reason: 'sickness-pattern-detected', longestRun, runDates }`. No TDEE write; no banner alert (it's a deferral, not a failure).
+  - **`_buildCadenceNote` extended:**
+    - Proactive: if state is CALIBRATED AND pattern is currently detected AND last outcome wasn't already `sickness-pattern-detected`, returns `Calibration will pause — sickness pattern detected (N consecutive disrupted days). Will retry once pattern clears. Next check in X days.`
+    - Past tense: when last outcome was `sickness-pattern-detected`, branches on whether the pattern still holds. If yes: same deferral message in past tense. If pattern cleared: `Last run: deferred for sickness pattern. Pattern has cleared — next check in X days.`
+- **`app.html` APP_VERSION 7.4.0 → 7.4.1** (patch — silent; deferral logic is defensive). No new dispatch event. No new SK key. No migration. No `sw.js` change.
+
+**Effect on existing data.** Today (Apr 28): if user marks Apr 24-26 sick (3 consecutive days), pattern auto-detects on next calibration cycle and defers apply. Reality Check shows: `Calibration will pause — sickness pattern detected (3 consecutive disrupted days). Will retry once pattern clears.` Pattern resolves once 3+ consecutive non-disrupted days accumulate (mid-May given current trajectory).
+
+**Manual override path** (for owner who wants to force a calibration cycle despite pattern): toggle "Freeze TDEE" ON → OFF. The override flag pause-resume cycle effectively resets the deferral on next load. Or the owner can simply wait for the pattern to clear naturally.
+
+**Roadmap:** `PENDING_IMPLEMENTATIONS.md` Phase 7 — IN PROGRESS until owner confirms PR merge.
+
+---
+
 ## Version 7.4.0 — 2026-04-28
 
 **Scope:** Minor (Phase 6 of calibration roadmap — sickness-aware calibration math)
