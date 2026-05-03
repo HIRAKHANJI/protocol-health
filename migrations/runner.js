@@ -5,6 +5,20 @@ import { gsSafe, ssSafe, downloadJson } from './helpers.js';
 
 const SCHEMA_KEY = 'ph_sch_v1';
 
+// v7.10.1: local "YYYY-MM-DD" formatter for the schema record's date fields.
+// Avoids `new Date().toISOString().slice(0,10)`, which returns the UTC date —
+// for users west of UTC after local-evening migration runs, that string can
+// be tomorrow's date in their timezone, corrupting establishedAt /
+// exportedAt. Self-contained so we don't depend on the inline classic
+// script's `dateToStr` having loaded first.
+function _localDateStr(d) {
+  d = d || new Date();
+  const yr = d.getFullYear();
+  const mo = String(d.getMonth() + 1).padStart(2, '0');
+  const dy = String(d.getDate()).padStart(2, '0');
+  return yr + '-' + mo + '-' + dy;
+}
+
 function getSchemaRecord() { return gsSafe(SCHEMA_KEY, null); }
 function writeSchemaRecord(rec) { return ssSafe(SCHEMA_KEY, rec); }
 
@@ -40,7 +54,7 @@ export async function runMigrations(skKeys) {
       schemaVersion: 1,
       lastMigration: null,
       migrationsApplied: [],
-      establishedAt: new Date().toISOString().slice(0, 10),
+      establishedAt: _localDateStr(),
       establishedFrom: hasAnyAppData() ? 'existing-user' : 'fresh-install'
     };
     writeSchemaRecord(record);
@@ -74,7 +88,7 @@ export async function runMigrations(skKeys) {
         version: 'ph_v1',
         schemaVersion: m.from,
         appVersion: window.APP_VERSION || 'unknown',
-        exportedAt: new Date().toISOString().slice(0, 10),
+        exportedAt: _localDateStr(),
         autoBackup: true,
         migration: { from: m.from, to: m.to, description: m.description },
         data: snapshot
