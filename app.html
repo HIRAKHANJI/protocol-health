@@ -1548,6 +1548,7 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
   window.getActiveFastWindow = FastWindow.getActiveFastWindow;
   window.getMostRecentWindow = FastWindow.getMostRecentWindow;
   window.isFastBroken = FastWindow.isFastBroken;
+  window.reconcileFastDaysFromSessions = FastWindow.reconcileFastDaysFromSessions;
   window.getFastDurationHours = FastWindow.getFastDurationHours;
   window.startFast = FastWindow.startFast;
   window.endFast = FastWindow.endFast;
@@ -1727,8 +1728,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '7.10.1';
-const APP_VERSION_MSG = 'Patch: schema record date-key now uses local time (not UTC, which corrupted establishedAt/exportedAt for users west of UTC). Saving weight via the day modal now syncs settings.currentKg and recomputes TDEE — same as the TODAY/TRACK weight inputs.';
+const APP_VERSION = '7.10.2';
+const APP_VERSION_MSG = 'Patch: multi-day fasts now correctly mark every covered date as a fast day (calendar coloring + calibration math + radar were missing the bookend dates of long fasts). Reality Check no longer requires today\'s weight log to leave GATHERING — relaxed the span gate so 13 of the last 14 days is enough. Existing fast sessions auto-reconcile on first load.';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
 
@@ -5565,6 +5566,17 @@ async function runInit() {
 
   applyPlanUI(s.plan||'default');
   migrateOrphanedChecks();
+  // v7.10.2: reconcile any drift between SK.fastSessions.dates[] and
+  // SK.fastDays. Multi-day fasts spanning the bookend dates of a week
+  // (e.g. Tue 4PM → Fri 7AM) used to leave the bookend dates flagged
+  // only in the session's dates[] array, not in the legacy fastDays
+  // map that calendar / calibration / radar all read. Idempotent.
+  if (typeof reconcileFastDaysFromSessions === 'function') {
+    try {
+      const added = reconcileFastDaysFromSessions();
+      if (added > 0) console.log('[init] reconciled ' + added + ' fast-day(s) from sessions');
+    } catch (e) { console.warn('[init] fast-day reconcile failed:', e); }
+  }
   updateFastUI();
   updateTodayTab();
   loadChecklist();
