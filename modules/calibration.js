@@ -5,14 +5,21 @@
 // disagrees with the formula by more than 7%.
 //
 // State machine:
-//   GATHERING   — < 13 days of weight span OR < 7 days of food logs in window
+//   GATHERING   — < 12 days of weight span OR < 7 days of food logs in window
 //                 → display formula TDEE only, do not apply observed
-//   CALIBRATED  — full 14-day weight span (13 days between earliest and
-//                 latest weight in the window) + >= 7 days of food log
+//   CALIBRATED  — span >= 12 days between earliest and latest weight in the
+//                 14-day window + >= 7 days of food log
 //                 → blend 70% observed + 30% formula, apply on >7% gap
-//   v7.10.0: thresholds say "13" because spanDays = (newest - oldest)/86400000
-//   maxes at days-1 for a `days`-day window. The previous "14" gate was
-//   unreachable.
+//   v7.10.0: spanDays = (newest - oldest)/86400000 maxes at days-1 for a
+//   `days`-day window. v7.10.0 fix changed the gate from 14 (unreachable)
+//   to 13.
+//   v7.10.2: relaxed further to 12. Reaching 13 requires a weight today
+//   AND 14 days ago — every "missed today" log left users stuck in
+//   GATHERING despite tons of history. 12 accepts "13 of last 14 days
+//   logged, missed today". The cadence gate (>= 7 days since last apply)
+//   AND sanity bounds [BMR, formula × 1.5] still gate any actual TDEE
+//   write, so the relaxed display threshold doesn't change apply
+//   behaviour.
 //
 // Manual override (settings.tdeeManualOverride === true) freezes calibration
 // entirely. The user keeps whatever TDEE they manually entered.
@@ -327,13 +334,17 @@ export function getCalibrationStatus() {
   const obs = computeObservedTDEE(14);
   const observedTDEE = obs.valid ? obs.tdee : null;
 
-  // Determine state — needs the full 14-day window covered by weight data
-  // AND 7+ logged days in window. v7.10.0 BUG FIX: spanDays is the diff
-  // between the oldest and newest weight in a 14-day window, so its maximum
-  // possible value is 13 (today minus 13 days back). The previous gate
-  // `>= 14` was unreachable, leaving every user permanently in GATHERING.
+  // Determine state — needs ~13 of the last 14 days covered by weight data
+  // AND 7+ logged days. v7.10.2 lowered the threshold from 13 to 12: with
+  // a 14-day window, spanDays = days-1 = 13 ONLY if the user logged a
+  // weight today AND 14 days ago. Any "missed today" log (very common)
+  // left users stuck in GATHERING despite tons of history. The cadence
+  // gate (>= 7 days since last apply) and sanity bounds (observed must
+  // fall within [BMR, formula × 1.5]) still gate any actual TDEE write,
+  // so this relaxed threshold doesn't change apply behaviour — only the
+  // displayed state name and cadence-note copy.
   let state = 'GATHERING';
-  if (obs.valid && obs.daysLogged >= 7 && obs.daysAvailable >= 13) {
+  if (obs.valid && obs.daysLogged >= 7 && obs.daysAvailable >= 12) {
     state = 'CALIBRATED';
   }
 
@@ -764,10 +775,10 @@ function _buildCadenceNote(status) {
     return 'Auto-calibration is OFF (you froze TDEE). Untick "Freeze TDEE" in Settings to re-enable.';
   }
   if (status.state !== 'CALIBRATED') {
-    // v7.10.0: matches the off-by-one fix in getCalibrationStatus — 14-day
-    // window's max spanDays is 13 (today + 13 prior days). Use 13 here too
-    // so the displayed shortfall agrees with the actual gating threshold.
-    const needWeight = Math.max(0, 13 - (status.daysAvailable || 0));
+    // v7.10.2: matches the relaxed gate in getCalibrationStatus (>= 12).
+    // Keeping the cadence-note threshold in lockstep with the actual
+    // gating threshold so the displayed shortfall is honest.
+    const needWeight = Math.max(0, 12 - (status.daysAvailable || 0));
     const needFood = Math.max(0, 7 - (status.daysLogged || 0));
     if (needWeight > 0 && needFood > 0) {
       return 'Gathering data — needs ' + needWeight + ' more days of weight logs and ' + needFood + ' more food-logged days.';

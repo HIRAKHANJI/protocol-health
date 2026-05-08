@@ -64,6 +64,29 @@ function _newSessionId() {
   return 'fs_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
 }
 
+// v7.10.2: After any session mutation, the legacy SK.fastDays map must
+// reflect every date the session spans — calendar coloring, calibration
+// math, radar fasting axis, today banner, day modal, and export all read
+// SK.fastDays only and never look at SK.fastSessions. Without this sync a
+// multi-day fast (e.g. Tue 4PM → Fri 7AM) only flagged the calendar-auto
+// midweek date, leaving the bookend dates rendered as eating days even
+// though the user was fasting.
+//
+// IMPORTANT: this is ADDITIVE only. Never delete an existing fastDays
+// entry — the user may have manually marked a date as fast that no
+// session covers (legacy single-tap-toggle path). Removing on edit would
+// clobber that intent.
+function _syncFastDaysFromSession(session) {
+  if (!session || !Array.isArray(session.dates) || !session.dates.length) return false;
+  const fd = gs(SK.fastDays) || {};
+  let changed = false;
+  for (const d of session.dates) {
+    if (!fd[d]) { fd[d] = true; changed = true; }
+  }
+  if (changed) ss(SK.fastDays, fd);
+  return changed;
+}
+
 // ─── SESSION-LEVEL API (Phase 12 primary surface) ───────────────────────────
 
 // The active session is global (not date-scoped). At most one active session
@@ -106,6 +129,7 @@ export function startFastSession() {
   };
   sessions.push(session);
   _writeSessions(sessions);
+  _syncFastDaysFromSession(session);
   dispatch('FAST_WINDOW_CHANGED');
   return true;
 }
@@ -119,6 +143,7 @@ export function endFastSession() {
   active.end = new Date().toISOString();
   active.dates = _datesCoveredBySession(active);
   _writeSessions(sessions);
+  _syncFastDaysFromSession(active);
   dispatch('FAST_WINDOW_CHANGED');
   return true;
 }
@@ -136,6 +161,7 @@ export function markSessionBroken(foodEntryId, foodTs) {
   if (foodEntryId) active.brokenBy.push(foodEntryId);
   active.dates = _datesCoveredBySession(active);
   _writeSessions(sessions);
+  _syncFastDaysFromSession(active);
   dispatch('FAST_WINDOW_CHANGED');
   return true;
 }
@@ -157,6 +183,7 @@ export function editSession(sessionId, startISO, endISO, broken) {
   // discoverable via getSessionsForDate.
   if (!sessions[idx].dates.length) sessions[idx].dates = [todayStr()];
   _writeSessions(sessions);
+  _syncFastDaysFromSession(sessions[idx]);
   dispatch('FAST_WINDOW_CHANGED');
   return true;
 }
@@ -216,6 +243,29 @@ export function getMostRecentWindow(dateStr) {
     sessionId: s.id,
     sessionDates: s.dates || []
   };
+}
+
+// v7.10.2: One-time at-init reconciliation. Walks every session and OR's its
+// dates[] into SK.fastDays. Idempotent — safe to run on every app load.
+// Fixes legacy data where multi-day sessions only had their auto-set dates
+// in fastDays (the bookend dates of a fast spanning Tue→Fri got missed).
+// Returns the count of date keys added (for diagnostic logging).
+export function reconcileFastDaysFromSessions() {
+  const sessions = gs(SK.fastSessions) || [];
+  if (!sessions.length) return 0;
+  const fd = gs(SK.fastDays) || {};
+  let added = 0;
+  for (const s of sessions) {
+    if (!s || !Array.isArray(s.dates)) continue;
+    for (const d of s.dates) {
+      if (!fd[d]) { fd[d] = true; added++; }
+    }
+  }
+  if (added > 0) {
+    ss(SK.fastDays, fd);
+    if (typeof dispatch === 'function') dispatch('FAST_DAY_TOGGLED');
+  }
+  return added;
 }
 
 // True if any session covering the date is broken.
