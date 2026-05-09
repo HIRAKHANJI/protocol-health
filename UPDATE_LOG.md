@@ -4,6 +4,73 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 8.0.0 — 2026-05-09
+
+**Scope:** Major (14 confirmed bug fixes from a 6-agent aggressive codebase audit; schema migration v5 → v6).
+**Banner:** shown — "Major: 14 confirmed bug fixes from a 6-agent codebase audit. Plan switches no longer carry stale check state with new meanings (n2 was 'Sleep 7-9hrs' in 4 plans but 'Monthly body comp check' in BULK — old ticks would have lied about new compliance). Markdown export now escapes user-typed food names and notes. Settings TDEE field stays in sync with background calibration so it can't be clobbered. Schedule extension preserves manually-unset fast/light days. Activity multiplier resets cleanly on plan switch. Backup restore type-checks every value. Day-modal exercise checks now auto-derive _workout for past days. Schema v5 → v6 (additive, no data transform)."
+**CACHE_NAME:** v29 → v30.
+**Version rollover:** v7.10.x → v8.0.0 per CLAUDE.md S12 (v7.10 was the last allowed minor; next minor rolls to v8.0.0).
+
+**Audit context.** Owner requested an aggressive top-down + bottom-up bug scan before adding 175 workouts. Six parallel Explore agents returned ~140 raw findings. Strict triage (each critical/high traced by reading the actual file:line, math walked by hand, agent claims cross-checked against code) reduced the list to 21 confirmed bugs across critical / high / medium / low severities. Past agent runs averaged ~30% accuracy; this audit's accept-rate matched that baseline. The full triaged report lives in `docs/v8.0.0-bug-audit.md` (consolidated from the in-flight plan file).
+
+**Critical fixes.**
+
+- **C1 — Cross-plan checklist ID semantic conflicts.** Same checklist IDs meant different things across plans. Most damaging: `n2` was "Sleep 7-9 hrs" in 4 plans but "Monthly body comp check" in BULK. `f1` had 5 different definitions. Old check state survived `migrateOrphanedChecks` (because the ID matched in both plans) and silently rendered as the new plan's label, corrupting compliance %, calendar coloring, and calibration's exclusion logic. Fix: added `_cleanupCrossPlanCheckIds(oldPlanKey, newPlanKey)` in `app.html`. `confirmPlan` captures the old plan key before overwriting, then runs the cleanup AFTER `saveSettings(s)` to clear all `dayLog.checks[id]` entries whose label differs between old plan and new plan (or whose ID is absent from the new plan). Same-label IDs (e.g., `m1` "Wake water" across LITE/AGRO/CUT) are preserved. Workout-related keys (wex*, _workout) are preserved. Console-logs cleanup count for transparency.
+- **C2 — Markdown export pipeline XSS.** Food names (line 393), profile name (line 469), plan subtitle (line 485), and day notes (line 591) flowed into the markdown string without escaping. `renderMarkdownPreview` then assigned the result via `box.innerHTML` (line 610) and embedded into the downloaded HTML file (line 703). A food name containing `<script>` or `<img onerror=...>` would execute on next EXPORT — exploitable through tampered backups or hand-edited storage. Fix: added a self-contained `_esc(s)` helper at the top of `modules/export.js` that converts `&<>"` to entities. Applied to all 4 user-controlled string interpolation sites.
+- **C3 — Settings TDEE field stale after auto-recompute.** `TDEE_CHANGED` dispatch refreshed projection/goalBar/radar/etc. but NOT the Settings panel's TDEE input. Sequence: open Settings → background calibration runs → user taps CONFIRM PLAN → confirmPlan reads stale `settingTdee.value` → writes back, clobbering the calibrated TDEE. Silent data loss. Fix: added `'settingsTdeeField'` target to `DISPATCH_MAP.TDEE_CHANGED` in `app.html`, with a switch case that updates the input value (when the panel is open AND the field isn't focused) plus the formula display. Also fixed M2 in the same pass.
+
+**High fixes.**
+
+- **H1 — `applyInferredActivityLevel` persists `s.activityByDayType` across plan switches.** Inferred override from AGRO survived a switch to LITE, producing 19%+ wrong TDEE. Fix: `confirmPlan` now nulls `s.activityByDayType` whenever the plan key changes. User can re-run inference if desired.
+- **H2 — Exercise level selector wrote to TODAY when viewing past day modal.** `setExerciseLevel` hardcoded `today = todayStr()`. Verified that the day modal currently strips level badges (so the bug isn't reachable today), but the underlying API was unsafe. Fix: `setExerciseLevel(groupId, level, dateStr)` now accepts an optional dateStr (defaults to today). `openLevelSelector(instanceKey, groupId, dateStr)` threads the date through into the row's onclick handler. Defensive — protects against future regressions when level badges are added to the day modal.
+- **H3 — `autoSetPlanFastDays` / `autoSetPlanLightDays` re-marked user-unset days on schedule extension.** New SK keys `fastDayUnsets` (`ph_fdu_v1`) and `lightDayUnsets` (`ph_ldu_v1`) now record explicit user unsets. `toggleFastDay` / `toggleLightDay` populate them when a user removes a fast/light marker; clear them when a user re-marks. `autoSetPlanFastDays` / `autoSetPlanLightDays` consult these on schedule extension and skip dates the user already opted out of. New schema migration **v5 → v6** registers the keys (additive, no data transform).
+- **H4 — `setCurrentWeight` had three different validation bounds.** HTML min=50/max=250, confirmPlan accepted >0, setCurrentWeight clamped 20-300. Fix: unified to **40 ≤ kg ≤ 250** across all three sites.
+- **H5 — Backup restore lacked type validation.** A tampered backup with `weights: "string"` would silently restore and crash downstream renderers. Fix: added `_SK_EXPECTED_TYPE` map listing the runtime type for each SK key. `_commitBackupRestore` now type-checks every value and rejects mismatches into a `rejectedKeys` list, surfaced in the success message with an amber color.
+
+**Medium fixes.**
+
+- **M1** — `onLinkedOffsetInput` now clamps `targetOffset` to per-mode bounds (cut: 100-3000, bulk: 100-1000, maintenance: ±300) before storage.
+- **M2** — `commitTdeeManual` now also fires on `oninput` (debounced 300ms via `commitTdeeManualDebounced`), so typing a TDEE and closing the panel via X / tap-outside no longer loses the change.
+- **M3** — `calcDuration`'s macro viability check now uses `plan.proteinFloorMultiplier` instead of hardcoded `1.3`. Eliminates false "PROTEIN FLOOR IMPOSSIBLE" warnings on plans with lower multipliers.
+- **M4** — `calcAdjust` now shows a hint ("Enter target weight and calorie ceiling to see the adjusted projection") when only one of the two required fields is filled, instead of silently hiding the result section.
+- **M5** — `applyInferredActivityLevel` now calls `syncCustomSelect` so the visible custom-dropdown's selected class stays in sync with the new value.
+- **M7** — `toggleModalWorkoutEx` now auto-derives `_workout` for the affected past date (≥80% completion → true) so calendar coloring + `getValidCheckCompletion` reflect new exercise completion without waiting for next app init's `migrateOrphanedChecks`. Likely root-cause fix for the May 6 "PARTIAL despite 100%" symptom reported in v7.10.x.
+
+**Low fixes.**
+
+- **L3** — Removed dead `SK.checklist` key. Old backups containing `ph_ck_v1` now restore as a "skipped key" notice instead of silently writing dead data.
+- **L4** — Migration init failure message now explains the specific failure mode (download blocked / verify failed / verify threw / run threw / write failed / version mismatch) instead of a generic "Data migration failed". Helps the user understand whether to allow downloads, free up storage, or contact support.
+- **L5** — `WORKOUT_CHECKED` dispatch now also targets `calendarCell` so today's calendar coloring updates immediately when the user ticks an exercise on TODAY.
+
+**Files touched:**
+- `app.html` — `_cleanupCrossPlanCheckIds` (new), confirmPlan H1+C1 hooks, DISPATCH_MAP TDEE_CHANGED + WORKOUT_CHECKED targets, `settingsTdeeField` switch case, `setExerciseLevel`/`openLevelSelector` dateStr threading, `autoSetPlanFastDays`/`autoSetPlanLightDays` unset-respect, `setCurrentWeight` + confirmPlan currentKg/targetKg bounds, `_SK_EXPECTED_TYPE` + `_commitBackupRestore` type-check, `onLinkedOffsetInput` clamp, `commitTdeeManualDebounced` (new) + oninput hookup, `calcDuration` protein floor multiplier, `calcAdjust` partial-input hint, `applyInferredActivityLevel` syncCustomSelect, runInit migration error message, SK.fastDayUnsets / lightDayUnsets entries, SK.checklist removed, APP_VERSION + APP_VERSION_MSG.
+- `modules/calendar.js` — `toggleFastDay`/`toggleLightDay` write fastDayUnsets/lightDayUnsets, `toggleModalWorkoutEx` auto-derives `_workout` for the affected date.
+- `modules/export.js` — `_esc` helper + 4 user-controlled interpolation sites.
+- `migrations/registry.js` — new migration v5 → v6 (additive, registers `ph_fdu_v1` + `ph_ldu_v1`).
+- `sw.js` — CACHE_NAME → v30.
+- `index.html` — hero badge → v8.0.0.
+- `CLAUDE.md` — version refs.
+
+**Audit findings deferred (documented, not fixed in v8.0.0):**
+
+- **L1** — `ss()` no success/fail signal (codebase-wide refactor).
+- **L2** — `getValidCheckCompletion` uses current plan's checklist for historical fast/light days marked under previous plan (needs per-day plan history; large schema change).
+- **L6** — Workout checks orphan across plan switches (intentional — preserves history when user returns to original plan).
+- **M6** — `idbSyncAll` 2-second deferred timer can race with rapid early writes (low risk; `ss()` mirrors per-write).
+
+**Smoke verification plan against the owner's most recent backup (5/8/2026):**
+
+1. Open MONTHS tab → 5/6 cell should now render full purple (M7 fix derives _workout from completion %).
+2. Switch from AGRO → LITE → AGRO. Verify checklist items render correctly each time. Console should log "[plan-switch] cleared N stale check id(s)" if any conflicting IDs were present.
+3. Open Settings → log a weight in another tab → return to Settings → TDEE field should show the new value (C3).
+4. Type a TDEE in Settings → close via X without blur → reopen → field should retain the typed value (M2).
+5. Apply activity inference on AGRO → switch to LITE → weighted activity should drop to LITE's 1.30 (H1).
+6. On a schedule, manually unset Sunday's auto-fast → extend the schedule → Sunday stays unset (H3).
+7. Type `<script>` in a food name → open EXPORT → preview shows literal text, no script execution (C2).
+8. Edit `localStorage.ph_wt_v1 = "garbage"` via DevTools → restore a backup → restore message lists `weights` in the rejected-keys note (H5).
+
+---
+
 ## Version 7.10.3 — 2026-05-08
 
 **Scope:** Patch (1 bug fix — break-fast prompt firing on past-day food entries)

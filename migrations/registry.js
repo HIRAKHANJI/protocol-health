@@ -148,5 +148,25 @@ export const MIGRATIONS = [
       delete data['ph_ah_v1'];
       return data;
     }
+  },
+  {
+    from: 5,
+    to: 6,
+    description: 'Register fast/light day manual-unset storage keys (ph_fdu_v1, ph_ldu_v1). No data transformation — purely additive. v8.0.0 (H3 fix): autoSetPlanFastDays / autoSetPlanLightDays now consult these to skip dates the user explicitly unset, so schedule extension preserves manual overrides.',
+    requiresBackup: false,
+    run: (data) => {
+      // No-op. SK.fastDayUnsets and SK.lightDayUnsets are added in app.html.
+      // Both keys default to empty {} on first read. Going forward,
+      // toggleFastDay and toggleLightDay populate them as the user explicitly
+      // unsets dates. autoSetPlanFastDays / LightDays read them and skip those
+      // dates on schedule extension.
+      return data;
+    },
+    verify: () => true,
+    reverse: (data) => {
+      delete data['ph_fdu_v1'];
+      delete data['ph_ldu_v1'];
+      return data;
+    }
   }
 ];
