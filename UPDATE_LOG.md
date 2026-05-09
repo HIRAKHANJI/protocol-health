@@ -4,6 +4,40 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 7.10.3 — 2026-05-08
+
+**Scope:** Patch (1 bug fix — break-fast prompt firing on past-day food entries)
+**Banner:** silent (patch-level, per Section 12 versioning rule)
+**CACHE_NAME:** unchanged on feature branch (v29 still); will bump once at merge to main per Section 11.
+
+**Bug — break-fast prompt fires when adding food to a past day during today's fast.**
+
+Symptom (reported by owner): on a fasting day, adding food to a previous day (e.g. backfilling a missed meal from 3 days ago) triggers the "Break this fast?" prompt. User clicks BREAK FAST (or feels forced to), then has to navigate to TODAY, open the fast editor, uncheck the broken-fast flag, and clear the end-fast time to restore the active fast. Round-trip data corruption from a single retroactive food entry.
+
+Root cause: `addFoodEntry` in `app.html:2078-2095` calls `getActiveFastWindow(dateStr)`, but per the function definition in `components/fast-window.js:221` the `dateStr` argument is **ignored** — the function returns the global active session regardless. Any food add anywhere triggers the prompt against today's fast. Past-date and future-date food entries can't physically have broken a fast that started at a different time, so the prompt is logically wrong for those cases.
+
+Fix: gated the prompt on `dateStr === todayStr()` at `app.html:2088`. Past-date and future-date food entries now silently skip the break-fast check. Only food added with a `dateStr` of today is evaluated against the active fast window. The check uses `todayStr()` (local-time helper, not `toISOString().slice(0,10)`) so timezones are handled correctly.
+
+Why this is correct:
+- A food entry's `dateStr` is the date the user ATE the food. If they ate it yesterday but are logging it today, `dateStr` = yesterday. That food can't have broken a fast that started today.
+- Editing existing food entries goes through the same `addFoodEntry` path (edit = remove + add), so the same fix covers both add and edit flows.
+- `removeFoodEntry` does not fire the prompt (correct — removing food can't break a fast).
+- If a user genuinely needs to break a fast retroactively on a past date, the day modal's fast editor remains the explicit path. The prompt is just for the common case of "logging food right now while fasting".
+
+**Files touched:**
+- `app.html` — single conditional addition + APP_VERSION + APP_VERSION_MSG.
+- `index.html` — hero badge → v7.10.3.
+- `CLAUDE.md` — version references updated.
+- `UPDATE_LOG.md` — this entry.
+
+**Behaviour after upgrade:**
+- Backfill a 3-day-old meal while currently fasting → no prompt, food saved silently for that past date.
+- Add food to today while fasting → prompt fires as before, allowing user to break or continue the fast.
+- Add food to a future date → no prompt (food entries on future dates are unusual but handled the same way).
+- Existing broken/edited fast sessions in the user's data are unaffected — this fix only changes when the prompt is shown going forward.
+
+---
+
 ## Version 7.10.2 — 2026-05-08
 
 **Scope:** Patch (3 bugs surfaced from a fresh real-data backup; pre-175-workouts hardening)

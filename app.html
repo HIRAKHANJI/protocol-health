@@ -1728,8 +1728,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '7.10.2';
-const APP_VERSION_MSG = 'Patch: multi-day fasts now correctly mark every covered date as a fast day (calendar coloring + calibration math + radar were missing the bookend dates of long fasts). Reality Check no longer requires today\'s weight log to leave GATHERING — relaxed the span gate so 13 of the last 14 days is enough. Existing fast sessions auto-reconcile on first load.';
+const APP_VERSION = '7.10.3';
+const APP_VERSION_MSG = 'Patch: backfilling food on a past day no longer triggers the "Break this fast?" prompt against today\'s active fast. Logging food to a past or future date now correctly skips the break-fast check — only TODAY food entries are evaluated against the active fast window.';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
 
@@ -2078,7 +2078,14 @@ function addFoodEntry(dateStr, name, calories, protein, carbs, fat, notes) {
   // Phase C: if a fast window is active and not yet broken, prompt the user
   // to mark this entry as breaking the fast. Cancel = fast continues (water,
   // electrolytes, salt, black coffee, green tea — all allowed mid-fast).
-  if (typeof getActiveFastWindow === 'function') {
+  // v7.10.3 BUG FIX: only fire the prompt when the food is being logged for
+  // TODAY. getActiveFastWindow returns the GLOBAL active session and ignores
+  // its dateStr argument, so previously every retroactive food add (e.g.
+  // backfilling a missed lunch from 3 days ago while currently fasting)
+  // would prompt to break TODAY's fast — wrong, because food eaten in the
+  // past can't have broken a fast that started later. Past-date and
+  // future-date food entries skip the prompt entirely.
+  if (dateStr === todayStr() && typeof getActiveFastWindow === 'function') {
     const win = getActiveFastWindow(dateStr);
     if (win && !win.broken) {
       showConfirm(
