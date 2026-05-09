@@ -3,6 +3,22 @@
 // for a selected date range. Preview renders as styled HTML in the modal.
 // Two outputs: COPY MARKDOWN (for Notion/Obsidian) and DOWNLOAD REPORT (styled HTML file).
 // Backup = machine-readable full snapshot. Export = human-readable selected range.
+
+// v8.0.0 (C2 fix): HTML escape user-controlled strings before they enter the
+// markdown. The markdown is later rendered via innerHTML in the preview pane
+// (renderMarkdownPreview) and embedded into the downloaded HTML file. Any
+// raw <script> or <img onerror="..."> in food names, notes, or settings text
+// would execute. Self-XSS via tampered backup or DevTools-edited storage.
+// _esc converts &, <, >, " to entities. Numbers are coerced to string first.
+function _esc(s) {
+  if (s === null || s === undefined) return '';
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 export function openExport() {
   // Default range: schedule start (or first logged date) to today
   const to = new Date();
@@ -390,7 +406,7 @@ export function generateExport() {
         if(e.carbs) parts.push(`C: ${e.carbs}g`);
         if(e.fat) parts.push(`F: ${e.fat}g`);
         const macros = parts.length ? ` (${parts.join(', ')})` : '';
-        out += `- ${e.name} — ${e.calories} cal${macros}\n`;
+        out += `- ${_esc(e.name)} — ${e.calories} cal${macros}\n`;
         dayCalTotal += e.calories || 0;
       });
       const cal = s.calories || 1500;
@@ -450,7 +466,7 @@ export function generateExport() {
   // ═══ 2. PATIENT PROFILE ═══
   if(incProfile) {
     md += `## Patient Profile\n\n`;
-    if(s.name) md += `**Name:** ${s.name}  \n`;
+    if(s.name) md += `**Name:** ${_esc(s.name)}  \n`;
     if(s.age) md += `**Age:** ${s.age}  \n`;
     if(s.sex) md += `**Sex:** ${s.sex.charAt(0).toUpperCase() + s.sex.slice(1)}  \n`;
     if(s.height) md += `**Height:** ${s.height} cm  \n`;
@@ -466,7 +482,7 @@ export function generateExport() {
     md += `| Parameter | Value |\n`;
     md += `|-----------|-------|\n`;
     md += `| Plan | ${plan.name} |\n`;
-    md += `| Description | ${plan.subtitle} |\n`;
+    md += `| Description | ${_esc(plan.subtitle)} |\n`;
     md += `| TDEE | ${s.tdee || plan.tdee} cal/day |\n`;
     if(s.calories) md += `| Calorie Ceiling | ${s.calories} cal/day |\n`;
     if(plan.fastDaysPerWeek > 0) {
@@ -588,7 +604,7 @@ export function generateExport() {
       noteDates.forEach(dateStr => {
         const log = dayLogs[dateStr];
         md += `### ${dateStr}\n\n`;
-        md += `> ${log.notes.replace(/\n/g, '\n> ')}\n`;
+        md += `> ${_esc(log.notes).replace(/\n/g, '\n> ')}\n`;
         const extras = [];
         if(log.energy) extras.push(`Energy: ${log.energy}`);
         if(log.weight) extras.push(`Weight: ${log.weight}kg`);

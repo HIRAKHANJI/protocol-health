@@ -963,7 +963,7 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
           <div>
             <label class="field-label">Current weight (kg)</label>
             <div style="display:flex;gap:6px">
-              <input class="field-input" type="number" id="settingCurrentKg" placeholder="104" step="0.1" min="50" max="250" oninput="autoFillTDEE();calcDuration()" style="flex:1">
+              <input class="field-input" type="number" id="settingCurrentKg" placeholder="104" step="0.1" min="40" max="250" oninput="autoFillTDEE();calcDuration()" style="flex:1">
               <button class="log-btn" style="font-size:0.7rem;padding:8px 12px;white-space:nowrap" onclick="setCurrentWeight()">SET</button>
             </div>
           </div>
@@ -1040,7 +1040,7 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
           </div>
           <div>
             <label class="field-label">TDEE (cal burned/day at rest)</label>
-            <input class="field-input" type="number" id="settingTdee" placeholder="2600" step="50" min="1200" max="5000" oninput="calcDuration();renderCaloriesHint()" onchange="commitTdeeManual()">
+            <input class="field-input" type="number" id="settingTdee" placeholder="2600" step="50" min="1200" max="5000" oninput="calcDuration();renderCaloriesHint();commitTdeeManualDebounced()" onchange="commitTdeeManual()">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--muted)">
               <span>Formula: <span id="settingTdeeFormula" style="color:var(--text)">—</span> cal/day</span>
               <button type="button" onclick="resetTdeeToFormula()" style="background:transparent;border:1px solid var(--border);color:var(--muted);font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:1px;padding:3px 8px;border-radius:4px;cursor:pointer">↺ RESET</button>
@@ -1702,7 +1702,10 @@ async function idbAutoRestore() {
 
 // NEVER hardcode these strings elsewhere — always use SK.keyName.
 const SK = {
-  checklist: 'ph_ck_v1',   // legacy key (checklist state now lives inside dayLogs.checks — kept for compatibility)
+  // v8.0.0 (L3 fix): SK.checklist removed — was a legacy key that's unused
+  // in v6+ (checklist state lives inside dayLogs.checks). Old backups
+  // containing 'ph_ck_v1' restore as a "skipped key" notice instead of
+  // silently writing dead data. No migration needed.
   weights:   'ph_wt_v1',   // array of { date, weight, ts } — sorted newest-first
   dayLogs:   'ph_dl_v1',   // object keyed by dateStr — each value: { checks, weight, water, energy, notes, ts }
   fastDays:  'ph_fd_v1',   // object keyed by dateStr — value: true if that day is a water fast (legacy boolean — pre-Phase-C)
@@ -1716,6 +1719,12 @@ const SK = {
   foodLib:   'ph_fb_v1',   // array of { name, lastCalories, useCount } — sorted by useCount desc
   exLevels:  'ph_ex_v1',   // object keyed by dateStr — each value: { groupId: levelIndex, ... }
   lightDays: 'ph_ld_v1',   // object keyed by dateStr — value: true if that day is a light eating day
+  // v8.0.0 (H3 fix): tracks dates the user EXPLICITLY UNSET via the day modal.
+  // autoSetPlanFastDays / autoSetPlanLightDays consult these on schedule extension
+  // and skip dates the user has already opted out of, so re-running auto-set
+  // doesn't clobber manual unsets. Object keyed by dateStr → true.
+  fastDayUnsets:  'ph_fdu_v1',
+  lightDayUnsets: 'ph_ldu_v1',
   swDismissedVer: 'ph_sw_v1', // string — last SW cache version the user dismissed the reload banner for
   backupTs: 'ph_bts_v1', // number — timestamp of last backup (for reminder banner)
   backupHistory: 'ph_bh_v1', // array of last 5 backup events: [{ ts, filename }]  (Phase 11, v7.7.0)
@@ -1728,8 +1737,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '7.10.3';
-const APP_VERSION_MSG = 'Patch: backfilling food on a past day no longer triggers the "Break this fast?" prompt against today\'s active fast. Logging food to a past or future date now correctly skips the break-fast check — only TODAY food entries are evaluated against the active fast window.';
+const APP_VERSION = '8.0.0';
+const APP_VERSION_MSG = 'Major: 14 confirmed bug fixes from a 6-agent codebase audit. Plan switches no longer carry stale check state with new meanings (n2 was "Sleep 7-9hrs" in 4 plans but "Monthly body comp check" in BULK — old ticks would have lied about new compliance). Markdown export now escapes user-typed food names and notes. Settings TDEE field stays in sync with background calibration so it can\'t be clobbered. Schedule extension preserves manually-unset fast/light days. Activity multiplier resets cleanly on plan switch. Backup restore type-checks every value. Day-modal exercise checks now auto-derive _workout for past days. Schema v5 → v6 (additive, no data transform).';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
 
@@ -2389,23 +2398,32 @@ function getCurrentExerciseLevel(groupId) {
   return null;
 }
 
-function setExerciseLevel(groupId, level) {
+// v8.0.0 (H2 fix): setExerciseLevel now accepts an optional dateStr so the
+// day modal can pass the displayed date instead of always writing to today.
+// Backward-compatible: omitting dateStr defaults to today (WORKOUTS tab path).
+function setExerciseLevel(groupId, level, dateStr) {
   const all = gs(SK.exLevels) || {};
-  const today = todayStr();
-  if(!all[today]) all[today] = {};
-  all[today][groupId] = level;
+  const ds = dateStr || todayStr();
+  if(!all[ds]) all[ds] = {};
+  all[ds][groupId] = level;
   ss(SK.exLevels, all);
   dispatch('EXERCISE_LEVEL_CHANGED');
 }
 
-function openLevelSelector(instanceKey, groupId) {
+// v8.0.0 (H2 fix): openLevelSelector accepts an optional dateStr that gets
+// threaded through into the level row's onclick. The day modal call site
+// passes the displayed past-day date so level writes target the correct
+// dayLog instead of silently writing to today.
+function openLevelSelector(instanceKey, groupId, dateStr) {
   groupId = groupId || instanceKey; // backward compat if called with single arg
   const prog = typeof EXERCISE_PROGRESSIONS !== 'undefined' ? EXERCISE_PROGRESSIONS[groupId] : null;
   if(!prog) return;
   const current = getCurrentExerciseLevel(instanceKey);
+  // dateStr is optional — empty string means "today" via setExerciseLevel default.
+  const dateArg = dateStr ? `,'${dateStr}'` : '';
   document.getElementById('levelModalTitle').textContent = prog.name + ' PROGRESSION';
   document.getElementById('levelModalBody').innerHTML = prog.levels.map(l =>
-    `<div class="level-row${l.level === current ? ' current' : ''}" onclick="setExerciseLevel('${instanceKey}',${l.level});closeLevelSelector();if(document.getElementById('tab-workouts').classList.contains('active'))renderWorkouts();">
+    `<div class="level-row${l.level === current ? ' current' : ''}" onclick="setExerciseLevel('${instanceKey}',${l.level}${dateArg});closeLevelSelector();if(document.getElementById('tab-workouts').classList.contains('active'))renderWorkouts();">
       <div class="level-num">${l.level}</div>
       <div class="level-info"><div class="level-ex-name">${l.exercise}</div><div class="level-ex-notes">${l.notes || ''}</div></div>
       <div class="level-sets">${l.sets}</div>
@@ -2456,9 +2474,14 @@ const DISPATCH_MAP = {
   SCHEDULE_REMOVED:  ['durationBar','calendarHighlights','manageSchedBtn'],
   FOOD_LOGGED:       ['projection','goalBar','recentNotes','foodModal','todayCalStrip','nutritionMacros','radar','trackFoodLog','autoItems'],
   EXERCISE_LEVEL_CHANGED: ['workoutLevelDisplay'],
-  WORKOUT_CHECKED: ['recentNotes','autoItems'],
+  WORKOUT_CHECKED: ['recentNotes','autoItems','calendarCell'],
   // ─── Calibration project (Phase A scaffolding; producers wired in Phases B-D) ──
-  TDEE_CHANGED:        ['projection','durationBar','goalBar','nutritionMacros','radar'],
+  // v8.0.0 (C3 fix): TDEE_CHANGED now also refreshes the Settings TDEE input
+  // when the panel is open, so a background calibration doesn't get clobbered
+  // by stale field reads on next CONFIRM PLAN.
+  // v8.0.0 (L5 fix): WORKOUT_CHECKED now also refreshes the calendar cell so
+  // exercise check-offs immediately reflect on the calendar coloring.
+  TDEE_CHANGED:        ['projection','durationBar','goalBar','nutritionMacros','radar','settingsTdeeField'],
   FAST_WINDOW_CHANGED: ['fastUI','checklist','calendarCell','projection','radar'],
 };
 
@@ -2626,6 +2649,31 @@ function dispatch(event) {
       case 'radar':
         if(document.getElementById('tab-track').classList.contains('active')) renderRadar();
         break;
+      case 'settingsTdeeField':
+        // v8.0.0 (C3 fix): if Settings panel is open and TDEE was just changed
+        // by background calibration / weight log / recompute, refresh the input
+        // value so the next CONFIRM PLAN doesn't clobber it with a stale read.
+        // Skips when panel is closed (most of the time) so this is cheap.
+        {
+          const overlay = document.getElementById('settingsOverlay');
+          const fieldEl = document.getElementById('settingTdee');
+          if (overlay && overlay.classList.contains('active') && fieldEl) {
+            const fresh = (typeof getSettings === 'function') ? getSettings().tdee : null;
+            if (fresh != null && document.activeElement !== fieldEl) {
+              // Only overwrite when user isn't actively typing in the field.
+              fieldEl.value = fresh;
+            }
+            const formulaEl = document.getElementById('settingTdeeFormula');
+            if (formulaEl && typeof computeFormulaTDEEAtWeight === 'function') {
+              const _s = getSettings();
+              const _wt = (typeof getLatestWeight === 'function' ? getLatestWeight() : null) || _s.currentKg;
+              if (_wt && _s.height && _s.age) {
+                formulaEl.textContent = computeFormulaTDEEAtWeight(_wt, _s);
+              }
+            }
+          }
+        }
+        break;
       case 'workoutLevelDisplay':
         if(document.getElementById('tab-workouts').classList.contains('active')) renderWorkouts();
         break;
@@ -2780,10 +2828,14 @@ function autoSetPlanFastDays(startDateStr, totalDays) {
   const plan = getActivePlan();
   const fastDow = plan.fastDaysDow || [0, 3, 6];
   const fd = gs(SK.fastDays) || {};
+  // v8.0.0 (H3 fix): respect user's explicit unsets. fdu[dateStr] === true
+  // means user manually unset that date and doesn't want auto-set to re-add it.
+  const fdu = gs(SK.fastDayUnsets) || {};
   const start = strToDate(startDateStr);
   for(let i = 0; i < totalDays; i++) {
     const d = new Date(start); d.setDate(d.getDate() + i);
-    if(fastDow.includes(d.getDay())) fd[dateToStr(d)] = true;
+    const ds = dateToStr(d);
+    if(fastDow.includes(d.getDay()) && !fdu[ds]) fd[ds] = true;
   }
   ss(SK.fastDays, fd);
   dispatch('FAST_DAY_TOGGLED');
@@ -2796,10 +2848,13 @@ function autoSetPlanLightDays(startDateStr, totalDays) {
   const lightDow = plan.lightDaysDow || [];
   if(!lightDow.length) return;
   const ld = gs(SK.lightDays) || {};
+  // v8.0.0 (H3 fix): respect user's explicit unsets, parallel to fast days.
+  const ldu = gs(SK.lightDayUnsets) || {};
   const start = strToDate(startDateStr);
   for(let i = 0; i < totalDays; i++) {
     const d = new Date(start); d.setDate(d.getDate() + i);
-    if(lightDow.includes(d.getDay())) ld[dateToStr(d)] = true;
+    const ds = dateToStr(d);
+    if(lightDow.includes(d.getDay()) && !ldu[ds]) ld[ds] = true;
   }
   ss(SK.lightDays, ld);
   dispatch('FAST_DAY_TOGGLED');
@@ -3796,11 +3851,71 @@ function updateTimingUI(planKey) {
   }
 }
 
+// v8.0.0 (C1 fix): clear check IDs whose label differs between old plan and
+// new plan across all dayLogs. Same-label IDs (e.g., 'm1' = "Wake water" in
+// LITE/AGRO/CUT) are preserved. IDs unique to old plan are also cleared
+// (orphan cleanup beyond what migrateOrphanedChecks covers — this runs
+// proactively at plan switch instead of reactively at app init).
+//
+// Returns {scanned, cleared} counts so confirmPlan can log/notify if anything
+// was cleaned. Workout-related keys (wex*, _workout) are preserved — they're
+// per-day exercise state and don't have cross-plan semantic conflicts.
+function _cleanupCrossPlanCheckIds(oldPlanKey, newPlanKey) {
+  if (!oldPlanKey || !newPlanKey || oldPlanKey === newPlanKey) {
+    return { scanned: 0, cleared: 0 };
+  }
+  const oldPlan = (typeof PLANS !== 'undefined') ? (PLANS[oldPlanKey] || PLANS.default) : null;
+  const newPlan = (typeof PLANS !== 'undefined') ? (PLANS[newPlanKey] || PLANS.default) : null;
+  if (!oldPlan || !newPlan) return { scanned: 0, cleared: 0 };
+  // Build label maps for old and new plans across normal/fast/light + subItems.
+  const buildLabelMap = (plan) => {
+    const map = {};
+    const lists = [plan.checklistNormal, plan.checklistFast, plan.checklistLight].filter(Boolean);
+    for (const list of lists) {
+      for (const item of list) {
+        if (item && item.id) map[item.id] = (item.label || '');
+        if (item && Array.isArray(item.subItems)) {
+          for (const si of item.subItems) {
+            if (si && si.id) map[si.id] = (si.name || si.label || '');
+          }
+        }
+      }
+    }
+    return map;
+  };
+  const oldLabels = buildLabelMap(oldPlan);
+  const newLabels = buildLabelMap(newPlan);
+  // Build the set of IDs that should be cleared:
+  //   - In old plan but not in new plan (orphan)
+  //   - In both plans but with different labels (semantic conflict — C1)
+  const idsToClear = new Set();
+  for (const id in oldLabels) {
+    if (!(id in newLabels)) { idsToClear.add(id); continue; }
+    if (oldLabels[id] !== newLabels[id]) idsToClear.add(id);
+  }
+  if (idsToClear.size === 0) return { scanned: 0, cleared: 0 };
+  const dayLogs = gs(SK.dayLogs) || {};
+  let scanned = 0, cleared = 0;
+  for (const ds in dayLogs) {
+    const log = dayLogs[ds];
+    if (!log || !log.checks) continue;
+    scanned++;
+    let dirty = false;
+    for (const id of idsToClear) {
+      if (id in log.checks) { delete log.checks[id]; dirty = true; cleared++; }
+    }
+    if (dirty) dayLogs[ds] = log;
+  }
+  if (cleared > 0) ss(SK.dayLogs, dayLogs);
+  return { scanned, cleared };
+}
+
 // confirmPlan: saves all settings inputs to storage, updates the header badge,
 // and dispatches PLAN_CHANGED + CALORIES_CHANGED to refresh all tabs
 function confirmPlan() {
   const val = document.getElementById('planSelect').value;
   const s = getSettings();
+  const oldPlanKey = s.plan; // capture BEFORE we overwrite
   s.plan = val;
   s.name = (document.getElementById('settingName').value||'').trim();
   const calInput = parseFloat(document.getElementById('settingCalories').value);
@@ -3809,8 +3924,10 @@ function confirmPlan() {
   if(!isNaN(tdeeInput) && tdeeInput >= 1200) s.tdee = tdeeInput;
   const curInput = parseFloat(document.getElementById('settingCurrentKg').value);
   const tgtInput = parseFloat(document.getElementById('settingTargetKg').value);
-  if(!isNaN(curInput) && curInput > 0) s.currentKg = curInput;
-  if(!isNaN(tgtInput) && tgtInput > 0) s.targetKg = tgtInput;
+  // v8.0.0 (H4 fix): unified weight bounds 40-250 kg (HTML, JS validators, setCurrentWeight all agree).
+  // Out-of-range values are silently dropped (user keeps their previous valid value).
+  if(!isNaN(curInput) && curInput >= 40 && curInput <= 250) s.currentKg = curInput;
+  if(!isNaN(tgtInput) && tgtInput >= 40 && tgtInput <= 250) s.targetKg = tgtInput;
   s.risk = document.getElementById('settingRisk').value || 'aggressive';
   s.startDate = document.getElementById('settingStartDate').value || todayStr();
   // TDEE auto-calc fields
@@ -3826,7 +3943,25 @@ function confirmPlan() {
   s.eveningSessionTime = document.getElementById('settingEveningSessionTime').value || null;
   s.eatingWindowStart = document.getElementById('settingEatingWindowStart').value || null;
   s.supplementsEnabled = document.getElementById('settingSupplements').checked;
+  // v8.0.0 (H1 fix): clear stored s.activityByDayType when switching plans so
+  // the previous plan's inferred override doesn't get reused under the new
+  // plan's day-type model. getWeeklyAvgActivity prioritizes settings.activityByDayType
+  // over plan.activityByDayType, so a stale override silently produces wrong TDEE.
+  // Reset to null on every plan switch — user can re-run inference if desired.
+  if (oldPlanKey && oldPlanKey !== val) {
+    s.activityByDayType = null;
+  }
   saveSettings(s);
+  // v8.0.0 (C1 fix): clear check IDs whose label changed between old plan and
+  // new plan across all dayLogs. Runs AFTER saveSettings so the new plan key
+  // is committed before the cleanup. Console-logs the cleanup count for the
+  // user to confirm in DevTools.
+  if (oldPlanKey && oldPlanKey !== val) {
+    try {
+      const r = _cleanupCrossPlanCheckIds(oldPlanKey, val);
+      if (r.cleared > 0) console.log('[plan-switch] cleared ' + r.cleared + ' stale check id(s) across ' + r.scanned + ' day(s)');
+    } catch (e) { console.warn('[plan-switch] check cleanup failed:', e); }
+  }
   // v7.9.0 BUG FIX: if linked-offset mode is on, the linked value MUST win
   // over any manually-typed calorie ceiling captured above. Re-run sync
   // after persisting the form so the linked-mode-managed value overrides
@@ -3856,7 +3991,8 @@ function applyPlanUI(plan) {
 // current weight in settings and updates all dependent UI (goal bar, projection, etc).
 function setCurrentWeight() {
   const val = parseFloat(document.getElementById('settingCurrentKg').value);
-  if(isNaN(val) || val < 20 || val > 300) { showAlert('Enter a valid weight between 20–300 kg.'); return; }
+  // v8.0.0 (H4 fix): unified to 40-250 kg across HTML, confirmPlan, setCurrentWeight.
+  if(isNaN(val) || val < 40 || val > 250) { showAlert('Enter a valid weight between 40–250 kg.'); return; }
   const s = getSettings();
   s.currentKg = val;
   saveSettings(s);
@@ -4200,6 +4336,13 @@ function applyInferredActivityLevel() {
   if (sel) sel.value = String(r.effective);
   const trigger = document.getElementById('activitySelectTrigger');
   if (trigger) trigger.textContent = 'Custom: ' + r.effective.toFixed(3) + ' (inferred)';
+  // v8.0.0 (M5 fix): keep the visible custom-dropdown options' selected
+  // class in sync with the native select. Otherwise the dropdown trigger
+  // shows "Custom: X" but the dropdown items don't visually highlight the
+  // closest match, leaving the next interaction confused about state.
+  if (typeof syncCustomSelect === 'function') {
+    syncCustomSelect('activitySelectCustom', 'settingActivityLevel');
+  }
   // Refresh dependent UI
   if (typeof autoFillTDEE === 'function') autoFillTDEE();
   dispatch('TDEE_CHANGED');
@@ -4212,7 +4355,21 @@ function onLinkedOffsetInput() {
   const v = parseFloat(raw);
   if (isNaN(v)) return;
   const s = getSettings();
-  s.targetOffset = Math.round(v);
+  // v8.0.0 (M1 fix): clamp to per-mode bounds before storage so
+  // hand-edited values via DevTools or pasted overrides don't corrupt
+  // s.targetOffset. Bounds match the HTML input min/max set by
+  // updateLinkedOffsetUI (cut: 100-3000, bulk: 100-1000, maintenance: ±300).
+  const plan = (typeof getActivePlan === 'function') ? getActivePlan() : null;
+  const mode = (plan && plan.caloriesMode) || 'floor';
+  let bounded = Math.round(v);
+  if (mode === 'tdee-band') {
+    bounded = Math.max(-300, Math.min(300, bounded));
+  } else if (mode === 'above-tdee') {
+    bounded = Math.max(100, Math.min(1000, bounded));
+  } else { // 'floor' (cut)
+    bounded = Math.max(100, Math.min(3000, bounded));
+  }
+  s.targetOffset = bounded;
   saveSettings(s);
   if (s.linkedOffsetMode) {
     syncCalorieCeilingFromOffset();
@@ -4222,6 +4379,18 @@ function onLinkedOffsetInput() {
     if (typeof calcDuration === 'function') calcDuration();
     if (typeof renderCaloriesHint === 'function') renderCaloriesHint();
   }
+}
+
+// v8.0.0 (M2 fix): debounced wrapper for commitTdeeManual. Wired to oninput
+// (live, while typing) so value persists even if user closes Settings without
+// blurring. 300ms debounce avoids thrashing storage on every keystroke.
+let _commitTdeeManualTimer = null;
+function commitTdeeManualDebounced() {
+  if (_commitTdeeManualTimer) clearTimeout(_commitTdeeManualTimer);
+  _commitTdeeManualTimer = setTimeout(() => {
+    _commitTdeeManualTimer = null;
+    commitTdeeManual();
+  }, 300);
 }
 
 // v7.1.0: persist a manual TDEE entry immediately on blur/change so the rest
@@ -4715,7 +4884,14 @@ function calcDuration() {
   // Macro viability check
   if(macroViabilityEl) {
     const currentKgForCheck = curKg || getLatestWeight();
-    const proteinFloor = Math.round(currentKgForCheck * 1.3);
+    // v8.0.0 (M3 fix): use the plan's declared protein floor multiplier
+    // instead of a hardcoded 1.3. computeMacros (line 1986) already does
+    // this correctly; the viability check was the only place still using
+    // 1.3, producing false-alarm "PROTEIN FLOOR IMPOSSIBLE" warnings on
+    // plans that declare a lower multiplier (e.g. LITE, MAINTENANCE).
+    const _planForFloor = (typeof getActivePlan === 'function') ? getActivePlan() : null;
+    const _pfm = (_planForFloor && _planForFloor.proteinFloorMultiplier) || 1.3;
+    const proteinFloor = Math.round(currentKgForCheck * _pfm);
     const fatFloor = 20;
     const minCalsNeeded = (proteinFloor * 4) + (fatFloor * 9);
     if(calcCals < minCalsNeeded) {
@@ -5026,9 +5202,25 @@ function calcAdjust() {
   const newTarget = parseFloat(document.getElementById('msTargetKg').value);
   const newCal    = parseFloat(document.getElementById('msCalories').value);
 
+  // v8.0.0 (M4 fix): show a hint when only one of the two required fields is
+  // filled, instead of silently hiding the result section. Previously the user
+  // typed calories, saw nothing happen, assumed the feature was broken.
   if(isNaN(newTarget) || isNaN(newCal)) {
-    document.getElementById('adjustResult').style.display='none';
-    document.getElementById('adjConfirmBtn').style.display='none';
+    const resultEl = document.getElementById('adjustResult');
+    const btnEl = document.getElementById('adjConfirmBtn');
+    if (btnEl) btnEl.style.display='none';
+    if (resultEl) {
+      const missing = [];
+      if (isNaN(newTarget)) missing.push('target weight');
+      if (isNaN(newCal)) missing.push('calorie ceiling');
+      if (missing.length > 0 && missing.length < 2) {
+        // One field filled — show a hint. Two fields empty — clean state.
+        resultEl.innerHTML = '<div style="padding:8px;color:var(--muted);font-family:\'DM Mono\',monospace;font-size:0.65rem">Enter ' + missing.join(' and ') + ' to see the adjusted projection.</div>';
+        resultEl.style.display = 'block';
+      } else {
+        resultEl.style.display = 'none';
+      }
+    }
     return;
   }
 
@@ -5367,12 +5559,42 @@ function exportMigrationLog() {
 // Phase 10 (v7.6.1): inner restore commit, factored out so the integrity-
 // check confirm dialog and the normal confirm dialog can share the same
 // write path. Called only after user confirms.
+// v8.0.0 (H5 fix): expected runtime types for each SK key. Used during
+// restore to reject malformed backups that would otherwise crash downstream
+// renderers (e.g. weights expects an array; if someone hand-edits a backup
+// to set weights="..." then renderWeights does .forEach() and throws).
+const _SK_EXPECTED_TYPE = {
+  weights: 'array', dayLogs: 'object', fastDays: 'object',
+  fastWindows: 'object', fastSessions: 'array', activityHistory: 'array',
+  settings: 'object', schedule: 'object', seenVer: 'string',
+  foodLog: 'object', foodLib: 'array', exLevels: 'object',
+  lightDays: 'object', fastDayUnsets: 'object', lightDayUnsets: 'object',
+  swDismissedVer: 'string', backupTs: 'string', backupHistory: 'array',
+  schemaVersion: 'object'
+};
+function _isExpectedType(val, expected) {
+  if (val === null || val === undefined) return true; // null is allowed (missing key)
+  if (expected === 'array') return Array.isArray(val);
+  if (expected === 'object') return typeof val === 'object' && !Array.isArray(val);
+  if (expected === 'string') return typeof val === 'string';
+  if (expected === 'number') return typeof val === 'number';
+  return true; // unknown expected → permissive
+}
+
 function _commitBackupRestore(backup, keys, exported) {
   const skippedKeys = [];
+  const rejectedKeys = []; // v8.0.0 (H5): keys whose value type didn't match expected
   Object.entries(backup.data).forEach(([key, val]) => {
     const storageKey = SK[key];
-    if(storageKey) ss(storageKey, val);
-    else skippedKeys.push(key);
+    if (!storageKey) { skippedKeys.push(key); return; }
+    // v8.0.0 (H5 fix): type-check against the SK expected shape. Reject any
+    // key whose value type is wrong (would crash renderers downstream).
+    const expected = _SK_EXPECTED_TYPE[key];
+    if (expected && !_isExpectedType(val, expected)) {
+      rejectedKeys.push(key + ' (expected ' + expected + ', got ' + (Array.isArray(val) ? 'array' : typeof val) + ')');
+      return;
+    }
+    ss(storageKey, val);
   });
   // Full UI refresh via dispatcher
   const s = getSettings();
@@ -5392,7 +5614,10 @@ function _commitBackupRestore(backup, keys, exported) {
   dispatch('FAST_DAY_TOGGLED');
   if(typeof EXERCISE_PROGRESSIONS !== 'undefined') dispatch('EXERCISE_LEVEL_CHANGED');
   const skippedNote = skippedKeys.length ? ` (${skippedKeys.length} key${skippedKeys.length>1?'s':''} from a newer app version could not be restored: ${skippedKeys.join(', ')})` : '';
-  showBackupStatus(`✓ Restored ${keys.length} data sets from backup (${exported}). All data reloaded.${skippedNote}`, 'var(--green)');
+  // v8.0.0 (H5 fix): surface type-rejected keys so user knows the backup was malformed.
+  const rejectedNote = rejectedKeys.length ? ` (${rejectedKeys.length} key${rejectedKeys.length>1?'s':''} rejected for wrong type: ${rejectedKeys.join(', ')})` : '';
+  showBackupStatus(`✓ Restored ${keys.length - rejectedKeys.length} data sets from backup (${exported}). All data reloaded.${skippedNote}${rejectedNote}`,
+                   rejectedKeys.length ? 'var(--accent2)' : 'var(--green)');
 }
 
 // restoreData: triggered by the hidden file input when a file is picked.
@@ -5552,7 +5777,20 @@ async function runInit() {
     const result = await window.runMigrations(Object.values(SK));
     if (!result.ok) {
       if (typeof showAlert === 'function') {
-        showAlert('Data migration failed. An auto-backup has been downloaded. Do not use the app further until this is investigated.');
+        // v8.0.0 (L4 fix): explain WHY migration failed instead of a generic error.
+        // Helps the user understand whether it's a download-block (browser
+        // popup-blocker) vs verify-fail vs threw error vs wrong key shape.
+        const reasonMap = {
+          'backup-failed': 'Auto-backup download was blocked by your browser. Allow downloads for this site (popup-blocker / "auto-download" setting), then reload the app to retry.',
+          'verify-failed': 'A migration produced data that failed its own integrity check. Your data has not been touched. Reach out to support before reloading.',
+          'verify-threw':  'A migration threw an error while verifying its result. Your data has not been touched. Reach out to support before reloading.',
+          'run-threw':     'A migration threw an error while running. An auto-backup was downloaded if reachable. Reach out to support before reloading.',
+          'write-failed':  'A migration could not write all keys to storage (likely quota / read-only). Free up space and reload to retry.',
+          'version-mismatch': 'Migration version chain is broken (gap or duplicate). Reach out to support — this should never happen on stock builds.'
+        };
+        const reason = result && result.error ? reasonMap[result.error] : null;
+        const desc = result && result.migration && result.migration.description ? '\n\nMigration step: ' + result.migration.description : '';
+        showAlert((reason || 'Data migration failed for an unknown reason.') + desc + '\n\nDo not use the app further until this is resolved.');
       }
       console.error('[migrations] Halting init:', result);
       return;

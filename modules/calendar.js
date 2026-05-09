@@ -525,6 +525,21 @@ export function toggleModalWorkoutEx(el, dateStr, wid) {
 
   saveDayLogField(dateStr, { workoutChecks: wChecks, workoutTodayTotal: total, workoutTodayDone: done, workoutSessions: sessions });
 
+  // v8.0.0 (M7 fix): auto-derive _workout for the affected past date so calendar
+  // coloring + getValidCheckCompletion reflect the new exercise completion state
+  // without waiting for next app init's migrateOrphanedChecks pass. Mirrors the
+  // refreshAutoItems behaviour that runs only for TODAY in components/checklist.js.
+  // Threshold (>=80% completion → done) matches refreshAutoItems exactly.
+  // Skip for fast days only: AUTO_WORKOUT_IDS items in eating-day checklists
+  // already track per-session completion individually; _workout pseudo-item is
+  // only added by getValidCheckCompletion when no AUTO_WORKOUT_IDS are present.
+  if (total > 0) {
+    const pct = done / total;
+    const _workout = pct >= 0.8;
+    const updatedChecks = Object.assign({}, (getDayLog(dateStr).checks || {}), { _workout });
+    saveDayLogField(dateStr, { checks: updatedChecks });
+  }
+
   // Update summary button
   const btn = document.getElementById('mWorkoutBtn');
   if(btn) {
@@ -544,14 +559,22 @@ export function toggleModalWorkoutEx(el, dateStr, wid) {
 // Also clears light day if setting fast (mutually exclusive).
 export function toggleFastDay(dateStr) {
   const fd = gs(SK.fastDays)||{};
-  if(fd[dateStr]) { delete fd[dateStr]; }
-  else {
+  // v8.0.0 (H3 fix): record explicit user unsets so a later schedule extension
+  // doesn't auto-re-mark the date. Mark TURNED-ON dates remove any prior unset
+  // (user's latest action wins). Manual overrides are stored in SK.fastDayUnsets.
+  const fdu = gs(SK.fastDayUnsets)||{};
+  if(fd[dateStr]) {
+    delete fd[dateStr];
+    fdu[dateStr] = true; // record the unset
+  } else {
     fd[dateStr]=true;
+    delete fdu[dateStr]; // user re-set it; clear any prior unset record
     // Clear light day if exists (mutually exclusive)
     const ld = gs(SK.lightDays)||{};
     if(ld[dateStr]) { delete ld[dateStr]; ss(SK.lightDays, ld); }
   }
   ss(SK.fastDays, fd);
+  ss(SK.fastDayUnsets, fdu);
   dispatch('FAST_DAY_TOGGLED');
   openDayModal(dateStr,strToDate(dateStr));
 }
@@ -560,14 +583,20 @@ export function toggleFastDay(dateStr) {
 // Also clears fast day if setting light (mutually exclusive).
 export function toggleLightDay(dateStr) {
   const ld = gs(SK.lightDays)||{};
-  if(ld[dateStr]) { delete ld[dateStr]; }
-  else {
+  // v8.0.0 (H3 fix): track explicit unsets in SK.lightDayUnsets, parallel to fastDayUnsets.
+  const ldu = gs(SK.lightDayUnsets)||{};
+  if(ld[dateStr]) {
+    delete ld[dateStr];
+    ldu[dateStr] = true;
+  } else {
     ld[dateStr]=true;
+    delete ldu[dateStr];
     // Clear fast day if exists (mutually exclusive)
     const fd = gs(SK.fastDays)||{};
     if(fd[dateStr]) { delete fd[dateStr]; ss(SK.fastDays, fd); }
   }
   ss(SK.lightDays, ld);
+  ss(SK.lightDayUnsets, ldu);
   dispatch('FAST_DAY_TOGGLED');
   openDayModal(dateStr,strToDate(dateStr));
 }
