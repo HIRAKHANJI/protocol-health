@@ -233,10 +233,10 @@ Nothing else changes. `getActivePlan()` reads `settings.plan`, looks up `PLANS[s
 
 | File | Purpose |
 |------|---------|
-| `app.html` | App bootstrap — HTML, CSS, and the inline orchestration script (runInit + helpers that stay in classic scope). ~6,054 lines as of v8.0.0 (grew from 4,637 post-v6.0.0-refactor through Phases A–D / calibration + multi-day fasts + v8.0.0 audit fixes). Plans, large function groups, shared components, and migrations load as ES modules — see Section 23. Zero build process, zero bundler, zero framework. |
+| `app.html` | App bootstrap — HTML, CSS, and the inline orchestration script (runInit + helpers that stay in classic scope). ~6,054 lines as of v8.1.0 (grew from 4,637 post-v6.0.0-refactor through Phases A–D / calibration + multi-day fasts + v8.1.0 audit fixes). Plans, large function groups, shared components, and migrations load as ES modules — see Section 23. Zero build process, zero bundler, zero framework. |
 | `index.html` | Landing/product page. Links to `app.html`. |
 | `manifest.json` | PWA manifest. App name, icons, display mode (standalone = fullscreen), theme color. |
-| `sw.js` | Service Worker. Caches all app files after first load for offline use. Cache-first strategy. Current cache name: `protocol-health-v30`. Bump version on major deploys. |
+| `sw.js` | Service Worker. Caches all app files after first load for offline use. Cache-first strategy. Current cache name: `protocol-health-v31`. Bump version on major deploys. |
 | `PH_LOGO_192.png` | Home screen icon at 192×192px. |
 | `PH_LOGO_512.png` | Splash screen icon at 512×512px. |
 
@@ -251,8 +251,8 @@ ph_fd_v1   — fast days: { "YYYY-MM-DD": true } — legacy boolean (pre-Phase-C
 ph_ld_v1   — light eating days: { "YYYY-MM-DD": true }
 ph_fw_v1   — fast windows (Phase A scaffolding; populated in Phase C; vestigial post-Phase-12, kept for rollback): { "YYYY-MM-DD": [{ start, end, broken, brokenBy }] }
 ph_fs_v1   — fast sessions (Phase 12, v7.8.0): array of { id, start, end, broken, brokenBy[], dates[], legacy } — primary fast storage, supports multi-day spans
-ph_fdu_v1  — fast-day manual unsets (v8.0.0, H3 fix): { "YYYY-MM-DD": true } — autoSetPlanFastDays skips these
-ph_ldu_v1  — light-day manual unsets (v8.0.0, H3 fix): same shape, parallel to fastDayUnsets
+ph_fdu_v1  — fast-day manual unsets (v8.1.0, H3 fix): { "YYYY-MM-DD": true } — autoSetPlanFastDays skips these
+ph_ldu_v1  — light-day manual unsets (v8.1.0, H3 fix): same shape, parallel to fastDayUnsets
 ph_st_v1   — settings: { plan, currentKg, targetKg, calories, tdee, risk, startDate, age, height, sex, activityLevel, activityByDayType, name, ... }
 ph_sc_v1   — schedule: { days[], startDate, totalDays, planName, startWeight }
 ph_sv_v1   — last seen app version (for update banner)
@@ -460,7 +460,7 @@ Push to GitHub → GitHub Pages serves new files (~60s)
 
 The service worker caches files under `CACHE_NAME` in `sw.js`. If this name does not change, the SW may keep serving the old cached version even after new files are pushed.
 
-**Current version:** `protocol-health-v30`
+**Current version:** `protocol-health-v31`
 
 > **Rule: Bump `CACHE_NAME` on every significant update to `main`.**
 > - Only bump when merging or pushing to `main` — feature branches do not need cache version increments
@@ -471,7 +471,7 @@ The service worker caches files under `CACHE_NAME` in `sw.js`. If this name does
 
 ```javascript
 // sw.js — line 22
-const CACHE_NAME = 'protocol-health-v30'; // ← increment this on every significant push
+const CACHE_NAME = 'protocol-health-v31'; // ← increment this on every significant push
 ```
 
 ### Files That Must Be Pushed Together
@@ -556,7 +556,7 @@ The app has two independent version numbers that serve different purposes:
 | **+0.1.0** (minor) | A new feature, a meaningful UI change, or 4+ bug fixes bundled together | Yes | Added streak counter, redesigned settings panel, new checklist group |
 | **+1.0.0** (major) | New plan added, major rework of a core system, or something that changes how you use the app | Yes | New combat training plan, schedule system rewrite, new tab added |
 
-**Current version:** `8.0.0`
+**Current version:** `8.1.0`
 
 > **Self-Update Rule:** Whenever `APP_VERSION` is bumped in `app.html`, also update ALL version references in this file (`CLAUDE.md`) to match — including this line and the Quick Reference section below. Never leave stale version numbers in project documentation.
 
@@ -573,7 +573,7 @@ The app has two independent version numbers that serve different purposes:
 When making changes, update these two lines near the top of the script in `app.html`:
 
 ```javascript
-const APP_VERSION = '8.0.0';                         // ← bump according to rules above
+const APP_VERSION = '8.1.0';                         // ← bump according to rules above
 const APP_VERSION_MSG = 'Description of changes.';    // ← short description of what changed
 ```
 
@@ -598,7 +598,7 @@ const APP_VERSION_MSG = 'Description of changes.';    // ← short description o
 ```
 Repository:   github.com/HIRAKHANJI/protocol-health
 Live URL:     https://hirakhanji.github.io/protocol-health/
-App file:     app.html (bootstrap, ~6,054 lines as of v8.0.0; plans/modules/components load as ES modules — see Section 23)
+App file:     app.html (bootstrap, ~6,054 lines as of v8.1.0; plans/modules/components load as ES modules — see Section 23)
 Landing:      index.html (product page)
 PWA files:    manifest.json, sw.js, PH_LOGO_192.png, PH_LOGO_512.png
 
@@ -609,8 +609,8 @@ Storage keys (all in SK object at top of script):
   ph_ld_v1  — light eating days
   ph_fw_v1  — fast windows (Phase A scaffolding; vestigial post-Phase-12)
   ph_fs_v1  — fast sessions (Phase 12, v7.8.0 — multi-day spans)
-  ph_fdu_v1 — fast-day manual unsets (v8.0.0 H3 fix)
-  ph_ldu_v1 — light-day manual unsets (v8.0.0 H3 fix)
+  ph_fdu_v1 — fast-day manual unsets (v8.1.0 H3 fix)
+  ph_ldu_v1 — light-day manual unsets (v8.1.0 H3 fix)
   ph_st_v1  — settings
   ph_sc_v1  — schedule
   ph_sv_v1  — last seen app version (for update banner)
@@ -621,7 +621,7 @@ Storage keys (all in SK object at top of script):
   ph_bts_v1 — backup timestamp (drives reminder banner)
   ph_bh_v1  — backup history (Phase 11, v7.7.0 — last 5 backups)
   ph_sw_v1  — last dismissed SW cache version (for reload banner)
-  ph_sch_v1 — schema version record (migration framework, v5.1.0+; currently v6 as of v8.0.0)
+  ph_sch_v1 — schema version record (migration framework, v5.1.0+; currently v7 as of v8.1.0)
 
 Modules:      migrations/ — schema versioning and upgrade logic (see Section 9 subsection)
               plans/ — plan definitions + EXERCISE_PROGRESSIONS, loaded as ES modules
@@ -637,8 +637,8 @@ Day types:    getDayType(dateStr) → 'fast' | 'light' | 'normal'
 Data writes:  always end with dispatch("EVENT_NAME")
 Dialogs:      showConfirm(), showAlert() — never native confirm/alert
 Dates:        dateToStr(d), strToDate(s), todayStr() — never toISOString()
-Cache:        sw.js CACHE_NAME = "protocol-health-v30" — bump on every significant push
-App version:  APP_VERSION = "8.0.0" — bump on notable updates (see Section 12)
+Cache:        sw.js CACHE_NAME = "protocol-health-v31" — bump on every significant push
+App version:  APP_VERSION = "8.1.0" — bump on notable updates (see Section 12)
 Update log:   UPDATE_LOG.md — every version bump must be documented here
 ```
 
@@ -854,7 +854,7 @@ As of v6.0.0 the app is a modular ES-module PWA, not a single-file app. Zero bui
 
 ```
 /
-├── app.html                  # Bootstrap: HTML + CSS + inline orchestration script (~6,054 lines as of v8.0.0)
+├── app.html                  # Bootstrap: HTML + CSS + inline orchestration script (~6,054 lines as of v8.1.0)
 ├── index.html                # Landing page (not the app entry point — that's app.html)
 ├── manifest.json             # PWA manifest
 ├── sw.js                     # Service worker (cache list covers every module file)
@@ -890,7 +890,7 @@ As of v6.0.0 the app is a modular ES-module PWA, not a single-file app. Zero bui
     ├── PHASE_N_PLAN.md       # One pre-execution plan per refactor phase (1, 2, 3, 6)
     ├── CALIBRATION_PHASE_*.md # Pre-execution plans for the calibration project (A–D) — historical
     ├── REFACTOR_COMPLETE.md  # Consolidated post-refactor retrospective (v5.0.1 → v6.2.x)
-    └── v8.0.0-bug-audit.md   # Consolidated audit report from the 6-agent v8.0.0 pre-175-workouts scan
+    └── v8.1.0-bug-audit.md   # Consolidated audit report from the 6-agent v8.1.0 pre-175-workouts scan
 ```
 
 ### Interop pattern — bare-name fallback to `globalThis`
@@ -1093,7 +1093,7 @@ Procedure:
 
 Approximate targets. Exceeding them is a hint to split, not a failure.
 
-| File | Target | Actual (v8.0.0) | Status |
+| File | Target | Actual (v8.1.0) | Status |
 |------|--------|-----------------|--------|
 | `app.html` | ≤ 6,500 lines | ~6,054 | ✓ within revised target |
 | Any `plans/*.js` | ≤ 800 lines | max 580 (agro) | ✓ |
@@ -1104,9 +1104,9 @@ Approximate targets. Exceeding them is a hint to split, not a failure.
 
 These are soft limits. Exceeding means "think about whether splitting would help," not "must split."
 
-**Targets revised in v8.0.0 (2026-05-09)** to reflect post-Phase-A–D growth:
+**Targets revised in v8.1.0 (2026-05-09)** to reflect post-Phase-A–D growth:
 
-- **`app.html`** target was originally `≤ 5,000` post-v6.0.0-refactor (then ~4,637 lines). Phase A–D calibration work, Phase 11–13 (backup history / multi-day fasts / activity history), and the v8.0.0 audit fixes added ~1,400 lines. Raised to ≤ 6,500 to reflect the new ceiling without forcing premature extraction. Further reduction is possible (TDEE/goal calculator UI, settings UI, schedule UI, weight-log UI) but has diminishing returns — each extraction adds a new module gate and window-exposure surface without proportional complexity relief. Stop here unless a concrete pain point motivates more work.
+- **`app.html`** target was originally `≤ 5,000` post-v6.0.0-refactor (then ~4,637 lines). Phase A–D calibration work, Phase 11–13 (backup history / multi-day fasts / activity history), and the v8.1.0 audit fixes added ~1,400 lines. Raised to ≤ 6,500 to reflect the new ceiling without forcing premature extraction. Further reduction is possible (TDEE/goal calculator UI, settings UI, schedule UI, weight-log UI) but has diminishing returns — each extraction adds a new module gate and window-exposure surface without proportional complexity relief. Stop here unless a concrete pain point motivates more work.
 
 - **`components/*.js`** target was originally `≤ 400` (then max 404 — checklist.js at the line). Phase C added `fast-window.js` (571 lines, the session-editor UI + state machine), which is a single cohesive unit with no obvious clean split. Raised to ≤ 600.
 

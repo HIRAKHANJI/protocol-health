@@ -34,6 +34,18 @@ This log records every git-tagged working version of Protocol Health during the 
 
 ---
 
+## v8.1.0-working — 2026-05-12 (multi-day fast bleed-out bug fix + manual-unset respect + schema v6→v7)
+- **Phase:** docs-defined release (owner-reported bug from 2026-05-12 backup)
+- **Git tag:** `v8.1.0-working` (to be pushed after this commit lands on main)
+- **Commit hash:** TBD on commit
+- **CACHE_NAME:** `protocol-health-v31`
+- **Smoke test:** PASS (in-flight; verified via migration simulation against owner's actual backup data — 5/12 correctly removed, 5/11 and all plan-auto-set dates preserved, 5/1 + 5/8 bleed over-marks also cleaned up). On-device smoke required after deploy.
+- **Owner-confirmed:** pending (post-deploy)
+- **Auto-backup on owner device:** migration is `requiresBackup: true`, auto-downloads before running
+- **Notes:** Minor release — closes the multi-day fast bleed-out bug class. Three coupled fixes: (1) `_sessionHoursOnDate` 16h-threshold rule replaces v7.10.2's over-broad "any date the session touches → fast day"; (2) `_syncFastDaysFromSession` and `reconcileFastDaysFromSessions` now respect `SK.fastDayUnsets` (parallel to v8.0.0's H3 fix for `autoSetPlanFastDays`); (3) `isFastDay(today)` consults `getActiveSession()` so spontaneous fasts immediately flip TODAY into fast protocol. Schema migration v6 → v7 cleans historical over-marks. The fix is conceptually correct — sessions are temporal records, fast days are user intent + plan auto-set; the v7.10.2 reconcile incorrectly coupled them. Phase 2 (full session-hour attribution in calibration / radar) deferred until after 175 workouts.
+
+---
+
 ## v8.0.0-working — 2026-05-09 (audit-driven major; 14 bug fixes + schema v5→v6)
 - **Phase:** docs-defined release (post-audit fix bundle from `docs/v8.0.0-bug-audit.md`)
 - **Git tag:** `v8.0.0-working` (to be pushed after this commit lands on main)

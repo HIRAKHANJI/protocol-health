@@ -76,12 +76,65 @@ function _newSessionId() {
 // entry — the user may have manually marked a date as fast that no
 // session covers (legacy single-tap-toggle path). Removing on edit would
 // clobber that intent.
+// v8.1.0: stricter session→fastDay sync rule. The v7.10.2 implementation
+// added EVERY date in session.dates[] to SK.fastDays, which over-marked
+// bleed-in/bleed-out dates (e.g. a fast 9 PM Sun → 8 AM Tue touches Mon
+// as the "real" fast day, plus Sun/Tue as bleed dates with only ~3h and
+// ~8h of fasting respectively — those aren't fast protocol days).
+//
+// New rule: a session contributes a date to SK.fastDays only when its
+// activity on that calendar date's local 24h window is ≥ 16 hours. 16h
+// is the threshold because:
+//   - Full-day fasts of a multi-day session land at 24h on the middle
+//     dates → marked ✓
+//   - Bleed-in / bleed-out evening/morning windows typically land at
+//     3–12h → NOT marked ✓
+//   - True single-day all-day fasts (e.g. 6 AM → 11 PM = 17h) land at
+//     17h → marked ✓
+//   - Wake-to-wake 24h patterns (9 AM Mon → 9 AM Tue) split as 15h + 9h
+//     → neither qualifies; user must mark the intended day manually via
+//     the day modal. Correct because the system can't infer which date
+//     the user calls "the fast day" for that pattern.
+//   - Intermittent 16:8 patterns (16h fast, 8h eating) split across two
+//     dates → typically 8–14h per date → NOT marked ✓ (matches intent,
+//     IF days aren't protocol fast days for AGRO-style plans).
+const _FAST_DAY_SESSION_HOURS_MIN = 16;
+
+// Returns hours of session activity within dateStr's local-midnight-to-
+// midnight 24h window. Used by _syncFastDaysFromSession and the v6→v7
+// migration cleanup. Active sessions (end===null) use Date.now() as end.
+function _sessionHoursOnDate(session, dateStr) {
+  if (!session || !session.start) return 0;
+  const dayStart = strToDate(dateStr); dayStart.setHours(0,0,0,0);
+  const dayEnd = new Date(dayStart); dayEnd.setDate(dayEnd.getDate() + 1);
+  const sessionStart = new Date(session.start).getTime();
+  const sessionEnd = session.end ? new Date(session.end).getTime() : Date.now();
+  const start = Math.max(sessionStart, dayStart.getTime());
+  const end = Math.min(sessionEnd, dayEnd.getTime());
+  return end > start ? (end - start) / 3600000 : 0;
+}
+
 function _syncFastDaysFromSession(session) {
   if (!session || !Array.isArray(session.dates) || !session.dates.length) return false;
   const fd = gs(SK.fastDays) || {};
+  // v8.1.0: respect SK.fastDayUnsets. If the user has explicitly unset a
+  // date via the day modal, the session-sync MUST NOT re-add it. This
+  // was the missing piece in v8.0.0's H3 fix — `autoSetPlanFastDays`
+  // started respecting `fastDayUnsets`, but the session-sync path didn't.
+  // Found via backup inspection: 5/12 had been manually unset by the user
+  // (fdu[5/12]=true) yet kept getting re-added because the next session
+  // mutation OR'd it back in.
+  const fdu = gs(SK.fastDayUnsets) || {};
   let changed = false;
   for (const d of session.dates) {
-    if (!fd[d]) { fd[d] = true; changed = true; }
+    if (fd[d]) continue;
+    if (fdu[d]) continue; // user explicitly unset → don't auto-re-add
+    // Only mark dates where the session covers a real fast day
+    // (≥ 16h on this calendar date). Bleed dates fall below the threshold.
+    if (_sessionHoursOnDate(session, d) >= _FAST_DAY_SESSION_HOURS_MIN) {
+      fd[d] = true;
+      changed = true;
+    }
   }
   if (changed) ss(SK.fastDays, fd);
   return changed;
@@ -245,20 +298,31 @@ export function getMostRecentWindow(dateStr) {
   };
 }
 
-// v7.10.2: One-time at-init reconciliation. Walks every session and OR's its
-// dates[] into SK.fastDays. Idempotent — safe to run on every app load.
-// Fixes legacy data where multi-day sessions only had their auto-set dates
-// in fastDays (the bookend dates of a fast spanning Tue→Fri got missed).
+// v7.10.2 / v8.1.0: at-init reconciliation. Walks every session and adds
+// dates to SK.fastDays only when the session covers ≥ 16h of that date's
+// local 24h window (see _sessionHoursOnDate). Idempotent — safe to run
+// on every app load. v8.1.0 tightened the rule from "any date the session
+// touches" to "any date where the session contributes ≥ 16h" to eliminate
+// the bleed-in/out over-mark bug (Tuesday morning breakfast end of a
+// Sunday-night-started fast no longer flags Tuesday as a fast day).
 // Returns the count of date keys added (for diagnostic logging).
 export function reconcileFastDaysFromSessions() {
   const sessions = gs(SK.fastSessions) || [];
   if (!sessions.length) return 0;
   const fd = gs(SK.fastDays) || {};
+  // v8.1.0: respect SK.fastDayUnsets — same fix as _syncFastDaysFromSession.
+  // Without this, a user who manually unset Tuesday via day modal would have
+  // Tuesday re-added on next app load (reconcile fires from runInit).
+  const fdu = gs(SK.fastDayUnsets) || {};
   let added = 0;
   for (const s of sessions) {
     if (!s || !Array.isArray(s.dates)) continue;
     for (const d of s.dates) {
-      if (!fd[d]) { fd[d] = true; added++; }
+      if (fd[d]) continue;
+      if (fdu[d]) continue; // user explicitly unset → preserve intent
+      if (_sessionHoursOnDate(s, d) >= _FAST_DAY_SESSION_HOURS_MIN) {
+        fd[d] = true; added++;
+      }
     }
   }
   if (added > 0) {
