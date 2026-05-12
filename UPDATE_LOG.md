@@ -4,6 +4,53 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 8.3.1 — 2026-05-12
+
+**Scope:** Patch (UX clarity + two real bugs in v8.3.0's EDIT START DATE flow). No schema change. No data shape change.
+**Banner:** shown — "Fixed EDIT START DATE so it actually saves: the APPLY flow now shows a live preview of the pending change as you type, a clear final confirmation prompt before applying, and a SAVE CHANGES button that is disabled until your inputs are valid. v8.3.0 had two bugs that made the apply look like it did nothing — alerts were dropping their messages, and there was no obvious final confirm step. Both fixed."
+**CACHE_NAME:** v33 → v34. Schema unchanged at v7.
+
+**Root motivation.** Owner reported after testing v8.3.0: "Is there no confirm button to actually make the edit actually take action? Cuz when I changed it it went back to 4rth May instead of 23rd March." The schedule wasn't actually updating from their perspective. Two underlying defects:
+
+### Bug 1 — `showAlert()` is single-argument; v8.3.0 was calling it as `(title, message)`
+
+`showAlert(msg)` in `app.html` takes ONE argument and writes it into `#alertMsg`. There is no `#alertTitle`. v8.3.0's `applyEditStartDate` made 10+ calls like `showAlert('INVALID DATE', 'Pick a valid start date.')` — the helpful messages were dropped and only the all-caps titles ("INVALID DATE", "START DATE UPDATED", "NO CHANGE", "BACKUP FAILED", etc.) rendered. Users saw cryptic two-word alerts with no detail, which made every code path look broken even when it worked.
+
+**Fix:** every `showAlert` call in `applyEditStartDate` rewritten to a single descriptive sentence. Where extra context (the exact "from → to" diff) was useful, that's now folded into the new `showConfirm` step or the live preview panel — not into an alert.
+
+### Bug 2 — no explicit final confirmation step; APPLY ran straight to backup + write
+
+v8.3.0's flow was: pick date → tap APPLY → backup downloads → schedule writes → success alert. On mobile (Android Chrome PWA), if the native date picker hadn't committed the value or if validation hit (because of the value not committing), the user got a one-word alert and no idea what happened. Owner experienced the schedule "going back to 5/4" — most likely the picked date never committed, or the user tapped the backdrop expecting auto-save.
+
+**Fix:** the SAVE path is now a clear three-stage flow.
+
+1. **Live preview panel** (`#esdPreviewSection`) appears as soon as both inputs have valid values. Renders the diff: `Start date: 2026-05-04 → 2026-03-23`, `Start weight: 95.15kg → 105kg`, `Schedule length: 17 → 51 days`. Updates on every keystroke / picker change (both `oninput` and `onchange` handlers). Shows red warnings when the picked date is forward / future / before 2020. Hidden when no change vs current.
+2. **SAVE CHANGES button** (`#esdSaveBtn`) — renamed from "APPLY (downloads backup first)" to a clear active-voice label. Styled with `var(--accent)` background to stand out. Disabled (opacity 0.5, click no-op) until the live preview confirms the change is valid + meaningful. Below the button: caption "You'll get a final confirmation prompt + your data is auto-backed up before any write."
+3. **`showConfirm` final gate** — tapping SAVE CHANGES no longer applies immediately. Instead it pops the existing custom confirm dialog (which z-indexes above the sub-modal at 9000) with the same diff text in the body and a "YES, SAVE" yellow button. Only after the user confirms does the canonical `await backupData()` + atomic `ss(SK.schedule, ...)` write run. Cancel preserves the inputs so the user can review again.
+
+### Other small improvements
+
+- Date input now has both `oninput` and `onchange` handlers so values commit on Android native date pickers regardless of whether the user taps "Done" or types directly. The live preview reacts to either signal.
+- Weight input has `oninput="updateEditStartDatePreview()"` so the diff panel updates as the user types.
+- `openEditStartDate()` calls `updateEditStartDatePreview()` at the end so the preview is pre-populated (shows "No change vs current values" initially).
+- Error path inside the showConfirm callback: if `backupData` throws, alert is now `'Auto-backup failed. Aborting to keep your data safe. Try a manual backup from the TRACK tab first, then retry.'` — actionable, single-arg.
+
+### What did NOT change
+
+- Underlying data write semantics: still extends `schedule.days[]` backward to span new start → existing last day, updates `startDate` / `startWeight` / `totalDays` / `exactDays` atomically, mirrors `startDate` into `settings`, fires `SCHEDULE_ADJUSTED`. No new SK key. No schema migration. No new module. No changes to fast/light/dayLogs/weights/foodLog/activityHistory.
+- v8.2.0 auto-derivation fix and v8.1.0 multi-day fast fix remain in place.
+- All other modal-edit flows (ADJUST, END TODAY, REMOVE) untouched.
+
+### Files changed
+
+- `app.html`: `#esdPreviewSection` HTML added; SAVE CHANGES button + caption replaced the old APPLY button; `onEditStartDateChange` + new `updateEditStartDatePreview` function; `applyEditStartDate` rewritten to use `showConfirm` for the final gate and single-arg `showAlert` for all alerts. `APP_VERSION` 8.3.0 → 8.3.1. `APP_VERSION_MSG` updated.
+- `sw.js`: `CACHE_NAME` v33 → v34.
+- `index.html`: hero badge v8.3.0 → v8.3.1.
+- `CLAUDE.md`: version refs.
+- `UPDATE_LOG.md`: this entry.
+
+---
+
 ## Version 8.3.0 — 2026-05-12
 
 **Scope:** Minor (new user-facing recovery feature; no schema change, no data mutation outside `SK.schedule` + `getSettings().startDate`).
