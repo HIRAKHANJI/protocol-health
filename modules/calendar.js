@@ -525,19 +525,28 @@ export function toggleModalWorkoutEx(el, dateStr, wid) {
 
   saveDayLogField(dateStr, { workoutChecks: wChecks, workoutTodayTotal: total, workoutTodayDone: done, workoutSessions: sessions });
 
-  // v8.0.0 (M7 fix): auto-derive _workout for the affected past date so calendar
-  // coloring + getValidCheckCompletion reflect the new exercise completion state
-  // without waiting for next app init's migrateOrphanedChecks pass. Mirrors the
-  // refreshAutoItems behaviour that runs only for TODAY in components/checklist.js.
-  // Threshold (>=80% completion → done) matches refreshAutoItems exactly.
-  // Skip for fast days only: AUTO_WORKOUT_IDS items in eating-day checklists
-  // already track per-session completion individually; _workout pseudo-item is
-  // only added by getValidCheckCompletion when no AUTO_WORKOUT_IDS are present.
+  // v8.0.0 (M7 fix) + v8.2.0 extension: auto-derive _workout AND per-session
+  // AUTO_WORKOUT_IDS items (m2/m3 → morning, e1/e2/e3 → evening) for the
+  // affected past date so calendar coloring + getValidCheckCompletion reflect
+  // the new exercise completion state without waiting for next app init's
+  // migrateOrphanedChecks pass. Mirrors the refreshAutoItems behaviour that
+  // runs only for TODAY in components/checklist.js. Threshold (>=80% completion
+  // → done) matches refreshAutoItems exactly.
   if (total > 0) {
-    const pct = done / total;
-    const _workout = pct >= 0.8;
-    const updatedChecks = Object.assign({}, (getDayLog(dateStr).checks || {}), { _workout });
-    saveDayLogField(dateStr, { checks: updatedChecks });
+    const newChecks = Object.assign({}, (getDayLog(dateStr).checks || {}));
+    // Per-session AUTO_WORKOUT items (eating-day checklists)
+    const wim = (typeof WORKOUT_ITEM_SESSION !== 'undefined') ? WORKOUT_ITEM_SESSION : {};
+    Object.keys(wim).forEach(itemId => {
+      const sessType = wim[itemId];
+      const sess = sessions[sessType];
+      if(sess && sess.total > 0) {
+        newChecks[itemId] = (sess.done / sess.total) >= 0.8;
+      }
+    });
+    // _workout global aggregate (fast/light days where AUTO_WORKOUT items
+    // aren't in the checklist — pseudo-item handled by getValidCheckCompletion)
+    newChecks._workout = (done / total) >= 0.8;
+    saveDayLogField(dateStr, { checks: newChecks });
   }
 
   // Update summary button
