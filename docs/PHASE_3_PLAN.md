@@ -1,5 +1,7 @@
 # Phase 3 Plan — Plan Extraction to ES Modules
 
+> **📜 HISTORICAL — ✅ SHIPPED across v5.3.0 → v5.5.0 (2026-04-19/21 refactor).** Pre-execution plan. Phases 4 + 5 from the original sketch were batched into this extraction sweep, so the ladder shipped as v5.3.0 (plans/) → v5.4.0 (modules/) → v5.5.0 (components/). Retained for audit trail. See `docs/REFACTOR_COMPLETE.md` for the consolidated post-refactor retrospective.
+
 **APP_VERSION:** 5.2.0 → **5.3.0**
 **CACHE_NAME:** v15 → **v16**
 **Banner:** `'Under the hood: plan definitions now load as separate files. No behavior change.'`

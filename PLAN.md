@@ -1,5 +1,8 @@
 # Implementation Plan: Default Cut / Default Bulk / Default Maintenance
 
+> **📜 HISTORICAL — ✅ SHIPPED in v1.9.0.**
+> This is the original pre-execution plan for adding the CUT / BULK / MAINTENANCE plans to Protocol Health. All work described below was implemented and merged. The "TODAY tab hardcoded HTML" issue called out below was resolved as part of this work (the checklist is now fully dynamic per active plan). Kept for audit trail only — do not follow these instructions as if active. For current plan architecture, see `CLAUDE.md` §3–§4.
+
 ## Overview
 
 Add 3 new plans to Protocol Health. Each plan is a self-contained object in the `PLANS` constant, following the existing architecture. The research document provides all content — this plan covers the exact code changes.

@@ -1,6 +1,6 @@
 # Protocol Health — Full Architecture
 
-> **Status (v6.2.x):** This document describes the app's **domain logic** — data flow, algorithms, and subsystem behavior. As of v6.0.0 the code is organized into ES modules (`plans/`, `modules/`, `components/`, `migrations/`). The algorithmic/data-flow descriptions below remain accurate — the same functions simply live in module files now instead of inline. For the **module layout**, interop pattern, and startup sequence, see `CLAUDE.md` Section 23. For the **migration framework**, see Section 24.
+> **Status (v8.0.0):** This document describes the app's **domain logic** — data flow, algorithms, and subsystem behavior. As of v6.0.0 the code is organized into ES modules (`plans/`, `modules/`, `components/`, `migrations/`). Phase A–D (calibration roadmap, v6.2.5 → v7.0.0+) added `modules/calibration.js`. Phase C added `components/fast-window.js` (multi-day session editor). Phases 11–13 added storage keys `ph_bh_v1`, `ph_bts_v1`, `ph_fs_v1`, `ph_fw_v1`, `ph_ah_v1`. v8.0.0 added `ph_fdu_v1` + `ph_ldu_v1` (manual fast/light unset tracking; schema v5 → v6). The algorithmic/data-flow descriptions below remain accurate. Storage diagrams may show a subset of keys for legibility; `CLAUDE.md` §5 is the full SK inventory. For the **module layout**, interop pattern, and startup sequence, see `CLAUDE.md` Section 23. For the **migration framework**, see Section 24.
 
 ---
 
@@ -20,18 +20,26 @@ graph TB
         JS["Inline Orchestration<br/>+ plans/, modules/,<br/>components/, migrations/"]
     end
 
-    subgraph STORAGE["💾 localStorage (Device Only)"]
+    subgraph STORAGE["💾 localStorage (Device Only) — Schema v6"]
         SK_WT["ph_wt_v1<br/>Weight Log"]
         SK_DL["ph_dl_v1<br/>Day Logs"]
-        SK_FD["ph_fd_v1<br/>Fast Days"]
+        SK_FD["ph_fd_v1<br/>Fast Days (legacy)"]
+        SK_LD["ph_ld_v1<br/>Light Days"]
+        SK_FW["ph_fw_v1<br/>Fast Windows (scaffolding)"]
+        SK_FS["ph_fs_v1<br/>Fast Sessions (Phase 12)"]
+        SK_FDU["ph_fdu_v1<br/>Fast Day Unsets (v8.0.0)"]
+        SK_LDU["ph_ldu_v1<br/>Light Day Unsets (v8.0.0)"]
         SK_ST["ph_st_v1<br/>Settings"]
         SK_SC["ph_sc_v1<br/>Schedule"]
         SK_FL["ph_fl_v1<br/>Food Log"]
         SK_FB["ph_fb_v1<br/>Food Library"]
         SK_EX["ph_ex_v1<br/>Exercise Levels"]
+        SK_AH["ph_ah_v1<br/>Activity History (Phase 13)"]
+        SK_BTS["ph_bts_v1<br/>Backup Timestamp"]
+        SK_BH["ph_bh_v1<br/>Backup History (Phase 11)"]
         SK_SV["ph_sv_v1<br/>Seen Version"]
-        SK_LD["ph_ld_v1<br/>Light Days"]
         SK_SW["ph_sw_v1<br/>SW Dismissed Ver"]
+        SK_SCH["ph_sch_v1<br/>Schema Version Record"]
     end
 
     USER["👤 User"] -->|"installs PWA"| PWA

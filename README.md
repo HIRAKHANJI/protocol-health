@@ -24,13 +24,13 @@ All data stored in the browser's `localStorage` (and mirrored to `IndexedDB` as 
 ## Architecture at a glance
 
 ```
-app.html                  # Bootstrap: HTML + CSS + inline orchestration (~4600 lines)
+app.html                  # Bootstrap: HTML + CSS + inline orchestration (~6,054 lines as of v8.0.0)
 index.html, manifest.json, sw.js
 plans/                    # 5 plan modules + exercise progressions + index assembler
-modules/                  # export.js, calendar.js, radar.js, schedule-html.js
-components/               # workout-card.js, rule-card.js, checklist.js
+modules/                  # export.js, calendar.js, radar.js, schedule-html.js, calibration.js
+components/               # workout-card.js, rule-card.js, checklist.js, fast-window.js
 migrations/               # runner, registry, helpers (schema versioning)
-docs/                     # Phase plans, recon reports, baselines
+docs/                     # Phase plans, recon report, refactor retrospective, audit reports
 ```
 
 No npm. No bundler. No TypeScript. No framework. All modules load natively via `<script type="module">`.

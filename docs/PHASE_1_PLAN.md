@@ -1,5 +1,7 @@
 # Phase 1 Plan — Migration Framework
 
+> **📜 HISTORICAL — ✅ SHIPPED in v5.1.0 (2026-04-19/21 refactor).** Pre-execution plan. Retained for audit trail. See `docs/REFACTOR_COMPLETE.md` for the consolidated post-refactor retrospective.
+
 **Phase:** 1 (Data Safety / Migration Framework)
 **Target APP_VERSION:** 5.0.1 → **5.1.0**
 **Target CACHE_NAME:** `protocol-health-v13` → **`protocol-health-v14`**
