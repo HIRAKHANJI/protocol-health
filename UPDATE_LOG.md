@@ -4,6 +4,79 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 8.3.0 — 2026-05-12
+
+**Scope:** Minor (new user-facing recovery feature; no schema change, no data mutation outside `SK.schedule` + `getSettings().startDate`).
+**Banner:** shown — "Added: a new EDIT START DATE button inside MANAGE SCHEDULE that lets you correct your schedule's original start date and start weight. Useful if your start date was reset by a previous bug, or if you want to backdate the schedule to when your journey actually began. The schedule extends backward to the new date — your target date, ADJUST math, fast/light day records, weight logs, day logs, food log, and notes are all left untouched. A full backup is downloaded before any change is applied."
+**CACHE_NAME:** v32 → v33. No schema migration (still v7).
+
+**Root motivation.** Owner inspected the 2026-05-12 backup and noted that their schedule's `startDate` is `2026-05-04` even though they started the protocol on `2026-03-23`. The 5/4 value is a side-effect of ADJUST/REMOVE-then-CREATE roundtrips during the calibration phases — past schedule.days[] entries were lost when the schedule was re-created from the goal calculator with a "today" start. Downstream effect: the MONTHS calendar overlay (white border = `schedule.days[]` membership) only covers 5/4 → 5/20, the TODAY duration strip shows "DAY 9 / 17" instead of "DAY 51 / 59," and the radar / export anchor at 5/4 instead of 3/23. Owner asked for a generic UI control to correct the original start date — explicitly not a one-off data fix.
+
+### What was added
+
+**New button — EDIT START DATE** inside the MANAGE SCHEDULE modal, between ADJUST and END SCHEDULE TODAY. Styled muted-cyan (`#6aa`) to distinguish it from the existing actions (orange for ADJUST, accent2 orange for END TODAY, red for REMOVE). Helper text: *"Backdates the schedule's original start date. Use only if your start date was lost or changed by a previous bug, or you want to backdate your tracking. This will NOT re-estimate your target date or rerun adjustment math. A full backup is downloaded before any change."*
+
+Clicking it opens a new sub-modal (`#editStartDateOverlay`) with:
+
+- A prominent ⚠ READ FIRST section explaining exactly what the operation does and does NOT do.
+- A Current Schedule readout (current startDate, startWeight, last day in schedule, totalDays).
+- New start date input (date picker capped at the current startDate via `max` attribute, so forward-dating is impossible through the UI).
+- New start weight input (auto-filled from the weight log on the selected date if an exact match exists; otherwise falls back to the nearest log entry by absolute date difference, with a helper note explaining the source). Editable.
+- APPLY button labelled "APPLY (downloads backup first)".
+
+### Apply behaviour
+
+1. Validates inputs: `YYYY-MM-DD` shape; `newStart <= sched.startDate`; `newStart <= todayStr()`; `newStart >= 2020-01-01`; weight in `(0, 500]` kg; not a no-op.
+2. Calls `await backupData()` — the existing canonical full-backup flow (writes JSON with `sha256` checksum, updates `SK.backupTs` and `SK.backupHistory`). If the backup throws, the apply path aborts BEFORE any write — owner is shown a "BACKUP FAILED" alert and the schedule is unchanged.
+3. Re-reads `gs(SK.schedule)` after the async backup in case another tab modified or removed it.
+4. Builds a new `days[]` array from `newStart` through `sched.days[sched.days.length-1]` inclusive (one entry per calendar day, generated via `strToDate` / `dateToStr` loop to stay timezone-safe).
+5. Writes `schedule.startDate`, `schedule.startWeight`, `schedule.days`, `schedule.totalDays`, `schedule.exactDays` atomically via a single `ss(SK.schedule, fresh)`.
+6. Mirrors `startDate` into `getSettings().startDate` via `saveSettings(s)` so anything reading from settings stays consistent (matches the original `applySchedule` behaviour at line 5106).
+7. Dispatches `SCHEDULE_ADJUSTED` — existing event, already refreshes `durationBar`, `calendarHighlights`, `projection`, `manageSchedBtn`, `goalBar`.
+8. Closes both modals, re-renders the calendar, shows a success alert with the new range and a reminder that the backup was downloaded.
+
+### What is deliberately NOT touched
+
+- `SK.fastDays` / `SK.lightDays` — past fast/light day records stay exactly as the user recorded them. No `autoSetPlanFastDays` / `autoSetPlanLightDays` calls on the backfilled range. Avoids duplicate entries or overwriting user choices.
+- `SK.dayLogs` / `SK.weights` / `SK.foodLog` / `SK.activityHistory` — zero changes.
+- `calcAdjust()` is NOT called. No target-date re-estimation, no rate recalculation.
+- `schedule.endDate`, `schedule.planName`, `schedule.scheduleMode`, `schedule.complianceRate`, `schedule.lastAdjustMode` — unchanged.
+- Schema version stays at v7. No migration entry. No new `SK` key.
+
+### Downstream consumer behaviour (verified during planning, see `docs/v8.3.0-schedule-history-edit.md`)
+
+| Consumer | Reads | Behaviour after edit |
+|---|---|---|
+| `modules/calendar.js:31` (`renderCalendar`) | `schedule.days[]` | White border now appears on every date from new startDate through the original last day |
+| `app.html:3198-3213` (`updateDurationBar`) | `startDate`, `totalDays`, `planName` | "DAY X / TOTAL" reflects elapsed days from new startDate |
+| `app.html:5181-5220` (`openManageSchedule`) | All fields | Status text reflects new range |
+| `app.html:5230-5361` (`calcAdjust`) | `startDate`, `startWeight` | Math anchors at new startDate + new startWeight — consistent kg-per-week calculation |
+| `modules/radar.js:29` (`renderRadar`) | `startDate` | Behavioral scoring window anchors at new startDate, covering the full journey |
+| `modules/export.js:25,28` (`openExport`) | `startDate` | Default export range starts at new startDate |
+| `modules/export.js:67,74` (`generateExport`) | `days[]` | Scheduled-vs-unscheduled section split uses the extended `days[]` |
+| `modules/calendar.js:182-185` (`openDayEditor`) | `days[]`, `totalDays`, `planName` | Day-modal "Day X of N" badge reflects extended range |
+| `modules/calibration.js` | (does not read schedule) | No change — calibration uses `SK.weights` + `SK.activityHistory` independently |
+| TDEE display (Settings) | (does not read schedule) | No change |
+
+### Files changed
+
+- `app.html`: new manage-modal section (button + helper); new `#editStartDateOverlay` sub-modal HTML; new `findWeightOnDate`, `openEditStartDate`, `closeEditStartDate`, `onEditStartDateChange`, `applyEditStartDate` functions; new backdrop-click handler for the sub-modal; `APP_VERSION` 8.2.0 → 8.3.0; `APP_VERSION_MSG` updated. ~225 lines added.
+- `sw.js`: `CACHE_NAME` v32 → v33.
+- `index.html`: hero badge v8.2.0 → v8.3.0.
+- `CLAUDE.md`: version references updated; line-count target unchanged (app.html now ~6,312 / target 6,500).
+- `docs/v8.3.0-schedule-history-edit.md`: pre-execution plan committed before implementation (per CLAUDE.md §25).
+- `UPDATE_LOG.md`: this entry.
+- `WORKING_VERSIONS.md`: entry to be added after on-device smoke.
+
+### Data safety
+
+- Full canonical backup auto-downloads BEFORE the write. If the backup fails for any reason, the apply path aborts with no changes. Owner can RESTORE from this backup file at any time to undo the edit.
+- Atomic write — every schedule field updates in a single `ss(SK.schedule, ...)` call. No partial intermediate states.
+- Two-tab race handled: re-reads `SK.schedule` after the async backup; if null, aborts.
+- Forward-dating is impossible: UI date picker capped via `max=sched.startDate`, plus a hard server-side validation that rejects any apply attempt where `newStart > sched.startDate`.
+
+---
+
 ## Version 8.2.0 — 2026-05-12
 
 **Scope:** Minor (auto-derivation completeness fix for past days; no schema change).

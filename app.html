@@ -1398,6 +1398,13 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
         <button class="schedule-btn" id="adjConfirmBtn" onclick="confirmAdjust()" style="display:none">CONFIRM ADJUSTMENT</button>
       </div>
 
+      <!-- EDIT START DATE (v8.3.0) -->
+      <div class="settings-section">
+        <div class="settings-section-title" style="color:#6aa">EDIT START DATE</div>
+        <p style="font-size:0.75rem;color:var(--muted);margin:0 0 10px">Backdates the schedule's original start date. Use only if your start date was lost or changed by a previous bug, or you want to backdate your tracking. This will NOT re-estimate your target date or rerun adjustment math. A full backup is downloaded before any change.</p>
+        <button class="reset-btn" onclick="openEditStartDate()" style="border-color:#6aa;color:#6aa;width:100%">EDIT START DATE</button>
+      </div>
+
       <!-- END TODAY -->
       <div class="settings-section">
         <div class="settings-section-title" style="color:var(--accent2)">END SCHEDULE TODAY</div>
@@ -1410,6 +1417,56 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
         <div class="settings-section-title" style="color:var(--danger)">REMOVE SCHEDULE</div>
         <p style="font-size:0.75rem;color:var(--muted);margin:0 0 10px">Wipes schedule structure completely. All logged data, weights, and notes are kept.</p>
         <button class="reset-btn" onclick="removeSchedule()" style="border-color:var(--danger);color:var(--danger);width:100%">REMOVE SCHEDULE COMPLETELY</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══ EDIT START DATE SUB-MODAL (v8.3.0) ══ -->
+<div class="settings-overlay" id="editStartDateOverlay">
+  <div class="settings-panel">
+    <div class="settings-header">
+      <h2>EDIT START DATE</h2>
+      <button class="close-x" onclick="closeEditStartDate()">×</button>
+    </div>
+    <div class="settings-body">
+
+      <div class="settings-section" style="border-color:var(--accent2)">
+        <div class="settings-section-title" style="color:var(--accent2)">⚠ READ FIRST</div>
+        <p style="font-size:0.75rem;color:var(--muted);margin:0;line-height:1.6">
+          This extends your schedule backward to a new start date. Use only if your start date was lost or changed by a previous bug, or you want to backdate your tracking.
+          <br><br>
+          <b>What this does:</b> Updates the schedule's start date, start weight, and extends the calendar overlay backward to cover the new date through your existing last day. All your weight logs, day logs, food logs, fast days, and notes are unchanged.
+          <br><br>
+          <b>What this does NOT do:</b> Re-estimate your target weight date, rerun ADJUST math, auto-mark new fast/light days on the backfilled range, or change your end date.
+          <br><br>
+          A full backup is downloaded before any change is applied.
+        </p>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-title">Current schedule</div>
+        <div id="esdCurrentText" style="font-size:0.8rem;color:var(--muted);line-height:1.7"></div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-title">New values</div>
+        <div class="duration-inputs">
+          <div>
+            <label class="field-label">Start date (must be on or before current)</label>
+            <input class="field-input" type="date" id="esdDate" onchange="onEditStartDateChange()">
+          </div>
+          <div>
+            <label class="field-label">Start weight on that date (kg)</label>
+            <input class="field-input" type="number" id="esdWeight" placeholder="—" step="0.05" min="20" max="300">
+          </div>
+        </div>
+        <div id="esdWeightNote" style="font-size:0.62rem;color:var(--muted);margin-top:6px;font-family:'DM Mono',monospace;line-height:1.5"></div>
+      </div>
+
+      <div class="settings-section">
+        <button class="schedule-btn" onclick="applyEditStartDate()" style="width:100%">APPLY (downloads backup first)</button>
       </div>
 
     </div>
@@ -1737,8 +1794,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '8.2.0';
-const APP_VERSION_MSG = 'Fixed: past days where you logged workouts retroactively (via the WORKOUTS tab or day modal on a later day) now correctly show as DONE / green on the calendar instead of PARTIAL / orange. The auto-derived checklist items (m2/m3 morning + e1/e2/e3 evening + the _workout aggregate + water item) for any historical day are now normalised on every app load — not just the day they were originally created. Same fix runs live when you tick an exercise in a past-day modal: the matching checklist items flip green immediately. Your raw data is unchanged — only the missing "item-done" markers are filled in from the workout session counts and water totals you already recorded.';
+const APP_VERSION = '8.3.0';
+const APP_VERSION_MSG = 'Added: a new EDIT START DATE button inside MANAGE SCHEDULE that lets you correct your schedule\'s original start date and start weight. Useful if your start date was reset by a previous bug, or if you want to backdate the schedule to when your journey actually began. The schedule extends backward to the new date — your target date, ADJUST math, fast/light day records, weight logs, day logs, food log, and notes are all left untouched. A full backup is downloaded before any change is applied.';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
 
@@ -5443,8 +5500,176 @@ function removeSchedule() {
   );
 }
 
+// ─── EDIT START DATE (v8.3.0) ───────────────────────────────────────────────
+// Lets the user retroactively correct their schedule's original startDate
+// without rerunning ADJUST math. Extends schedule.days[] backward to cover
+// the new date through the existing last day, syncs startWeight from the
+// weight log on the new date (overridable), and mirrors startDate into
+// settings. A full canonical backup is downloaded before the write.
+//
+// Does NOT touch SK.fastDays / SK.lightDays / SK.dayLogs / SK.weights /
+// SK.foodLog / SK.activityHistory — those stay as the user recorded them.
+// Does NOT call calcAdjust / autoSetPlanFastDays / autoSetPlanLightDays.
+// Use case: recovering from a bug that reset startDate, or backdating
+// tracking when the journey actually began before the current schedule.
+
+function findWeightOnDate(dateStr) {
+  const weights = gs(SK.weights) || [];
+  if (!weights.length) return null;
+  const exact = weights.find(w => w && w.date === dateStr && typeof w.weight === 'number');
+  if (exact) return exact.weight;
+  // Fall back to the nearest weight by absolute date difference
+  const targetTs = strToDate(dateStr).getTime();
+  let best = null, bestDiff = Infinity;
+  weights.forEach(w => {
+    if (!w || !w.date || typeof w.weight !== 'number') return;
+    const diff = Math.abs(strToDate(w.date).getTime() - targetTs);
+    if (diff < bestDiff) { bestDiff = diff; best = w; }
+  });
+  return best ? best.weight : null;
+}
+
+function openEditStartDate() {
+  const sched = gs(SK.schedule);
+  if (!sched) return;
+  const lastDay = (sched.days && sched.days.length)
+    ? sched.days[sched.days.length - 1]
+    : sched.startDate;
+  document.getElementById('esdCurrentText').innerHTML =
+    `Start date: <b>${sched.startDate}</b><br>` +
+    `Start weight: <b>${(typeof sched.startWeight === 'number') ? sched.startWeight + 'kg' : '—'}</b><br>` +
+    `Last day in schedule: <b>${lastDay}</b><br>` +
+    `Current total days: <b>${sched.totalDays}</b>`;
+  const dateEl = document.getElementById('esdDate');
+  const wEl    = document.getElementById('esdWeight');
+  dateEl.value = sched.startDate || '';
+  // Cap the date picker at the current startDate — this control only backdates
+  dateEl.setAttribute('max', sched.startDate || todayStr());
+  wEl.value = (typeof sched.startWeight === 'number') ? sched.startWeight : '';
+  document.getElementById('esdWeightNote').textContent = '';
+  document.getElementById('editStartDateOverlay').classList.add('active');
+}
+
+function closeEditStartDate() {
+  document.getElementById('editStartDateOverlay').classList.remove('active');
+}
+
+function onEditStartDateChange() {
+  const newDate = document.getElementById('esdDate').value;
+  if (!newDate) return;
+  const w = findWeightOnDate(newDate);
+  const wEl = document.getElementById('esdWeight');
+  const noteEl = document.getElementById('esdWeightNote');
+  if (w !== null) {
+    wEl.value = w;
+    const weights = gs(SK.weights) || [];
+    const exact = weights.find(x => x && x.date === newDate);
+    noteEl.textContent = exact
+      ? `Auto-filled from your weight log on ${newDate}.`
+      : `No log on ${newDate} — using nearest entry (${w}kg). Edit if you remember a different value.`;
+  } else {
+    noteEl.textContent = 'No weight history available — enter manually.';
+  }
+}
+
+async function applyEditStartDate() {
+  const sched = gs(SK.schedule);
+  if (!sched) {
+    showAlert('NO SCHEDULE', 'The schedule was removed in another tab. Nothing to edit.');
+    closeEditStartDate();
+    return;
+  }
+
+  const newStart = document.getElementById('esdDate').value;
+  const newWeight = parseFloat(document.getElementById('esdWeight').value);
+
+  if (!newStart || !/^\d{4}-\d{2}-\d{2}$/.test(newStart)) {
+    showAlert('INVALID DATE', 'Pick a valid start date.');
+    return;
+  }
+  if (newStart > sched.startDate) {
+    showAlert('FORWARD NOT ALLOWED',
+      `New start date ${newStart} is after current start date ${sched.startDate}. ` +
+      `This control only backdates. Use END SCHEDULE TODAY or REMOVE to trim forward.`);
+    return;
+  }
+  if (newStart > todayStr()) {
+    showAlert('FUTURE DATE', 'Start date cannot be in the future.');
+    return;
+  }
+  if (newStart < '2020-01-01') {
+    showAlert('TOO EARLY', 'Start date must be on or after 2020-01-01.');
+    return;
+  }
+  if (!isFinite(newWeight) || newWeight <= 0 || newWeight > 500) {
+    showAlert('INVALID WEIGHT', 'Enter a start weight between 1 and 500 kg.');
+    return;
+  }
+  if (newStart === sched.startDate && newWeight === sched.startWeight) {
+    showAlert('NO CHANGE', 'New values are identical to current values. Nothing to do.');
+    return;
+  }
+
+  // Full canonical backup before any write
+  try {
+    await backupData();
+  } catch (e) {
+    console.error('[editStartDate] backup failed:', e);
+    showAlert('BACKUP FAILED', 'Could not auto-backup before applying changes. Aborting to keep your data safe. Try a manual backup first, then retry.');
+    return;
+  }
+
+  // Re-read schedule after the async backup — another tab may have changed it
+  const fresh = gs(SK.schedule);
+  if (!fresh) {
+    showAlert('NO SCHEDULE', 'The schedule was removed during backup. Aborting.');
+    closeEditStartDate();
+    return;
+  }
+
+  const lastDay = (fresh.days && fresh.days.length)
+    ? fresh.days[fresh.days.length - 1]
+    : fresh.startDate;
+  const newDays = [];
+  const cur = strToDate(newStart);
+  const end = strToDate(lastDay);
+  if (cur > end) {
+    showAlert('INVALID RANGE', 'New start date is after the schedule end. Aborting.');
+    return;
+  }
+  while (cur <= end) {
+    newDays.push(dateToStr(cur));
+    cur.setDate(cur.getDate() + 1);
+  }
+
+  fresh.startDate   = newStart;
+  fresh.startWeight = newWeight;
+  fresh.days        = newDays;
+  fresh.totalDays   = newDays.length;
+  fresh.exactDays   = newDays.length;
+  ss(SK.schedule, fresh);
+
+  const s = getSettings();
+  s.startDate = newStart;
+  saveSettings(s);
+
+  dispatch('SCHEDULE_ADJUSTED');
+  closeEditStartDate();
+  closeManageSchedule();
+  setTimeout(() => {
+    if (typeof renderCalendar === 'function') renderCalendar();
+    showAlert('START DATE UPDATED',
+      `Schedule extended backward to ${newStart} (start weight ${newWeight}kg). ` +
+      `Total days: ${newDays.length}. A full backup was downloaded before the change.`);
+  }, 50);
+}
+
 document.getElementById('manageSchedOverlay').addEventListener('click', e=>{
   if(e.target.id==='manageSchedOverlay') closeManageSchedule();
+});
+
+document.getElementById('editStartDateOverlay').addEventListener('click', e=>{
+  if(e.target.id==='editStartDateOverlay') closeEditStartDate();
 });
 document.getElementById('scheduleChoiceOverlay').addEventListener('click', e=>{
   if(e.target.id==='scheduleChoiceOverlay') closeScheduleChoice();
