@@ -1,5 +1,7 @@
 # Phase 6 Plan — Finalize CLAUDE.md Architecture Docs
 
+> **📜 HISTORICAL — ✅ SHIPPED in v6.0.0 (2026-04-21).** Pre-execution plan for the documentation finalization phase of the v5 → v6 modular refactor. Retained for audit trail. See `docs/REFACTOR_COMPLETE.md` for the consolidated post-refactor retrospective.
+
 **APP_VERSION:** 5.5.0 → **6.0.0** (major bump — architecture refactor complete)
 **CACHE_NAME:** v18 → **v19**
 **Banner:** `'Architecture refactor complete. Zero behavior change; app is now modular under the hood.'`

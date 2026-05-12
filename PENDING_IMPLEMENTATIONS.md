@@ -1,18 +1,24 @@
 # Pending Implementations — Calibration & Stability Roadmap
 
+> **📜 HISTORICAL — ✅ PROJECT CLOSED 2026-04-28. DO NOT FOLLOW INSTRUCTIONS BELOW AS IF ACTIVE.**
+>
+> All 13 phases of the original calibration & stability roadmap shipped and merged at v7.8.1. Closed out with cache bump v26 → v27 on 2026-04-28. Subsequent calibration-related fixes (v7.9.0 TDEE accuracy upgrade, v7.10.0 calibration off-by-one, v7.10.1–v7.10.3 micro-patches, v8.0.0 audit fixes) ship via the normal release process documented in `CLAUDE.md` §§11–12 — **not** through this file.
+>
+> The "How to use this file" section below describes the rules that governed Claude Code sessions DURING the project. They are kept verbatim for audit trail. **Do not interpret them as live instructions.** For current code-change procedure, see `CLAUDE.md` §25 "Working With This Codebase".
+
 **Status:** ✅ **PROJECT COMPLETED** (2026-04-28). All 13 phases shipped and merged. End state: APP_VERSION 7.8.1, schemaVersion 5, 4 migrations applied. Closed-out cache bump (CACHE_NAME v26 → v27) shipped 2026-04-28 to invalidate stale installed-PWA caches that had been frozen at v7.1.0.
 
 **This file is now historical.** No further phases. CLAUDE.md no longer references this document. Retained for audit trail only.
 
-**Source of truth for all post-v7.1.0 calibration/stability work.** Created 2026-04-28.
+**Source of truth for all post-v7.1.0 calibration/stability work** (during the project's active period, Mar–Apr 2026). Created 2026-04-28 as the closing snapshot.
 
 ---
 
-## How to use this file
+## How to use this file [HISTORICAL — describes rules during the active project, Mar–Apr 2026]
 
-This document is the **only** task list Claude follows when asked to "continue", "implement", "work", "proceed", "do the next phase", or any equivalent prompt about the calibration/stability project.
+This document **was** the only task list Claude followed when asked to "continue", "implement", "work", "proceed", "do the next phase", or any equivalent prompt about the calibration/stability project. The project is closed; the rules below no longer apply to current work.
 
-### Rules (non-negotiable)
+### Rules (non-negotiable) [during the active project — historical]
 
 1. **Read this file before every action.** Find the next phase whose status is `PENDING`. Implement only that phase. Do not skip ahead. Do not bundle phases.
 2. **One phase per session, one commit per phase.** No multi-phase commits. No "while we're in here" extra changes.

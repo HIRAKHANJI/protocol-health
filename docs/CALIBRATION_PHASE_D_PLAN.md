@@ -1,6 +1,8 @@
 # Calibration Project — Phase D Plan
 
-**Status:** EXECUTING
+> **📜 HISTORICAL — ✅ SHIPPED in v7.0.0.** Calibration project completed at v7.8.1 (all phases A–D + 11–13). Plan retained for audit trail only. Do not follow as if active. See `UPDATE_LOG.md` v7.0.0 entry and `PENDING_IMPLEMENTATIONS.md` for the closed-out roadmap. Subsequent calibration-related fixes shipped in v7.1.0 through v7.10.x and v8.0.0.
+
+**Status:** ✅ COMPLETED (shipped v7.0.0)
 **Branch:** `claude/add-workout-exercises-KjRRh`
 **Version target:** `7.0.0` (major — completes the calibration project; new system rework)
 

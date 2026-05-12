@@ -1,5 +1,7 @@
 # Phase 2 Plan — Bugfixes
 
+> **📜 HISTORICAL — ✅ SHIPPED in v5.2.0 (2026-04-19/21 refactor).** Pre-execution plan. Retained for audit trail. See `docs/REFACTOR_COMPLETE.md` for the consolidated post-refactor retrospective.
+
 **Phase:** 2 (Real bugs only, no refactor)
 **Target APP_VERSION:** 5.1.0 → **5.2.0**
 **Target CACHE_NAME:** `protocol-health-v14` → **`protocol-health-v15`**

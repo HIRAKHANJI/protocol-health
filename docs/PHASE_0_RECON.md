@@ -1,5 +1,7 @@
 # Phase 0 — Refactor Recon Report
 
+> **📜 HISTORICAL — refactor completed in v6.0.0 (2026-04-21).** This is the pre-refactor reconnaissance report. All line-count, storage-key, and extraction-target observations describe the v5.0.1 codebase, not current state. Retained for audit trail. See `docs/REFACTOR_COMPLETE.md` for the post-execution retrospective.
+
 **Date:** 2026-04-19
 **App version at recon:** 5.0.1
 **Current CACHE_NAME:** `protocol-health-v13`

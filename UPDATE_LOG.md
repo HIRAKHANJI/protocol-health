@@ -4,6 +4,87 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 8.1.0 — 2026-05-12
+
+**Scope:** Minor (multi-day fast bleed-out display bug + reconcile-vs-manual-unset race; schema migration v6 → v7)
+**Banner:** shown — "Fixed: ending a multi-day fast no longer forces the next day into fast protocol. The 'bleed-in' evening before and the 'bleed-out' morning after a long fast were being auto-marked as fast days even though only a few hours of fasting touched them. Now a date is only auto-marked when the session covers ≥ 16 hours of that calendar day — the actual fast day. Bookend dates revert to their declared protocol (eating, light, or whatever the plan says). Active fasts still keep today in fast protocol until you end. Stale auto-marks from earlier versions are cleaned on first load (auto-backup happens first). Manual day-modal unsets are now strictly respected — session syncs no longer silently re-add a date you explicitly toggled off."
+**CACHE_NAME:** v30 → v31.
+
+**Root motivation.** Owner reported: ended a Sun-9-PM → Tue-9:45-AM multi-day fast this morning (2026-05-12). The session spanned 3 calendar dates (5/10, 5/11, 5/12) and only 5/11 was the intended fast day. But the app showed Tuesday 5/12 as a fast day on every surface (calendar coloring, TODAY checklist, day-modal protocol). When the owner toggled Tuesday off via the day modal, the toggle worked initially — but on next app open, Tuesday came back as fast. The backup snapshot showed `fastDays["2026-05-12"]: true` AND `fastDayUnsets["2026-05-12"]: true` simultaneously, which should be impossible from a normal user-flow.
+
+**Two bugs identified by tracing the backup data + code:**
+
+### Bug 1 — Session-to-fastDay sync uses an over-broad rule (the headline bug)
+
+`components/fast-window.js:_syncFastDaysFromSession` added EVERY date in `session.dates[]` to `SK.fastDays`, regardless of how many hours the session actually covered on that date. This was added in v7.10.2 to fix a sibling bug (5/5 and 5/8 showing as eating-day cells when they were partial-fast bookends of a multi-day fast). The v7.10.2 fix went too far — it conflated "session touched this date" with "this date is a fast PROTOCOL day", treating bleed-in (3h on the eve) and bleed-out (9h next morning) dates as full fast days.
+
+**Architectural clarification:** there are two distinct concepts the code was conflating:
+
+| Concept | Storage | Meaning |
+|---|---|---|
+| **Fast protocol day** | `SK.fastDays` | A calendar date the user DESIGNATED as a fast day (via day-modal toggle OR plan auto-set). Drives checklist, calendar cell color, day-modal protocol, calibration intake exclusion. |
+| **Fast session** | `SK.fastSessions` | The temporal record of when the user was actually fasting. `dates[]` = every calendar date the session touched (for UI badges + hour attribution). |
+
+A session can bleed into dates that are NOT fast protocol days. That's how humans normally fast — start the evening before, end the morning after. Only the "middle" date(s) of a multi-day fast should auto-mark as protocol days. The bookends are eating days with fast-time bleed.
+
+**Fix:** introduced a 16-hour threshold rule. A session contributes a date to `SK.fastDays` only when its activity on that calendar date's local 24h window is ≥ 16 hours. New helper `_sessionHoursOnDate(session, dateStr)` computes the per-date contribution. Applied to both `_syncFastDaysFromSession` (session-mutation entry points) and `reconcileFastDaysFromSessions` (init-time bulk reconcile). 16 hours is the threshold because:
+- Full-day fasts of a multi-day session land at 24h → marked ✓
+- Bleed dates typically land at 3–12h → not marked ✓
+- True single-day all-day fasts (e.g. 6 AM → 11 PM = 17h) land at 17h → marked ✓
+- Wake-to-wake 24h patterns (9 AM Mon → 9 AM Tue) split as 15h + 9h → neither qualifies; user must mark the intended day manually via the day modal. Correct fallback because the system can't infer which date the user calls "the fast day" for that pattern.
+- Intermittent 16:8 patterns → not marked ✓
+
+### Bug 2 — Session syncs ignored manual unsets (the contradiction-in-data root cause)
+
+`_syncFastDaysFromSession` and `reconcileFastDaysFromSessions` didn't consult `SK.fastDayUnsets`. In v8.0.0 (H3 fix), `autoSetPlanFastDays` and `autoSetPlanLightDays` were updated to respect `fastDayUnsets` so schedule extension wouldn't clobber user toggles. **The session-sync path was missed.** When the owner manually unset 5/12 via the day modal, the toggle worked once — but the next time anything called `_syncFastDaysFromSession` or the init-time `reconcileFastDaysFromSessions`, 5/12 was added back from the covering session, creating the contradictory state observed in the backup.
+
+**Fix:** both functions now check `fdu[d]` and skip dates the user has explicitly unset. The user's most recent explicit intent (the unset) is always preserved. (If the user later re-toggles a date ON, `toggleFastDay` already clears it from `fdu`, so re-marking is properly enabled.)
+
+### Bug 3 — TODAY tab dropped active fasts on user without `SK.fastDays` entry
+
+If the user spontaneously started a fast at noon without first toggling today as a fast day, `isFastDay(today)` returned false (no `SK.fastDays` entry yet) even though there's an active session. Today displayed eating-day protocol while the user was actually fasting.
+
+**Fix:** `isFastDay` in `app.html` now consults `getActiveSession()` for today. If an active session exists, today is fast regardless of `SK.fastDays`. Past and future dates use the stored map only (no dynamic behavior). This pairs cleanly with Bug 1's fix — past bleed dates correctly fall out of fast protocol (no session is active anymore), while a still-running fast keeps today in fast protocol until ended.
+
+### Migration v6 → v7 (one-time cleanup)
+
+New migration cleans up the historical over-marks accumulated from v7.10.2 through v8.0.0. `requiresBackup: true` — auto-downloads a snapshot before running. Walks `SK.fastDays` and removes any date that satisfies the new rules. Algorithm:
+
+1. **If the date is in `SK.fastDayUnsets`**: remove from `SK.fastDays` (user said off; the contradictory entry was a sync bug).
+2. **Else if the date matches the active plan's `fastDaysDow` pattern**: preserve (plan auto-set, authoritative).
+3. **Else if no session covers the date**: preserve (pure manual intent; we have no record of it being auto-added).
+4. **Else if any covering session has ≥ 16h on this date**: preserve (legitimate full-day fast contribution).
+5. **Otherwise**: remove (bleed over-mark from v7.10.2 reconcile).
+
+Owner's backup simulation: removes 5/12 (unset-preserved), 5/8 (4h bleed-only on a Friday non-plan-day), 5/1 (12.5h bleed-only on a Friday non-plan-day). Preserves all 28 other dates including 5/11 (24h full-day session) and every plan-scheduled Sun/Wed/Sat.
+
+Migration has `verify()` (re-checks the invariant) and `reverse()` (re-applies the old over-broad sync, for rollback).
+
+**Files touched:**
+
+- `components/fast-window.js` — added `_sessionHoursOnDate`, `_FAST_DAY_SESSION_HOURS_MIN = 16`, threshold + `fastDayUnsets` respect in both `_syncFastDaysFromSession` and `reconcileFastDaysFromSessions`.
+- `migrations/registry.js` — new migration v6 → v7 with cleanup, verify, reverse.
+- `app.html` — `isFastDay` consults `getActiveSession()` for today. APP_VERSION + APP_VERSION_MSG bumped.
+- `sw.js` — CACHE_NAME v30 → v31.
+- `index.html` — hero badge → v8.1.0.
+- `CLAUDE.md` — schema version note updated.
+
+**Behaviour after upgrade for the owner's data:**
+
+1. App loads, auto-backup downloads (migration `requiresBackup: true`).
+2. Migration v6→v7 fires once. Console logs: `[migration v6→v7] removed 3 bleed over-marks: 2026-05-12 [unset-preserved], 2026-05-08 [bleed-9.5h], 2026-05-01 [bleed-12.5h]`.
+3. MONTHS tab: 5/12 cell now shows EATING-day color. 5/11 stays purple (correct full-day fast). 5/10 stays purple (AGRO Sun auto-set). 5/8 and 5/1 also revert to eating-day color (those were also bleed bookends from the earlier sessions).
+4. Open 5/12 day modal: shows eating-day checklist. The fast session record (`fs_..._rbgjam`) is still in `SK.fastSessions` for hour-attribution; if needed, the day modal can still show "session activity here" as a secondary badge (deferred to Phase 2).
+5. TODAY tab (currently 5/12): eating-day checklist visible. User can log food, projection / cal strip behave as eating day.
+6. If user starts a NEW fast right now: TODAY immediately flips to fast protocol via the active-session check. End fast → reverts to eating.
+7. Manual day-modal unset of any future date will now stay unset — no more silent re-add on next app load.
+
+**Audit findings deferred:**
+
+The earlier audit's open items (L1 ss() return signal, L2 historical fast-day plan attribution, L6 workoutChecks orphan by design, M6 idbSyncAll race) remain deferred. A Phase 2 architectural cleanup (separating session-hour attribution from protocol-day classification in calibration / radar) is a future task — v8.1.0 fully resolves the user-visible display + cross-rule data contradiction without requiring it.
+
+---
+
 ## Version 8.0.0 — 2026-05-09
 
 **Scope:** Major (14 confirmed bug fixes from a 6-agent aggressive codebase audit; schema migration v5 → v6).

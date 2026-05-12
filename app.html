@@ -1737,8 +1737,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '8.0.0';
-const APP_VERSION_MSG = 'Major: 14 confirmed bug fixes from a 6-agent codebase audit. Plan switches no longer carry stale check state with new meanings (n2 was "Sleep 7-9hrs" in 4 plans but "Monthly body comp check" in BULK — old ticks would have lied about new compliance). Markdown export now escapes user-typed food names and notes. Settings TDEE field stays in sync with background calibration so it can\'t be clobbered. Schedule extension preserves manually-unset fast/light days. Activity multiplier resets cleanly on plan switch. Backup restore type-checks every value. Day-modal exercise checks now auto-derive _workout for past days. Schema v5 → v6 (additive, no data transform).';
+const APP_VERSION = '8.1.0';
+const APP_VERSION_MSG = 'Fixed: ending a multi-day fast no longer forces the next day into fast protocol. The "bleed-in" evening before and the "bleed-out" morning after a long fast were being auto-marked as fast days even though only a few hours of fasting touched them. Now a date is only auto-marked when the session covers ≥ 16 hours of that calendar day — the actual fast day. Bookend dates revert to their declared protocol (eating, light, or whatever the plan says). Active fasts still keep today in fast protocol until you end. Stale auto-marks from earlier versions are cleaned on first load (auto-backup happens first). Manual day-modal unsets are now strictly respected — session syncs no longer silently re-add a date you explicitly toggled off.';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
 
@@ -2739,7 +2739,24 @@ const FULL_DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','
 document.getElementById('todayDayName').textContent = FULL_DAYS[new Date().getDay()];
 
 // isFastDay: checks if a given dateStr is marked as a water fast in storage
-function isFastDay(dateStr) { return !!(gs(SK.fastDays)||{})[dateStr]; }
+// v8.1.0: an active fast session covering TODAY keeps today in fast
+// protocol regardless of SK.fastDays — supports the "user is still
+// fasting; don't drop them out of fast protocol just because no
+// SK.fastDays entry exists yet" case. Past and future dates use the
+// stored map only. This pairs with the v8.1.0 16h threshold rule: the
+// stored map is set at session-end (per _syncFastDaysFromSession) so
+// past dates correctly reflect the rule, while today defers to the
+// real-time session state. If the user manually toggled today as fast
+// (SK.fastDays[today] === true) the result is the same. The dynamic
+// branch only matters when no SK.fastDays entry exists yet for today
+// — e.g., the user spontaneously started a fast at noon and wants the
+// TODAY tab to flip to fast protocol immediately.
+function isFastDay(dateStr) {
+  if (dateStr === todayStr() && typeof getActiveSession === 'function') {
+    if (getActiveSession()) return true;
+  }
+  return !!(gs(SK.fastDays)||{})[dateStr];
+}
 
 // isLightDay: checks if a given dateStr is marked as a light eating day in storage
 function isLightDay(dateStr) { return !!(gs(SK.lightDays)||{})[dateStr]; }
