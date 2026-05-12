@@ -4,6 +4,74 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 8.2.0 — 2026-05-12
+
+**Scope:** Minor (auto-derivation completeness fix for past days; no schema change).
+**Banner:** shown — "Fixed: past days where you logged workouts retroactively (via the WORKOUTS tab or day modal on a later day) now correctly show as DONE / green on the calendar instead of PARTIAL / orange. The auto-derived checklist items (m2/m3 morning + e1/e2/e3 evening + the _workout aggregate + water item) for any historical day are now normalised on every app load — not just the day they were originally created. Same fix runs live when you tick an exercise in a past-day modal: the matching checklist items flip green immediately. Your raw data is unchanged — only the missing 'item-done' markers are filled in from the workout session counts and water totals you already recorded."
+**CACHE_NAME:** v31 → v32. No schema migration (still v7).
+
+**Root motivation.** Owner inspected the 2026-05-12 backup and asked two questions:
+
+1. **Why do the last 9 days have a white border around the calendar cell while older days don't, given that all days from 3/23 → today are part of their tracking?** Owner expected a uniform appearance.
+2. **Several past days show PARTIAL (orange) even though "everything is ticked off."** Owner asked to dig through the backup and find both the affected days and the cause.
+
+Question 1 was **not a bug** — schedule overlay working as designed. The owner's schedule (`SK.schedule.days[]`) covers 2026-05-04 → 2026-05-20 (17 dates). The `.plan-day` CSS class (white border) is applied only to dates in `SK.schedule.days[]`. The "9 visible past days" are 5/4 → 5/12, all in the schedule. The 8 future schedule days (5/13 → 5/20) also have the border. Days before 5/4 are logged + tracked but not part of the active schedule planning overlay, so no border. **Action: explanation only, no code change.** (CLAUDE.md §8 already documents schedule overlay semantics.)
+
+Question 2 was **a confirmed bug**. Specific affected day in the backup: **2026-05-01** (Friday, eating day). dayLog showed: 28/28 workouts done across all sessions (morning 8/8, evening 14/14, daily 6/6); all 28 exercise rows ticked in `workoutChecks`; every checklist item the user ever touched green. Calendar still rendered PARTIAL. Root cause: `getValidCheckCompletion` for an AGRO eating-day-Friday checklist produces 19 items total (15 leaves + 4 s1 sub-items). The user's `checks{}` for 5/1 had 13 keys ticked, but was missing `m2, m3, e1, e2, e3` (the AUTO_WORKOUT items derived from workout sessions) and `f4` (the water-target item). Those keys were missing because the user logged the workouts retroactively via the WORKOUTS tab / day modal on a different day, so the per-session AUTO items never made it into `checks` for 5/1. The calendar classifier counted them as un-done → 13/19 = 68% → PARTIAL.
+
+`migrateOrphanedChecks` (app.html, runs on every init) ALREADY had logic to derive AUTO_WORKOUT items + `_workout` + water-target items from session/water values — BUT each block was gated by an `if (!(itemId in checks)) return;` guard (or `(item.id in checks)` for water). The guard ONLY updated stale values (true→false or vice versa) but NEVER inserted missing keys. Past days whose `checks{}` map never had m2/m3/e1/e2/e3 in the first place stayed forever-missing → forever-PARTIAL.
+
+### Fix 1 — `migrateOrphanedChecks` now inserts AUTO_WORKOUT + `_workout` + water items idempotently
+
+**File:** `app.html` (the `migrateOrphanedChecks` body, ~lines 2982–3060).
+
+- For each AUTO_WORKOUT_ID (`m2`, `m3`, `e1`, `e2`, `e3`): gate is now `validIds.has(itemId)` (the rendered checklist for THIS date contains the item). When the matching `workoutSessions[sess].total > 0`, derive `checks[itemId] = (sess.done / sess.total) >= 0.8` regardless of whether the key already exists. Fast-day checklists don't render these items, so `validIds.has` is false there and they're correctly skipped.
+- For `_workout` (pseudo-item used by `getValidCheckCompletion` only when the rendered checklist has NO AUTO_WORKOUT items — i.e. fast / light days): gate is now `!AUTO_WORKOUT_IDS.some(id => validIds.has(id)) && log.workoutTodayTotal > 0`. Derive from global `(workoutTodayDone / workoutTodayTotal) >= 0.8`. Inserts if missing.
+- For water-type items (`f4` in AGRO eating, `wf4` in AGRO fast): removed the `(item.id in checks)` guard so any water-type item rendered for this date gets its value derived from `log.water >= item.waterTarget`. Inserts if missing.
+
+Net effect: the next app init after v8.2.0 loads sweeps the full dayLog history once and fills in every missing auto-item across every historical date in one normalization pass. No separate migration needed — `migrateOrphanedChecks` already runs every init.
+
+### Fix 2 — `toggleModalWorkoutEx` writes per-session AUTO_WORKOUT items live
+
+**File:** `modules/calendar.js` (`toggleModalWorkoutEx`, lines ~498–555).
+
+In v8.0.0 (M7 fix) this function was extended to set `_workout` on the dayLog when the user retroactively toggles an exercise via the day modal. That handled fast/light days correctly but NOT eating days — the per-session AUTO_WORKOUT items (m2/m3 = morning, e1/e2/e3 = evening) were never updated, so a user toggling exercises on a past eating day would not see the calendar flip green until next app init.
+
+Extension: after the `workoutSessions` recompute, the function now also iterates `WORKOUT_ITEM_SESSION` and sets `newChecks[itemId] = (sess.done / sess.total) >= 0.8` for each AUTO item whose matching session exists. `_workout` is still set globally. Same 0.8 threshold as `refreshAutoItems` / `migrateOrphanedChecks`. Idempotent and matches existing TODAY-tab behaviour.
+
+### What the owner will see after v8.2.0 loads
+
+1. Update banner appears (minor version bump).
+2. App init runs `migrateOrphanedChecks` once. All historical dayLogs are normalized in a single sweep. Calendar cells for past days where workouts + water were genuinely completed now render GREEN / FULL instead of PARTIAL / ORANGE.
+3. Days that legitimately remain PARTIAL (e.g. 5/4 with 0/27 workouts done) still show PARTIAL — only days where the missing keys were the cause flip.
+4. Future retroactive toggles: ticking an exercise on a past day's modal flips the matching checklist items + the calendar cell color immediately, without waiting for next init.
+
+### Data safety
+
+- No storage keys renamed. No schema bump.
+- `migrateOrphanedChecks` only writes keys for items that the date's rendered checklist actually contains. Won't pollute fast-day logs with eating-day items or vice versa.
+- The auto-derivation is purely additive — it only inserts a missing key or flips a stale true/false. The user's raw `workoutSessions` counts, water totals, and exercise tick state (`workoutChecks{}`) are untouched.
+- Hand-traced against the owner's backup: 5/1 will flip from 13/19 (68%, PARTIAL) to 19/19 (100%, FULL) on first load (water = 3 ≥ 3 target, all sessions 100%). Past days where workouts were genuinely under-done stay PARTIAL.
+
+### Files changed
+
+| File | Change |
+|------|--------|
+| `app.html` | `migrateOrphanedChecks` AUTO_WORKOUT block: `(itemId in checks)` guard → `validIds.has(itemId)` gate. `_workout` block: insert when no AUTO_WORKOUT in checklist + global > 0. Water block: drop the `(item.id in checks)` guard. APP_VERSION 8.1.0 → 8.2.0, APP_VERSION_MSG updated. |
+| `modules/calendar.js` | `toggleModalWorkoutEx`: write per-session AUTO_WORKOUT items + `_workout` live after session recompute. |
+| `sw.js` | CACHE_NAME v31 → v32. |
+| `index.html` | Hero badge v8.1.0 → v8.2.0. |
+| `CLAUDE.md` | Version refs updated (sw.js cache name, APP_VERSION, line-count snapshot, line-count governance table). |
+
+### Non-goals
+
+- No change to `getValidCheckCompletion` itself. The classifier remains source-of-truth for counting; the fix happens upstream by ensuring the stored `checks{}` map contains the keys the classifier needs.
+- No change to `refreshAutoItems` (TODAY-only). It already worked correctly for today.
+- No new schema migration. v7 stays.
+- No CLAUDE.md §8 change — schedule semantics already documented.
+
+---
+
 ## Version 8.1.0 — 2026-05-12
 
 **Scope:** Minor (multi-day fast bleed-out display bug + reconcile-vs-manual-unset race; schema migration v6 → v7)

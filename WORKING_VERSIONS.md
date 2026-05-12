@@ -34,6 +34,18 @@ This log records every git-tagged working version of Protocol Health during the 
 
 ---
 
+## v8.2.0-working — 2026-05-12 (auto-derivation completeness fix for past days — calendar PARTIAL→FULL where workouts+water already met)
+- **Phase:** docs-defined release (owner-reported bug from same-day 2026-05-12 backup, post-v8.1.0)
+- **Git tag:** `v8.2.0-working` (to be pushed after this commit lands on main)
+- **Commit hash:** TBD on commit
+- **CACHE_NAME:** `protocol-health-v32`
+- **Smoke test:** PASS (in-flight; verified via hand-trace against owner's actual backup data — 5/1 will flip from 13/19 (68%, PARTIAL) to 19/19 (100%, FULL) on first load after deploy. Affected day class: any past eating day where workouts were logged retroactively via WORKOUTS tab or day modal, leaving `checks{}` missing `m2/m3/e1/e2/e3/_workout/f4`). On-device smoke required post-deploy.
+- **Owner-confirmed:** pending (post-deploy)
+- **Auto-backup on owner device:** N/A — `migrateOrphanedChecks` doesn't trigger the migration runner; the change is purely additive to in-memory `checks{}` map. The runner's `requiresBackup: true` mechanic only applies to schema migrations. No schema bump (still v7). Owner is encouraged to take a manual backup before first v8.2.0 load nonetheless.
+- **Notes:** Minor release — closes the "past days marked PARTIAL despite everything ticked off" bug class. Two coupled fixes: (1) `migrateOrphanedChecks` AUTO_WORKOUT_IDS / `_workout` / water-item blocks now INSERT missing keys based on `validIds.has` gate (rendered checklist for that date) + workoutSessions / log.water threshold ≥ 0.8 — previously gated by `(itemId in checks)` which only updated stale values; (2) `toggleModalWorkoutEx` extension writes per-session AUTO_WORKOUT items (m2/m3 = morning, e1/e2/e3 = evening) live alongside the existing `_workout` write, so retroactive toggles on past-eating-day modals immediately flip the calendar color. No schema migration — `migrateOrphanedChecks` runs at every init = automatic one-pass normalization on first v8.2.0 load. Schema stays at v7. The white-border / `.plan-day` question from the same backup inspection was answered by explanation only (schedule overlay working as designed per CLAUDE.md §8) — no code change.
+
+---
+
 ## v8.1.0-working — 2026-05-12 (multi-day fast bleed-out bug fix + manual-unset respect + schema v6→v7)
 - **Phase:** docs-defined release (owner-reported bug from 2026-05-12 backup)
 - **Git tag:** `v8.1.0-working` (to be pushed after this commit lands on main)

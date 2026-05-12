@@ -1737,8 +1737,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '8.1.0';
-const APP_VERSION_MSG = 'Fixed: ending a multi-day fast no longer forces the next day into fast protocol. The "bleed-in" evening before and the "bleed-out" morning after a long fast were being auto-marked as fast days even though only a few hours of fasting touched them. Now a date is only auto-marked when the session covers ≥ 16 hours of that calendar day — the actual fast day. Bookend dates revert to their declared protocol (eating, light, or whatever the plan says). Active fasts still keep today in fast protocol until you end. Stale auto-marks from earlier versions are cleaned on first load (auto-backup happens first). Manual day-modal unsets are now strictly respected — session syncs no longer silently re-add a date you explicitly toggled off.';
+const APP_VERSION = '8.2.0';
+const APP_VERSION_MSG = 'Fixed: past days where you logged workouts retroactively (via the WORKOUTS tab or day modal on a later day) now correctly show as DONE / green on the calendar instead of PARTIAL / orange. The auto-derived checklist items (m2/m3 morning + e1/e2/e3 evening + the _workout aggregate + water item) for any historical day are now normalised on every app load — not just the day they were originally created. Same fix runs live when you tick an exercise in a past-day modal: the matching checklist items flip green immediately. Your raw data is unchanged — only the missing "item-done" markers are filled in from the workout session counts and water totals you already recorded.';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
 
@@ -3011,10 +3011,19 @@ function migrateOrphanedChecks() {
       if(!validIds.has(checkId)) { delete checks[checkId]; changed = true; }
     });
 
-    // Fix stale workout auto-items: if workoutSessions shows completion but checks say false
+    // v8.2.0 fix: derive auto-workout items from workoutSessions for EVERY date
+    // whose rendered checklist contains them — regardless of whether the key
+    // already exists in `checks`. Previous behaviour gated on `(itemId in checks)`,
+    // so days where the user logged workouts retroactively (the auto-items never
+    // got tapped on TODAY) stayed forever-missing in checks, and the calendar
+    // counter treated them as un-done → past day rendered PARTIAL even though
+    // every session was 100% complete. Inserting based on validIds + threshold
+    // makes the derivation idempotent across init for all historical days.
     const sessions = log.workoutSessions || {};
     AUTO_WORKOUT_IDS.forEach(itemId => {
-      if(!(itemId in checks)) return; // not in this day's checks
+      // Only derive items that the rendered checklist for this date contains
+      // (e.g. fast-day checklists don't include m2/m3/e1/e2/e3 — leave them alone)
+      if(!validIds.has(itemId)) return;
       const sessType = WORKOUT_ITEM_SESSION[itemId] || 'evening';
       const sess = sessions[sessType] || (sessType === 'morning' ? sessions['evening'] : null);
       if(sess && sess.total > 0) {
@@ -3023,16 +3032,23 @@ function migrateOrphanedChecks() {
         if(checks[itemId] !== shouldBeDone) { checks[itemId] = shouldBeDone; changed = true; }
       }
     });
-    // Fix _workout item from global counts
-    if('_workout' in checks && log.workoutTodayTotal > 0) {
+    // _workout pseudo-item: getValidCheckCompletion only counts it when the
+    // rendered checklist has no AUTO_WORKOUT items (fast/light days). Derive
+    // from global workoutToday counts so retroactive logging flips those days
+    // to FULL on the calendar without needing the user to tick anything.
+    const hasAutoWorkoutInChecklist = AUTO_WORKOUT_IDS.some(id => validIds.has(id));
+    if(!hasAutoWorkoutInChecklist && log.workoutTodayTotal > 0) {
       const globalPct = (log.workoutTodayDone || 0) / log.workoutTodayTotal;
       const shouldBeDone = globalPct >= 0.8;
       if(checks['_workout'] !== shouldBeDone) { checks['_workout'] = shouldBeDone; changed = true; }
     }
 
-    // Fix stale water items: if dayLogs.water meets target but checks say false
+    // v8.2.0 fix: water items follow the same pattern — derive from log.water
+    // for every water-type item in the rendered checklist, regardless of
+    // whether the check already exists. Past days where water was logged but
+    // the water item was never tapped now flip to done automatically.
     checklist.forEach(item => {
-      if(item.type === 'water' && item.waterTarget && (item.id in checks)) {
+      if(item.type === 'water' && item.waterTarget) {
         const waterVal = log.water || 0;
         const shouldBeDone = waterVal >= item.waterTarget;
         if(checks[item.id] !== shouldBeDone) { checks[item.id] = shouldBeDone; changed = true; }
