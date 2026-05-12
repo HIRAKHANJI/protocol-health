@@ -1455,18 +1455,24 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
         <div class="duration-inputs">
           <div>
             <label class="field-label">Start date (must be on or before current)</label>
-            <input class="field-input" type="date" id="esdDate" onchange="onEditStartDateChange()">
+            <input class="field-input" type="date" id="esdDate" oninput="onEditStartDateChange()" onchange="onEditStartDateChange()">
           </div>
           <div>
             <label class="field-label">Start weight on that date (kg)</label>
-            <input class="field-input" type="number" id="esdWeight" placeholder="—" step="0.05" min="20" max="300">
+            <input class="field-input" type="number" id="esdWeight" placeholder="—" step="0.05" min="20" max="300" oninput="updateEditStartDatePreview()">
           </div>
         </div>
         <div id="esdWeightNote" style="font-size:0.62rem;color:var(--muted);margin-top:6px;font-family:'DM Mono',monospace;line-height:1.5"></div>
       </div>
 
+      <div class="settings-section" id="esdPreviewSection" style="border-color:var(--accent);display:none">
+        <div class="settings-section-title" style="color:var(--accent)">PENDING CHANGE</div>
+        <div id="esdPreviewText" style="font-size:0.8rem;color:var(--text);line-height:1.7;font-family:'DM Mono',monospace"></div>
+      </div>
+
       <div class="settings-section">
-        <button class="schedule-btn" onclick="applyEditStartDate()" style="width:100%">APPLY (downloads backup first)</button>
+        <button class="schedule-btn" id="esdSaveBtn" onclick="applyEditStartDate()" style="width:100%;background:var(--accent);color:#000;font-weight:700">SAVE CHANGES</button>
+        <p style="font-size:0.62rem;color:var(--muted);margin:8px 0 0;text-align:center;font-family:'DM Mono',monospace;line-height:1.5">You'll get a final confirmation prompt + your data is auto-backed up before any write.</p>
       </div>
 
     </div>
@@ -1794,8 +1800,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '8.3.0';
-const APP_VERSION_MSG = 'Added: a new EDIT START DATE button inside MANAGE SCHEDULE that lets you correct your schedule\'s original start date and start weight. Useful if your start date was reset by a previous bug, or if you want to backdate the schedule to when your journey actually began. The schedule extends backward to the new date — your target date, ADJUST math, fast/light day records, weight logs, day logs, food log, and notes are all left untouched. A full backup is downloaded before any change is applied.';
+const APP_VERSION = '8.3.1';
+const APP_VERSION_MSG = 'Fixed EDIT START DATE so it actually saves: the APPLY flow now shows a live preview of the pending change as you type, a clear final confirmation prompt before applying, and a SAVE CHANGES button that is disabled until your inputs are valid. v8.3.0 had two bugs that made the apply look like it did nothing — alerts were dropping their messages, and there was no obvious final confirm step. Both fixed.';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
 
@@ -5547,6 +5553,7 @@ function openEditStartDate() {
   dateEl.setAttribute('max', sched.startDate || todayStr());
   wEl.value = (typeof sched.startWeight === 'number') ? sched.startWeight : '';
   document.getElementById('esdWeightNote').textContent = '';
+  updateEditStartDatePreview();
   document.getElementById('editStartDateOverlay').classList.add('active');
 }
 
@@ -5556,10 +5563,10 @@ function closeEditStartDate() {
 
 function onEditStartDateChange() {
   const newDate = document.getElementById('esdDate').value;
-  if (!newDate) return;
+  const noteEl = document.getElementById('esdWeightNote');
+  if (!newDate) { updateEditStartDatePreview(); return; }
   const w = findWeightOnDate(newDate);
   const wEl = document.getElementById('esdWeight');
-  const noteEl = document.getElementById('esdWeightNote');
   if (w !== null) {
     wEl.value = w;
     const weights = gs(SK.weights) || [];
@@ -5570,12 +5577,77 @@ function onEditStartDateChange() {
   } else {
     noteEl.textContent = 'No weight history available — enter manually.';
   }
+  updateEditStartDatePreview();
 }
 
-async function applyEditStartDate() {
+// Live preview — updates whenever the user types or picks. Renders the diff
+// against the current schedule so the user sees exactly what SAVE CHANGES
+// will do BEFORE tapping. Hidden when no change yet (avoids visual noise).
+function updateEditStartDatePreview() {
+  const sched = gs(SK.schedule);
+  if (!sched) return;
+  const section = document.getElementById('esdPreviewSection');
+  const out     = document.getElementById('esdPreviewText');
+  const btn     = document.getElementById('esdSaveBtn');
+  const newDate = document.getElementById('esdDate').value;
+  const newWeightRaw = document.getElementById('esdWeight').value;
+  const newWeight = parseFloat(newWeightRaw);
+
+  const dateOk   = newDate && /^\d{4}-\d{2}-\d{2}$/.test(newDate);
+  const weightOk = isFinite(newWeight) && newWeight > 0 && newWeight <= 500;
+  const changed  = dateOk && weightOk && (newDate !== sched.startDate || newWeight !== sched.startWeight);
+  const forward  = dateOk && newDate > sched.startDate;
+  const future   = dateOk && newDate > todayStr();
+  const tooEarly = dateOk && newDate < '2020-01-01';
+
+  if (!dateOk || !weightOk) {
+    section.style.display = 'none';
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
+    return;
+  }
+
+  // Compute days[] length preview
+  let daysCount = 0;
+  if (dateOk && !forward) {
+    const lastDay = (sched.days && sched.days.length)
+      ? sched.days[sched.days.length - 1]
+      : sched.startDate;
+    const cur = strToDate(newDate);
+    const end = strToDate(lastDay);
+    if (cur <= end) {
+      daysCount = Math.floor((end.getTime() - cur.getTime()) / 86400000) + 1;
+    }
+  }
+
+  let html = '';
+  if (forward) {
+    html = `<span style="color:var(--danger)">⚠ New start ${newDate} is AFTER current start ${sched.startDate}. This control only backdates — use END TODAY or REMOVE to trim forward.</span>`;
+  } else if (future) {
+    html = `<span style="color:var(--danger)">⚠ Start date can't be in the future.</span>`;
+  } else if (tooEarly) {
+    html = `<span style="color:var(--danger)">⚠ Start date must be on or after 2020-01-01.</span>`;
+  } else if (!changed) {
+    html = `<span style="color:var(--muted)">No change vs current values.</span>`;
+  } else {
+    html =
+      `Start date: <b>${sched.startDate}</b> → <b style="color:var(--accent)">${newDate}</b><br>` +
+      `Start weight: <b>${(typeof sched.startWeight === 'number') ? sched.startWeight + 'kg' : '—'}</b> → <b style="color:var(--accent)">${newWeight}kg</b><br>` +
+      `Schedule length: <b>${sched.totalDays}</b> → <b style="color:var(--accent)">${daysCount} days</b><br>` +
+      `<span style="color:var(--muted);font-size:0.7rem">Calendar overlay extends to cover every day from ${newDate} through ${(sched.days||[]).slice(-1)[0] || sched.startDate}. Past data untouched.</span>`;
+  }
+  out.innerHTML = html;
+  section.style.display = 'block';
+
+  const canSave = changed && !forward && !future && !tooEarly;
+  btn.disabled = !canSave;
+  btn.style.opacity = canSave ? '1' : '0.5';
+}
+
+function applyEditStartDate() {
   const sched = gs(SK.schedule);
   if (!sched) {
-    showAlert('NO SCHEDULE', 'The schedule was removed in another tab. Nothing to edit.');
+    showAlert('No schedule found. It may have been removed in another tab. Nothing to edit.');
     closeEditStartDate();
     return;
   }
@@ -5584,84 +5656,100 @@ async function applyEditStartDate() {
   const newWeight = parseFloat(document.getElementById('esdWeight').value);
 
   if (!newStart || !/^\d{4}-\d{2}-\d{2}$/.test(newStart)) {
-    showAlert('INVALID DATE', 'Pick a valid start date.');
+    showAlert('Pick a valid start date in YYYY-MM-DD format. On mobile, make sure you tap "Done" or "Set" in the date picker so the value commits.');
     return;
   }
   if (newStart > sched.startDate) {
-    showAlert('FORWARD NOT ALLOWED',
-      `New start date ${newStart} is after current start date ${sched.startDate}. ` +
-      `This control only backdates. Use END SCHEDULE TODAY or REMOVE to trim forward.`);
+    showAlert(`New start date ${newStart} is after the current start date ${sched.startDate}. This control only backdates — use END SCHEDULE TODAY or REMOVE to trim forward from the start.`);
     return;
   }
   if (newStart > todayStr()) {
-    showAlert('FUTURE DATE', 'Start date cannot be in the future.');
+    showAlert('Start date cannot be in the future.');
     return;
   }
   if (newStart < '2020-01-01') {
-    showAlert('TOO EARLY', 'Start date must be on or after 2020-01-01.');
+    showAlert('Start date must be on or after 2020-01-01.');
     return;
   }
   if (!isFinite(newWeight) || newWeight <= 0 || newWeight > 500) {
-    showAlert('INVALID WEIGHT', 'Enter a start weight between 1 and 500 kg.');
+    showAlert('Enter a start weight between 1 and 500 kg.');
     return;
   }
   if (newStart === sched.startDate && newWeight === sched.startWeight) {
-    showAlert('NO CHANGE', 'New values are identical to current values. Nothing to do.');
+    showAlert('New values are identical to current values. Nothing to change.');
     return;
   }
 
-  // Full canonical backup before any write
-  try {
-    await backupData();
-  } catch (e) {
-    console.error('[editStartDate] backup failed:', e);
-    showAlert('BACKUP FAILED', 'Could not auto-backup before applying changes. Aborting to keep your data safe. Try a manual backup first, then retry.');
+  // Compute preview values for the confirmation message
+  const lastDay = (sched.days && sched.days.length)
+    ? sched.days[sched.days.length - 1]
+    : sched.startDate;
+  const _cur = strToDate(newStart);
+  const _end = strToDate(lastDay);
+  if (_cur > _end) {
+    showAlert('New start date is after the schedule end. Cannot apply.');
     return;
   }
+  const previewDaysCount = Math.floor((_end.getTime() - _cur.getTime()) / 86400000) + 1;
 
-  // Re-read schedule after the async backup — another tab may have changed it
-  const fresh = gs(SK.schedule);
-  if (!fresh) {
-    showAlert('NO SCHEDULE', 'The schedule was removed during backup. Aborting.');
+  const confirmMsg =
+    `Start date: ${sched.startDate} → ${newStart}\n` +
+    `Start weight: ${sched.startWeight}kg → ${newWeight}kg\n` +
+    `Schedule length: ${sched.totalDays} → ${previewDaysCount} days\n\n` +
+    `A full backup file will download FIRST. Then the schedule will update. No other data is touched.`;
+
+  showConfirm('APPLY START-DATE EDIT?', confirmMsg, async () => {
+    // Confirmed — now run backup + write
+    try {
+      await backupData();
+    } catch (e) {
+      console.error('[editStartDate] backup failed:', e);
+      showAlert('Auto-backup failed. Aborting to keep your data safe. Try a manual backup from the TRACK tab first, then retry.');
+      return;
+    }
+
+    // Re-read schedule after the async backup — another tab may have changed it
+    const fresh = gs(SK.schedule);
+    if (!fresh) {
+      showAlert('Schedule was removed during backup. Aborting with no changes.');
+      closeEditStartDate();
+      return;
+    }
+
+    const freshLastDay = (fresh.days && fresh.days.length)
+      ? fresh.days[fresh.days.length - 1]
+      : fresh.startDate;
+    const newDays = [];
+    const cur = strToDate(newStart);
+    const end = strToDate(freshLastDay);
+    if (cur > end) {
+      showAlert('Schedule shifted during backup — new start date is now after the end. Aborting.');
+      return;
+    }
+    while (cur <= end) {
+      newDays.push(dateToStr(cur));
+      cur.setDate(cur.getDate() + 1);
+    }
+
+    fresh.startDate   = newStart;
+    fresh.startWeight = newWeight;
+    fresh.days        = newDays;
+    fresh.totalDays   = newDays.length;
+    fresh.exactDays   = newDays.length;
+    ss(SK.schedule, fresh);
+
+    const s = getSettings();
+    s.startDate = newStart;
+    saveSettings(s);
+
+    dispatch('SCHEDULE_ADJUSTED');
     closeEditStartDate();
-    return;
-  }
-
-  const lastDay = (fresh.days && fresh.days.length)
-    ? fresh.days[fresh.days.length - 1]
-    : fresh.startDate;
-  const newDays = [];
-  const cur = strToDate(newStart);
-  const end = strToDate(lastDay);
-  if (cur > end) {
-    showAlert('INVALID RANGE', 'New start date is after the schedule end. Aborting.');
-    return;
-  }
-  while (cur <= end) {
-    newDays.push(dateToStr(cur));
-    cur.setDate(cur.getDate() + 1);
-  }
-
-  fresh.startDate   = newStart;
-  fresh.startWeight = newWeight;
-  fresh.days        = newDays;
-  fresh.totalDays   = newDays.length;
-  fresh.exactDays   = newDays.length;
-  ss(SK.schedule, fresh);
-
-  const s = getSettings();
-  s.startDate = newStart;
-  saveSettings(s);
-
-  dispatch('SCHEDULE_ADJUSTED');
-  closeEditStartDate();
-  closeManageSchedule();
-  setTimeout(() => {
-    if (typeof renderCalendar === 'function') renderCalendar();
-    showAlert('START DATE UPDATED',
-      `Schedule extended backward to ${newStart} (start weight ${newWeight}kg). ` +
-      `Total days: ${newDays.length}. A full backup was downloaded before the change.`);
-  }, 50);
+    closeManageSchedule();
+    setTimeout(() => {
+      if (typeof renderCalendar === 'function') renderCalendar();
+      showAlert(`Schedule extended backward to ${newStart} (start weight ${newWeight}kg, ${newDays.length} total days). A full backup was downloaded before the change.`);
+    }, 50);
+  }, { yesLabel: 'YES, SAVE' });
 }
 
 document.getElementById('manageSchedOverlay').addEventListener('click', e=>{
