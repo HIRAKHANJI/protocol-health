@@ -4,6 +4,35 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 8.3.2 — 2026-05-12
+
+**Scope:** Patch (small UX enhancement — surfaces APP_VERSION in the app UI). No schema change. No data mutation.
+**Banner:** shown — "Added a visible version badge: a muted 'PROTOCOL HEALTH · vX.Y.Z · TAP FOR DETAILS' strip now appears at the bottom of every tab, and a matching version chip is in the SETTINGS header next to the close button. Tapping either one opens an alert with the current version number and the full update message for the version you are running — useful for confirming the service worker has actually picked up the latest code after a deploy. No data changes."
+**CACHE_NAME:** v34 → v35. Schema unchanged at v7.
+
+**Root motivation.** Owner reported after v8.3.1 ship: "There's no version badge anywhere in the app UI at all. Update that feature too." Until now the only way to know what version was actually running on-device was the one-shot update banner (dismissed after first view) or the desktop devtools. After dismissing the banner there was no way to verify whether a deploy had actually taken effect — particularly when debugging service-worker cache issues like the v8.3.0 → v8.3.1 EDIT START DATE fix where the owner couldn't tell whether they were running the patched code.
+
+### What was added
+
+- **Persistent footer strip** at the bottom of every tab (TODAY / MONTHS / WORKOUTS / NUTRITION / TRACK / RULES). Rendered as a sibling of the `.section` elements so the active-tab CSS swap doesn't hide it. Style: small DM Mono caps, muted color, top-border separator, tappable. Text: `PROTOCOL HEALTH · v<APP_VERSION> · TAP FOR DETAILS`.
+- **Version chip in the SETTINGS header**, next to the close (×) button. Style: small DM Mono caps in a bordered box. Tappable.
+- **`showVersionInfo()` handler** — both surfaces call it. Opens the existing `showAlert` dialog with `'Protocol Health v' + APP_VERSION + '\n\n' + APP_VERSION_MSG`. Single-arg call, displays correctly.
+- **`paintVersionChips()` paint function** — finds every `[data-app-version-chip]` span on init and writes `APP_VERSION` into it. Run from `runInit()` right after `checkVersionUpdate()` so the chip text is correct the moment the user can see it. Means future version bumps only need to touch the `APP_VERSION` constant — the chips re-paint automatically.
+
+### Files changed
+
+- `app.html`: footer div after the last `.section`; chip in the SETTINGS header; `paintVersionChips` + `showVersionInfo` functions; `paintVersionChips()` call added to `runInit()`. `APP_VERSION` 8.3.1 → 8.3.2. `APP_VERSION_MSG` updated.
+- `sw.js`: `CACHE_NAME` v34 → v35.
+- `index.html`: hero badge v8.3.1 → v8.3.2.
+- `CLAUDE.md`: version refs.
+- `UPDATE_LOG.md`: this entry.
+
+### Diagnostic value
+
+If owner ever reports "I don't see the change you said you shipped," the version chip is the canonical answer: tap it, read what it says, and if the number is older than what was just pushed the issue is service-worker cache. The fix in that case is to fully close + reopen the PWA (swipe away from app switcher, then tap icon) — never a code issue.
+
+---
+
 ## Version 8.3.1 — 2026-05-12
 
 **Scope:** Patch (UX clarity + two real bugs in v8.3.0's EDIT START DATE flow). No schema change. No data shape change.
