@@ -4,6 +4,93 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 8.3.4 — 2026-05-14
+
+**Scope:** Patch (service-worker user-facing diagnostics + landing-page version audit fixes). No schema change. No data mutation.
+**Banner:** shown — "Added a CHECK FOR UPDATES button in Settings → APP UPDATES that forces a service-worker update check on demand and shows your current cache version + service-worker state so you always know what code your device is actually running. Also fixed the landing page (index.html) which was stuck at v7.8.1 in the title, nav, footer, copyright and asset cache-bust strings — all 13 stale references corrected and the changelog updated to cover the six v8.x releases. Startup now logs the running APP_VERSION + schema version to the browser console so debugging 'is the deploy live yet' is unambiguous. No data changes."
+**CACHE_NAME:** v36 → v37. Schema unchanged at v7.
+
+### Root motivation
+
+Owner asked (post-v8.3.3): "verify the sw.js system thing works properly for my phone to get regular updates for the app properly." Also requested a full project-state audit covering documentation drift, science references, repo rules, and the landing page.
+
+The SW update mechanism itself was already well-built (SW_UPDATED postMessage on activate after `clients.claim()`, page-side message listener at `app.html:6397-6401`, version-tied dismiss via `SK.swDismissedVer`, 30-minute auto-poll, visibilitychange + pageshow resume listeners forcing `_swReg.update()`). The missing piece was user-facing visibility — no way to manually trigger a check, no way to see what cache the device is on, no way to confirm "did the deploy reach me yet" without the one-shot update banner.
+
+The owner-driven audit also surfaced 13 stale `v7.8.1` references across `index.html` (title, nav, footer, copyright, CSS/JS cache-bust query strings) plus a changelog frozen at v7.8 — six v8.x releases never landed on the landing page. The hero badge was the only landing-page surface kept current.
+
+### What was added
+
+**Service-worker visibility (sw.js + app.html)**
+
+- `sw.js`: new `message` event listener responds to `{ type: 'GET_VERSION' }` over a MessageChannel with `{ type: 'VERSION', cache: CACHE_NAME }`. Stateless RPC, no side effects.
+- `app.html`: `querySwCacheVersion()` posts `GET_VERSION` to `navigator.serviceWorker.controller` on a fresh `MessageChannel` and writes the reply into the existing `_swCacheVersion` slot. Runs once on `navigator.serviceWorker.ready` and again whenever the user opens Settings or taps CHECK FOR UPDATES.
+- `app.html`: existing `SW_UPDATED` message listener (lines 6397-6401) now also writes `_swCacheVersion = event.data.cache` so the diagnostic stays current after a fresh activation, not just after a manual query.
+- `app.html`: new `checkForUpdates()` function exposed on `window`. Calls `_swReg.update()`, waits 1.5s, then inspects `_swReg.installing / .waiting / .active` and shows a context-appropriate `showAlert` — "Update downloading," "Update ready to activate," or "You are on the latest version (cache vN)."
+- `app.html`: new `paintUpdatePanel()` function exposed on `window`. Repaints `#updPanelStatus` with APP_VERSION, current SW cache version, and SW registration state. Called from `openSettings()` so the panel is fresh every time.
+
+**Settings → APP UPDATES section (app.html:1172-1182)**
+
+- New `settings-section` below Data Management.
+- Status row: `App version: <b>X.Y.Z</b>` / `Service worker cache: <b>protocol-health-vN</b>` / `Service worker state: <b>registered</b>`.
+- CHECK FOR UPDATES button (accent yellow, full-width).
+- Helper text: explains that a RELOAD banner appears if a new version is found, and that the canonical phone-refresh path is "fully close the PWA (swipe away from app switcher) and reopen."
+
+**Startup diagnostic (app.html, end of inline script)**
+
+- One-line `console.info('[PH] running APP_VERSION X.Y.Z · schema vN — for cache version, open Settings → APP UPDATES or check window._swCacheVersion')` fires synchronously when the inline script runs. Lets DevTools confirm at-a-glance whether the deploy actually reached the device — if the console says v8.3.2 but the latest deploy is v8.3.4, the issue is cache, not code.
+
+### Landing page audit fixes (index.html)
+
+- **Line 12** `<title>`: `v7.8.1` → `v8.3.4`
+- **Lines 18-22, 1177-1178** CSS/JS cache-bust query strings: `?v=7.8.1` → `?v=8.3.4` (7 occurrences via replace_all)
+- **Line 34** nav `.ver` chip: `v7.8.1` → `v8.3.4`
+- **Line 52** hero badge: `v8.3.3` → `v8.3.4` (already current with each release; bumped per version-update rule)
+- **Line 561** changelog section title: `The v7 release. Adaptive TDEE...` → `The v8 release. Audit fixes, recovery controls, schedule history.`
+- **Line 562** changelog section-desc: rewritten to describe v8.x work
+- **Lines 567-571** v7.8 entry: removed `.current` dot class, changed date label from `CURRENT · APR 2026` to plain `APR 2026`
+- **Line 865** CTA band note: `v7.8.1 · Installable PWA · Offline ready` → `v8.3.4 · Installable PWA · Offline ready`
+- **Line 878** footer stats: `v7.8.1 CURRENT` → `v8.3.4 CURRENT`
+- **Line 909** copyright footer: `© 2026 PROTOCOL HEALTH · v7.8.1 · ALL RIGHTS RESERVED` → `v8.3.4`
+
+**New changelog entries inserted at top of `.changelog-wrap`:**
+- v8.3.4 (CURRENT · MAY 2026) — Service-worker visibility + landing audit fixes
+- v8.3.0 → v8.3.3 — EDIT START DATE recovery control (consolidated)
+- v8.2.0 — Past PARTIAL days now flip to FULL when complete
+- v8.1.0 — Multi-day fast bleed-out fix
+- v8.0.0 — Audit-driven 14 bug fixes
+
+Total of 5 new entries spanning all v8.x releases. v7.8 entry preserved at its historical position.
+
+### Audit findings deferred (not addressed in v8.3.4)
+
+The comprehensive audit also surfaced these — left as-is per scope discipline:
+
+- WORKOUTS_LIBRARY.md is incomplete pending the 175-workouts library project. No disclaimer added to the file top — owner has acknowledged the incompleteness in the v8.0.0 working-versions notes already.
+- `docs/` folder has 12 historical phase plans (PHASE_0_RECON, PHASE_N_PLAN ×4, CALIBRATION_PHASE_×4, REFACTOR_COMPLETE, v8.0.0-bug-audit, v8.3.0-schedule-history-edit). Per CLAUDE.md §22 these are intentionally kept as historical reference. No archival pass.
+- README.md doesn't pin a version — design choice for stability across releases, intentionally untouched.
+
+### Files changed
+
+- `app.html`: SW message listener stores cache version, `querySwCacheVersion` RPC, `checkForUpdates` + `paintUpdatePanel` window-exposed functions, APP UPDATES section in SETTINGS, `paintUpdatePanel` / `querySwCacheVersion` hooked into `openSettings`, startup console.info. `APP_VERSION` 8.3.3 → 8.3.4. `APP_VERSION_MSG` updated.
+- `sw.js`: GET_VERSION message handler. `CACHE_NAME` v36 → v37.
+- `index.html`: 13 stale version refs corrected. 5 new changelog entries (v8.0.0 through v8.3.4). Section title + description rewritten for v8 release. v7.8 entry demoted from CURRENT.
+- `CLAUDE.md`: version refs.
+- `UPDATE_LOG.md`: this entry.
+
+### Diagnostic flow now available
+
+If a future "I don't see my update" report comes in:
+
+1. Owner opens Settings → APP UPDATES.
+2. Status row shows `App version: 8.3.4` / `Service worker cache: protocol-health-v37` / `Service worker state: registered`.
+3. If `App version` matches the latest deploy but `Service worker cache` is older, the SW is stale and a fully-close-and-reopen cycle is needed.
+4. If `App version` doesn't match the latest deploy, the `app.html` itself wasn't refetched — same fix.
+5. If `Service worker state` shows "not registered yet," it's a first-load race; refresh once.
+
+CHECK FOR UPDATES forces the network re-check on demand. The startup console line (`[PH] running APP_VERSION X.Y.Z`) gives the same information in DevTools for users who don't have Settings open.
+
+---
+
 ## Version 8.3.3 — 2026-05-12
 
 **Scope:** Patch (UX cleanup of the EDIT START DATE sub-modal — no behavioural change). No schema change. No data mutation.
