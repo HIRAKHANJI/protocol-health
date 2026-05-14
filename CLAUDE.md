@@ -771,6 +771,16 @@ Any plan that includes creatine supplementation must specify: 3-5g/day, no loadi
 ### Push:Pull Ratio (HARD RULE)
 Protocol Health must NEVER generate a training plan with push:pull ratio > 1:1. Default for AGRO CUT: pull-dominant (5:7). Source: Cools 2016 + Prinold 2016
 
+### Demographic Stratification (WORKOUT ENGINE FOUNDATION)
+The exercise-prescription rules for age, weight, sex, training history, and medical context live in `WORKOUTS_LIBRARY.md` **Section 2 — Demographic Stratification Matrix**. The Workout Engine (v9.0.0 roadmap) consults that matrix before prescribing any exercise. Section 2 covers:
+- **§2.1** — Plan Eligibility by Demographics (which plan defaults for each profile)
+- **§2.2** — Universal Volume + Intensity Modulators (per-age / per-weight / per-sex multipliers)
+- **§2.3** — Blanket Exercise Restrictions (absolute blocks by demographic)
+- **§2.4** — Medical Disclaimer triggers
+- **§2.5** — Engine Prescription Algorithm (precedence order: medical → plan eligibility → blanket restriction → progression prereq → plan prescription → universal modulators → push:pull cap → volume floor)
+
+Source: ICFSR 2021/2025 + ACSM Pre-Participation Screening + WHO 2020 + ISSN 2018. Any change to age/weight/sex/medical-clearance rules MUST update Section 2 and reference its Tier 1 source.
+
 ### Prohibited Sources
 Never cite: supplement brand websites, influencer stacks, sites requiring purchase, single case reports, commercial programs, news articles about research (use original DOI).
 
@@ -790,13 +800,14 @@ The file `WORKOUTS_LIBRARY.md` in the repo root is the canonical reference for a
 
 ### What it contains
 
-- Every exercise from `EXERCISE_PROGRESSIONS` in `app.html` with full biomechanical detail
-- Every non-progression exercise used across all 5 plans
-- All training modalities (HIIT, shadowboxing, Animal Flow, yoga, Pilates, etc.) with evidence
+- **Section 1** — Training Modalities (12 modalities with evidence citations)
+- **Section 2** — Demographic Stratification Matrix (the foundation for the Workout Engine — age/weight/sex/training-history/medical rules with Tier 1 source citations)
+- **PROGRESSION EXERCISES** — every exercise from `EXERCISE_PROGRESSIONS` in `plans/exercise-progressions.js` with full biomechanical detail
+- **NON-PROGRESSION EXERCISES** — every accessory / conditioning / mobility / stretch exercise used across all 5 plans
 - Per-plan prescription tables (sets/reps/tempo/rest/frequency) for every exercise
-- Progression prerequisites and paths for every exercise
-- Auto-prescription data model for future workout generation features
-- Safety rules and contraindications per exercise
+- Progression prerequisites and paths for every progression exercise
+- Per-exercise demographic safety notes (engine consumes these via Section 2 §2.3)
+- Auto-prescription data model framework (final shape will be `plans/exercise-db.js` once Phase 1 of the v9.0.0 Workout Engine ships — see `docs/workout-engine-v9-roadmap.md`)
 
 ### Rules
 
@@ -804,7 +815,8 @@ The file `WORKOUTS_LIBRARY.md` in the repo root is the canonical reference for a
 2. Always match the per-plan prescription when generating workout content
 3. The library's evidence citations must reference entries in CLAUDE.md Section 15
 4. Push:pull ratio must remain ≤ 1:1 across any plan's weekly schedule
-5. Exercise progressions in the library must match `EXERCISE_PROGRESSIONS` in `app.html` exactly
+5. Exercise progressions in the library must match `EXERCISE_PROGRESSIONS` in `plans/exercise-progressions.js` exactly
+6. **The Demographic Stratification Matrix (Section 2) is the single source of truth for age/weight/sex/medical exercise eligibility. Any change to these rules must update Section 2 first and cite a Tier 1 source from CLAUDE.md §15.**
 
 ---
 
