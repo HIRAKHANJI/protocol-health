@@ -233,7 +233,7 @@ Nothing else changes. `getActivePlan()` reads `settings.plan`, looks up `PLANS[s
 
 | File | Purpose |
 |------|---------|
-| `app.html` | App bootstrap — HTML, CSS, and the inline orchestration script (runInit + helpers that stay in classic scope). ~6,312 lines as of v8.3.0 (grew from 4,637 post-v6.0.0-refactor through Phases A–D / calibration + multi-day fasts + v8.1.0 audit fixes + v8.2.0 auto-derivation completeness fix + v8.3.0 EDIT START DATE recovery control). Plans, large function groups, shared components, and migrations load as ES modules — see Section 23. Zero build process, zero bundler, zero framework. |
+| `app.html` | App bootstrap — HTML, CSS, and the inline orchestration script (runInit + helpers that stay in classic scope). ~6,512 lines as of v8.3.4 (grew from 4,637 post-v6.0.0-refactor through Phases A–D / calibration + multi-day fasts + v8.1.0 audit fixes + v8.2.0 auto-derivation completeness fix + v8.3.0 EDIT START DATE recovery control). Plans, large function groups, shared components, and migrations load as ES modules — see Section 23. Zero build process, zero bundler, zero framework. |
 | `index.html` | Landing/product page. Links to `app.html`. |
 | `manifest.json` | PWA manifest. App name, icons, display mode (standalone = fullscreen), theme color. |
 | `sw.js` | Service Worker. Caches all app files after first load for offline use. Cache-first strategy. Current cache name: `protocol-health-v37`. Bump version on major deploys. |
@@ -598,7 +598,7 @@ const APP_VERSION_MSG = 'Description of changes.';    // ← short description o
 ```
 Repository:   github.com/HIRAKHANJI/protocol-health
 Live URL:     https://hirakhanji.github.io/protocol-health/
-App file:     app.html (bootstrap, ~6,312 lines as of v8.3.0; plans/modules/components load as ES modules — see Section 23)
+App file:     app.html (bootstrap, ~6,512 lines as of v8.3.4; plans/modules/components load as ES modules — see Section 23)
 Landing:      index.html (product page)
 PWA files:    manifest.json, sw.js, PH_LOGO_192.png, PH_LOGO_512.png
 
@@ -854,7 +854,7 @@ As of v6.0.0 the app is a modular ES-module PWA, not a single-file app. Zero bui
 
 ```
 /
-├── app.html                  # Bootstrap: HTML + CSS + inline orchestration script (~6,312 lines as of v8.3.0)
+├── app.html                  # Bootstrap: HTML + CSS + inline orchestration script (~6,512 lines as of v8.3.4)
 ├── index.html                # Landing page (not the app entry point — that's app.html)
 ├── manifest.json             # PWA manifest
 ├── sw.js                     # Service worker (cache list covers every module file)
@@ -1095,7 +1095,7 @@ Approximate targets. Exceeding them is a hint to split, not a failure.
 
 | File | Target | Actual (v8.3.0) | Status |
 |------|--------|-----------------|--------|
-| `app.html` | ≤ 6,500 lines | ~6,087 | ✓ within revised target |
+| `app.html` | ≤ 6,500 lines | ~6,512 | ⚠ marginally over soft limit; ok pending v8.4+ engine split |
 | Any `plans/*.js` | ≤ 800 lines | max 580 (agro) | ✓ |
 | Any `modules/*.js` | ≤ 1,000 lines | max 964 (calibration) | ⚠ approaching limit |
 | Any `components/*.js` | ≤ 600 lines | max 635 (fast-window) | ⚠ over soft limit |
