@@ -1435,7 +1435,7 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
   </div>
 </div>
 
-<!-- ══ EDIT START DATE SUB-MODAL (v8.3.0) ══ -->
+<!-- ══ EDIT START DATE SUB-MODAL (v8.3.3 cleanup — compact, always-visible SAVE) ══ -->
 <div class="settings-overlay" id="editStartDateOverlay">
   <div class="settings-panel">
     <div class="settings-header">
@@ -1444,48 +1444,36 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
     </div>
     <div class="settings-body">
 
-      <div class="settings-section" style="border-color:var(--accent2)">
-        <div class="settings-section-title" style="color:var(--accent2)">⚠ READ FIRST</div>
-        <p style="font-size:0.75rem;color:var(--muted);margin:0;line-height:1.6">
-          This extends your schedule backward to a new start date. Use only if your start date was lost or changed by a previous bug, or you want to backdate your tracking.
-          <br><br>
-          <b>What this does:</b> Updates the schedule's start date, start weight, and extends the calendar overlay backward to cover the new date through your existing last day. All your weight logs, day logs, food logs, fast days, and notes are unchanged.
-          <br><br>
-          <b>What this does NOT do:</b> Re-estimate your target weight date, rerun ADJUST math, auto-mark new fast/light days on the backfilled range, or change your end date.
-          <br><br>
-          A full backup is downloaded before any change is applied.
-        </p>
-      </div>
+      <!-- Tight one-paragraph warning -->
+      <p style="font-size:0.72rem;color:var(--muted);margin:0 0 16px;line-height:1.6;padding:10px 12px;background:rgba(245,166,35,0.08);border-left:3px solid var(--accent2);border-radius:4px">
+        Backdate the schedule's original start date. The calendar overlay extends backward to cover the new date through your existing last day. A full backup auto-downloads first. Past data (weight logs, day logs, food, fast/light, notes) is left untouched.
+      </p>
 
-      <div class="settings-section">
-        <div class="settings-section-title">Current schedule</div>
-        <div id="esdCurrentText" style="font-size:0.8rem;color:var(--muted);line-height:1.7"></div>
-      </div>
+      <!-- Current readout (compact) -->
+      <div class="settings-section-title" style="margin-top:0">Current schedule</div>
+      <div id="esdCurrentText" style="font-size:0.75rem;color:var(--muted);line-height:1.7;margin-bottom:16px;font-family:'DM Mono',monospace"></div>
 
-      <div class="settings-section">
-        <div class="settings-section-title">New values</div>
-        <div class="duration-inputs">
-          <div>
-            <label class="field-label">Start date (must be on or before current)</label>
-            <input class="field-input" type="date" id="esdDate" oninput="onEditStartDateChange()" onchange="onEditStartDateChange()">
-          </div>
-          <div>
-            <label class="field-label">Start weight on that date (kg)</label>
-            <input class="field-input" type="number" id="esdWeight" placeholder="—" step="0.05" min="20" max="300" oninput="updateEditStartDatePreview()">
-          </div>
-        </div>
-        <div id="esdWeightNote" style="font-size:0.62rem;color:var(--muted);margin-top:6px;font-family:'DM Mono',monospace;line-height:1.5"></div>
-      </div>
+      <!-- Inputs -->
+      <div class="settings-section-title">New values</div>
+      <label class="field-label">New start date (on or before current)</label>
+      <input class="field-input" type="date" id="esdDate" oninput="onEditStartDateChange()" onchange="onEditStartDateChange()">
 
-      <div class="settings-section" id="esdPreviewSection" style="border-color:var(--accent);display:none">
-        <div class="settings-section-title" style="color:var(--accent)">PENDING CHANGE</div>
-        <div id="esdPreviewText" style="font-size:0.8rem;color:var(--text);line-height:1.7;font-family:'DM Mono',monospace"></div>
-      </div>
+      <label class="field-label" style="margin-top:10px">New start weight (kg)</label>
+      <input class="field-input" type="number" id="esdWeight" placeholder="—" step="0.05" min="20" max="300" oninput="updateEditStartDatePreview()">
 
-      <div class="settings-section">
-        <button class="schedule-btn" id="esdSaveBtn" onclick="applyEditStartDate()" style="width:100%;background:var(--accent);color:#000;font-weight:700">SAVE CHANGES</button>
-        <p style="font-size:0.62rem;color:var(--muted);margin:8px 0 0;text-align:center;font-family:'DM Mono',monospace;line-height:1.5">You'll get a final confirmation prompt + your data is auto-backed up before any write.</p>
-      </div>
+      <div id="esdWeightNote" style="font-size:0.62rem;color:var(--muted);margin-top:6px;font-family:'DM Mono',monospace;line-height:1.5"></div>
+
+      <!-- Inline preview / validation message — always visible -->
+      <div id="esdPreviewText" style="font-size:0.72rem;color:var(--text);margin:14px 0 0;padding:10px 12px;background:rgba(200,245,66,0.06);border-left:3px solid var(--accent);border-radius:4px;font-family:'DM Mono',monospace;line-height:1.7"></div>
+
+      <!-- BIG always-on SAVE button (not nested in a section box so it can't be missed) -->
+      <button id="esdSaveBtn" onclick="applyEditStartDate()"
+              style="display:block;width:100%;margin-top:16px;padding:16px;background:var(--accent);color:#000;border:none;border-radius:6px;font-family:'Bebas Neue',sans-serif;font-size:1.15rem;letter-spacing:4px;cursor:pointer;font-weight:700">
+        SAVE CHANGES
+      </button>
+      <p style="font-size:0.6rem;color:var(--muted);margin:8px 0 0;text-align:center;font-family:'DM Mono',monospace;letter-spacing:1px">
+        Tapping shows a final confirmation prompt before any write.
+      </p>
 
     </div>
   </div>
@@ -1812,8 +1800,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '8.3.2';
-const APP_VERSION_MSG = 'Added a visible version badge: a muted "PROTOCOL HEALTH · vX.Y.Z · TAP FOR DETAILS" strip now appears at the bottom of every tab, and a matching version chip is in the SETTINGS header next to the close button. Tapping either one opens an alert with the current version number and the full update message for the version you are running — useful for confirming the service worker has actually picked up the latest code after a deploy. No data changes.';
+const APP_VERSION = '8.3.3';
+const APP_VERSION_MSG = 'Cleaned up the EDIT START DATE modal: dropped the wall-of-text warning to a single paragraph, merged the current-schedule readout into one line, put the inputs and inline preview right at the top, and made the SAVE CHANGES button a big always-enabled yellow button immediately under the inputs. No more ghosted / faded button at the bottom of the modal. Validation still happens — if your inputs are wrong, tapping SAVE CHANGES shows a clear alert instead of silently doing nothing. Next patch (v8.3.4) will verify the service-worker update path so your phone always picks up new versions cleanly.';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
 
@@ -5566,10 +5554,9 @@ function openEditStartDate() {
     ? sched.days[sched.days.length - 1]
     : sched.startDate;
   document.getElementById('esdCurrentText').innerHTML =
-    `Start date: <b>${sched.startDate}</b><br>` +
+    `Start date: <b>${sched.startDate}</b> · ` +
     `Start weight: <b>${(typeof sched.startWeight === 'number') ? sched.startWeight + 'kg' : '—'}</b><br>` +
-    `Last day in schedule: <b>${lastDay}</b><br>` +
-    `Current total days: <b>${sched.totalDays}</b>`;
+    `Last day: <b>${lastDay}</b> · Total days: <b>${sched.totalDays}</b>`;
   const dateEl = document.getElementById('esdDate');
   const wEl    = document.getElementById('esdWeight');
   dateEl.value = sched.startDate || '';
@@ -5604,68 +5591,69 @@ function onEditStartDateChange() {
   updateEditStartDatePreview();
 }
 
-// Live preview — updates whenever the user types or picks. Renders the diff
-// against the current schedule so the user sees exactly what SAVE CHANGES
-// will do BEFORE tapping. Hidden when no change yet (avoids visual noise).
+// Live preview — always visible, updates on every input/change. Renders the
+// diff against the current schedule so the user sees exactly what SAVE
+// CHANGES will do. SAVE button stays always-enabled in v8.3.3 cleanup — the
+// validation happens inside applyEditStartDate when tapped, so the user
+// always gets a clear alert telling them what's wrong instead of a ghosted
+// button that looks unclickable.
 function updateEditStartDatePreview() {
   const sched = gs(SK.schedule);
   if (!sched) return;
-  const section = document.getElementById('esdPreviewSection');
   const out     = document.getElementById('esdPreviewText');
-  const btn     = document.getElementById('esdSaveBtn');
   const newDate = document.getElementById('esdDate').value;
   const newWeightRaw = document.getElementById('esdWeight').value;
   const newWeight = parseFloat(newWeightRaw);
 
   const dateOk   = newDate && /^\d{4}-\d{2}-\d{2}$/.test(newDate);
   const weightOk = isFinite(newWeight) && newWeight > 0 && newWeight <= 500;
-  const changed  = dateOk && weightOk && (newDate !== sched.startDate || newWeight !== sched.startWeight);
-  const forward  = dateOk && newDate > sched.startDate;
-  const future   = dateOk && newDate > todayStr();
-  const tooEarly = dateOk && newDate < '2020-01-01';
 
-  if (!dateOk || !weightOk) {
-    section.style.display = 'none';
-    btn.disabled = true;
-    btn.style.opacity = '0.5';
+  if (!dateOk && !weightOk) {
+    out.innerHTML = `<span style="color:var(--muted)">Fill in both date and weight to see the pending change.</span>`;
+    return;
+  }
+  if (!dateOk) {
+    out.innerHTML = `<span style="color:var(--muted)">Pick a start date to see the pending change.</span>`;
+    return;
+  }
+  if (!weightOk) {
+    out.innerHTML = `<span style="color:var(--muted)">Enter a start weight between 1 and 500 kg.</span>`;
     return;
   }
 
-  // Compute days[] length preview
-  let daysCount = 0;
-  if (dateOk && !forward) {
-    const lastDay = (sched.days && sched.days.length)
-      ? sched.days[sched.days.length - 1]
-      : sched.startDate;
-    const cur = strToDate(newDate);
-    const end = strToDate(lastDay);
-    if (cur <= end) {
-      daysCount = Math.floor((end.getTime() - cur.getTime()) / 86400000) + 1;
-    }
-  }
+  const forward  = newDate > sched.startDate;
+  const future   = newDate > todayStr();
+  const tooEarly = newDate < '2020-01-01';
+  const changed  = (newDate !== sched.startDate || newWeight !== sched.startWeight);
 
-  let html = '';
   if (forward) {
-    html = `<span style="color:var(--danger)">⚠ New start ${newDate} is AFTER current start ${sched.startDate}. This control only backdates — use END TODAY or REMOVE to trim forward.</span>`;
-  } else if (future) {
-    html = `<span style="color:var(--danger)">⚠ Start date can't be in the future.</span>`;
-  } else if (tooEarly) {
-    html = `<span style="color:var(--danger)">⚠ Start date must be on or after 2020-01-01.</span>`;
-  } else if (!changed) {
-    html = `<span style="color:var(--muted)">No change vs current values.</span>`;
-  } else {
-    html =
-      `Start date: <b>${sched.startDate}</b> → <b style="color:var(--accent)">${newDate}</b><br>` +
-      `Start weight: <b>${(typeof sched.startWeight === 'number') ? sched.startWeight + 'kg' : '—'}</b> → <b style="color:var(--accent)">${newWeight}kg</b><br>` +
-      `Schedule length: <b>${sched.totalDays}</b> → <b style="color:var(--accent)">${daysCount} days</b><br>` +
-      `<span style="color:var(--muted);font-size:0.7rem">Calendar overlay extends to cover every day from ${newDate} through ${(sched.days||[]).slice(-1)[0] || sched.startDate}. Past data untouched.</span>`;
+    out.innerHTML = `<span style="color:var(--danger)">⚠ ${newDate} is AFTER current start ${sched.startDate}. This control only backdates — use END SCHEDULE TODAY or REMOVE to trim forward.</span>`;
+    return;
   }
-  out.innerHTML = html;
-  section.style.display = 'block';
+  if (future) {
+    out.innerHTML = `<span style="color:var(--danger)">⚠ Start date can't be in the future.</span>`;
+    return;
+  }
+  if (tooEarly) {
+    out.innerHTML = `<span style="color:var(--danger)">⚠ Start date must be on or after 2020-01-01.</span>`;
+    return;
+  }
+  if (!changed) {
+    out.innerHTML = `<span style="color:var(--muted)">No change vs current values yet.</span>`;
+    return;
+  }
 
-  const canSave = changed && !forward && !future && !tooEarly;
-  btn.disabled = !canSave;
-  btn.style.opacity = canSave ? '1' : '0.5';
+  const lastDay = (sched.days && sched.days.length)
+    ? sched.days[sched.days.length - 1]
+    : sched.startDate;
+  const cur = strToDate(newDate);
+  const end = strToDate(lastDay);
+  const daysCount = Math.floor((end.getTime() - cur.getTime()) / 86400000) + 1;
+
+  out.innerHTML =
+    `Start date: <b>${sched.startDate}</b> → <b style="color:var(--accent)">${newDate}</b><br>` +
+    `Start weight: <b>${(typeof sched.startWeight === 'number') ? sched.startWeight + 'kg' : '—'}</b> → <b style="color:var(--accent)">${newWeight}kg</b><br>` +
+    `Schedule length: <b>${sched.totalDays}</b> → <b style="color:var(--accent)">${daysCount} days</b>`;
 }
 
 function applyEditStartDate() {
