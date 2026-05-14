@@ -4,6 +4,60 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 8.3.3 — 2026-05-12
+
+**Scope:** Patch (UX cleanup of the EDIT START DATE sub-modal — no behavioural change). No schema change. No data mutation.
+**Banner:** shown — "Cleaned up the EDIT START DATE modal: dropped the wall-of-text warning to a single paragraph, merged the current-schedule readout into one line, put the inputs and inline preview right at the top, and made the SAVE CHANGES button a big always-enabled yellow button immediately under the inputs. No more ghosted / faded button at the bottom of the modal. Validation still happens — if your inputs are wrong, tapping SAVE CHANGES shows a clear alert instead of silently doing nothing. Next patch (v8.3.4) will verify the service-worker update path so your phone always picks up new versions cleanly."
+**CACHE_NAME:** v35 → v36. Schema unchanged at v7.
+
+**Root motivation.** Owner reported after v8.3.2: "the confirm button I assure you still does not exist in the edit start date of the adjust schedule feature or the manage schedule feature at all." Two underlying root causes were identified:
+
+1. **The SAVE CHANGES button looked unclickable.** v8.3.0–v8.3.2 had it disabled with `opacity: 0.5` whenever the inputs hadn't changed from the current values. When the modal first opened, the inputs were pre-filled with current values → `changed === false` → button rendered at 50% opacity with `disabled=true`. Visually it looked like a ghosted, inactive label, not a real button. Owner naturally concluded "there is no confirm button."
+
+2. **The button was below a wall of text.** v8.3.0 had a ~7-line ⚠ READ FIRST section + a separate Current Schedule readout + a separate Pending Change section before the inputs were even reached. On a 375px mobile screen this pushed the SAVE CHANGES button to the bottom of a scrolling modal — easy to miss if the user didn't realise they needed to scroll.
+
+### What was changed
+
+**Aggressive layout cleanup of `#editStartDateOverlay`:**
+
+- ⚠ READ FIRST `settings-section` (7 lines of `<br><br>`-separated paragraphs) → single concise paragraph in a `border-left` accent box.
+- Current Schedule readout collapsed from 4 lines to 2 lines (one line: date · weight; one line: last day · total).
+- Pending Change `settings-section` → inline `<div id="esdPreviewText">` immediately under the inputs, always visible (no `display:none` toggle).
+- SAVE CHANGES button moved out of its `settings-section` wrapper → free-standing full-width button immediately under the inline preview. Big Bebas Neue 1.15rem text, 4px letter-spacing, 16px padding. Black text on yellow `var(--accent)` background. Cannot be missed.
+- Footer caption under the button: "Tapping shows a final confirmation prompt before any write."
+
+**Always-enabled SAVE button:**
+
+- Dropped `btn.disabled = !canSave` and `btn.style.opacity = canSave ? '1' : '0.5'` from `updateEditStartDatePreview`. Button is always 100% opacity, always clickable.
+- All validation (date format, ≤ current startDate, ≤ today, ≥ 2020-01-01, weight in (0, 500], not a no-op) still runs inside `applyEditStartDate` when the button is tapped. If validation fails, the user gets a clear single-arg `showAlert` explaining exactly what's wrong — actionable, not silent.
+- The inline `#esdPreviewText` now shows validation issues as red warnings as the user types (`⚠ ${newDate} is AFTER current start ${sched.startDate}...`) so the user sees the problem before tapping.
+
+**Compact `updateEditStartDatePreview` logic:**
+
+- Branch order: empty inputs → field-incomplete prompts → forward / future / pre-2020 / no-change warnings → full diff. Each branch returns immediately. Simpler to reason about than the previous nested-if version.
+- Diff format unchanged: `Start date: X → Y`, `Start weight: X → Y`, `Schedule length: X → Y days`.
+
+### What did NOT change
+
+- `applyEditStartDate` behaviour: still calls `showConfirm` with the same diff message before running `backupData` + atomic schedule write. Confirm gate is preserved.
+- All write semantics: `schedule.startDate` / `startWeight` / `days` / `totalDays` / `exactDays` updated atomically, `settings.startDate` mirrored, `SCHEDULE_ADJUSTED` dispatched.
+- Validation rules unchanged.
+- No new SK key. No new module. No schema migration.
+
+### Files changed
+
+- `app.html`: `#editStartDateOverlay` HTML restructured for compactness; `updateEditStartDatePreview` rewritten without `disabled`/opacity gating; `openEditStartDate` adjusted to a 2-line current readout. `APP_VERSION` 8.3.2 → 8.3.3. `APP_VERSION_MSG` updated.
+- `sw.js`: `CACHE_NAME` v35 → v36.
+- `index.html`: hero badge v8.3.2 → v8.3.3.
+- `CLAUDE.md`: version refs.
+- `UPDATE_LOG.md`: this entry.
+
+### Next: v8.3.4
+
+Will audit the service-worker update propagation path. Currently `sw.js` sends a `SW_UPDATED` postMessage to clients after `clients.claim()` on the activate event, but the page-side listener for that message + reload-banner wiring needs verification. Owner has reported "I don't see updates on my phone reliably" — v8.3.4 will add diagnostics + a manual CHECK FOR UPDATES button in Settings so the SW state is never opaque again.
+
+---
+
 ## Version 8.3.2 — 2026-05-12
 
 **Scope:** Patch (small UX enhancement — surfaces APP_VERSION in the app UI). No schema change. No data mutation.
