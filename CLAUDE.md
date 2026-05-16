@@ -581,7 +581,43 @@ const APP_VERSION_MSG = 'Description of changes.';    // ← short description o
 
 > **Non-Negotiable:** Every commit that changes `app.html` must include an `APP_VERSION` bump according to the thresholds above. Never skip this — the version bump is part of the change, not a separate step. Accumulate changes within a session and apply the appropriate bump level (patch/minor/major) based on the total scope of changes in that commit.
 
-> **Non-Negotiable:** When `APP_VERSION` is bumped, also update the version in the hero badge in `index.html` (`<div class="hero-badge">PROGRESSIVE WEB APP — vX.Y.Z — ZERO DEPENDENCIES</div>`) to match. The landing page must always reflect the current app version.
+### Version-Bump Checklist (MANDATORY — every APP_VERSION bump)
+
+> **Non-Negotiable.** Every `APP_VERSION` bump in `app.html` MUST be accompanied by updates to **every** version-displaying surface listed below in the SAME commit. Pushing an `APP_VERSION` bump without updating these surfaces creates user-visible drift (the v8.3.4 audit found 13 stale `v7.8.1` references across `index.html` because earlier bumps only touched the hero badge — this rule exists to prevent that recurring).
+
+**Required updates on every bump:**
+
+| File | Surface to update | How to verify |
+|---|---|---|
+| `app.html` | `const APP_VERSION = 'X.Y.Z';` | Search the file for `APP_VERSION =` |
+| `app.html` | `const APP_VERSION_MSG = '...';` (always update for minor/major) | Same line range |
+| `sw.js` | `const CACHE_NAME = 'protocol-health-vN';` (bump on every push to main) | Search the file for `CACHE_NAME =` |
+| `index.html` | `<title>` tag — `Protocol Health · vX.Y.Z — ...` | Line ~12 |
+| `index.html` | Nav `.ver` chip — `<div class="ver">vX.Y.Z</div>` | Line ~34 |
+| `index.html` | Hero badge — `vX.Y.Z · FREE · OFFLINE · NO ACCOUNT` | Line ~52 |
+| `index.html` | CTA band note — `<div class="note">vX.Y.Z · Installable PWA · Offline ready</div>` | Search for "Installable PWA" |
+| `index.html` | Footer stats — `<span class="v">vX.Y.Z</span><span class="l">CURRENT</span>` | Search for `CURRENT</span>` |
+| `index.html` | Copyright footer — `© 2026 PROTOCOL HEALTH · vX.Y.Z · ALL RIGHTS RESERVED` | Last visible line |
+| `index.html` | Asset cache-bust query strings — `?v=X.Y.Z` on every `<link>` and `<script>` referencing assets (currently 7 CSS + 2 JS = 9 occurrences). Use `replace_all` for safety. | Search for `?v=` |
+| `index.html` | Changelog block — **add a new `<div class="cl-entry">` at the top of `.changelog-wrap` with `<div class="cl-dot current"></div>` and remove `.current` from the previously-CURRENT entry**. The changelog must always lead with the latest release marked CURRENT. | Search for `cl-dot current` |
+| `CLAUDE.md` | "Current version" line in §11 and §12, the cache name in §11, the `APP_VERSION` example in §12, the §13 Quick Reference cache + version lines, the §13 line-count anchor, the §23 architecture line-count anchor, the §26 line-count table | Use the grep command below |
+| `UPDATE_LOG.md` | New entry at the top with date, scope, banner copy, file deltas, science citation if any rule changed | Top of the file |
+| `README.md` | The `app.html` line-count + version anchor in the Architecture block (line ~27) | Search for "as of v" |
+| `WORKING_VERSIONS.md` | New entry **after on-device smoke passes** (not before — failed smokes don't get tagged) | Top of the file |
+
+**Verification grep — run BEFORE every push to confirm no stale refs slipped through:**
+
+```bash
+# Replace OLD with the previous version, NEW with the new version
+OLD="8.3.4"; NEW="8.3.5"
+grep -rn "v${OLD}\|protocol-health-v[0-9]\+" \
+  app.html sw.js index.html manifest.json CLAUDE.md README.md UPDATE_LOG.md \
+  | grep -v "^UPDATE_LOG.md\|^WORKING_VERSIONS.md\|cl-ver\|cl-body" | grep -v "v${NEW}"
+```
+
+Any output other than historical changelog references inside `.cl-ver` / `.cl-body` (descriptive prose inside a changelog entry that references the version it documents) is a stale ref that must be fixed before push. Historical references inside `UPDATE_LOG.md` and `WORKING_VERSIONS.md` entries are append-only audit trail and must NOT be edited.
+
+**Why this is mandatory.** Owner found in May 2026 that `index.html` had been silently rotting at `v7.8.1` across 13 surfaces while the app shipped 6 v8.x releases. The user-facing landing page said "CURRENT v7.8" while the installed PWA said v8.3.3. That divergence is unacceptable — fixing it once is fine; preventing recurrence is what this rule is for.
 
 ### Version Rollover Rule
 
@@ -621,7 +657,7 @@ Storage keys (all in SK object at top of script):
   ph_bts_v1 — backup timestamp (drives reminder banner)
   ph_bh_v1  — backup history (Phase 11, v7.7.0 — last 5 backups)
   ph_sw_v1  — last dismissed SW cache version (for reload banner)
-  ph_sch_v1 — schema version record (migration framework, v5.1.0+; currently v7 as of v8.3.0)
+  ph_sch_v1 — schema version record (migration framework, v5.1.0+; currently v7 as of v8.3.4)
 
 Modules:      migrations/ — schema versioning and upgrade logic (see Section 9 subsection)
               plans/ — plan definitions + EXERCISE_PROGRESSIONS, loaded as ES modules
@@ -1105,7 +1141,7 @@ Procedure:
 
 Approximate targets. Exceeding them is a hint to split, not a failure.
 
-| File | Target | Actual (v8.3.0) | Status |
+| File | Target | Actual (v8.3.4) | Status |
 |------|--------|-----------------|--------|
 | `app.html` | ≤ 6,500 lines | ~6,512 | ⚠ marginally over soft limit; ok pending v8.4+ engine split |
 | Any `plans/*.js` | ≤ 800 lines | max 580 (agro) | ✓ |
