@@ -24,7 +24,7 @@ All data stored in the browser's `localStorage` (and mirrored to `IndexedDB` as 
 ## Architecture at a glance
 
 ```
-app.html                  # Bootstrap: HTML + CSS + inline orchestration (~6,054 lines as of v8.0.0)
+app.html                  # Bootstrap: HTML + CSS + inline orchestration (~6,512 lines as of v8.3.4)
 index.html, manifest.json, sw.js
 plans/                    # 5 plan modules + exercise progressions + index assembler
 modules/                  # export.js, calendar.js, radar.js, schedule-html.js, calibration.js
@@ -60,7 +60,7 @@ For any code change, read `CLAUDE.md` §25 first. The short version:
 2. Read `CLAUDE.md` and `WORKING_VERSIONS.md` top entry.
 3. Produce a plan under `docs/` before touching code (for any non-trivial change).
 4. Implement surgically.
-5. Bump `APP_VERSION` in `app.html` + `CACHE_NAME` in `sw.js` + hero-badge in `index.html` + `UPDATE_LOG.md` entry — per `CLAUDE.md` §12.
+5. Bump `APP_VERSION` in `app.html` + `CACHE_NAME` in `sw.js` + **every version surface in `index.html` and `README.md`** + `UPDATE_LOG.md` entry — see `CLAUDE.md` §12 "Version-bump checklist (mandatory)" for the full list of places to update on every bump.
 6. Test on-device.
 7. Tag `vX.Y.Z-working` + log in `WORKING_VERSIONS.md`.
 

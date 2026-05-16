@@ -1170,6 +1170,15 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
         </div>
       </div>
 
+      <!-- APP UPDATES (v8.3.4) -->
+      <div class="settings-section">
+        <div class="settings-section-title">App Updates</div>
+        <p style="font-size:0.75rem;color:var(--muted);margin:0 0 10px">The app updates itself in the background — usually you don't have to do anything. Tap CHECK FOR UPDATES below to force the check now (needs network).</p>
+        <div id="updPanelStatus" style="padding:10px 13px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-family:'DM Mono',monospace;font-size:0.7rem;line-height:1.7;color:var(--muted);margin-bottom:10px"></div>
+        <button class="reset-btn" onclick="checkForUpdates()" style="border-color:var(--accent);color:var(--accent);width:100%">CHECK FOR UPDATES</button>
+        <p style="font-size:0.62rem;color:var(--muted);margin:10px 0 0;line-height:1.6;font-family:'DM Mono',monospace">If a new version is found, a RELOAD banner appears at the bottom of the screen. To force a refresh on phone: fully close the PWA (swipe it away from your app switcher / recents tray) and reopen — that picks up new versions cleanly without losing data.</p>
+      </div>
+
     </div>
   </div>
 </div>
@@ -1800,8 +1809,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '8.3.3';
-const APP_VERSION_MSG = 'Cleaned up the EDIT START DATE modal: dropped the wall-of-text warning to a single paragraph, merged the current-schedule readout into one line, put the inputs and inline preview right at the top, and made the SAVE CHANGES button a big always-enabled yellow button immediately under the inputs. No more ghosted / faded button at the bottom of the modal. Validation still happens — if your inputs are wrong, tapping SAVE CHANGES shows a clear alert instead of silently doing nothing. Next patch (v8.3.4) will verify the service-worker update path so your phone always picks up new versions cleanly.';
+const APP_VERSION = '8.3.4';
+const APP_VERSION_MSG = 'Added a CHECK FOR UPDATES button in Settings → APP UPDATES that forces a service-worker update check on demand and shows your current cache version + service-worker state so you always know what code your device is actually running. Also fixed the landing page (index.html) which was stuck at v7.8.1 in the title, nav, footer, copyright and asset cache-bust strings — all 13 stale references corrected and the changelog updated to cover the six v8.x releases. Startup now logs the running APP_VERSION + schema version to the browser console so debugging "is the deploy live yet" is unambiguous. No data changes.';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
 
@@ -3802,6 +3811,9 @@ function openSettings() {
   syncCustomSelect('activitySelectCustom', 'settingActivityLevel');
   document.getElementById('settingsOverlay').classList.add('active');
   renderStorageHealth();
+  // v8.3.4: paint the APP UPDATES diagnostic + refresh the SW cache version
+  if(typeof paintUpdatePanel === 'function') paintUpdatePanel();
+  if(typeof querySwCacheVersion === 'function') querySwCacheVersion();
   // Populate schema version display (migration framework, v5.1.0+)
   const schemaV = (typeof window.getSchemaVersion === 'function') ? window.getSchemaVersion() : null;
   const schemaEl = document.getElementById('schemaVersionDisplay');
@@ -6396,8 +6408,39 @@ if('serviceWorker' in navigator) {
   // Listen for messages from the service worker
   navigator.serviceWorker.addEventListener('message', event => {
     if(event.data && event.data.type === 'SW_UPDATED') {
+      _swCacheVersion = event.data.cache || _swCacheVersion;
       showReloadBanner(event.data.cache);
     }
+  });
+
+  // ── Query active SW for its current cache version (v8.3.4) ────────────
+  // The SW_UPDATED message only fires when a NEW version activates, but on
+  // normal loads we still want to know which cache the running SW is using
+  // so the Settings → APP UPDATES panel can show it accurately. We use a
+  // MessageChannel RPC: post GET_VERSION, listen on the transferred port
+  // for the reply, store the cache name in _swCacheVersion + repaint the
+  // status row. The matching message handler lives in sw.js.
+  function querySwCacheVersion() {
+    if(!navigator.serviceWorker.controller) return;
+    try {
+      const channel = new MessageChannel();
+      channel.port1.onmessage = e => {
+        if(e.data && e.data.type === 'VERSION' && e.data.cache) {
+          _swCacheVersion = e.data.cache;
+          if(typeof paintUpdatePanel === 'function') paintUpdatePanel();
+          console.info('[PH] service worker cache: ' + _swCacheVersion);
+        }
+      };
+      navigator.serviceWorker.controller.postMessage({ type: 'GET_VERSION' }, [channel.port2]);
+    } catch(e) {
+      // RPC unsupported in some embedded contexts — fall back to "unknown" in UI
+    }
+  }
+  // Run once on load, plus again whenever the active SW changes
+  navigator.serviceWorker.ready.then(() => {
+    querySwCacheVersion();
+    // Also expose for the Settings panel to call manually
+    window.querySwCacheVersion = querySwCacheVersion;
   });
 
   // If the controlling SW changes (new SW took over), show reload banner
@@ -6407,7 +6450,63 @@ if('serviceWorker' in navigator) {
     swRefreshing = true;
     showReloadBanner();
   });
+
+  // ── Expose for Settings → APP UPDATES panel (v8.3.4) ───────────────────
+  // checkForUpdates() and paintUpdatePanel() are called from the SETTINGS UI.
+  // They live here (inside the 'serviceWorker' in navigator block) because
+  // they reference _swReg / _swCacheVersion which are scoped here.
+
+  window.checkForUpdates = async function() {
+    if(!_swReg) {
+      showAlert('Service worker not registered yet. Wait a moment and try again.');
+      return;
+    }
+    // Manually-triggered update check — refetch sw.js from the network
+    try {
+      await _swReg.update();
+    } catch(e) {
+      showAlert('Update check failed: ' + (e && e.message ? e.message : e) + '. Are you offline? Update checks need network — the app itself still works offline.');
+      return;
+    }
+    // _swReg.installing / .waiting / .active states after .update():
+    //   installing → a new SW is downloading
+    //   waiting    → a new SW is ready but not yet activated (rare with skipWaiting)
+    //   active     → the running SW (no update found)
+    setTimeout(() => {
+      if(_swReg.installing) {
+        showAlert('Update found — a new version is downloading in the background. A RELOAD banner will appear at the bottom of the screen when it is ready. You can keep using the app meanwhile.');
+      } else if(_swReg.waiting) {
+        showAlert('A new version is ready to activate. The RELOAD banner should be visible at the bottom of the screen — tap it, or refresh the page.');
+      } else {
+        const cache = _swCacheVersion || 'unknown';
+        showAlert('You are on the latest version. Cache: ' + cache + '. If a new release just shipped and you still see an old version, fully close the PWA (swipe away from the app switcher) and reopen it.');
+      }
+      // Re-query cache version after the update attempt — the active SW may have rotated
+      if(typeof querySwCacheVersion === 'function') querySwCacheVersion();
+    }, 1500);
+  };
+
+  window.paintUpdatePanel = function() {
+    const el = document.getElementById('updPanelStatus');
+    if(!el) return;
+    const cache = _swCacheVersion || '—';
+    const swState = _swReg ? 'registered' : 'not registered yet';
+    el.innerHTML =
+      'App version: <b>' + APP_VERSION + '</b><br>' +
+      'Service worker cache: <b>' + cache + '</b><br>' +
+      'Service worker state: <b>' + swState + '</b>';
+  };
+
 }
+
+// ─── STARTUP DIAGNOSTIC (v8.3.4) ─────────────────────────────────────────────
+// One-line console banner so DevTools shows exactly what's running. Helps when
+// debugging "I don't see my update" situations — if the console shows v8.3.2
+// but the latest deploy is v8.3.4, you know it's a SW cache issue not a code
+// issue. Schema version is appended if the migrations runner has loaded.
+console.info('[PH] running APP_VERSION ' + APP_VERSION
+  + (typeof getSchemaVersion === 'function' ? ' · schema v' + getSchemaVersion() : '')
+  + ' — for cache version, open Settings → APP UPDATES or check window._swCacheVersion');
 </script>
 </body>
 </html>

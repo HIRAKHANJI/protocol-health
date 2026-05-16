@@ -20,7 +20,7 @@
 // VERSION: bump CACHE_NAME (e.g. 'protocol-health-v8') when you deploy a major update.
 // This forces old caches to be deleted and new files to be fetched fresh.
 
-const CACHE_NAME = 'protocol-health-v36';
+const CACHE_NAME = 'protocol-health-v37';
 
 // ─── INSTALL ─────────────────────────────────────────────────────────────────
 // Runs once when the service worker is first registered (or when CACHE_NAME changes).
@@ -119,6 +119,21 @@ self.addEventListener('activate', event => {
       });
     })
   );
+});
+
+// ─── MESSAGE — GET_VERSION RPC (v8.3.4) ──────────────────────────────────────
+// The page can ask the active SW for its current CACHE_NAME at any time by
+// posting { type: 'GET_VERSION' } via a MessageChannel. We reply on the
+// transferred port with { type: 'VERSION', cache: CACHE_NAME }.
+// Used by the CHECK FOR UPDATES button in Settings and by the startup
+// diagnostic so the page can show the user exactly which cache they're
+// running, without having to wait for a SW_UPDATED message.
+self.addEventListener('message', event => {
+  if(event.data && event.data.type === 'GET_VERSION') {
+    if(event.ports && event.ports[0]) {
+      event.ports[0].postMessage({ type: 'VERSION', cache: CACHE_NAME });
+    }
+  }
 });
 
 // ─── FETCH ───────────────────────────────────────────────────────────────────

@@ -233,10 +233,10 @@ Nothing else changes. `getActivePlan()` reads `settings.plan`, looks up `PLANS[s
 
 | File | Purpose |
 |------|---------|
-| `app.html` | App bootstrap — HTML, CSS, and the inline orchestration script (runInit + helpers that stay in classic scope). ~6,312 lines as of v8.3.0 (grew from 4,637 post-v6.0.0-refactor through Phases A–D / calibration + multi-day fasts + v8.1.0 audit fixes + v8.2.0 auto-derivation completeness fix + v8.3.0 EDIT START DATE recovery control). Plans, large function groups, shared components, and migrations load as ES modules — see Section 23. Zero build process, zero bundler, zero framework. |
+| `app.html` | App bootstrap — HTML, CSS, and the inline orchestration script (runInit + helpers that stay in classic scope). ~6,512 lines as of v8.3.4 (grew from 4,637 post-v6.0.0-refactor through Phases A–D / calibration + multi-day fasts + v8.1.0 audit fixes + v8.2.0 auto-derivation completeness fix + v8.3.0 EDIT START DATE recovery control). Plans, large function groups, shared components, and migrations load as ES modules — see Section 23. Zero build process, zero bundler, zero framework. |
 | `index.html` | Landing/product page. Links to `app.html`. |
 | `manifest.json` | PWA manifest. App name, icons, display mode (standalone = fullscreen), theme color. |
-| `sw.js` | Service Worker. Caches all app files after first load for offline use. Cache-first strategy. Current cache name: `protocol-health-v36`. Bump version on major deploys. |
+| `sw.js` | Service Worker. Caches all app files after first load for offline use. Cache-first strategy. Current cache name: `protocol-health-v37`. Bump version on major deploys. |
 | `PH_LOGO_192.png` | Home screen icon at 192×192px. |
 | `PH_LOGO_512.png` | Splash screen icon at 512×512px. |
 
@@ -460,7 +460,7 @@ Push to GitHub → GitHub Pages serves new files (~60s)
 
 The service worker caches files under `CACHE_NAME` in `sw.js`. If this name does not change, the SW may keep serving the old cached version even after new files are pushed.
 
-**Current version:** `protocol-health-v36`
+**Current version:** `protocol-health-v37`
 
 > **Rule: Bump `CACHE_NAME` on every significant update to `main`.**
 > - Only bump when merging or pushing to `main` — feature branches do not need cache version increments
@@ -471,7 +471,7 @@ The service worker caches files under `CACHE_NAME` in `sw.js`. If this name does
 
 ```javascript
 // sw.js — line 22
-const CACHE_NAME = 'protocol-health-v36'; // ← increment this on every significant push
+const CACHE_NAME = 'protocol-health-v37'; // ← increment this on every significant push
 ```
 
 ### Files That Must Be Pushed Together
@@ -556,7 +556,7 @@ The app has two independent version numbers that serve different purposes:
 | **+0.1.0** (minor) | A new feature, a meaningful UI change, or 4+ bug fixes bundled together | Yes | Added streak counter, redesigned settings panel, new checklist group |
 | **+1.0.0** (major) | New plan added, major rework of a core system, or something that changes how you use the app | Yes | New combat training plan, schedule system rewrite, new tab added |
 
-**Current version:** `8.3.3`
+**Current version:** `8.3.4`
 
 > **Self-Update Rule:** Whenever `APP_VERSION` is bumped in `app.html`, also update ALL version references in this file (`CLAUDE.md`) to match — including this line and the Quick Reference section below. Never leave stale version numbers in project documentation.
 
@@ -573,7 +573,7 @@ The app has two independent version numbers that serve different purposes:
 When making changes, update these two lines near the top of the script in `app.html`:
 
 ```javascript
-const APP_VERSION = '8.3.3';                         // ← bump according to rules above
+const APP_VERSION = '8.3.4';                         // ← bump according to rules above
 const APP_VERSION_MSG = 'Description of changes.';    // ← short description of what changed
 ```
 
@@ -581,7 +581,43 @@ const APP_VERSION_MSG = 'Description of changes.';    // ← short description o
 
 > **Non-Negotiable:** Every commit that changes `app.html` must include an `APP_VERSION` bump according to the thresholds above. Never skip this — the version bump is part of the change, not a separate step. Accumulate changes within a session and apply the appropriate bump level (patch/minor/major) based on the total scope of changes in that commit.
 
-> **Non-Negotiable:** When `APP_VERSION` is bumped, also update the version in the hero badge in `index.html` (`<div class="hero-badge">PROGRESSIVE WEB APP — vX.Y.Z — ZERO DEPENDENCIES</div>`) to match. The landing page must always reflect the current app version.
+### Version-Bump Checklist (MANDATORY — every APP_VERSION bump)
+
+> **Non-Negotiable.** Every `APP_VERSION` bump in `app.html` MUST be accompanied by updates to **every** version-displaying surface listed below in the SAME commit. Pushing an `APP_VERSION` bump without updating these surfaces creates user-visible drift (the v8.3.4 audit found 13 stale `v7.8.1` references across `index.html` because earlier bumps only touched the hero badge — this rule exists to prevent that recurring).
+
+**Required updates on every bump:**
+
+| File | Surface to update | How to verify |
+|---|---|---|
+| `app.html` | `const APP_VERSION = 'X.Y.Z';` | Search the file for `APP_VERSION =` |
+| `app.html` | `const APP_VERSION_MSG = '...';` (always update for minor/major) | Same line range |
+| `sw.js` | `const CACHE_NAME = 'protocol-health-vN';` (bump on every push to main) | Search the file for `CACHE_NAME =` |
+| `index.html` | `<title>` tag — `Protocol Health · vX.Y.Z — ...` | Line ~12 |
+| `index.html` | Nav `.ver` chip — `<div class="ver">vX.Y.Z</div>` | Line ~34 |
+| `index.html` | Hero badge — `vX.Y.Z · FREE · OFFLINE · NO ACCOUNT` | Line ~52 |
+| `index.html` | CTA band note — `<div class="note">vX.Y.Z · Installable PWA · Offline ready</div>` | Search for "Installable PWA" |
+| `index.html` | Footer stats — `<span class="v">vX.Y.Z</span><span class="l">CURRENT</span>` | Search for `CURRENT</span>` |
+| `index.html` | Copyright footer — `© 2026 PROTOCOL HEALTH · vX.Y.Z · ALL RIGHTS RESERVED` | Last visible line |
+| `index.html` | Asset cache-bust query strings — `?v=X.Y.Z` on every `<link>` and `<script>` referencing assets (currently 7 CSS + 2 JS = 9 occurrences). Use `replace_all` for safety. | Search for `?v=` |
+| `index.html` | Changelog block — **add a new `<div class="cl-entry">` at the top of `.changelog-wrap` with `<div class="cl-dot current"></div>` and remove `.current` from the previously-CURRENT entry**. The changelog must always lead with the latest release marked CURRENT. | Search for `cl-dot current` |
+| `CLAUDE.md` | "Current version" line in §11 and §12, the cache name in §11, the `APP_VERSION` example in §12, the §13 Quick Reference cache + version lines, the §13 line-count anchor, the §23 architecture line-count anchor, the §26 line-count table | Use the grep command below |
+| `UPDATE_LOG.md` | New entry at the top with date, scope, banner copy, file deltas, science citation if any rule changed | Top of the file |
+| `README.md` | The `app.html` line-count + version anchor in the Architecture block (line ~27) | Search for "as of v" |
+| `WORKING_VERSIONS.md` | New entry **after on-device smoke passes** (not before — failed smokes don't get tagged) | Top of the file |
+
+**Verification grep — run BEFORE every push to confirm no stale refs slipped through:**
+
+```bash
+# Replace OLD with the previous version, NEW with the new version
+OLD="8.3.4"; NEW="8.3.5"
+grep -rn "v${OLD}\|protocol-health-v[0-9]\+" \
+  app.html sw.js index.html manifest.json CLAUDE.md README.md UPDATE_LOG.md \
+  | grep -v "^UPDATE_LOG.md\|^WORKING_VERSIONS.md\|cl-ver\|cl-body" | grep -v "v${NEW}"
+```
+
+Any output other than historical changelog references inside `.cl-ver` / `.cl-body` (descriptive prose inside a changelog entry that references the version it documents) is a stale ref that must be fixed before push. Historical references inside `UPDATE_LOG.md` and `WORKING_VERSIONS.md` entries are append-only audit trail and must NOT be edited.
+
+**Why this is mandatory.** Owner found in May 2026 that `index.html` had been silently rotting at `v7.8.1` across 13 surfaces while the app shipped 6 v8.x releases. The user-facing landing page said "CURRENT v7.8" while the installed PWA said v8.3.3. That divergence is unacceptable — fixing it once is fine; preventing recurrence is what this rule is for.
 
 ### Version Rollover Rule
 
@@ -598,7 +634,7 @@ const APP_VERSION_MSG = 'Description of changes.';    // ← short description o
 ```
 Repository:   github.com/HIRAKHANJI/protocol-health
 Live URL:     https://hirakhanji.github.io/protocol-health/
-App file:     app.html (bootstrap, ~6,312 lines as of v8.3.0; plans/modules/components load as ES modules — see Section 23)
+App file:     app.html (bootstrap, ~6,512 lines as of v8.3.4; plans/modules/components load as ES modules — see Section 23)
 Landing:      index.html (product page)
 PWA files:    manifest.json, sw.js, PH_LOGO_192.png, PH_LOGO_512.png
 
@@ -621,7 +657,7 @@ Storage keys (all in SK object at top of script):
   ph_bts_v1 — backup timestamp (drives reminder banner)
   ph_bh_v1  — backup history (Phase 11, v7.7.0 — last 5 backups)
   ph_sw_v1  — last dismissed SW cache version (for reload banner)
-  ph_sch_v1 — schema version record (migration framework, v5.1.0+; currently v7 as of v8.3.0)
+  ph_sch_v1 — schema version record (migration framework, v5.1.0+; currently v7 as of v8.3.4)
 
 Modules:      migrations/ — schema versioning and upgrade logic (see Section 9 subsection)
               plans/ — plan definitions + EXERCISE_PROGRESSIONS, loaded as ES modules
@@ -637,8 +673,8 @@ Day types:    getDayType(dateStr) → 'fast' | 'light' | 'normal'
 Data writes:  always end with dispatch("EVENT_NAME")
 Dialogs:      showConfirm(), showAlert() — never native confirm/alert
 Dates:        dateToStr(d), strToDate(s), todayStr() — never toISOString()
-Cache:        sw.js CACHE_NAME = "protocol-health-v36" — bump on every significant push
-App version:  APP_VERSION = "8.3.3" — bump on notable updates (see Section 12)
+Cache:        sw.js CACHE_NAME = "protocol-health-v37" — bump on every significant push
+App version:  APP_VERSION = "8.3.4" — bump on notable updates (see Section 12)
 Update log:   UPDATE_LOG.md — every version bump must be documented here
 ```
 
@@ -771,6 +807,16 @@ Any plan that includes creatine supplementation must specify: 3-5g/day, no loadi
 ### Push:Pull Ratio (HARD RULE)
 Protocol Health must NEVER generate a training plan with push:pull ratio > 1:1. Default for AGRO CUT: pull-dominant (5:7). Source: Cools 2016 + Prinold 2016
 
+### Demographic Stratification (WORKOUT ENGINE FOUNDATION)
+The exercise-prescription rules for age, weight, sex, training history, and medical context live in `WORKOUTS_LIBRARY.md` **Section 2 — Demographic Stratification Matrix**. The Workout Engine (v9.0.0 roadmap) consults that matrix before prescribing any exercise. Section 2 covers:
+- **§2.1** — Plan Eligibility by Demographics (which plan defaults for each profile)
+- **§2.2** — Universal Volume + Intensity Modulators (per-age / per-weight / per-sex multipliers)
+- **§2.3** — Blanket Exercise Restrictions (absolute blocks by demographic)
+- **§2.4** — Medical Disclaimer triggers
+- **§2.5** — Engine Prescription Algorithm (precedence order: medical → plan eligibility → blanket restriction → progression prereq → plan prescription → universal modulators → push:pull cap → volume floor)
+
+Source: ICFSR 2021/2025 + ACSM Pre-Participation Screening + WHO 2020 + ISSN 2018. Any change to age/weight/sex/medical-clearance rules MUST update Section 2 and reference its Tier 1 source.
+
 ### Prohibited Sources
 Never cite: supplement brand websites, influencer stacks, sites requiring purchase, single case reports, commercial programs, news articles about research (use original DOI).
 
@@ -790,13 +836,14 @@ The file `WORKOUTS_LIBRARY.md` in the repo root is the canonical reference for a
 
 ### What it contains
 
-- Every exercise from `EXERCISE_PROGRESSIONS` in `app.html` with full biomechanical detail
-- Every non-progression exercise used across all 5 plans
-- All training modalities (HIIT, shadowboxing, Animal Flow, yoga, Pilates, etc.) with evidence
+- **Section 1** — Training Modalities (12 modalities with evidence citations)
+- **Section 2** — Demographic Stratification Matrix (the foundation for the Workout Engine — age/weight/sex/training-history/medical rules with Tier 1 source citations)
+- **PROGRESSION EXERCISES** — every exercise from `EXERCISE_PROGRESSIONS` in `plans/exercise-progressions.js` with full biomechanical detail
+- **NON-PROGRESSION EXERCISES** — every accessory / conditioning / mobility / stretch exercise used across all 5 plans
 - Per-plan prescription tables (sets/reps/tempo/rest/frequency) for every exercise
-- Progression prerequisites and paths for every exercise
-- Auto-prescription data model for future workout generation features
-- Safety rules and contraindications per exercise
+- Progression prerequisites and paths for every progression exercise
+- Per-exercise demographic safety notes (engine consumes these via Section 2 §2.3)
+- Auto-prescription data model framework (final shape will be `plans/exercise-db.js` once Phase 1 of the v9.0.0 Workout Engine ships — see `docs/workout-engine-v9-roadmap.md`)
 
 ### Rules
 
@@ -804,7 +851,8 @@ The file `WORKOUTS_LIBRARY.md` in the repo root is the canonical reference for a
 2. Always match the per-plan prescription when generating workout content
 3. The library's evidence citations must reference entries in CLAUDE.md Section 15
 4. Push:pull ratio must remain ≤ 1:1 across any plan's weekly schedule
-5. Exercise progressions in the library must match `EXERCISE_PROGRESSIONS` in `app.html` exactly
+5. Exercise progressions in the library must match `EXERCISE_PROGRESSIONS` in `plans/exercise-progressions.js` exactly
+6. **The Demographic Stratification Matrix (Section 2) is the single source of truth for age/weight/sex/medical exercise eligibility. Any change to these rules must update Section 2 first and cite a Tier 1 source from CLAUDE.md §15.**
 
 ---
 
@@ -854,7 +902,7 @@ As of v6.0.0 the app is a modular ES-module PWA, not a single-file app. Zero bui
 
 ```
 /
-├── app.html                  # Bootstrap: HTML + CSS + inline orchestration script (~6,312 lines as of v8.3.0)
+├── app.html                  # Bootstrap: HTML + CSS + inline orchestration script (~6,512 lines as of v8.3.4)
 ├── index.html                # Landing page (not the app entry point — that's app.html)
 ├── manifest.json             # PWA manifest
 ├── sw.js                     # Service worker (cache list covers every module file)
@@ -1093,9 +1141,9 @@ Procedure:
 
 Approximate targets. Exceeding them is a hint to split, not a failure.
 
-| File | Target | Actual (v8.3.0) | Status |
+| File | Target | Actual (v8.3.4) | Status |
 |------|--------|-----------------|--------|
-| `app.html` | ≤ 6,500 lines | ~6,087 | ✓ within revised target |
+| `app.html` | ≤ 6,500 lines | ~6,512 | ⚠ marginally over soft limit; ok pending v8.4+ engine split |
 | Any `plans/*.js` | ≤ 800 lines | max 580 (agro) | ✓ |
 | Any `modules/*.js` | ≤ 1,000 lines | max 964 (calibration) | ⚠ approaching limit |
 | Any `components/*.js` | ≤ 600 lines | max 635 (fast-window) | ⚠ over soft limit |
