@@ -3096,3 +3096,690 @@ the feet down in sequence rather than collapsing straight down.
 straight-arm milestone.
 
 ---
+
+## NON-PROGRESSION EXERCISES
+
+Exercises in this section are not part of the levelled progression ladders in
+`EXERCISE_PROGRESSIONS`. They appear in plan workout cards, HIIT circuits, or as
+accessory/isolation work. They do not have a progression group or level — they are
+prescribed directly in each plan's `workoutContent()` function.
+
+---
+
+### Calisthenics / Resistance
+
+---
+
+#### Mountain climbers
+
+**Category:** Core / Cardio
+**Equipment:** None
+**Target muscles (primary):** Hip flexors, shoulders (isometric), core
+**Target muscles (secondary):** Quadriceps, chest (isometric), triceps
+**Movement type:** Compound (dynamic)
+
+**Description:** From a push-up plank position, drive one knee toward the chest, then
+rapidly alternate legs in a running motion while keeping the hands planted and the
+hips low. A high-output core-and-cardio hybrid that elevates heart rate without
+leaving the floor.
+
+**Common mistakes:**
+- Letting the hips pike up as the legs drive in, reducing core demand and making the exercise easier
+- Bouncing off the toes instead of driving the knees deliberately, sacrificing hip-flexor load for speed
+
+**Safety notes:** Maintain plank position throughout. Stop on any wrist or shoulder pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not prescribed |
+| Cut | 30 sec | Fast | 15 sec | 2× | Tue HIIT A + Fri HIIT B circuit |
+| Bulk | N/A | — | — | — | Not prescribed |
+| Maintenance | N/A | — | — | — | Not prescribed |
+| AGRO | 30 sec | Fast | 15 sec | 3× | Mon/Wed/Fri morning warmup |
+
+**Evidence:** ACE 2024 (HIIT calorie burn), Schoenfeld 2021 (HIIT vs MICT)
+
+---
+
+#### Reverse lunge
+
+**Category:** Squat / Lower body
+**Equipment:** None
+**Target muscles (primary):** Quadriceps, glutes
+**Target muscles (secondary):** Hamstrings, core (balance), hip flexors
+**Movement type:** Compound
+
+**Description:** From standing, step one foot backward and lower the rear knee toward
+the floor until both knees reach approximately 90°, then drive through the front heel
+to return to standing. Alternating legs each rep. A more knee-friendly lunge variant
+than the forward lunge because deceleration occurs through the hips rather than the
+front knee.
+
+**Common mistakes:**
+- The front knee caving inward on the drive-up, breaking knee tracking
+- Stepping too short, keeping the torso upright but reducing ROM and quad load
+
+**Safety notes:** Stop on any sharp knee pain. Maintain upright torso. Use a wall touch
+for balance if needed.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not prescribed |
+| Cut | 30 sec or 3×12/leg | Normal | 15-60s | 2× | Tue HIIT A circuit + Thu lower |
+| Bulk | N/A | — | — | — | Not prescribed |
+| Maintenance | N/A | — | — | — | Not prescribed |
+| AGRO | 3×12/leg | Normal | 60s | 3× | Tue/Thu/Sat morning |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022
+
+---
+
+#### Jumping jacks
+
+**Category:** Cardio
+**Equipment:** None
+**Target muscles (primary):** Full body (cardiovascular)
+**Target muscles (secondary):** Calves, shoulders, hip abductors
+**Movement type:** Compound (plyometric)
+
+**Description:** From standing with feet together and arms at sides, jump the feet
+out wide while simultaneously raising the arms overhead, then jump back to the start
+position. A classic full-body warmup and HIIT filler that elevates heart rate quickly
+with minimal coordination demand.
+
+**Common mistakes:**
+- Landing flat-footed, sending impact through the knees instead of absorbing through the balls of the feet
+- Cutting the arm range, losing the shoulder-involvement component
+
+**Safety notes:** **Substitute marching jacks (step-out, no jump) for users >100kg** —
+the repetitive plyometric landing at heavy bodyweight is too high-impact for routine
+use. Stop on any knee, ankle, or lower-back pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not prescribed |
+| Cut | 30 sec | Fast | 15 sec | 1× | Tue HIIT A circuit. Marching jacks if >100kg |
+| Bulk | N/A | — | — | — | Not prescribed |
+| Maintenance | 30 sec | Fast | 15 sec | 1× | Tue cardio rotation option. Marching jacks if >100kg |
+| AGRO | N/A | — | — | — | Not prescribed |
+
+**Evidence:** ACE 2024 (HIIT calorie burn), WHO 2020 (moderate cardio)
+
+---
+
+#### High knees
+
+**Category:** Cardio
+**Equipment:** None
+**Target muscles (primary):** Hip flexors, quadriceps
+**Target muscles (secondary):** Core, calves
+**Movement type:** Compound (plyometric)
+
+**Description:** Run in place while driving the knees as high as possible — at least
+to hip height — with each stride. Arms pump opposite to the legs. A high-output
+cardio drill that builds hip-flexor endurance and elevates heart rate rapidly.
+
+**Common mistakes:**
+- Leaning the torso backward to cheat knee height, losing the upright running posture
+- Landing on the heels instead of the balls of the feet, sending impact through the knees
+
+**Safety notes:** Maintain an upright posture. Stop on any sharp knee or hip-flexor pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not prescribed |
+| Cut | 30 sec | Fast | 15 sec | 1× | Tue HIIT A circuit |
+| Bulk | N/A | — | — | — | Not prescribed |
+| Maintenance | N/A | — | — | — | Not prescribed |
+| AGRO | 30 sec | Fast | 15 sec | 3× | Mon/Wed/Fri morning warmup |
+
+**Evidence:** ACE 2024 (HIIT calorie burn)
+
+---
+
+#### Speed skaters
+
+**Category:** Plyometric / Cardio
+**Equipment:** None
+**Target muscles (primary):** Glute medius, quadriceps, calves
+**Target muscles (secondary):** Hip abductors, core (lateral stability)
+**Movement type:** Compound (lateral plyometric)
+
+**Description:** Leap laterally from one foot to the other, landing on the outside
+foot and sweeping the inside leg behind the landing leg. Absorb each landing softly
+and immediately leap to the other side. A lateral-plane power drill that builds
+glute-medius strength and lateral agility that sagittal-plane exercises miss.
+
+**Common mistakes:**
+- Landing stiff-legged, sending impact through the knee instead of absorbing through the hip
+- Cutting the lateral distance to rush the tempo, reducing the power output
+
+**Safety notes:** Ensure adequate lateral space. Land soft on each side. Stop on any
+knee, ankle, or hip pain. Substitute lateral step-taps if >100kg.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not prescribed |
+| Cut | 40 sec | Fast | 20 sec | 1× | Fri HIIT B circuit |
+| Bulk | N/A | — | — | — | Not prescribed |
+| Maintenance | N/A | — | — | — | Not prescribed |
+| AGRO | N/A | — | — | — | Not prescribed |
+
+**Evidence:** ACE 2024 (HIIT calorie burn), Schoenfeld 2021 (HIIT vs MICT)
+
+---
+
+#### Burpee / squat thrust
+
+**Category:** Compound / Conditioning
+**Equipment:** None
+**Target muscles (primary):** Full body — quads, chest, shoulders, triceps
+**Target muscles (secondary):** Core, hip flexors, calves
+**Movement type:** Compound (plyometric)
+
+**Description:** From standing, drop into a squat, place the hands on the floor, jump
+the feet back to a plank, perform a push-up (optional), jump the feet forward to the
+hands, and drive explosively upward into a jump. The highest-caloric-output bodyweight
+exercise in the library. **Squat thrust variant** (no push-up, no jump at the top) is
+the prescribed modification for beginners and users >100kg.
+
+**Common mistakes:**
+- Letting the hips sag in the plank phase, compressing the lower back
+- Rushing the push-up portion, producing a partial rep that adds no value
+
+**Safety notes:** **Substitute squat thrust (no jump, no push-up) for beginners and
+users >100kg.** The jump + landing at heavy bodyweight creates excessive joint impact.
+Stop on any sharp knee, back, or wrist pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not prescribed |
+| Cut | 40 sec | Fast | 20 sec | 1× | Fri HIIT B. Squat thrust if >100kg |
+| Bulk | N/A | — | — | — | Not prescribed |
+| Maintenance | N/A | — | — | — | Not prescribed |
+| AGRO | 40 sec | Fast | 20 sec | 3× | Wed/Sat conditioning. Squat thrust if >100kg |
+
+**Evidence:** ACE 2024 (HIIT calorie burn), Schoenfeld 2021 (HIIT vs MICT)
+
+---
+
+#### Flutter kicks
+
+**Category:** Core
+**Equipment:** None
+**Target muscles (primary):** Lower rectus abdominis, hip flexors
+**Target muscles (secondary):** Transverse abdominis, quadriceps
+**Movement type:** Isolation (dynamic)
+
+**Description:** Lie on the back with legs extended and slightly off the floor. Rapidly
+alternate kicking the legs up and down in a small range of motion — roughly 6-12 inches
+— while keeping the lower back pressed into the floor. A high-rep core drill that
+targets the lower abdominal region with continuous time under tension.
+
+**Common mistakes:**
+- Letting the lower back arch off the floor, losing the anti-extension stimulus
+- Kicking too high, converting the exercise into a lying leg raise with less continuous tension
+
+**Safety notes:** Place the hands under the glutes for lower-back support if needed.
+Stop on any sharp lower-back pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not prescribed |
+| Cut | 40 sec | Fast | 20 sec | 1× | Fri HIIT B circuit |
+| Bulk | N/A | — | — | — | Not prescribed |
+| Maintenance | N/A | — | — | — | Not prescribed |
+| AGRO | N/A | — | — | — | Not prescribed |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022
+
+---
+
+#### Plank to downdog
+
+**Category:** Mobility / Compound
+**Equipment:** None
+**Target muscles (primary):** Shoulders, hamstrings, core
+**Target muscles (secondary):** Calves, chest (isometric), serratus anterior
+**Movement type:** Compound (dynamic mobility)
+
+**Description:** From a plank position, push the hips up and back into a downward-dog
+yoga position — driving the heels toward the floor and pressing the chest toward the
+thighs — then return to plank. A dynamic transition that stretches the posterior chain
+while loading the shoulders under movement, serving as both a mobility drill and a
+shoulder endurance exercise.
+
+**Common mistakes:**
+- Bending the knees in the downdog position, skipping the hamstring stretch
+- Rushing the transitions, missing the brief hold at each end that provides the mobility benefit
+
+**Safety notes:** Warm up the shoulders first. Stop on any sharp shoulder or lower-back
+pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not prescribed |
+| Cut | 30 sec | Controlled | 15 sec | 1× | Tue HIIT A circuit |
+| Bulk | 3×8 | 2-1-2-0 | 60s | 1× | Mon push day (shoulder mobility) |
+| Maintenance | N/A | — | — | — | Not prescribed |
+| AGRO | N/A | — | — | — | Not prescribed |
+
+**Evidence:** PMC 8038747 (Yoga / functional movement)
+
+---
+
+#### Calf raises (standing)
+
+**Category:** Isolation
+**Equipment:** None | Optional: step edge for deficit
+**Target muscles (primary):** Gastrocnemius, soleus
+**Target muscles (secondary):** Tibialis posterior
+**Movement type:** Isolation
+
+**Description:** Stand on the balls of the feet and raise the heels as high as
+possible, squeezing the calves at the top, then lower with control to the starting
+position. Use a step edge for a deeper stretch at the bottom if available. A simple
+but necessary isolation for calf and ankle health.
+
+**Common mistakes:**
+- Bouncing at the bottom of the rep, using the Achilles tendon as a spring instead of contracting the calf
+- Cutting the top of the range, failing to achieve peak contraction
+
+**Safety notes:** Use a wall or rail for balance. Stop on any sharp Achilles or ankle
+pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not prescribed |
+| Cut | 3×15-20 | 2-1-2-0 | 60s | 1× | Thu lower body |
+| Bulk | 3×20 | 3-1-2-0 | 60s | 1× | Thu lower body |
+| Maintenance | 3×15 | Normal | 60s | 1× | Thu |
+| AGRO | N/A | — | — | — | Not prescribed |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022
+
+---
+
+#### Side-lying hip abduction
+
+**Category:** Isolation
+**Equipment:** None
+**Target muscles (primary):** Glute medius
+**Target muscles (secondary):** Tensor fasciae latae, glute minimus
+**Movement type:** Isolation
+
+**Description:** Lie on one side with the hips stacked, bottom leg slightly bent for
+stability. Lift the top leg straight up toward the ceiling, hold briefly at the top,
+then lower with control. An isolation exercise for the glute medius — a muscle critical
+for lateral hip stability, single-leg exercise quality, and knee tracking.
+
+**Common mistakes:**
+- Rolling the hips backward to cheat the lift, engaging the hip flexors instead of the abductors
+- Lifting too high, engaging the lower back instead of the glute medius
+
+**Safety notes:** Keep the hips stacked and the lift controlled. Stop on any sharp hip
+or lower-back pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not prescribed |
+| Cut | 3×15/side | Normal | 60s | 1× | Thu lower body |
+| Bulk | 3×15/side | 2-1-2-0 | 60s | 1× | Thu lower body |
+| Maintenance | N/A | — | — | — | Not prescribed |
+| AGRO | N/A | — | — | — | Not prescribed |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022
+
+---
+
+#### Wall sit (non-progression)
+
+**Category:** Isometric
+**Equipment:** None | Required: clear wall space
+**Target muscles (primary):** Quadriceps
+**Target muscles (secondary):** Glutes, hamstrings (isometric)
+**Movement type:** Isometric
+
+**Description:** Lean against a wall with the thighs parallel to the floor and hold.
+Used here as a standalone finisher or accessory hold on lower body days, distinct from
+the Wall squat (hold) that appears at L1 of the squat progression ladder.
+
+**Common mistakes:**
+- Letting the hips drift higher than parallel as fatigue accumulates
+- Pushing the knees beyond the toes instead of keeping shins vertical
+
+**Safety notes:** Stop on any sharp knee pain. The wall must be clear and the floor
+non-slip.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not prescribed |
+| Cut | 3×30-45 sec | Hold | 60s | 1× | Thu lower body (finisher) |
+| Bulk | 3×45 sec | Hold | 60s | 1× | Thu lower body (finisher) |
+| Maintenance | N/A | — | — | — | Not prescribed |
+| AGRO | N/A | — | — | — | Not prescribed |
+
+**Evidence:** Oranchuk 2019 (isometric)
+
+---
+
+#### Single-leg RDL (bodyweight)
+
+**Category:** Hinge
+**Equipment:** None
+**Target muscles (primary):** Hamstrings (unilateral), glutes
+**Target muscles (secondary):** Core (balance), erector spinae, ankle stabilisers
+**Movement type:** Compound
+
+**Description:** Same movement pattern as the Bodyweight RDL in the hinge progression
+ladder (L4), listed here as a standalone non-progression entry because some plans
+prescribe it outside the progression context — as a direct accessory on lower body or
+evening sessions without reference to the user's current hinge level.
+
+**Common mistakes:**
+- Twisting the hips open as the back leg extends
+- Rounding the lower back instead of maintaining a neutral spine through the hinge
+
+**Safety notes:** Use a wall or chair fingertip touch for balance. Stop on any sharp
+hamstring or lower-back pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not prescribed |
+| Cut | 3×10/leg | Normal | 60s | 1× | Thu lower body |
+| Bulk | N/A | — | — | — | Not prescribed |
+| Maintenance | N/A | — | — | — | Not prescribed |
+| AGRO | 3×10/leg | Normal | 60s | 3× | Tue/Thu/Sat evening |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022
+
+---
+
+#### Tricep dips (chair edge)
+
+**Category:** Push
+**Equipment:** Required: sturdy chair, bench, or low surface
+**Target muscles (primary):** Triceps, anterior deltoid
+**Target muscles (secondary):** Pectoralis (lower), core
+**Movement type:** Compound
+
+**Description:** Sit on the edge of a sturdy chair with hands gripping the edge by the
+hips. Walk the feet out, lift the hips off the chair, and lower the body by bending
+the elbows until the upper arms reach roughly parallel to the floor. Press back up.
+A tricep-dominant pressing exercise that loads the posterior shoulder more than push-up
+variants.
+
+**Common mistakes:**
+- Letting the elbows flare out wide, shifting load to the shoulders and risking impingement
+- Going too deep, overstretching the anterior shoulder capsule under load
+
+**Safety notes:** The chair must be sturdy and braced against a wall. Do not descend
+past 90° elbow angle if the shoulders are tight. Stop on any sharp shoulder pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not prescribed |
+| Cut | N/A | — | — | — | Not prescribed |
+| Bulk | 3×12 | 2-1-2-0 | 90s | 1× | Mon push day |
+| Maintenance | N/A | — | — | — | Not prescribed |
+| AGRO | N/A | — | — | — | Not prescribed |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022
+
+---
+
+#### Push-up ladder (10 down to 1)
+
+**Category:** Push (intensity protocol)
+**Equipment:** None
+**Target muscles (primary):** Pectoralis major, triceps, anterior deltoid
+**Target muscles (secondary):** Core, serratus anterior
+**Movement type:** Compound
+
+**Description:** Perform 10 push-ups (at the user's current push level), rest briefly,
+then 9, rest, then 8, continuing down to 1 — a total of 55 reps with decreasing
+set size and minimal rest. A density-focused intensity protocol that accumulates high
+volume in a short window. Builds muscular endurance and mental toughness.
+
+**Common mistakes:**
+- Resting too long between sets, converting the ladder into a standard session and losing the density stimulus
+- Sacrificing form in the higher-rep early sets, accumulating junk reps
+
+**Safety notes:** Use whichever push level the user currently owns. Stop on any sharp
+chest, shoulder, or wrist pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not prescribed |
+| Cut | N/A | — | — | — | Not prescribed |
+| Bulk | 10-9-8...1 (55 total) | Normal | 10-15 sec | 1× | Fri only (intensity finisher) |
+| Maintenance | N/A | — | — | — | Not prescribed |
+| AGRO | N/A | — | — | — | Not prescribed |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022
+
+---
+
+### HIIT Protocols
+
+---
+
+#### HIIT Circuit A
+
+**Category:** HIIT (Bodyweight)
+**Equipment:** None
+**Target muscles (primary):** Full body (cardiovascular + muscular endurance)
+**Target muscles (secondary):** All major muscle groups
+**Movement type:** Circuit
+
+**Description:** A 6-exercise bodyweight HIIT circuit run for 4 rounds with 30 seconds
+of work and 15 seconds of rest per exercise, and 2 minutes of rest between rounds.
+Exercises in order: high knees, bodyweight squat (fast), mountain climbers, reverse
+lunge (alternating), jumping jacks (marching jacks if >100kg), plank to downdog.
+Total duration approximately 20 minutes including rest.
+
+**Common mistakes:**
+- Reducing effort in later rounds instead of maintaining intensity — the entire stimulus depends on high output
+- Skipping the 2-minute inter-round rest, which causes form collapse in subsequent rounds
+
+**Safety notes:** Warm up for 3-5 minutes before starting. Substitute low-impact
+variants (marching jacks, step-out) for any plyometric movement if >100kg. Stop
+the entire circuit on any sharp pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not prescribed |
+| Cut | 4 rounds × 6 exercises | 30s work / 15s rest | 2 min between rounds | 1× | Tuesday |
+| Bulk | N/A | — | — | — | Not prescribed |
+| Maintenance | N/A | — | — | — | Not prescribed |
+| AGRO | N/A | — | — | — | Uses own conditioning format |
+
+**Evidence:** ACE 2024 (HIIT calorie burn), Schoenfeld 2021 (HIIT vs MICT fat loss),
+Boutcher 2011 (HIIT body composition)
+
+---
+
+#### HIIT Circuit B
+
+**Category:** HIIT (Bodyweight)
+**Equipment:** None
+**Target muscles (primary):** Full body (cardiovascular + muscular endurance)
+**Target muscles (secondary):** All major muscle groups
+**Movement type:** Circuit
+
+**Description:** A 6-exercise bodyweight HIIT circuit run for 3 rounds with 40 seconds
+of work and 20 seconds of rest per exercise, and 90 seconds of rest between rounds.
+Exercises in order: squat jump (fast bodyweight squat if >100kg), push-up (at any
+level), speed skaters, bicycle crunch, burpee (squat thrust if >100kg), flutter kicks.
+Total duration approximately 20 minutes including rest. Higher work-to-rest ratio than
+Circuit A.
+
+**Common mistakes:**
+- Choosing too advanced a push-up level and failing mid-circuit, losing output
+- Free-falling on squat jump landings — every landing must be soft and controlled
+
+**Safety notes:** **Substitute fast bodyweight squats for squat jumps and squat thrusts
+for burpees if >100kg.** Warm up for 3-5 minutes. Stop the entire circuit on any
+sharp pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not prescribed |
+| Cut | 3 rounds × 6 exercises | 40s work / 20s rest | 90 sec between rounds | 1× | Friday |
+| Bulk | N/A | — | — | — | Not prescribed |
+| Maintenance | N/A | — | — | — | Not prescribed |
+| AGRO | N/A | — | — | — | Uses own conditioning format |
+
+**Evidence:** ACE 2024 (HIIT calorie burn), Schoenfeld 2021 (HIIT vs MICT fat loss),
+Boutcher 2011 (HIIT body composition)
+
+---
+
+### Shadowboxing
+
+---
+
+#### Shadowboxing cardio
+
+**Category:** Combat / Cardio
+**Equipment:** None
+**Target muscles (primary):** Full body — shoulders, core, hip rotators, calves
+**Target muscles (secondary):** Biceps, forearms, quadriceps, glutes
+**Movement type:** Compound (skill + cardio)
+
+**Description:** 5 rounds of 3 minutes each with 60 seconds of rest between rounds.
+Each round has a defined focus: R1 warmup jab-cross with footwork. R2 speed — fast
+combination punches, high volume. R3 power — hooks, uppercuts, full hip rotation on
+every shot. R4 intervals — 20 seconds all-out flurry followed by 10 seconds light,
+repeating. R5 mixed tempo — alternate speed and power every 30 seconds. Burns
+300-400 calories per 30 minutes. Builds toward the long-term combat sports goal
+in the Protocol Health mission.
+
+**Common mistakes:**
+- Dropping the guard between combinations, losing the defensive habit that real striking demands
+- Punching with the arms only instead of rotating the hips and core, reducing both power output and caloric burn
+
+**Safety notes:** Beginners should slow the pace and focus on form before chasing
+intensity. Keep the wrists straight on every punch. Stay light on the feet. Warm up
+the shoulders for 2-3 minutes before R1.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not prescribed |
+| Cut | 5 × 3 min rounds | Per round focus | 60 sec | 1× | Tue HIIT Option 2 (replaces Circuit A) |
+| Bulk | N/A | — | — | — | Not prescribed |
+| Maintenance | 5 × 3 min rounds | Per round focus | 60 sec | 1× | Tue Cardio Rotation Option B |
+| AGRO | N/A | — | — | — | Not prescribed |
+
+**Evidence:** Croom 2023 (shadowboxing — ↑ aerobic capacity, ↑ muscle mass, ↓ fat mass,
+300-400 cal/30 min)
+
+---
+
+### Jump Rope
+
+---
+
+#### Jump rope HIIT
+
+**Category:** Cardio / HIIT
+**Equipment:** Required: jump rope (~$5)
+**Target muscles (primary):** Calves, shoulders, core
+**Target muscles (secondary):** Forearms, quadriceps, hip flexors
+**Movement type:** Compound (plyometric)
+
+**Description:** An interval-based rope session: 8 rounds of 30 seconds jumping with
+20 seconds rest, followed by 3 rounds of 60 seconds continuous jumping with 30 seconds
+rest. Total duration approximately 18 minutes. Alternates between high-output interval
+bursts and longer sustained efforts.
+
+**Common mistakes:**
+- Jumping too high, wasting energy and increasing impact on the knees and ankles
+- Using the arms to spin the rope instead of the wrists, causing premature shoulder fatigue
+
+**Safety notes:** **Equipment requirement — a jump rope is needed.** **Caution for users
+>100kg — start on softer surfaces and shorter durations to manage joint impact load.**
+Stop on any sharp knee, ankle, or calf pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not prescribed |
+| Cut | 8 × 30s + 3 × 60s | Fast | 20s / 30s | 1× | Tue HIIT Option 3 (if rope available) |
+| Bulk | N/A | — | — | — | Not prescribed |
+| Maintenance | N/A | — | — | — | Not prescribed |
+| AGRO | N/A | — | — | — | Not prescribed |
+
+**Evidence:** PMC 8467906 (8-week RCT: ↑ body composition, ↓ inflammation, ↓ blood
+pressure), PMC 12473967 (10 min/week ↑ cardiovascular capacity)
+
+---
+
+#### Jump rope steady-state
+
+**Category:** Cardio
+**Equipment:** Required: jump rope (~$5)
+**Target muscles (primary):** Calves, shoulders, core
+**Target muscles (secondary):** Forearms, quadriceps, hip flexors
+**Movement type:** Compound
+
+**Description:** 4 rounds of 3 minutes continuous jumping with 1 minute rest between
+rounds. Mix of basic bounce, alternating feet, and high knees to prevent monotony and
+distribute fatigue across different movement patterns. Total duration approximately
+16 minutes. A steady-state zone-2 rope session for cardiovascular base building.
+
+**Common mistakes:**
+- Defaulting to the same foot pattern every round, missing the stimulus variety
+- Trying to go fast instead of maintaining a sustainable rhythm for the full 3-minute round
+
+**Safety notes:** **Equipment requirement — a jump rope is needed.** Same >100kg caution
+as Jump rope HIIT. Stop on any sharp knee, ankle, or calf pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not prescribed |
+| Cut | N/A | — | — | — | Not prescribed |
+| Bulk | N/A | — | — | — | Not prescribed |
+| Maintenance | 4 × 3 min | Moderate | 1 min | 1× | Tue Cardio Rotation Option C |
+| AGRO | N/A | — | — | — | Not prescribed |
+
+**Evidence:** PMC 8467906 (8-week RCT), PMC 12473967 (10 min/week cardiovascular gains)
+
+---
