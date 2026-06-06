@@ -315,6 +315,20 @@ Each phase is a minor release with smoke + tag + log per CLAUDE.md §11. Final p
 > Note: `skill_planche` is *still* not prescribed by any plan, but `skill_press` and
 > `skill_bridge` are now prescribed by AGRO (Thursday + Tue/Fri evenings respectively).
 
+> **SHIPPED as v8.5.0 BETA (2026-06-06):** Phases 1–4 are effectively built and wired,
+> compressed into a single opt-in BETA release rather than five sequential ships:
+> `exercise-db.js` (199 entries) + `session-templates.js` + `engine-helpers.js` +
+> `engine-focus.js` + `workout-engine.js` + `components/engine-session.js`, plus the
+> `app.html` wiring (non-gating loader, defensive `renderWorkouts()` branch with legacy
+> fallback, Settings → WORKOUT ENGINE (BETA) controls, 3 additive SK keys). The engine is
+> **OFF by default**; legacy `workoutContent()` remains the default render path.
+> The muscle-focus / physique-goal customiser (originally a post-engine idea) shipped in
+> the same release via `engine-focus.js`. **What remains for v9.0.0 (consolidation):**
+> on-device smoke + owner sign-off, a per-exercise completion-logger UI in the day modal
+> (to feed auto-progression with real data), an APPLY button for progression suggestions,
+> and flipping the engine ON by default. Auto-progression is currently **suggest-only**
+> and surfaces nothing until completion data exists.
+
 ### Phase 1 — `v8.5.0` — Exercise Database Conversion
 
 **Scope:** Convert `WORKOUTS_LIBRARY.md` + `EXERCISE_PROGRESSIONS` + `workoutContent()` prescriptions into the single canonical `plans/exercise-db.js` module. **No UI changes, no engine logic, no behaviour change.**

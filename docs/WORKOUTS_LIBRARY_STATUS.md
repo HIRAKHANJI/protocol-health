@@ -34,7 +34,7 @@ Workout Engine, not a library-prose gap.
 
 | Gap | Priority | Status | Notes |
 |-----|----------|--------|-------|
-| Machine-readable exercise DB (`plans/exercise-db.js`) | P0 — v9 Phase 1 | NOT STARTED | The core bridge: library, EXERCISE_PROGRESSIONS, and workoutContent() need a shared ID system. This is CODE, not library prose. |
+| Machine-readable exercise DB (`plans/exercise-db.js`) | P0 — v9 Phase 1 | ✅ DONE + WIRED (v8.5.0) | 199 entries built; engine modules (session-templates/helpers/focus/workout-engine/engine-session) built + validated by execution; wired into app.html as opt-in BETA (default OFF). v9.0.0 reserved for completion-logger UI + default-on. |
 | 4 SKILL exercises missing explicit progression prerequisites | P1 | ✅ DONE | Verified all 4 skill tracks (crow/handstand/lsit/planche) carry prerequisites + paths |
 | Naming canonicalization (spelling drift) | P1 | DEFERRED to exercise-db.js | Library already uses `(skill)` disambiguation suffixes; port these as `aliases` in Phase 1 |
 | Central contraindication matrix | P2 | ✅ EXISTS | Section 2.3 is a demographic→blocked-exercise matrix. Per-exercise machine-readable version = Phase 1. |

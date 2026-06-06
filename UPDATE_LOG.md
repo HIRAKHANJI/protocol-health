@@ -4,6 +4,42 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 8.5.0 — 2026-06-06
+
+**Scope:** Minor (new opt-in feature — the Workout Engine, shipped as BETA, default OFF). New ES modules + additive SK keys (no migration). app.html wiring behind a feature flag. No schema change. No data mutation.
+**Banner:** shown — "NEW (opt-in BETA): a WORKOUT ENGINE that auto-builds your training week from the full 199-exercise database at your current levels — with a muscle-focus / physique-goal picker (V-taper, athletic, upper/lower, core, strength…) and optional safety brakes. Turn it on in Settings → WORKOUT ENGINE (BETA); it is OFF by default, so your normal workouts are completely unchanged until you choose to try it, and you can switch it off anytime. No data changes — your logs, weights, and settings are untouched."
+**CACHE_NAME:** v38 → v39. Schema unchanged at v7.
+
+### What shipped — the v9 Workout Engine, as an opt-in BETA
+
+The engine that the v9 roadmap describes is now built and wired, but **OFF by default**. With the toggle off, the WORKOUTS tab renders byte-identically to before (legacy `workoutContent()`). v9.0.0 remains reserved for when/if the engine becomes the default.
+
+**New data layer + logic modules (previously committed dormant; now wired):**
+- `plans/exercise-db.js` — 199-exercise machine-readable database (focus-ready muscle/region metadata).
+- `plans/session-templates.js` — 5 plans × 7-day skeletons, archetype→slot rules, volume caps.
+- `modules/engine-helpers.js` — pure functions: plan eligibility, age/weight/sex/experience/re-entry modulators, injury blocks (always-on), demographic brakes (opt-in), prereq checks, push:pull cap, fast-day modifier, deload + suggest-only progression evaluation.
+- `modules/engine-focus.js` — muscle-focus / physique-goal customiser: 7 goal presets + scoring/ranking.
+- `modules/workout-engine.js` — `generateWeek()` / `generateSession()` / `explainSession()` orchestrator.
+- `components/engine-session.js` — pure HTML renderer for engine output (reuses the app's workout-card styling).
+
+**app.html wiring (all behind the OFF-by-default flag):**
+- Non-gating engine loader (dynamic `import()` in try/catch — a load failure can never block startup).
+- `renderWorkouts()` branch: `if (engineEnabled && engine loaded) try engine else/catch → legacy`. The WORKOUTS tab can never blank out from the engine.
+- `buildEngineUserState()` assembles the engine's input from settings + `SK.exLevels` + completion logs.
+- Settings → **WORKOUT ENGINE (BETA)**: enable toggle, goal/focus preset buttons, per-plan safety-brakes toggle.
+- 3 additive SK keys (`ph_ec_v1`, `ph_ell_v1`, `ph_pe_v1`) — no migration (default sensibly when absent).
+
+**Safety model:** demographic/volume brakes are opt-in per plan (AGRO OFF by default, others ON, user-toggleable); active-injury contraindications ALWAYS block regardless of the toggle.
+
+### Validation
+- All 4 engine modules + the renderer validated by EXECUTION against the real 199-exercise DB: all 5 plans generate valid weeks; muscle focus surfaces targeted regions first; 125kg user blocked → routed to Lite; wrist injury removes hand-loaded moves even with brakes off; deload triggers.
+- Every inline `app.html` script block syntax-checked; the exact `renderWorkouts()` call path (`generateWeek`→`renderEngineWeek`) verified to render all 5 plans without throwing.
+
+### Files touched
+New: `plans/session-templates.js`, `modules/workout-engine.js`, `modules/engine-helpers.js`, `modules/engine-focus.js`, `components/engine-session.js` (and `plans/exercise-db.js` from prior dormant commits, now cached/wired). Modified: `app.html` (SK keys, settings defaults, engine loader, renderWorkouts branch, settings UI + wiring), `sw.js` (CACHE_NAME v39 + 6 new files cached), `index.html` (all version surfaces + changelog), `CLAUDE.md`, `README.md`, `UPDATE_LOG.md`, `docs/*`.
+
+---
+
 ## Version 8.4.0 — 2026-06-06
 
 **Scope:** Minor (workout content + library finalization). New exercises, two new progression groups, AGRO prescription update. No schema change. No data mutation.
