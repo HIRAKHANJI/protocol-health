@@ -104,5 +104,21 @@ export const EXERCISE_PROGRESSIONS = {
       { level:3, exercise:'Tuck planche', sets:'3 × 10 sec', notes:'Tucked knees, feet off floor, body horizontal.' },
       { level:4, exercise:'Straddle planche', sets:'3 × 5 sec', notes:'Legs wide, body horizontal. Very advanced.' }
     ]
+  },
+  skill_press: {
+    name: 'PRESS TO HANDSTAND', levels: [
+      { level:1, exercise:'Elevated pike press', sets:'3 × 6–8', notes:'Feet on chair, pike. Press head toward floor and back. Vertical press strength.' },
+      { level:2, exercise:'Wall handstand negative', sets:'3 × 3–5', notes:'From wall handstand, lower head to floor slowly (4–5 sec), press back up.' },
+      { level:3, exercise:'Straddle press negative (wall)', sets:'3 × 3–5', notes:'From wall handstand, lower straight-armed to straddle stand under control.' },
+      { level:4, exercise:'Freestanding press to handstand', sets:'5 × attempts', notes:'Straddle/pike press from floor to free handstand. Track success rate.' }
+    ]
+  },
+  skill_bridge: {
+    name: 'BRIDGE', levels: [
+      { level:1, exercise:'Glute bridge hold', sets:'3 × 30–45 sec', notes:'Hips high, shoulders grounded. Isometric posterior chain.' },
+      { level:2, exercise:'Short bridge (crown support)', sets:'3 × 20–30 sec', notes:'Hands by ears, press hips and chest up to crown of head. Partial backbend.' },
+      { level:3, exercise:'Full bridge hold', sets:'3 × 15–20 sec', notes:'Full backbend, arms + legs pressing, chest drives toward hands.' },
+      { level:4, exercise:'Bridge with single-leg lift', sets:'3 × 5–8/side', notes:'From full bridge, lift one leg straight. Single-leg posterior load + balance.' }
+    ]
   }
 };

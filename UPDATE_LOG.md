@@ -4,6 +4,52 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 8.4.0 — 2026-06-06
+
+**Scope:** Minor (workout content + library finalization). New exercises, two new progression groups, AGRO prescription update. No schema change. No data mutation.
+**Banner:** shown — "Two new calisthenics skill ladders are now level-pickable: PRESS TO HANDSTAND and BRIDGE / BACKBEND (4 levels each). A dedicated REAR DELTOID / POSTERIOR SHOULDER training group was added to close the front/rear shoulder imbalance — reverse snow angels, prone reverse fly, a bodyweight face pull, and an isometric fly hold. AGRO CUT now trains rear delts 4×/week and folds the two new skills into its evening sessions. The workout library is finalized at 194 documented exercises across 12 progression groups. No data changes — your logs, weights, and settings are untouched."
+**CACHE_NAME:** v37 → v38. Schema unchanged at v7.
+
+### Root motivation
+
+Owner is taking AGRO CUT CALISTHENICS to a more aggressive off-books version, with the app as the foundation. Two gaps were identified in the foundation review:
+
+1. **Rear-delt imbalance.** A four-agent audit of `WORKOUTS_LIBRARY.md` found an 11:1 front-to-rear primary-deltoid ratio. Every push/shoulder progression (push-ups, pike push-ups, handstand work) is anterior-deltoid dominant; the only dedicated rear-delt isolation was Prone Y-T-W raises (Pull L2), prescribed by AGRO just once a week (Monday). Front-delt work appeared in 5+ sessions/week.
+2. **Skill-track coverage.** The four existing skill ladders (crow, handstand, L-sit, planche) are all anterior-chain holds. Two high-value zero-equipment skills were missing: a dynamic vertical press (press-to-handstand) and a posterior-chain spinal-extension skill (bridge).
+
+### What was added
+
+**Two new calisthenics skill ladders (`plans/exercise-progressions.js` + `WORKOUTS_LIBRARY.md`)**
+
+- `skill_press` — PRESS TO HANDSTAND (4 levels): elevated pike press → wall handstand negative → straddle press negative (wall) → freestanding press to handstand. The only dynamic skill ladder. Gated on core ≥ 4 AND push ≥ 5 AND shoulder ≥ 4.
+- `skill_bridge` — BRIDGE / BACKBEND (4 levels): glute bridge hold → short bridge (crown support) → full bridge hold → bridge with single-leg lift. The only posterior-chain / spinal-extension skill. Gated on core ≥ 4 AND hinge ≥ 4 (not push).
+- Both fully level-pickable via the existing `exRowWithLevel` selector. Progression groups now total 12 (6 skill tracks); progression levels now total 74.
+
+**Rear-deltoid training group (`WORKOUTS_LIBRARY.md` non-progression)**
+
+- New "Rear Deltoid / Posterior Shoulder" subsection: reverse snow angels, prone reverse fly, prone W pull (bodyweight face pull), prone reverse fly hold (isometric). All zero-equipment, pull-pattern, evidence-cited (Cools 2016 + Prinold 2016).
+
+**AGRO CUT prescription update (`plans/agro.js`)**
+
+- Rear-delt work now runs 4×/week: Mon (Y-T-W raises, existing) + Tue/Fri (reverse snow angels, Evening B) + Thu (prone W pull, Evening C). Balances the 5+ weekly front-delt sessions; push:pull stays pull-dominant.
+- Bridge skill added to Tue/Fri Evening B (posterior-chain session). Press-to-handstand skill added to Thu Evening C (skill session). Evening-session description sub-text updated to match.
+
+**Library finalization**
+
+- `WORKOUTS_LIBRARY.md` now documents 194 exercises (74 progression + 120 non-progression). Section 2.3 contraindication matrix extended to cover the two new skill tracks (notably: full bridge blocked for active lower-back injury; press-to-handstand blocked for active wrist/shoulder injury). TOC and Library Status block updated.
+
+### Safety / science
+
+- Rear-delt moves cite Cools 2016 (scapular stabilisers) + Prinold 2016 — both CLAUDE.md §15 Tier 1 (Push:Pull balance).
+- New skills cite Kotarsky 2018, Plotkin 2022, Oranchuk 2019 (isometric), Schoenfeld 2015 (tempo/eccentric for the press negative) — all §15 approved.
+- Push:pull ratio across AGRO remains ≤ 1:1 (pull-dominant) per the §15 hard rule — the rear-delt additions are pull-pattern and increase pull volume.
+
+### Files touched
+
+`plans/exercise-progressions.js`, `plans/agro.js`, `WORKOUTS_LIBRARY.md`, `app.html` (APP_VERSION + message), `sw.js` (CACHE_NAME v37→v38), `index.html` (all version surfaces + changelog), `CLAUDE.md`, `README.md`, `docs/WORKOUTS_LIBRARY_STATUS.md`, `docs/workout-engine-v9-roadmap.md`, `UPDATE_LOG.md`.
+
+---
+
 ## Version 8.3.4 — 2026-05-14
 
 **Scope:** Patch (service-worker user-facing diagnostics + landing-page version audit fixes). No schema change. No data mutation.

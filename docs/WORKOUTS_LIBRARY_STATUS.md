@@ -1,7 +1,7 @@
 # WORKOUTS_LIBRARY.md — Project Status & Completion Checklist
 
 **Last updated:** 2026-06-06
-**Library version:** 7,400+ lines, 182 documented exercises (old target was 175 — exceeded)
+**Library version:** 7,800+ lines, 194 documented exercises (74 progression + 120 non-progression; was 182 at v8.3.x, +12 in v8.4.0)
 **App version:** v8.3.4 (modular ES-modules architecture, schema v7)
 **Roadmap:** `docs/workout-engine-v9-roadmap.md` (v9 Workout Engine, 6-phase rollout)
 **Library status:** ✅ FINALIZED — full-document audit passed 2026-06-06 (zero missing
@@ -21,8 +21,8 @@ module** (`plans/exercise-db.js`) — a CODE deliverable that is Phase 1 of the 
 Workout Engine, not a library-prose gap.
 
 ### What's done
-- 182 exercise entries across progression and non-progression categories
-- All 66 progression levels from `plans/exercise-progressions.js` documented (exact 1:1 match)
+- 194 exercise entries across progression and non-progression categories
+- All 74 progression levels from `plans/exercise-progressions.js` documented (exact 1:1 match)
 - Full per-plan prescription tables (Lite/Cut/Bulk/Maintenance/AGRO) for every entry
 - Section 2 Demographic Stratification Matrix (incl. 2.3 contraindication matrix)
 - Auto-Prescription Data Model section (schema spec for future engine)
@@ -54,7 +54,7 @@ All 12 modalities documented with evidence citations against CLAUDE.md §15.
 Covers plan eligibility, volume/intensity modulators, exercise restrictions, medical
 disclaimer, and engine prescription algorithm. Ready for v9 engine consumption.
 
-### Progression Exercises (66 levels across 10 groups)
+### Progression Exercises (74 levels across 12 groups)
 **Status: COMPLETE**
 - Push: 10 levels (L0-L9) — matches `exercise-progressions.js`
 - Pull: 9 levels (L1-L9) — matches
@@ -68,7 +68,7 @@ disclaimer, and engine prescription algorithm. Ready for v9 engine consumption.
 - Skill Planche: 4 levels — matches
 
 ### Non-Progression Exercises
-**Status: COMPLETE (182 total entries, exceeds 175 target)**
+**Status: COMPLETE (194 total entries)**
 
 | Subsection | Count | Status |
 |------------|-------|--------|

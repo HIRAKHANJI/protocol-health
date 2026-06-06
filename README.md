@@ -24,7 +24,7 @@ All data stored in the browser's `localStorage` (and mirrored to `IndexedDB` as 
 ## Architecture at a glance
 
 ```
-app.html                  # Bootstrap: HTML + CSS + inline orchestration (~6,512 lines as of v8.3.4)
+app.html                  # Bootstrap: HTML + CSS + inline orchestration (~6,512 lines as of v8.4.0)
 index.html, manifest.json, sw.js
 plans/                    # 5 plan modules + exercise progressions + index assembler
 modules/                  # export.js, calendar.js, radar.js, schedule-html.js, calibration.js

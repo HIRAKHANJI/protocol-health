@@ -22,15 +22,17 @@ Owner asked to take the existing `WORKOUTS_LIBRARY.md` and `EXERCISE_PROGRESSION
 
 ## 2. Audit findings (from 2026-05-14 four-agent audit)
 
-> **UPDATE (2026-06-06):** The library has since been finalized. Current state:
-> **182 documented exercises** (66 progression + 116 non-progression), 7,400+ lines.
-> The dated gaps below have been **closed**: the 7 missing exercises were added
-> (total now exceeds the old 175 target), all 4 skill tracks carry explicit
+> **UPDATE (2026-06-06, v8.4.0):** The library has since been finalized and extended.
+> Current state: **194 documented exercises** (74 progression + 120 non-progression),
+> 7,800+ lines, **12 progression groups** (6 skill tracks). The dated gaps below have
+> been **closed**: the 7 missing exercises were added, all skill tracks carry explicit
 > progression prerequisites, and Section 2.3 provides a demographic→exercise
-> contraindication matrix. The remaining items (machine-readable schema, per-exercise
-> quantitative enums) are intentionally deferred to Phase 1 (`plans/exercise-db.js`) —
-> they are CODE deliverables, not library-prose gaps. The snapshot below is preserved
-> as the historical baseline; do not edit it.
+> contraindication matrix. v8.4.0 additionally added a rear-deltoid training group (4
+> moves) and two new skill ladders — `skill_press` (press-to-handstand) and
+> `skill_bridge` (bridge/backbend), both prescribed by AGRO. The remaining items
+> (machine-readable schema, per-exercise quantitative enums) are intentionally deferred
+> to Phase 1 (`plans/exercise-db.js`) — they are CODE deliverables, not library-prose
+> gaps. The snapshot below is preserved as the historical baseline; do not edit it.
 
 ### `WORKOUTS_LIBRARY.md` — 96% complete (snapshot 2026-05-14)
 
@@ -305,7 +307,15 @@ Sources for the limits are documented in CLAUDE.md §15 lines 752–770. Engine 
 
 Each phase is a minor release with smoke + tag + log per CLAUDE.md §11. Final phase consolidates to v9.0.0.
 
-### Phase 1 — `v8.4.0` — Exercise Database Conversion
+> **VERSION SHIFT (2026-06-06):** `v8.4.0` was used for a content release — the
+> rear-deltoid training group and two new calisthenics skill ladders (press-to-handstand,
+> bridge). The engine phases below therefore each shift up by one minor (Phase 1 = v8.5.0
+> … Phase 5 = v8.9.0), still consolidating at v9.0.0. The library is now 194 exercises /
+> 12 progression groups / 74 levels — exercise-db.js (Phase 1) must cover all of them.
+> Note: `skill_planche` is *still* not prescribed by any plan, but `skill_press` and
+> `skill_bridge` are now prescribed by AGRO (Thursday + Tue/Fri evenings respectively).
+
+### Phase 1 — `v8.5.0` — Exercise Database Conversion
 
 **Scope:** Convert `WORKOUTS_LIBRARY.md` + `EXERCISE_PROGRESSIONS` + `workoutContent()` prescriptions into the single canonical `plans/exercise-db.js` module. **No UI changes, no engine logic, no behaviour change.**
 
@@ -323,7 +333,7 @@ Each phase is a minor release with smoke + tag + log per CLAUDE.md §11. Final p
 
 **Estimated effort:** 2–3 weeks of structured data entry. Most of this is mechanical conversion from the existing prose library.
 
-### Phase 2 — `v8.5.0` — Storage Layer + Completion Logger
+### Phase 2 — `v8.6.0` — Storage Layer + Completion Logger
 
 **Scope:** Add the three new SK keys + completion logger backend. UI surfaces a "log completion" toggle per exercise in the day modal but doesn't drive any progression yet.
 
@@ -339,7 +349,7 @@ Each phase is a minor release with smoke + tag + log per CLAUDE.md §11. Final p
 
 **Estimated effort:** 1 week.
 
-### Phase 3 — `v8.6.0` — Session Templates + Static Engine Generator
+### Phase 3 — `v8.7.0` — Session Templates + Static Engine Generator
 
 **Scope:** Build `plans/session-templates.js` + a static (rule-based, no auto-progression) `generateWeek()` in `modules/workout-engine.js`. Hook it into the WORKOUTS tab behind a feature flag.
 
@@ -355,7 +365,7 @@ Each phase is a minor release with smoke + tag + log per CLAUDE.md §11. Final p
 
 **Estimated effort:** 2 weeks.
 
-### Phase 4 — `v8.7.0` — Auto-Progression Suggestions
+### Phase 4 — `v8.8.0` — Auto-Progression Suggestions
 
 **Scope:** `evaluateProgressions(userState)` runs at app init, checks completion history against advancement criteria, and surfaces suggestions. Auto-apply is **off** — suggestions only, owner taps APPLY.
 
@@ -370,7 +380,7 @@ Each phase is a minor release with smoke + tag + log per CLAUDE.md §11. Final p
 
 **Estimated effort:** 1.5 weeks.
 
-### Phase 5 — `v8.8.0` — Polish + Safety Audit + Documentation
+### Phase 5 — `v8.9.0` — Polish + Safety Audit + Documentation
 
 **Scope:** Final QoL pass, comprehensive safety audit, science-citation cross-check, full WORKOUTS_LIBRARY.md update with the new schema.
 
