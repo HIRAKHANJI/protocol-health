@@ -23,7 +23,7 @@ Owner asked to take the existing `WORKOUTS_LIBRARY.md` and `EXERCISE_PROGRESSION
 ## 2. Audit findings (from 2026-05-14 four-agent audit)
 
 > **UPDATE (2026-06-06, v8.4.0):** The library has since been finalized and extended.
-> Current state: **194 documented exercises** (74 progression + 120 non-progression),
+> Current state: **199 documented exercises** (74 progression + 125 non-progression),
 > 7,800+ lines, **12 progression groups** (6 skill tracks). The dated gaps below have
 > been **closed**: the 7 missing exercises were added, all skill tracks carry explicit
 > progression prerequisites, and Section 2.3 provides a demographic→exercise
@@ -158,7 +158,7 @@ export const EXERCISE_DB = {
     citation: 'PMC 7927075 (Schoenfeld 2021 repetition continuum)',
     libraryRef: 'WORKOUTS_LIBRARY.md:#push-l0-wall-pushup'
   },
-  // ... 182 total entries
+  // ... 199 total entries
 };
 ```
 
@@ -310,7 +310,7 @@ Each phase is a minor release with smoke + tag + log per CLAUDE.md §11. Final p
 > **VERSION SHIFT (2026-06-06):** `v8.4.0` was used for a content release — the
 > rear-deltoid training group and two new calisthenics skill ladders (press-to-handstand,
 > bridge). The engine phases below therefore each shift up by one minor (Phase 1 = v8.5.0
-> … Phase 5 = v8.9.0), still consolidating at v9.0.0. The library is now 194 exercises /
+> … Phase 5 = v8.9.0), still consolidating at v9.0.0. The library is now 199 exercises /
 > 12 progression groups / 74 levels — exercise-db.js (Phase 1) must cover all of them.
 > Note: `skill_planche` is *still* not prescribed by any plan, but `skill_press` and
 > `skill_bridge` are now prescribed by AGRO (Thursday + Tue/Fri evenings respectively).
@@ -319,9 +319,9 @@ Each phase is a minor release with smoke + tag + log per CLAUDE.md §11. Final p
 
 **Scope:** Convert `WORKOUTS_LIBRARY.md` + `EXERCISE_PROGRESSIONS` + `workoutContent()` prescriptions into the single canonical `plans/exercise-db.js` module. **No UI changes, no engine logic, no behaviour change.**
 
-- Create `plans/exercise-db.js` with full schema for all 182 exercises (library now finalized — the 7 previously-missing exercises were added 2026-06-06)
+- Create `plans/exercise-db.js` with full schema for all 199 exercises (library now finalized — the 7 previously-missing exercises were added 2026-06-06)
 - Each exercise has: id, name, aliases, progressionGroup, level, pattern, equipment, muscles, difficulty, jointImpact, plyometric flag, contraindications, per-plan prescriptions, progression unlocks, safety overrides, citation, libraryRef
-- ~~Migrate the 7 missing exercises~~ — DONE (library at 182, exceeds old 175 target)
+- ~~Migrate the 7 missing exercises~~ — DONE (library at 199, exceeds old 175 target)
 - ~~Add explicit progression prerequisites to the 4 SKILL exercises~~ — DONE (all 4 skill tracks carry prerequisites + paths)
 - Naming canonicalisation: pick one spelling per exercise, store aliases for matching (library already uses `(skill)` disambiguation suffixes — port these as aliases)
 - Build the machine-readable per-exercise contraindication matrix (Section 2.3's demographic matrix is the prose source)
@@ -423,7 +423,7 @@ Each phase is a minor release with smoke + tag + log per CLAUDE.md §11. Final p
 | Phase 5 — Polish + audit | v8.8.0 | 1 week | 7.5–8.5 weeks |
 | Phase 6 — Consolidation | v9.0.0 | 0.5 weeks | **~8 weeks total** |
 
-This is a substantial project. The biggest single time sink is Phase 1 — the data entry to convert 182 exercises into structured form with all the metadata each one needs. That phase has the highest scope risk because every gap discovered downstream forces a return to Phase 1 to fill it in.
+This is a substantial project. The biggest single time sink is Phase 1 — the data entry to convert 199 exercises into structured form with all the metadata each one needs. That phase has the highest scope risk because every gap discovered downstream forces a return to Phase 1 to fill it in.
 
 ---
 

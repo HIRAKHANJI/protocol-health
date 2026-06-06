@@ -1,7 +1,7 @@
 # WORKOUTS_LIBRARY.md — Project Status & Completion Checklist
 
 **Last updated:** 2026-06-06
-**Library version:** 7,800+ lines, 194 documented exercises (74 progression + 120 non-progression; was 182 at v8.3.x, +12 in v8.4.0)
+**Library version:** 7,900+ lines, 199 documented exercises (74 progression + 125 non-progression; was 182 at v8.3.x, +12 skill/rear-delt in v8.4.0, +5 chair-fill in v9 Phase 1)
 **App version:** v8.3.4 (modular ES-modules architecture, schema v7)
 **Roadmap:** `docs/workout-engine-v9-roadmap.md` (v9 Workout Engine, 6-phase rollout)
 **Library status:** ✅ FINALIZED — full-document audit passed 2026-06-06 (zero missing
@@ -21,7 +21,7 @@ module** (`plans/exercise-db.js`) — a CODE deliverable that is Phase 1 of the 
 Workout Engine, not a library-prose gap.
 
 ### What's done
-- 194 exercise entries across progression and non-progression categories
+- 199 exercise entries across progression and non-progression categories
 - All 74 progression levels from `plans/exercise-progressions.js` documented (exact 1:1 match)
 - Full per-plan prescription tables (Lite/Cut/Bulk/Maintenance/AGRO) for every entry
 - Section 2 Demographic Stratification Matrix (incl. 2.3 contraindication matrix)
@@ -68,7 +68,7 @@ disclaimer, and engine prescription algorithm. Ready for v9 engine consumption.
 - Skill Planche: 4 levels — matches
 
 ### Non-Progression Exercises
-**Status: COMPLETE (194 total entries)**
+**Status: COMPLETE (199 total entries)**
 
 | Subsection | Count | Status |
 |------------|-------|--------|
@@ -99,7 +99,7 @@ is Phase 1 of the v9 roadmap and has NOT started.
 
 ### Priority 0 — Blockers for v9 Engine (Phase 1 prerequisite)
 
-- [ ] **P0-1: Create `plans/exercise-db.js`** — Convert the 182 exercises from prose
+- [x] **P0-1: Create `plans/exercise-db.js`** — DONE (v9 Phase 1, dormant): all 199 exercises converted from prose
   into a single canonical JS module with structured schema: id, name, aliases,
   progressionGroup, level, pattern, equipment, muscles, difficulty, jointImpact,
   plyometric flag, contraindications, per-plan prescriptions, progression unlocks,

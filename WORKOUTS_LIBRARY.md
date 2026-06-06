@@ -28,7 +28,7 @@ or prescribing any workout content in `app.html`.
 
 | Metric | Value |
 |---|---|
-| Total documented exercises | **194** (74 progression + 120 non-progression) |
+| Total documented exercises | **199** (74 progression + 125 non-progression) |
 | Progression groups | 12 (push, pull, shoulder, squat, hinge, core + 6 skill tracks) |
 | Progression levels | 74 — exact 1:1 match with `plans/exercise-progressions.js` |
 | Training modalities | 12 (Section 1) |
@@ -62,7 +62,7 @@ suffix where a label collides across groups — e.g. handstand L1 vs shoulder L4
   - [Hinge Progression](#hinge-progression-7-levels) — 7 levels
   - [Core Progression](#core-progression-10-levels) — 10 levels
   - [Skill Progressions](#skill-progressions) — Crow (4) · Handstand (4) · L-sit (3) · Planche (4) · Press-to-Handstand (4) · Bridge (4)
-- [Non-Progression Exercises](#non-progression-exercises) — 120 accessories / conditioning / mobility
+- [Non-Progression Exercises](#non-progression-exercises) — 125 accessories / conditioning / mobility
   - [Calisthenics / Resistance](#calisthenics--resistance) — 14
   - [Rear Deltoid / Posterior Shoulder](#rear-deltoid--posterior-shoulder) — 4
   - [HIIT Protocols](#hiit-protocols) — 2
@@ -72,7 +72,7 @@ suffix where a label collides across groups — e.g. handstand L1 vs shoulder L4
   - [Yoga Poses](#yoga-poses) — 18
   - [Pilates Exercises](#pilates-exercises) — 13
   - [Tai Chi — Yang Style 8-Form](#tai-chi--yang-style-8-form) — 8
-  - [Chair Exercises (Lite Protocol)](#chair-exercises-lite-protocol) — 20
+  - [Chair Exercises (Lite Protocol)](#chair-exercises-lite-protocol) — 25
   - [Isometric Finishers](#isometric-finishers) — 5
   - [Warmup Movements](#warmup-movements) — 5
   - [Cooldown / Stretch Movements](#cooldown--stretch-movements) — 13
@@ -6930,6 +6930,180 @@ creates anxiety.
 | AGRO | N/A | — | — | — | Not in plan structure |
 
 **Evidence:** ICFSR 2021 (CLAUDE.md §15)
+
+---
+
+#### Seated towel row (isometric)
+
+**Category:** Pull (chair)
+**Equipment:** Chair | Required: towel
+**Target muscles (primary):** Latissimus dorsi, rhomboids, biceps
+**Target muscles (secondary):** Posterior deltoid, mid-trapezius
+**Movement type:** Isometric (self-resistance)
+
+**Description:** Sit tall toward the front of the chair. Loop a towel under both feet
+and grip an end in each hand. Keeping the chest up, pull the elbows back toward the ribs
+against the towel's resistance and squeeze the shoulder blades together. Hold the
+contraction, then release slowly. A seated, self-resistance row that loads the back
+without any weight — the chair-track equivalent of the inverted row.
+
+**Common mistakes:**
+- Rounding the back and pulling with the arms only instead of driving the elbows back with the mid-back
+- Shrugging the shoulders up toward the ears instead of squeezing the blades down and back
+
+**Safety notes:** Keep the spine tall and neutral — do not round forward to reach. Build
+resistance gradually by pressing the feet down harder into the towel. Stop on any sharp
+lower-back or shoulder pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 2×8 (5s holds) | Hold | 45-60s | 2× (Mon/Fri) | Seated back strength |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** ICFSR 2021 (CLAUDE.md §15), Oranchuk 2019 (isometric)
+
+---
+
+#### Seated towel pull-apart
+
+**Category:** Pull (chair)
+**Equipment:** Chair | Required: towel
+**Target muscles (primary):** Posterior deltoid, rhomboids, mid-trapezius
+**Target muscles (secondary):** Rotator cuff, lower trapezius
+**Movement type:** Isometric (self-resistance)
+
+**Description:** Sit tall and hold a towel a little wider than shoulder width at chest
+height, arms extended forward. Pull the ends of the towel apart, tensioning it
+isometrically while squeezing the shoulder blades together, then release slowly. The
+seated, zero-equipment analogue of a band pull-apart — the terminal chair-pull move,
+biasing the posterior deltoid and scapular retractors that seated rounding neglects.
+
+**Common mistakes:**
+- Bending the elbows and turning it into a row instead of keeping arms long for a true pull-apart
+- Letting the shoulders creep up toward the ears rather than drawing the blades down and together
+
+**Safety notes:** Keep the neck long and shoulders down. Tension the towel only to a
+firm, pain-free squeeze. Stop on any front-of-shoulder pinching.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 2×10 (3s holds) | Hold | 45-60s | 1× (Fri) | Posture + rear-delt finisher |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** ICFSR 2021 (CLAUDE.md §15), Cools 2016 (scapular stabilisers)
+
+---
+
+#### Seated side bend
+
+**Category:** Core (chair)
+**Equipment:** Chair
+**Target muscles (primary):** Obliques
+**Target muscles (secondary):** Erector spinae, transverse abdominis
+**Movement type:** Isolation
+
+**Description:** Sit tall with feet flat. Reach one hand down toward the floor alongside
+the chair, bending sideways at the waist (lateral flexion), then contract the opposite
+side's waist to return upright. Alternate sides. A gentle seated oblique movement that
+reintroduces lateral-trunk control.
+
+**Common mistakes:**
+- Leaning forward or rotating instead of bending purely to the side
+- Using momentum to swing rather than controlling the bend with the waist
+
+**Safety notes:** Move slowly through a comfortable range. Keep both sit-bones on the
+chair. Stop on any sharp lower-back pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 2×8/side | Slow | 30-45s | 2× (Wed/Fri) | Seated oblique work |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** ICFSR 2021 (CLAUDE.md §15)
+
+---
+
+#### Seated knee-to-chest
+
+**Category:** Core (chair)
+**Equipment:** Chair
+**Target muscles (primary):** Rectus abdominis, hip flexors
+**Target muscles (secondary):** Obliques
+**Movement type:** Isolation
+
+**Description:** Sit tall toward the front of the chair, hands lightly holding the seat
+edges for support. Brace the core and draw one knee up toward the chest, then lower it
+with control. Alternate legs. Progresses the seated-core track by adding a dynamic
+lower-abdominal demand under a braced trunk.
+
+**Common mistakes:**
+- Rounding the back and collapsing the chest toward the knee instead of staying tall
+- Letting the leg drop fast instead of lowering under control
+
+**Safety notes:** Keep the chest up and the spine tall throughout. Hold the chair for
+stability. Stop on any lower-back discomfort — reduce the knee height if needed.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 2×8/side | Slow | 30-45s | 2× (Wed/Fri) | Seated lower-ab work |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** ICFSR 2021 (CLAUDE.md §15)
+
+---
+
+#### Seated core brace + leg extension
+
+**Category:** Core (chair)
+**Equipment:** Chair
+**Target muscles (primary):** Rectus abdominis, transverse abdominis
+**Target muscles (secondary):** Hip flexors, quadriceps
+**Movement type:** Isometric (anti-extension)
+
+**Description:** Sit tall with hands lightly on the seat edges. Brace the core hard as
+if bracing for a light tap to the stomach, then extend one leg out straight and hold it,
+keeping the torso completely upright and still — the brace resists the trunk wanting to
+lean back. Lower with control and alternate. The terminal chair-core move: an
+anti-extension brace under a moving-limb load.
+
+**Common mistakes:**
+- Leaning back as the leg extends instead of holding the trunk upright with the brace
+- Holding the breath through the brace rather than breathing steadily
+
+**Safety notes:** Maintain the tall, braced trunk the whole time — if the lower back
+arches or the torso tips back, shorten the leg extension. Stop on any lower-back pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 2×5/leg (5s holds) | Hold | 45-60s | 1× (Fri) | Seated anti-extension brace |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** ICFSR 2021 (CLAUDE.md §15), Oranchuk 2019 (isometric)
 
 ---
 

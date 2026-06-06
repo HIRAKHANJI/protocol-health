@@ -1878,7 +1878,7 @@ export const EXERCISE_DB = [
     },
     progression: {
       prereq: { chair_pull: 1 },
-      next: null,
+      next: 'chairpull-l3-seated-towel-row-isometric',
       advanceCriteria: { cleanSessions: 5, repTargetPct: 0.9 }
     },
     safetyOverrides: {},
@@ -2086,7 +2086,7 @@ export const EXERCISE_DB = [
     },
     progression: {
       prereq: {},
-      next: null,
+      next: 'chaircore-l2-seated-side-bend',
       advanceCriteria: { cleanSessions: 5, repTargetPct: 0.9 }
     },
     safetyOverrides: { 'lower_back_injury': 'regress' },
@@ -6798,5 +6798,137 @@ export const EXERCISE_DB = [
     safetyOverrides: {},
     citation: 'PMC 11447755; Physiology & Behavior 2016',
     libraryRef: 'WORKOUTS_LIBRARY.md#side-lying-leg-lift'
+  },
+
+  // ── chair ladder fill (v9 Phase 1 follow-up: chair_pull L3-L4, chair_core L2-L4) ──
+  {
+    id: 'chairpull-l3-seated-towel-row-isometric',
+    name: 'Seated towel row (isometric)',
+    aliases: ['Seated row (towel)','Chair towel row'],
+    progressionGroup: 'chair_pull',
+    level: 3,
+    pattern: 'pull',
+    plane: 'isometric',
+    equipment: ['chair','towel'],
+    muscles: { primary: ['latissimus_dorsi','rhomboids','biceps'], secondary: ['posterior_deltoid','trapezius_mid'] },
+    region: 'back',
+    type: 'isometric',
+    difficulty: 2,
+    jointImpact: 'low',
+    plyometric: false,
+    unilateral: false,
+    contraindications: ['shoulder_injury'],
+    prescriptions: {
+      lite: { sets:2, reps:[8,8], unit:'reps', tempo:'hold', rest:[45,60], freq:2, raw:'2×8 (5s holds)' },
+      cut: null, bulk: null, maintenance: null, agro: null
+    },
+    progression: { prereq: { chair_pull: 2 }, next: 'chairpull-l4-seated-towel-pull-apart', advanceCriteria: { cleanSessions: 5, repTargetPct: 0.9 } },
+    safetyOverrides: {},
+    citation: 'ICFSR 2021; Oranchuk 2019',
+    libraryRef: 'WORKOUTS_LIBRARY.md#seated-towel-row-isometric'
+  },
+  {
+    id: 'chairpull-l4-seated-towel-pull-apart',
+    name: 'Seated towel pull-apart',
+    aliases: ['Seated band pull-apart (towel)','Chair pull-apart'],
+    progressionGroup: 'chair_pull',
+    level: 4,
+    pattern: 'pull',
+    plane: 'isometric',
+    equipment: ['chair','towel'],
+    muscles: { primary: ['posterior_deltoid','rhomboids','trapezius_mid'], secondary: ['rotator_cuff','trapezius_lower'] },
+    region: 'shoulders',
+    type: 'isometric',
+    difficulty: 2,
+    jointImpact: 'low',
+    plyometric: false,
+    unilateral: false,
+    contraindications: ['shoulder_injury'],
+    prescriptions: {
+      lite: { sets:2, reps:[10,10], unit:'reps', tempo:'hold', rest:[45,60], freq:1, raw:'2×10 (3s holds)' },
+      cut: null, bulk: null, maintenance: null, agro: null
+    },
+    progression: { prereq: { chair_pull: 3 }, next: null, advanceCriteria: { cleanSessions: 5, repTargetPct: 0.9 } },
+    safetyOverrides: {},
+    citation: 'ICFSR 2021; Cools 2016',
+    libraryRef: 'WORKOUTS_LIBRARY.md#seated-towel-pull-apart'
+  },
+  {
+    id: 'chaircore-l2-seated-side-bend',
+    name: 'Seated side bend',
+    aliases: ['Seated lateral flexion','Chair side bend'],
+    progressionGroup: 'chair_core',
+    level: 2,
+    pattern: 'core',
+    plane: null,
+    equipment: ['chair'],
+    muscles: { primary: ['obliques'], secondary: ['erector_spinae','transverse_abdominis'] },
+    region: 'core',
+    type: 'isolation',
+    difficulty: 1,
+    jointImpact: 'low',
+    plyometric: false,
+    unilateral: true,
+    contraindications: ['lower_back_injury'],
+    prescriptions: {
+      lite: { sets:2, reps:[8,8], unit:'perside', tempo:'slow', rest:[30,45], freq:2, raw:'2×8/side' },
+      cut: null, bulk: null, maintenance: null, agro: null
+    },
+    progression: { prereq: { chair_core: 1 }, next: 'chaircore-l3-seated-knee-to-chest', advanceCriteria: { cleanSessions: 5, repTargetPct: 0.9 } },
+    safetyOverrides: {},
+    citation: 'ICFSR 2021',
+    libraryRef: 'WORKOUTS_LIBRARY.md#seated-side-bend'
+  },
+  {
+    id: 'chaircore-l3-seated-knee-to-chest',
+    name: 'Seated knee-to-chest',
+    aliases: ['Seated knee raise','Chair knee tuck'],
+    progressionGroup: 'chair_core',
+    level: 3,
+    pattern: 'core',
+    plane: null,
+    equipment: ['chair'],
+    muscles: { primary: ['rectus_abdominis','hip_flexors'], secondary: ['obliques'] },
+    region: 'core',
+    type: 'isolation',
+    difficulty: 2,
+    jointImpact: 'low',
+    plyometric: false,
+    unilateral: true,
+    contraindications: ['lower_back_injury'],
+    prescriptions: {
+      lite: { sets:2, reps:[8,8], unit:'perside', tempo:'slow', rest:[30,45], freq:2, raw:'2×8/side' },
+      cut: null, bulk: null, maintenance: null, agro: null
+    },
+    progression: { prereq: { chair_core: 2 }, next: 'chaircore-l4-seated-core-brace-leg-extension', advanceCriteria: { cleanSessions: 5, repTargetPct: 0.9 } },
+    safetyOverrides: {},
+    citation: 'ICFSR 2021',
+    libraryRef: 'WORKOUTS_LIBRARY.md#seated-knee-to-chest'
+  },
+  {
+    id: 'chaircore-l4-seated-core-brace-leg-extension',
+    name: 'Seated core brace + leg extension',
+    aliases: ['Seated anti-extension brace','Chair core brace'],
+    progressionGroup: 'chair_core',
+    level: 4,
+    pattern: 'core',
+    plane: 'isometric',
+    equipment: ['chair'],
+    muscles: { primary: ['rectus_abdominis','transverse_abdominis'], secondary: ['hip_flexors','quadriceps'] },
+    region: 'core',
+    type: 'isometric',
+    difficulty: 2,
+    jointImpact: 'low',
+    plyometric: false,
+    unilateral: true,
+    contraindications: ['lower_back_injury'],
+    prescriptions: {
+      lite: { sets:2, reps:[5,5], unit:'perside', tempo:'hold', rest:[45,60], freq:1, raw:'2×5/leg (5s holds)' },
+      cut: null, bulk: null, maintenance: null, agro: null
+    },
+    progression: { prereq: { chair_core: 3 }, next: null, advanceCriteria: { cleanSessions: 5, repTargetPct: 0.9 } },
+    safetyOverrides: {},
+    citation: 'ICFSR 2021; Oranchuk 2019',
+    libraryRef: 'WORKOUTS_LIBRARY.md#seated-core-brace-leg-extension'
   }
 ];
