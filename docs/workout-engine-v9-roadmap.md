@@ -329,6 +329,17 @@ Each phase is a minor release with smoke + tag + log per CLAUDE.md §11. Final p
 > and flipping the engine ON by default. Auto-progression is currently **suggest-only**
 > and surfaces nothing until completion data exists.
 
+> **v8.6.0 (2026-06-06):** Added the `functional` "All-Round Strength" goal + a week-level
+> `balanceWeek` algorithm that fills under-trained movement patterns with the user's-level
+> compound progression exercise (per-day dedup) and tops up pull to hold the WEEKLY
+> push:pull ≤ 1:1 rule. This replaced a first cut whose region-blind `volumeBias` accessory
+> flooded one region (caught by a balance audit before ship). Added plan-aware preset
+> gating (`PLAN_PRESETS`/`presetsForPlan`/`isPresetAllowed` — Lite gets balanced only;
+> Cut/Bulk/AGRO the full set) and moved the Settings section to the top. NOTE: the audit
+> also flagged that the *static* AGRO plan (what the owner follows when the engine is off)
+> is leg/pull-heavy with ~0 direct arm and starved chest/shoulder volume — a separate,
+> optional static-plan rebalance the owner can request.
+
 ### Phase 1 — `v8.5.0` — Exercise Database Conversion
 
 **Scope:** Convert `WORKOUTS_LIBRARY.md` + `EXERCISE_PROGRESSIONS` + `workoutContent()` prescriptions into the single canonical `plans/exercise-db.js` module. **No UI changes, no engine logic, no behaviour change.**

@@ -23,7 +23,8 @@
 // Physique-goal presets. Keys + shape are stable; preset contents use the
 // REGIONS/MUSCLES vocabulary from plans/exercise-db.js.
 export const GOAL_PRESETS = {
-  balanced:  { label: 'Balanced',          regions: [],                                       muscles: [],                                                                  volumeBias: 1.0,  repBias: null  },
+  balanced:   { label: 'Balanced',           regions: [],                                       muscles: [],                                                                  volumeBias: 1.0,  repBias: null,  functionalBias: false },
+  functional: { label: 'All-Round Strength', regions: ['chest', 'back', 'shoulders', 'legs', 'glutes', 'core'], muscles: [],                                              volumeBias: 1.0,  repBias: null,  functionalBias: true  },
   vtaper:    { label: 'V-Taper',           regions: ['shoulders', 'back'],                    muscles: ['latissimus_dorsi', 'posterior_deltoid', 'lateral_deltoid'],        volumeBias: 1.25, repBias: 'mid' },
   athletic:  { label: 'Athletic / Combat', regions: ['core', 'legs', 'shoulders'],            muscles: ['rectus_abdominis', 'gluteus_maximus', 'anterior_deltoid'],         volumeBias: 1.15, repBias: 'mid' },
   strength:  { label: 'Strength bias',      regions: [],                                       muscles: [],                                                                  volumeBias: 1.0,  repBias: 'low' },
@@ -31,6 +32,31 @@ export const GOAL_PRESETS = {
   lowerbody: { label: 'Lower-body focus',   regions: ['legs', 'glutes'],                       muscles: [],                                                                  volumeBias: 1.2,  repBias: 'mid' },
   core:      { label: 'Core / midsection',  regions: ['core'],                                 muscles: ['rectus_abdominis', 'obliques', 'transverse_abdominis'],            volumeBias: 1.2,  repBias: 'mid' }
 };
+
+// ─── PLAN_PRESETS — which goal presets each plan exposes ──────────────────────
+// Plan-aware: a plan only offers presets that suit its purpose. LITE is catered
+// (chair-based, elderly/limited-mobility) so it gets only the neutral 'balanced'.
+// MAINTENANCE is moderate/catered so it gets a restrained subset. CUT/BULK/AGRO are
+// the functional-strength plans and get the full range, led by 'functional'
+// (All-Round Strength) — the recommended default for whole-body development.
+// 'functional' is listed first (after balanced) so it surfaces prominently.
+export const PLAN_PRESETS = {
+  lite:        ['balanced'],
+  maintenance: ['balanced', 'functional', 'core'],
+  cut:         ['balanced', 'functional', 'athletic', 'upperbody', 'lowerbody', 'core', 'strength', 'vtaper'],
+  bulk:        ['balanced', 'functional', 'athletic', 'upperbody', 'lowerbody', 'core', 'strength', 'vtaper'],
+  agro:        ['balanced', 'functional', 'athletic', 'upperbody', 'lowerbody', 'core', 'strength', 'vtaper']
+};
+// Returns the ordered list of preset keys available for a plan ('default' aliases lite).
+export function presetsForPlan(plan) {
+  const key = (plan === 'default' || !plan) ? 'lite' : plan;
+  return PLAN_PRESETS[key] || PLAN_PRESETS.cut;
+}
+// True if a preset key is valid for a plan (used to sanitise stored focus).
+export function isPresetAllowed(plan, presetKey) {
+  if (!presetKey || presetKey === 'balanced') return true;
+  return presetsForPlan(plan).includes(presetKey);
+}
 
 // ─── resolveFocus ────────────────────────────────────────────────────────────
 // Merge the goalPreset (if any) with the user's explicit muscles[]/regions[] (union).
@@ -41,9 +67,10 @@ export function resolveFocus(focusConfig) {
   const regions = new Set();
   let volumeBias = 1.0;
   let repBias = null;
+  let functionalBias = false;
 
   if (!focusConfig || typeof focusConfig !== 'object') {
-    return { muscles, regions, volumeBias, repBias };
+    return { muscles, regions, volumeBias, repBias, functionalBias };
   }
 
   const preset = focusConfig.goalPreset ? GOAL_PRESETS[focusConfig.goalPreset] : null;
@@ -52,12 +79,13 @@ export function resolveFocus(focusConfig) {
     for (const r of (preset.regions || [])) regions.add(r);
     if (typeof preset.volumeBias === 'number') volumeBias = preset.volumeBias;
     repBias = preset.repBias != null ? preset.repBias : null;
+    functionalBias = !!preset.functionalBias;
   }
 
   if (Array.isArray(focusConfig.muscles)) for (const m of focusConfig.muscles) if (m) muscles.add(m);
   if (Array.isArray(focusConfig.regions)) for (const r of focusConfig.regions) if (r) regions.add(r);
 
-  return { muscles, regions, volumeBias, repBias };
+  return { muscles, regions, volumeBias, repBias, functionalBias };
 }
 
 // ─── focusScore ──────────────────────────────────────────────────────────────
@@ -66,7 +94,7 @@ export function resolveFocus(focusConfig) {
 // Higher = better match for the user's goal.
 export function focusScore(exercise, resolved) {
   if (!exercise || !resolved) return 0;
-  if (resolved.muscles.size === 0 && resolved.regions.size === 0) return 0;
+  if (resolved.muscles.size === 0 && resolved.regions.size === 0 && !resolved.functionalBias) return 0;
 
   const muscles = exercise.muscles || {};
   const primary = Array.isArray(muscles.primary) ? muscles.primary : [];
@@ -76,6 +104,14 @@ export function focusScore(exercise, resolved) {
   for (const m of primary) if (resolved.muscles.has(m)) score += 2;
   for (const m of secondary) if (resolved.muscles.has(m)) score += 1;
   if (exercise.region && resolved.regions.has(exercise.region)) score += 3;
+
+  // All-Round Strength: bias toward functional compound work + calisthenics
+  // progression movements (across whatever regions the slot offers), so the week
+  // builds the whole body through strength-driving exercises rather than isolation.
+  if (resolved.functionalBias) {
+    if (exercise.type === 'compound') score += 2;
+    if (exercise.progressionGroup) score += 2;
+  }
 
   return score;
 }

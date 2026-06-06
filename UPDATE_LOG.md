@@ -4,6 +4,37 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 8.6.0 — 2026-06-06
+
+**Scope:** Minor (Workout Engine BETA enhancement). New goal preset + a week-level balancing algorithm + plan-aware preset gating + Settings reorder. No schema change. No data mutation. Engine remains opt-in, default OFF.
+**Banner:** shown — "Workout Engine (BETA) upgrade: a new ALL-ROUND STRENGTH goal that develops the whole body evenly through functional, compound, calisthenics-progression work — it actively fills under-trained movement patterns across your week while keeping push:pull balanced. Goal options are now tailored per plan (the heavier functional/athletic goals show on Cut/Bulk/AGRO; Lite stays gentle). The WORKOUT ENGINE section also moved to the top of Settings so it is easy to find. Still opt-in and OFF by default — your normal workouts and all your data are unchanged until you turn it on."
+**CACHE_NAME:** v39 → v40. Schema unchanged at v7.
+
+### Why
+
+Owner asked for a goal that builds the whole body for functional strength + calisthenics progress (not an aesthetic split), noting the static AGRO plan "lacks overall body development and is more intensive on some things than others." A four-agent-style balance audit confirmed it with numbers: static AGRO ≈ **56 leg / 37 back / 17 chest / 15 shoulder / 0 direct-arm** weekly sets — leg/posterior/pull heavy, starved chest/shoulders/arms (push:pull 0.5, within the ≤1:1 rule).
+
+### What shipped
+
+**New `functional` / "All-Round Strength" goal preset (`modules/engine-focus.js`)**
+- Covers all six major regions; `functionalBias` scoring bonus (+2 compound, +2 progression-group) prefers functional calisthenics work.
+
+**Week-level balance algorithm (`modules/workout-engine.js` `balanceWeek`)** — the real fix:
+- The first cut of the preset was net-negative (audit caught it): the score bonus was inert on single-pick slots and a region-blind `volumeBias` accessory flooded AGRO with 33 leg sets. Replaced with `balanceWeek`, which fills UNDER-trained movement patterns across the week with the user's-level compound progression exercise (per-day dedup), and tops up PULL when adding push-side work so the **weekly** push:pull ≤ 1:1 rule (CLAUDE.md §15) always holds.
+- Result on AGRO: all 6 major patterns trained ≥2 days (shoulder 0→2), push:pull 12:12. Verified by execution across all 5 plans (cut 9:9, bulk 18:20, maintenance 6:6, agro 12:12, lite via balanced 4:4 — all ≤1:1).
+- Focus accessories (for aesthetic presets) now dedup across the week, fixing the same-exercise-every-day flood.
+
+**Plan-aware preset gating (`engine-focus.js` `PLAN_PRESETS` / `presetsForPlan` / `isPresetAllowed`)**
+- Lite → `balanced` only (catered/gentle). Maintenance → balanced/functional/core. Cut/Bulk/AGRO → full set led by functional. Settings shows only a plan's eligible presets; a stored preset invalid for the current plan is sanitised to balanced (in the UI and in `buildEngineUserState`).
+
+**Settings UX (`app.html`)**
+- The WORKOUT ENGINE (BETA) section moved to the TOP of the settings body (was last, after APP UPDATES) so it isn't buried.
+
+### Files touched
+`modules/engine-focus.js` (preset + gating + functionalBias), `modules/workout-engine.js` (balanceWeek + accessory dedup + week-level push:pull cap + shared formatEntry), `app.html` (move settings section, plan-aware paint + sanitise, expose presetsForPlan/isPresetAllowed), `sw.js` (CACHE v40), `index.html` (surfaces + changelog), `CLAUDE.md`, `README.md`, `UPDATE_LOG.md`, `docs/*`.
+
+---
+
 ## Version 8.5.0 — 2026-06-06
 
 **Scope:** Minor (new opt-in feature — the Workout Engine, shipped as BETA, default OFF). New ES modules + additive SK keys (no migration). app.html wiring behind a feature flag. No schema change. No data mutation.
