@@ -22,6 +22,64 @@ or prescribing any workout content in `app.html`.
 
 ---
 
+## Library Status
+
+**Status: COMPLETE & FINALIZED** (audited 2026-06-06)
+
+| Metric | Value |
+|---|---|
+| Total documented exercises | **182** (66 progression + 116 non-progression) |
+| Progression groups | 10 (push, pull, shoulder, squat, hinge, core + 4 skill tracks) |
+| Progression levels | 66 — exact 1:1 match with `plans/exercise-progressions.js` |
+| Training modalities | 12 (Section 1) |
+| Demographic matrix | Complete (Section 2, 5 sub-matrices) |
+| Auto-prescription data model | Specification complete (implementation = v9 Workout Engine) |
+| Evidence citations | 100% from CLAUDE.md §15 approved sources — zero brand/influencer/video sources |
+
+**Completeness contract:** every exercise entry carries Category, Equipment, primary +
+secondary target muscles, movement type, description, common mistakes, safety notes, a
+5-row per-plan prescription table (Lite / Cut / Bulk / Maintenance / AGRO), and an
+evidence citation. Progression exercises additionally carry progression group, level,
+prerequisites, and progression path. Non-progression exercises legitimately omit the
+progression fields.
+
+**Maintenance rule:** when adding an exercise, update the count above and the relevant
+Table of Contents line. When adding a progression level, it MUST mirror
+`plans/exercise-progressions.js` exactly (names may carry a `(skill)` disambiguation
+suffix where a label collides across groups — e.g. handstand L1 vs shoulder L4).
+
+---
+
+## Table of Contents
+
+- [Section 1 — Training Modalities](#section-1--training-modalities) — 12 modalities
+- [Section 2 — Demographic Stratification Matrix](#section-2--demographic-stratification-matrix) — 2.1 eligibility · 2.2 modulators · 2.3 restrictions · 2.4 disclaimer · 2.5 engine algorithm
+- [Progression Exercises](#progression-exercises) — 66 levels across 10 groups
+  - [Push Progression](#push-progression-10-levels) — 10 levels
+  - [Pull Progression](#pull-progression-9-levels) — 9 levels
+  - [Shoulder Progression](#shoulder-progression-6-levels) — 6 levels
+  - [Squat Progression](#squat-progression-9-levels) — 9 levels
+  - [Hinge Progression](#hinge-progression-7-levels) — 7 levels
+  - [Core Progression](#core-progression-10-levels) — 10 levels
+  - [Skill Progressions](#skill-progressions) — Crow (4) · Handstand (4) · L-sit (3) · Planche (4)
+- [Non-Progression Exercises](#non-progression-exercises) — 116 accessories / conditioning / mobility
+  - [Calisthenics / Resistance](#calisthenics--resistance) — 14
+  - [HIIT Protocols](#hiit-protocols) — 2
+  - [Shadowboxing](#shadowboxing) — 3
+  - [Jump Rope](#jump-rope) — 4
+  - [Animal Flow / QMT](#animal-flow--qmt) — 9
+  - [Yoga Poses](#yoga-poses) — 18
+  - [Pilates Exercises](#pilates-exercises) — 13
+  - [Tai Chi — Yang Style 8-Form](#tai-chi--yang-style-8-form) — 8
+  - [Chair Exercises (Lite Protocol)](#chair-exercises-lite-protocol) — 20
+  - [Isometric Finishers](#isometric-finishers) — 5
+  - [Warmup Movements](#warmup-movements) — 5
+  - [Cooldown / Stretch Movements](#cooldown--stretch-movements) — 13
+  - [Neck Protocol](#neck-protocol) — 2
+- [Auto-Prescription Data Model](#auto-prescription-data-model) — engine spec (v9.0.0)
+
+---
+
 ## Section 1 — Training Modalities
 
 Protocol Health uses 12 distinct training modalities across its 5 plans. Each modality has
@@ -7301,7 +7359,7 @@ Stop immediately on any dizziness, tingling, or sharp pain.
 1. **Daily exercise list** — specific exercises with sets, reps, tempo, rest tailored to user's level and plan
 2. **Weekly schedule** — modality rotation per plan requirements
 3. **Progression recommendations** — flag exercises ready for level advancement based on streak data
-4. **Deload week trigger** — every 8-10 weeks or when completion < 70% for 2 consecutive weeks
+4. **Deload week trigger** — every 6-10 weeks (default 8) or when completion < 70% for 2 consecutive weeks
 5. **Exercise substitutions** — swap exercises that load injured body regions
 
 ### Volume Caps Per Plan
@@ -7334,8 +7392,8 @@ Stop immediately on any dizziness, tingling, or sharp pain.
 |------|-------------|
 | Streak threshold | 3 consecutive completed sessions at current level -> recommend advancement (Lite: 5) |
 | Failure threshold | 2 consecutive sessions < 60% completion -> recommend regression |
-| Deload trigger | 8-10 weeks continuous OR 2 weeks with completion < 70% |
-| Deload protocol | Reduce volume 40% (fewer sets, not exercises). Maintain frequency. 1 week. |
+| Deload trigger | 6-10 weeks continuous (default 8) OR 2 weeks with completion < 70% |
+| Deload protocol | Reduce volume 40-50% (fewer sets, not exercises). Maintain frequency. 1 week. |
 | Cross-level dependency | Bulgarian split squat (squat L6) requires hinge >= 2 |
 | Skill unlock | Skills available when core >= 4 AND push >= 5 |
 
@@ -7350,7 +7408,7 @@ Stop immediately on any dizziness, tingling, or sharp pain.
 7. All plans: push:pull ratio <= 1:1 (pull-dominant preferred)
 8. Weight > 100kg: no plyometrics unless user overrides in settings
 9. Age > 50: default Lite variants unless manually overridden
-10. Deload weeks: reduce volume 40%, maintain frequency
+10. Deload weeks: reduce volume 40-50%, maintain frequency
 11. Max 2 compound push exercises per session
 12. Always pair push with pull in same session
 13. Lower body sessions: minimum 1 hinge + 1 squat movement

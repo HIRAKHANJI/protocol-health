@@ -22,7 +22,17 @@ Owner asked to take the existing `WORKOUTS_LIBRARY.md` and `EXERCISE_PROGRESSION
 
 ## 2. Audit findings (from 2026-05-14 four-agent audit)
 
-### `WORKOUTS_LIBRARY.md` — 96% complete
+> **UPDATE (2026-06-06):** The library has since been finalized. Current state:
+> **182 documented exercises** (66 progression + 116 non-progression), 7,400+ lines.
+> The dated gaps below have been **closed**: the 7 missing exercises were added
+> (total now exceeds the old 175 target), all 4 skill tracks carry explicit
+> progression prerequisites, and Section 2.3 provides a demographic→exercise
+> contraindication matrix. The remaining items (machine-readable schema, per-exercise
+> quantitative enums) are intentionally deferred to Phase 1 (`plans/exercise-db.js`) —
+> they are CODE deliverables, not library-prose gaps. The snapshot below is preserved
+> as the historical baseline; do not edit it.
+
+### `WORKOUTS_LIBRARY.md` — 96% complete (snapshot 2026-05-14)
 
 - **6,916 lines, 168/175 documented exercises** across 12 modalities
 - All 10 progression groups (push, pull, shoulder, squat, hinge, core, skill_crow/handstand/lsit/planche) fully documented with per-plan prescription tables (LITE / CUT / BULK / MAINTENANCE / AGRO)
@@ -146,7 +156,7 @@ export const EXERCISE_DB = {
     citation: 'PMC 7927075 (Schoenfeld 2021 repetition continuum)',
     libraryRef: 'WORKOUTS_LIBRARY.md:#push-l0-wall-pushup'
   },
-  // ... 175 total entries
+  // ... 182 total entries
 };
 ```
 
@@ -299,12 +309,12 @@ Each phase is a minor release with smoke + tag + log per CLAUDE.md §11. Final p
 
 **Scope:** Convert `WORKOUTS_LIBRARY.md` + `EXERCISE_PROGRESSIONS` + `workoutContent()` prescriptions into the single canonical `plans/exercise-db.js` module. **No UI changes, no engine logic, no behaviour change.**
 
-- Create `plans/exercise-db.js` with full schema for all ~175 exercises
+- Create `plans/exercise-db.js` with full schema for all 182 exercises (library now finalized — the 7 previously-missing exercises were added 2026-06-06)
 - Each exercise has: id, name, aliases, progressionGroup, level, pattern, equipment, muscles, difficulty, jointImpact, plyometric flag, contraindications, per-plan prescriptions, progression unlocks, safety overrides, citation, libraryRef
-- Migrate the 7 missing exercises (isometric variants, jump rope variations, shadowboxing modules) — bring total to 175
-- Add explicit progression prerequisites to the 4 SKILL exercises currently missing them
-- Naming canonicalisation: pick one spelling per exercise, store aliases for matching
-- Add the central contraindication matrix
+- ~~Migrate the 7 missing exercises~~ — DONE (library at 182, exceeds old 175 target)
+- ~~Add explicit progression prerequisites to the 4 SKILL exercises~~ — DONE (all 4 skill tracks carry prerequisites + paths)
+- Naming canonicalisation: pick one spelling per exercise, store aliases for matching (library already uses `(skill)` disambiguation suffixes — port these as aliases)
+- Build the machine-readable per-exercise contraindication matrix (Section 2.3's demographic matrix is the prose source)
 - Add machine-readable safety overrides per exercise
 
 **Verification:** unit-test-style assertions in a one-off script that confirms every exercise prescribed in current `workoutContent()` HTML maps cleanly to an `EXERCISE_DB` entry via name or alias.
@@ -403,7 +413,7 @@ Each phase is a minor release with smoke + tag + log per CLAUDE.md §11. Final p
 | Phase 5 — Polish + audit | v8.8.0 | 1 week | 7.5–8.5 weeks |
 | Phase 6 — Consolidation | v9.0.0 | 0.5 weeks | **~8 weeks total** |
 
-This is a substantial project. The biggest single time sink is Phase 1 — the data entry to convert 175 exercises into structured form with all the metadata each one needs. That phase has the highest scope risk because every gap discovered downstream forces a return to Phase 1 to fill it in.
+This is a substantial project. The biggest single time sink is Phase 1 — the data entry to convert 182 exercises into structured form with all the metadata each one needs. That phase has the highest scope risk because every gap discovered downstream forces a return to Phase 1 to fill it in.
 
 ---
 

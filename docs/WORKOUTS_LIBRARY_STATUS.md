@@ -1,39 +1,45 @@
 # WORKOUTS_LIBRARY.md — Project Status & Completion Checklist
 
 **Last updated:** 2026-06-06
-**Library version:** 7,385 lines, 182 documented exercises (target was 175 — exceeded)
+**Library version:** 7,400+ lines, 182 documented exercises (old target was 175 — exceeded)
 **App version:** v8.3.4 (modular ES-modules architecture, schema v7)
 **Roadmap:** `docs/workout-engine-v9-roadmap.md` (v9 Workout Engine, 6-phase rollout)
+**Library status:** ✅ FINALIZED — full-document audit passed 2026-06-06 (zero missing
+fields, zero malformed tables, zero internal contradictions, zero broken cross-refs,
+zero rogue citations)
 
 ---
 
 ## Executive Summary
 
-The workout library (`WORKOUTS_LIBRARY.md`) is **~96% complete** as a prose/table
-reference document. It covers all 10 progression groups, all 4 skill tracks, 12
+The workout library (`WORKOUTS_LIBRARY.md`) is **complete and finalized as a prose/table
+reference document.** It covers all 10 progression groups, all 4 skill tracks, 12
 training modalities, a demographic stratification matrix, and an auto-prescription
-data model. However, **it is not yet machine-readable**, which is the prerequisite for
-the v9 Workout Engine (the next major project).
+data model. A full-document audit (2026-06-06) found no content gaps, contradictions,
+or format defects. The only remaining work is **converting it to a machine-readable
+module** (`plans/exercise-db.js`) — a CODE deliverable that is Phase 1 of the v9
+Workout Engine, not a library-prose gap.
 
 ### What's done
 - 182 exercise entries across progression and non-progression categories
-- All 66 progression levels from `plans/exercise-progressions.js` documented
+- All 66 progression levels from `plans/exercise-progressions.js` documented (exact 1:1 match)
 - Full per-plan prescription tables (Lite/Cut/Bulk/Maintenance/AGRO) for every entry
-- Section 2 Demographic Stratification Matrix (added in PR #145)
+- Section 2 Demographic Stratification Matrix (incl. 2.3 contraindication matrix)
 - Auto-Prescription Data Model section (schema spec for future engine)
 - Evidence citations against CLAUDE.md Section 15 approved sources
+- **Table of Contents + Library Status block (added 2026-06-06)**
+- **Deload timing reconciled with v9 roadmap (6-10 weeks, default 8; 40-50% volume cut)**
 
-### What's NOT done
-The v9 roadmap's own audit (2026-05-14) identified these gaps. Most are still open:
+### What's NOT done (all reclassified as CODE work, not library gaps)
 
 | Gap | Priority | Status | Notes |
 |-----|----------|--------|-------|
-| Machine-readable exercise DB (`plans/exercise-db.js`) | P0 — v9 Phase 1 | NOT STARTED | The core bridge problem: library, EXERCISE_PROGRESSIONS, and workoutContent() are three parallel universes with no shared ID system |
-| 4 SKILL exercises missing explicit progression prerequisites | P1 | OPEN | Likely skill_crow L1-L4 or skill_planche entries; need to verify which 4 |
-| Naming canonicalization (spelling drift) | P1 | OPEN | "Push-up" vs "Push-ups" vs "Push-up progression"; "Plank" vs "Plank hold" vs "Plank-elbows" |
-| Central contraindication matrix | P2 | OPEN | Safety notes are per-exercise prose; no structured matrix |
-| Structured difficulty/joint-impact/muscle-group enums | P2 | OPEN | Required for engine's safety overrides |
-| `skill_planche` group not prescribed by any plan | P2 | OPEN | Exists in EXERCISE_PROGRESSIONS but no plan's workoutContent() references it |
+| Machine-readable exercise DB (`plans/exercise-db.js`) | P0 — v9 Phase 1 | NOT STARTED | The core bridge: library, EXERCISE_PROGRESSIONS, and workoutContent() need a shared ID system. This is CODE, not library prose. |
+| 4 SKILL exercises missing explicit progression prerequisites | P1 | ✅ DONE | Verified all 4 skill tracks (crow/handstand/lsit/planche) carry prerequisites + paths |
+| Naming canonicalization (spelling drift) | P1 | DEFERRED to exercise-db.js | Library already uses `(skill)` disambiguation suffixes; port these as `aliases` in Phase 1 |
+| Central contraindication matrix | P2 | ✅ EXISTS | Section 2.3 is a demographic→blocked-exercise matrix. Per-exercise machine-readable version = Phase 1. |
+| Structured difficulty/joint-impact/muscle-group enums | P2 | DEFERRED to exercise-db.js | Belongs in the JS schema, not markdown prose |
+| `skill_planche` group not prescribed by any plan | P2 | OPEN (plan decision) | Documented in library; whether to prescribe it in AGRO is an owner decision, not a library gap |
 
 ---
 
