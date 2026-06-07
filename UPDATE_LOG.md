@@ -4,6 +4,35 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 8.8.0 — 2026-06-07
+
+**Scope:** Minor (Workout Engine BETA — AGRO morning/evening two-card split). No schema change. No data mutation. Engine remains opt-in, default OFF.
+**Banner:** shown — AGRO engine now renders a Morning card + an Evening card per training day.
+**CACHE_NAME:** v41 → v42. Schema unchanged at v7.
+
+### Why
+
+Owner asked for the engine to mirror the hand-built AGRO plan's structure — a short morning activation session and a separate, heavier evening session — rather than one merged card, and explicitly required the engine to match or exceed the real plan's density, never less.
+
+### What changed
+
+**AGRO bimodal block recipes (`plans/session-templates.js`)**
+- Added per-day `slots` to `SESSION_TEMPLATES.agro`, each slot tagged `block:'AM'|'PM'`, composed from reusable block recipes: Morning A (push+pull activation), Morning B (lower+hinge), Evening A (upper balance), Evening B (legs+posterior), Evening C (skill+core+pull), and the fasted run block. Sized to meet/exceed the real plan.
+
+**Engine (`modules/workout-engine.js`)**
+- `generateSession` carries each slot's `block` onto the exercise entry (`formatEntry` gains a `block` field); all-round/emphasis fills tag `PM`.
+
+**Renderer (`components/engine-session.js`)**
+- A day whose exercises carry `block:'AM'` renders TWO cards (`DAY · Morning` + `DAY · Evening`), each with its own warm-up/cool-down and block labels. All non-AGRO plans (no AM tags) stay single-card.
+
+### Validation
+- AGRO renders Morning (6-7 ex) + Evening (14 ex on Mon/Tue/Thu/Fri; lighter run days Wed/Sat) — meeting/exceeding the hand-built plan. Re-ran all 40 plan×goal combos: still full sessions, warm-up+cool-down every day, weekly push:pull ≤ 1:1; only AGRO is bimodal; renderer never throws.
+
+### Files touched
+`plans/session-templates.js`, `modules/workout-engine.js`, `components/engine-session.js`, `app.html` (APP_VERSION + banner), `sw.js` (CACHE v42), `index.html` (surfaces + changelog), `CLAUDE.md`, `README.md`, `UPDATE_LOG.md`.
+
+---
+
 ## Version 8.7.0 — 2026-06-07
 
 **Scope:** Minor (Workout Engine BETA rebuild). Session-generation rewrite + rich archetype recipes + plan-scaled density. No schema change. No data mutation. Engine remains opt-in, default OFF.

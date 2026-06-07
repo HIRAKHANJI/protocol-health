@@ -909,7 +909,7 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
     </div>
     <div class="settings-body">
 
-      <!-- WORKOUT ENGINE (BETA) — v8.7.0 · opt-in, default OFF · placed first so it isn't buried -->
+      <!-- WORKOUT ENGINE (BETA) — v8.8.0 · opt-in, default OFF · placed first so it isn't buried -->
       <div class="settings-section">
         <div class="settings-section-title">Workout Engine <span style="color:var(--accent2)">· BETA</span></div>
         <p style="font-size:0.75rem;color:var(--muted);margin:0 0 10px">Experimental. Auto-builds your training week from the 199-exercise database at your current levels, with a focus/goal picker and optional safety brakes. <b>Default OFF</b> — your normal workouts are unchanged until you switch this on, and you can switch it off anytime. Your data is never affected.</p>
@@ -1861,8 +1861,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '8.7.0';
-const APP_VERSION_MSG = 'Workout Engine (BETA) — major rebuild: it now generates COMPLETE sessions like the hand-built plans (warm-up → main lifts → accessories → skill → core → cool-down), 8-15 exercises a day instead of a thin handful. Selecting a goal now ADDS emphasis on top of a full whole-body session — it can no longer strip out other body parts. AGRO rebuilds to its real ~13-15 exercise days; Lite stays gentle and chair-based. Every session has a warm-up and cool-down, and weekly push:pull stays balanced. Still opt-in and OFF by default — your normal workouts and data are unchanged until you turn it on.';
+const APP_VERSION = '8.8.0';
+const APP_VERSION_MSG = 'Workout Engine (BETA): the AGRO plan now generates a separate MORNING card (activation, ~20 min) and a heavier EVENING card (main session, ~40-45 min) for each training day — exactly like the hand-built AGRO plan, at matching or greater density (a Monday is now a ~7-exercise morning + a ~14-exercise evening). Other plans stay single-session. Still opt-in and OFF by default — your normal workouts and data are unchanged until you turn it on.';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
 

@@ -180,7 +180,7 @@ function buildPrescription(exercise, user, fasted, deloadActive, resolvedFocus, 
 
 // Shared formatter so every code path emits identical exercise entries.
 // `kind` drives block grouping in the renderer + the working-exercise cap.
-function formatEntry(exercise, prescription, slot, kind) {
+function formatEntry(exercise, prescription, slot, kind, block) {
   return {
     id: exercise.id,
     name: exercise.name,
@@ -189,6 +189,7 @@ function formatEntry(exercise, prescription, slot, kind) {
     region: exercise.region,
     pattern: exercise.pattern,
     kind: kind || slotKind(slot),
+    block: block || null,
     sets: prescription.sets,
     reps: prescription.reps,
     unit: prescription.unit,
@@ -231,12 +232,12 @@ export function generateSession(plan, dow, user, opts = {}) {
   const used = new Set();
   let items = [];
 
-  for (const { slot, count } of slots) {
+  for (const { slot, count, block } of slots) {
     const kind = slotKind(slot);
     for (const ex of pickN(slot, user, used, count || 1)) {
       used.add(ex.id);
       const px = buildPrescription(ex, user, base.fasted, base.isDeload, resolvedFocus, kind);
-      items.push({ exercise: ex, prescription: px, slot, kind });
+      items.push({ exercise: ex, prescription: px, slot, kind, block });
     }
   }
 
@@ -252,7 +253,7 @@ export function generateSession(plan, dow, user, opts = {}) {
     base.notes.push('Trimmed accessories to the ' + plan + ' working-exercise cap (' + caps.maxExercisesPerSession + ').');
   }
 
-  base.exercises = items.map(({ exercise, prescription, slot, kind }) => formatEntry(exercise, prescription, slot, kind));
+  base.exercises = items.map(({ exercise, prescription, slot, kind, block }) => formatEntry(exercise, prescription, slot, kind, block));
   if (base.isDeload) base.notes.push('Deload week — volume reduced ~50%, frequency held.');
   if (base.fasted) base.notes.push('Fasted session — keep intensity ~70-80%.');
   return base;
@@ -276,7 +277,7 @@ function balanceWeek(days, plan, user, resolved, caps) {
       .sort((a, b) => a.exercises.length - b.exercises.length)[0];
     if (!cand) return false;
     const px = buildPrescription(ex, user, cand.fasted, cand.isDeload, resolved, slotKind(g));
-    cand.exercises.push(formatEntry(ex, px, 'all-round-fill', slotKind(g)));
+    cand.exercises.push(formatEntry(ex, px, 'all-round-fill', slotKind(g), 'PM'));
     cand.notes.push('All-Round: added ' + ex.name + ' so ' + g + ' is trained this week.');
     return true;
   }
@@ -327,7 +328,7 @@ function addEmphasis(days, plan, user, resolved, caps) {
     if (!cands.length) { if (guard >= regions.length && added === 0) break; continue; }
     const ex = cands[0]; usedIds.add(ex.id);
     const px = buildPrescription(ex, user, d.fasted, d.isDeload, resolved, 'accessory');
-    d.exercises.push(formatEntry(ex, px, 'emphasis', 'accessory'));
+    d.exercises.push(formatEntry(ex, px, 'emphasis', 'accessory', 'PM'));
     d.notes.push('Goal emphasis: added ' + ex.name + ' (' + region + ').');
     added++;
   }

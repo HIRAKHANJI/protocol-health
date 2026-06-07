@@ -41,21 +41,15 @@ export function formatDose(ex) {
   return `${ex.sets}×${repStr}${unit ? ' ' + unit : ''}`;
 }
 
-// renderSessionCard: one .workout-card for a day with exercises. No inline open
-// state — the caller's renderWorkouts toggles .workout-body.
-function renderSessionCard(session) {
-  const dayName = DOW_SHORT[session.dow] || '';
-  const title = `${dayName} · ${session.name}`;
-  const meta = `${session.archetype}${session.fasted ? ' · FASTED' : ''}${session.isDeload ? ' · DELOAD' : ''}`;
-
-  // Block labels shown as the session moves through its anatomy. Exercises arrive in
-  // block order (warmup first … cooldown last), so a label is emitted whenever the
-  // block (kind) changes — giving the WARM-UP / MAIN / ACCESSORY / CORE / COOL-DOWN
-  // structure the hand-built plans have.
+// renderCard: one .workout-card from a title/meta/exercise-list. No inline open state —
+// the caller's renderWorkouts toggles .workout-body. Emits a block label (WARM-UP / MAIN
+// / ACCESSORY / SKILL / CORE / COOL-DOWN) whenever the block changes, so the session
+// reads with the same anatomy as the hand-built plans.
+function renderCard(title, meta, exercises, notes) {
   const BLOCK_LABEL = { warmup: 'WARM-UP', main: 'MAIN', accessory: 'ACCESSORY', skill: 'SKILL', core: 'CORE', conditioning: 'CONDITIONING', recovery: 'MOBILITY', cooldown: 'COOL-DOWN' };
   const warmCool = k => k === 'warmup' || k === 'cooldown';
   let lastKind = null;
-  const rows = session.exercises.map(ex => {
+  const rows = (exercises || []).map(ex => {
     const kind = ex.kind || 'main';
     let head = '';
     if (kind !== lastKind && BLOCK_LABEL[kind]) {
@@ -69,11 +63,7 @@ function renderSessionCard(session) {
     const dose = warmCool(kind) ? '' : formatDose(ex);
     return `${head}<div class="exercise-row"><div><div class="ex-name">${ex.name}</div><div class="ex-detail">${detail}</div></div><div class="ex-sets">${dose}</div></div>`;
   }).join('');
-
-  const noteRows = (session.notes || []).map(n =>
-    `<div class="section-note" style="padding:4px 0;opacity:0.7">${n}</div>`
-  ).join('');
-
+  const noteRows = (notes || []).map(n => `<div class="section-note" style="padding:4px 0;opacity:0.7">${n}</div>`).join('');
   return `<div class="workout-card">
     <div class="workout-card-header">
       <h3>${title}</h3>
@@ -81,6 +71,24 @@ function renderSessionCard(session) {
     </div>
     <div class="workout-body">${rows}${noteRows}</div>
   </div>`;
+}
+
+// renderSessionCard: renders a day. Bimodal days (AGRO — exercises tagged block:'AM')
+// split into TWO cards (Morning + Evening) like the hand-built plan; all other days
+// render as a single card.
+function renderSessionCard(session) {
+  const dayName = DOW_SHORT[session.dow] || '';
+  const exs = session.exercises || [];
+  const tail = (session.fasted ? ' · FASTED' : '') + (session.isDeload ? ' · DELOAD' : '');
+  if (exs.some(e => e.block === 'AM')) {
+    const am = exs.filter(e => e.block === 'AM');
+    const pm = exs.filter(e => e.block !== 'AM');
+    const cards = [];
+    if (am.length) cards.push(renderCard(`${dayName} · Morning`, 'Activation · ~20 min' + tail, am, []));
+    if (pm.length) cards.push(renderCard(`${dayName} · Evening`, session.archetype + ' · main session' + tail, pm, session.notes));
+    return cards.join('\n');
+  }
+  return renderCard(`${dayName} · ${session.name}`, session.archetype + tail, exs, session.notes);
 }
 
 // renderEngineWeek: full HTML string for a generated week. Pure — returns a string,

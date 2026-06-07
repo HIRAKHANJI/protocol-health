@@ -53,6 +53,25 @@ export const ARCHETYPES = [
 // else (no other plan declares fast days). `name` carries the human-readable
 // session label; for AGRO bimodal days it names both sessions and the archetype
 // reflects the dominant (longer/heavier) session.
+// ─── AGRO BIMODAL BLOCK RECIPES ──────────────────────────────────────────────
+// AGRO is the only plan that trains twice a day. Each AGRO training day composes an
+// AM (morning activation, ~20 min) block + a heavier PM (evening, ~40-45 min) block,
+// each slot tagged with `block:'AM'|'PM'` so the engine renders TWO cards per day
+// (Morning / Evening) like the hand-built plan — and at matching-or-greater density.
+const _tag = (block, list) => list.map(s => ({ ...s, block }));
+// Morning A — push + pull activation superset (Mon/Wed/Fri mornings)
+const AGRO_AM_A = _tag('AM', [ { slot: 'warmup', count: 2 }, { slot: 'push', count: 1 }, { slot: 'pull', count: 1 }, { slot: 'core', count: 1 }, { slot: 'conditioning', count: 1 }, { slot: 'cooldown', count: 1 } ]);
+// Morning B — lower + hinge (Tue/Thu/Sat mornings)
+const AGRO_AM_B = _tag('AM', [ { slot: 'warmup', count: 2 }, { slot: 'squat', count: 1 }, { slot: 'hinge', count: 1 }, { slot: 'accessory:legs', count: 1 }, { slot: 'cooldown', count: 1 } ]);
+// Evening A — upper push/pull balance (Mon)
+const AGRO_PM_A = _tag('PM', [ { slot: 'warmup', count: 1 }, { slot: 'push', count: 3 }, { slot: 'pull', count: 2 }, { slot: 'shoulder', count: 1 }, { slot: 'accessory:shoulders', count: 2 }, { slot: 'skill', count: 1 }, { slot: 'core', count: 1 }, { slot: 'cooldown', count: 3 } ]);
+// Evening B — legs + posterior chain (Tue/Fri)
+const AGRO_PM_B = _tag('PM', [ { slot: 'warmup', count: 1 }, { slot: 'hinge', count: 2 }, { slot: 'squat', count: 1 }, { slot: 'pull', count: 1 }, { slot: 'accessory:legs', count: 2 }, { slot: 'accessory:glutes', count: 1 }, { slot: 'skill', count: 1 }, { slot: 'core', count: 2 }, { slot: 'cooldown', count: 3 } ]);
+// Evening C — skill + core + pull focus (Thu)
+const AGRO_PM_C = _tag('PM', [ { slot: 'warmup', count: 1 }, { slot: 'pull', count: 2 }, { slot: 'accessory:shoulders', count: 1 }, { slot: 'skill', count: 3 }, { slot: 'core', count: 3 }, { slot: 'cooldown', count: 3 } ]);
+// Evening run + conditioning (Wed/Sat — fasted)
+const AGRO_PM_RUN = _tag('PM', [ { slot: 'warmup', count: 1 }, { slot: 'conditioning', count: 2 }, { slot: 'core', count: 1 }, { slot: 'cooldown', count: 2 } ]);
+
 export const SESSION_TEMPLATES = {
   // LITE PROTOCOL — gentle, chair-first, zero equipment.
   // Lib template: Mon Walk+ChairUpper | Tue TaiChi | Wed Walk+ChairLower |
@@ -131,12 +150,12 @@ export const SESSION_TEMPLATES = {
     plan: 'agro',
     weekly: [
       { dow: 0, name: 'Active Rest — Walk + Full Hip Session', archetype: 'recovery',         duration: 50, fasted: true  },
-      { dow: 1, name: 'Morning A + Evening A',                 archetype: 'push-pull',        duration: 65, fasted: false },
-      { dow: 2, name: 'Morning B + Evening B',                 archetype: 'resistance-lower', duration: 65, fasted: false },
-      { dow: 3, name: 'Morning A + Midweek Run',              archetype: 'conditioning',     duration: 55, fasted: true  },
-      { dow: 4, name: 'Morning B + Evening C',                 archetype: 'skill',            duration: 60, fasted: false },
-      { dow: 5, name: 'Morning A + Evening B',                 archetype: 'resistance-lower', duration: 65, fasted: false },
-      { dow: 6, name: 'Morning B + Run + Conditioning',        archetype: 'conditioning',     duration: 65, fasted: true  }
+      { dow: 1, name: 'Morning A + Evening A',                 archetype: 'push-pull',        duration: 65, fasted: false, slots: [ ...AGRO_AM_A, ...AGRO_PM_A ] },
+      { dow: 2, name: 'Morning B + Evening B',                 archetype: 'resistance-lower', duration: 65, fasted: false, slots: [ ...AGRO_AM_B, ...AGRO_PM_B ] },
+      { dow: 3, name: 'Morning A + Midweek Run',              archetype: 'conditioning',     duration: 55, fasted: true,  slots: [ ...AGRO_AM_A, ...AGRO_PM_RUN ] },
+      { dow: 4, name: 'Morning B + Evening C',                 archetype: 'skill',            duration: 60, fasted: false, slots: [ ...AGRO_AM_B, ...AGRO_PM_C ] },
+      { dow: 5, name: 'Morning A + Evening B',                 archetype: 'resistance-lower', duration: 65, fasted: false, slots: [ ...AGRO_AM_A, ...AGRO_PM_B ] },
+      { dow: 6, name: 'Morning B + Run + Conditioning',        archetype: 'conditioning',     duration: 65, fasted: true,  slots: [ ...AGRO_AM_B, ...AGRO_PM_RUN ] }
     ]
   }
 };
