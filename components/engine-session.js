@@ -48,12 +48,26 @@ function renderSessionCard(session) {
   const title = `${dayName} · ${session.name}`;
   const meta = `${session.archetype}${session.fasted ? ' · FASTED' : ''}${session.isDeload ? ' · DELOAD' : ''}`;
 
+  // Block labels shown as the session moves through its anatomy. Exercises arrive in
+  // block order (warmup first … cooldown last), so a label is emitted whenever the
+  // block (kind) changes — giving the WARM-UP / MAIN / ACCESSORY / CORE / COOL-DOWN
+  // structure the hand-built plans have.
+  const BLOCK_LABEL = { warmup: 'WARM-UP', main: 'MAIN', accessory: 'ACCESSORY', skill: 'SKILL', core: 'CORE', conditioning: 'CONDITIONING', recovery: 'MOBILITY', cooldown: 'COOL-DOWN' };
+  const warmCool = k => k === 'warmup' || k === 'cooldown';
+  let lastKind = null;
   const rows = session.exercises.map(ex => {
+    const kind = ex.kind || 'main';
+    let head = '';
+    if (kind !== lastKind && BLOCK_LABEL[kind]) {
+      head = `<div class="ex-detail" style="padding:6px 0 2px;letter-spacing:1.5px;opacity:0.6;font-family:'DM Mono',monospace">${BLOCK_LABEL[kind]}</div>`;
+      lastKind = kind;
+    }
     const detailParts = [];
-    if (ex.tempo) detailParts.push(ex.tempo);
+    if (!warmCool(kind) && ex.tempo && ex.tempo !== 'easy') detailParts.push(ex.tempo);
     if (ex.rationale && ex.rationale.length) detailParts.push(ex.rationale.join(', '));
     const detail = detailParts.join(' · ');
-    return `<div class="exercise-row"><div><div class="ex-name">${ex.name}</div><div class="ex-detail">${detail}</div></div><div class="ex-sets">${formatDose(ex)}</div></div>`;
+    const dose = warmCool(kind) ? '' : formatDose(ex);
+    return `${head}<div class="exercise-row"><div><div class="ex-name">${ex.name}</div><div class="ex-detail">${detail}</div></div><div class="ex-sets">${dose}</div></div>`;
   }).join('');
 
   const noteRows = (session.notes || []).map(n =>

@@ -147,32 +147,51 @@ export const SESSION_TEMPLATES = {
 // `count` is how many distinct exercises the engine should select for that slot.
 // Push:pull is kept ≤ 1:1 by construction: every push-bearing archetype pairs a
 // push slot with a pull slot (CLAUDE.md §15 hard rule).
+// ─── ARCHETYPE → SLOT COMPOSITION (full 7-block session anatomy) ─────────────
+// Each session follows the canonical anatomy:
+//   WARMUP → MAIN(compounds) → ACCESSORY → SKILL → CORE → CONDITIONING → COOLDOWN
+// so the engine produces a COMPLETE session (matching the hand-built plans'
+// 6-15 exercises), not a 3-exercise spine. Slot kinds the generator resolves:
+//   'warmup'                 → warmup-* / dynamic mobility (id-prefix 'warmup-')
+//   '<group>'                → a progression group at the user's level
+//                              (push/pull/shoulder/squat/hinge/core, chair_*, skill_*)
+//   'skill'                  → any unlocked skill_* group
+//   'core'                   → core group (chair_core on Lite)
+//   'accessory:<region>'     → non-progression supplementary volume in a region
+//                              (shoulders/back/arms/legs/glutes/calves/neck/balance/wrist)
+//   'conditioning'           → pattern:conditioning (HIIT/run/shadowbox/jump rope/circuit)
+//   'recovery-main'          → yoga/pilates/tai-chi/animal-flow mobility block
+//   'cooldown'               → cooldown-* / static stretch (id-prefix 'cooldown-')
+// `count` is the MAX exercises for that slot; per-plan caps (VOLUME_CAPS) trim
+// ACCESSORY first if a plan's working-exercise ceiling is lower (warmup/cooldown
+// are exempt from the cap and always survive). Push:pull ≤ 1:1 is enforced weekly.
 export const ARCHETYPE_SLOTS = {
   'rest':              [],
-  'recovery':          [ { slot: 'pattern:mobility', count: 3 } ],
-  'mobility':          [ { slot: 'pattern:mobility', count: 3 } ],
-  'conditioning':      [ { slot: 'pattern:conditioning', count: 2 } ],
-  'resistance-upper':  [ { slot: 'push', count: 1 }, { slot: 'pull', count: 1 }, { slot: 'shoulder', count: 1 }, { slot: 'core', count: 1 } ],
-  'resistance-lower':  [ { slot: 'squat', count: 1 }, { slot: 'hinge', count: 1 }, { slot: 'core', count: 1 } ],
-  'resistance-full':   [ { slot: 'push', count: 1 }, { slot: 'pull', count: 1 }, { slot: 'squat', count: 1 }, { slot: 'core', count: 1 } ],
-  'push-pull':         [ { slot: 'push', count: 1 }, { slot: 'pull', count: 1 }, { slot: 'core', count: 1 } ],
-  'skill':             [ { slot: 'skill', count: 2 }, { slot: 'core', count: 1 }, { slot: 'pull', count: 1 } ],
-  'chair-upper':       [ { slot: 'chair_push', count: 1 }, { slot: 'chair_pull', count: 1 } ],
-  'chair-lower':       [ { slot: 'chair_legs', count: 1 }, { slot: 'chair_core', count: 1 } ],
-  'chair-full':        [ { slot: 'chair_push', count: 1 }, { slot: 'chair_pull', count: 1 }, { slot: 'chair_legs', count: 1 }, { slot: 'chair_core', count: 1 } ]
+  'recovery':          [ { slot: 'warmup', count: 1 }, { slot: 'recovery-main', count: 6 }, { slot: 'cooldown', count: 1 } ],
+  'mobility':          [ { slot: 'warmup', count: 1 }, { slot: 'recovery-main', count: 6 }, { slot: 'accessory:balance', count: 1 }, { slot: 'cooldown', count: 1 } ],
+  'conditioning':      [ { slot: 'warmup', count: 2 }, { slot: 'conditioning', count: 2 }, { slot: 'core', count: 1 }, { slot: 'cooldown', count: 2 } ],
+  'resistance-upper':  [ { slot: 'warmup', count: 2 }, { slot: 'push', count: 2 }, { slot: 'pull', count: 2 }, { slot: 'shoulder', count: 1 }, { slot: 'accessory:shoulders', count: 1 }, { slot: 'accessory:arms', count: 1 }, { slot: 'core', count: 2 }, { slot: 'cooldown', count: 3 } ],
+  'resistance-lower':  [ { slot: 'warmup', count: 2 }, { slot: 'squat', count: 2 }, { slot: 'hinge', count: 2 }, { slot: 'accessory:legs', count: 1 }, { slot: 'accessory:glutes', count: 1 }, { slot: 'core', count: 2 }, { slot: 'cooldown', count: 3 } ],
+  'resistance-full':   [ { slot: 'warmup', count: 2 }, { slot: 'push', count: 1 }, { slot: 'pull', count: 1 }, { slot: 'squat', count: 1 }, { slot: 'hinge', count: 1 }, { slot: 'accessory:back', count: 1 }, { slot: 'core', count: 2 }, { slot: 'cooldown', count: 3 } ],
+  'push-pull':         [ { slot: 'warmup', count: 2 }, { slot: 'push', count: 2 }, { slot: 'pull', count: 2 }, { slot: 'shoulder', count: 1 }, { slot: 'accessory:shoulders', count: 1 }, { slot: 'accessory:pull', count: 1 }, { slot: 'skill', count: 1 }, { slot: 'core', count: 2 }, { slot: 'cooldown', count: 3 } ],
+  'skill':             [ { slot: 'warmup', count: 2 }, { slot: 'skill', count: 3 }, { slot: 'pull', count: 2 }, { slot: 'accessory:shoulders', count: 1 }, { slot: 'core', count: 3 }, { slot: 'cooldown', count: 3 } ],
+  'chair-upper':       [ { slot: 'warmup', count: 1 }, { slot: 'chair_push', count: 2 }, { slot: 'chair_pull', count: 2 }, { slot: 'accessory:wrist', count: 1 }, { slot: 'chair_core', count: 1 }, { slot: 'cooldown', count: 1 } ],
+  'chair-lower':       [ { slot: 'warmup', count: 1 }, { slot: 'chair_legs', count: 2 }, { slot: 'chair_core', count: 1 }, { slot: 'accessory:legs', count: 1 }, { slot: 'cooldown', count: 1 } ],
+  'chair-full':        [ { slot: 'warmup', count: 1 }, { slot: 'chair_push', count: 1 }, { slot: 'chair_pull', count: 1 }, { slot: 'chair_legs', count: 1 }, { slot: 'chair_core', count: 1 }, { slot: 'accessory:balance', count: 1 }, { slot: 'cooldown', count: 1 } ]
 };
 
 // ─── VOLUME CAPS PER PLAN ────────────────────────────────────────────────────
-// maxSessionsPerWeek / maxExercisesPerSession / maxWeeklySets pulled from the
-// WORKOUTS_LIBRARY.md "Volume Caps Per Plan" table. deloadEveryWeeks defaults to
-// 8 (range 6-10 per the deload trigger rule) and advanceCleanSessions encodes
-// the streak threshold (3 sessions to advance; Lite = 5).
+// maxExercisesPerSession now caps WORKING exercises only (warmup + cooldown are
+// exempt and always render) — so each plan scales the same rich archetype recipe
+// to its appropriate density (Lite ~5-6 working, Cut ~8-10, Bulk ~10, AGRO ~12-15).
+// When a plan's cap is below a recipe's working count, the generator trims
+// ACCESSORY slots first, never mains/core/skill/warmup/cooldown.
 export const VOLUME_CAPS = {
-  lite:        { maxSessionsPerWeek: 6, maxExercisesPerSession: 10, maxWeeklySets: 30, deloadEveryWeeks: 9, advanceCleanSessions: 5 },
+  lite:        { maxSessionsPerWeek: 6, maxExercisesPerSession: 8,  maxWeeklySets: 30, deloadEveryWeeks: 9, advanceCleanSessions: 5 },
   cut:         { maxSessionsPerWeek: 6, maxExercisesPerSession: 10, maxWeeklySets: 50, deloadEveryWeeks: 7, advanceCleanSessions: 3 },
   bulk:        { maxSessionsPerWeek: 5, maxExercisesPerSession: 12, maxWeeklySets: 70, deloadEveryWeeks: 7, advanceCleanSessions: 3 },
-  maintenance: { maxSessionsPerWeek: 6, maxExercisesPerSession: 8,  maxWeeklySets: 40, deloadEveryWeeks: 9, advanceCleanSessions: 3 },
-  agro:        { maxSessionsPerWeek: 7, maxExercisesPerSession: 12, maxWeeklySets: 80, deloadEveryWeeks: 6, advanceCleanSessions: 3 }
+  maintenance: { maxSessionsPerWeek: 6, maxExercisesPerSession: 9,  maxWeeklySets: 40, deloadEveryWeeks: 9, advanceCleanSessions: 3 },
+  agro:        { maxSessionsPerWeek: 7, maxExercisesPerSession: 16, maxWeeklySets: 80, deloadEveryWeeks: 6, advanceCleanSessions: 3 }
 };
 
 // ─── SELF-TEST (dormant; run manually, see header of this comment block) ──────

@@ -4,6 +4,39 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 8.7.0 — 2026-06-07
+
+**Scope:** Minor (Workout Engine BETA rebuild). Session-generation rewrite + rich archetype recipes + plan-scaled density. No schema change. No data mutation. Engine remains opt-in, default OFF.
+**Banner:** shown — see APP_VERSION_MSG (engine now builds complete 8-15 exercise sessions; goals add emphasis without dropping body parts).
+**CACHE_NAME:** v40 → v41. Schema unchanged at v7.
+
+### Why
+
+Owner tried the engine's All-Round goal and got ~3 exercises/day vs the hand-built AGRO's real 13-15 (morning + evening). A five-agent reverse-engineering of all 5 plans confirmed the engine was building only the "compound spine" — no warm-up, no accessory volume, no cool-down, too few mains — and that selecting a goal *filtered* the session down and dropped body parts. Both are now fixed.
+
+### What changed
+
+**Full 7-block session anatomy (`plans/session-templates.js` ARCHETYPE_SLOTS rewrite)**
+- Every archetype now declares the complete recipe: WARM-UP → MAIN(compounds) → ACCESSORY → SKILL → CORE → CONDITIONING → COOL-DOWN, sized to the real plans (e.g. resistance-upper ≈ 9 working + warm-up/cool-down; push-pull ≈ 10; chair ≈ 5-6 gentle).
+- VOLUME_CAPS `maxExercisesPerSession` now caps WORKING exercises only (warm-up/cool-down exempt) so one rich recipe scales per plan: Lite ~5-6, Cut ~8-10, Bulk ~10, AGRO ~12-15. Accessories trim first; mains/core/skill/warm-up/cool-down never trim.
+
+**Generator rebuild (`modules/workout-engine.js`)**
+- New slot resolvers: `warmup`/`cooldown` (by `warmup-`/`cooldown-` id-prefix), `recovery-main` (yoga/pilates/tai-chi/animal-flow), `conditioning`, richer `accessory:<region>` (incl. balance/wrist/pull/calves/hamstrings), `core` (chair_core on Lite), `skill`, and `main:<group>` (a `push×2` slot now yields two different push variants like the real plans).
+- The model is INVERTED: build a FULL base session first, then a purely-additive goal pass (`addEmphasis`) layers focus volume on top — a goal can no longer remove a base movement (the structural fix for "dropped body parts").
+- `strength` rep-bias bug fixed (it was silently dropped); removed the per-session push:pull trim that ate mains — now enforced WEEKLY (`enforceWeeklyPushPull`), trimming only push accessories, never mains.
+- `balanceWeek` (All-Round) retained as a coverage guarantee.
+
+**Renderer (`components/engine-session.js`)**
+- Renders block headers (WARM-UP / MAIN / ACCESSORY / SKILL / CORE / COOL-DOWN) so engine output reads like the hand-built plans.
+
+### Validation
+- Executed all 40 plan×goal combinations: every training day is full with a warm-up + cool-down, every goal stays ≥ the balanced full session, and weekly push:pull ≤ 1:1 across all of them. AGRO renders ~13-15 exercise days; Lite stays gentle (5-6 working). Render path verified (block-structured HTML, graceful ineligible path).
+
+### Files touched
+`plans/session-templates.js`, `modules/workout-engine.js`, `components/engine-session.js`, `app.html` (APP_VERSION + banner), `sw.js` (CACHE v41), `index.html` (surfaces + changelog), `CLAUDE.md`, `README.md`, `UPDATE_LOG.md`, `docs/*`.
+
+---
+
 ## Version 8.6.0 — 2026-06-06
 
 **Scope:** Minor (Workout Engine BETA enhancement). New goal preset + a week-level balancing algorithm + plan-aware preset gating + Settings reorder. No schema change. No data mutation. Engine remains opt-in, default OFF.

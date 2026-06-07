@@ -340,6 +340,15 @@ Each phase is a minor release with smoke + tag + log per CLAUDE.md §11. Final p
 > is leg/pull-heavy with ~0 direct arm and starved chest/shoulder volume — a separate,
 > optional static-plan rebalance the owner can request.
 
+> **v8.7.0 (2026-06-07):** Rebuilt session generation around the full 7-block anatomy
+> (warm-up → mains → accessory → skill → core → conditioning → cool-down). ARCHETYPE_SLOTS
+> now carry complete recipes; VOLUME_CAPS cap WORKING exercises only (warm-up/cool-down
+> exempt) so density scales per plan (Lite ~5-6, Cut ~8-10, Bulk ~10, AGRO ~12-15). Goals
+> are a purely-additive emphasis pass (addEmphasis) on top of a full session — structurally
+> unable to drop body parts. Fixed: strength rep-bias was dropped; per-session push:pull
+> trim ate mains (now weekly-only, trims push accessories only). Renderer shows block headers.
+> Verified across all 40 plan×goal combos. Engine still opt-in / OFF by default.
+
 ### Phase 1 — `v8.5.0` — Exercise Database Conversion
 
 **Scope:** Convert `WORKOUTS_LIBRARY.md` + `EXERCISE_PROGRESSIONS` + `workoutContent()` prescriptions into the single canonical `plans/exercise-db.js` module. **No UI changes, no engine logic, no behaviour change.**
