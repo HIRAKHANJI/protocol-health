@@ -13,6 +13,9 @@ export const cut = {
   fastDaysDow: [],
   lightDaysPerWeek: 0,
   lightDaysDow: [],
+  // Auto-derived-from-workout items: m2 = training session, e1 = post-training stretch.
+  // m3 (breakfast) and e2 (15-min walk) are normal manual ticks — NOT workout-driven.
+  autoWorkoutItems: { m2:'morning', e1:'evening' },
   macroSplit: { base:[40,35,25], rest:[45,30,25], preFast:[40,35,25], stall:[45,30,25], satiety:[45,30,25] },
   proteinFloorMultiplier: 1.6,
   // Phase 3 (v7.2.2): plan-direction-aware calorie safety bounds.

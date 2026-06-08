@@ -364,7 +364,7 @@ export function openDayModal(dateStr, dt) {
       <span>🤒 Mark this day as sick / disrupted</span>
     </label>
     <div class="field-group"><label class="field-label">Notes</label>
-    <textarea class="field-input" id="mNotes" placeholder="How did today go?">${log.notes||''}</textarea></div>
+    <textarea class="field-input" id="mNotes" placeholder="How did today go?">${esc(log.notes||'')}</textarea></div>
     <button class="save-btn" onclick="saveDayLog('${dateStr}')">SAVE DAY</button>`;
   }
 

@@ -9,17 +9,17 @@ if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.s
   window.location.replace('app.html');
 }
 </script>
-<title>Protocol Health · v8.8.0 — workout engine, morning + evening split, free</title>
+<title>Protocol Health · v8.8.1 — stability + safety fixes, free</title>
 <meta name="description" content="Free fitness protocol PWA. Installs like a native app. Five training plans. Zero equipment. Zero accounts. Your data stays on your device.">
 <meta name="theme-color" content="#0a0a0a">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="apple-touch-icon" href="PH_LOGO_192.png">
-<link rel="stylesheet" href="assets/landing.css?v=8.8.0">
-<link rel="stylesheet" href="assets/landing-sections.css?v=8.8.0">
-<link rel="stylesheet" href="assets/landing-demos.css?v=8.8.0">
-<link rel="stylesheet" href="assets/landing-v5.css?v=8.8.0">
-<link rel="stylesheet" href="assets/install-guide.css?v=8.8.0">
+<link rel="stylesheet" href="assets/landing.css?v=8.8.1">
+<link rel="stylesheet" href="assets/landing-sections.css?v=8.8.1">
+<link rel="stylesheet" href="assets/landing-demos.css?v=8.8.1">
+<link rel="stylesheet" href="assets/landing-v5.css?v=8.8.1">
+<link rel="stylesheet" href="assets/install-guide.css?v=8.8.1">
 </head>
 <body>
 
@@ -31,7 +31,7 @@ if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.s
   <a href="#" class="nav-logo">
     <img src="PH_ARROWS_LOGO.png" alt="">
     <div class="brand">PROTOCOL <span>HEALTH</span></div>
-    <div class="ver">v8.8.0</div>
+    <div class="ver">v8.8.1</div>
   </a>
   <div class="nav-links">
     <a href="#anywhere">ANYWHERE</a>
@@ -49,7 +49,7 @@ if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.s
   <div class="hero-copy">
     <div class="hero-badge">
       <span class="dot"></span>
-      v8.8.0 · FREE · OFFLINE · NO ACCOUNT
+      v8.8.1 · FREE · OFFLINE · NO ACCOUNT
     </div>
     <h1>
       <span class="outlined">YOUR</span> <span class="accent">PROTOCOL.</span><br>
@@ -567,8 +567,27 @@ if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.s
       <div class="cl-dot current"></div>
       <div class="cl-body">
         <div class="cl-head">
-          <div class="cl-ver">v8.8.0</div>
+          <div class="cl-ver">v8.8.1</div>
           <div class="cl-date">CURRENT · JUN 2026</div>
+          <div class="cl-tag">PATCH · FIXES</div>
+        </div>
+        <h4>Stability + safety fixes</h4>
+        <ul>
+          <li>Hardened the day-notes, weight history, and backup-history displays against malformed input (defence-in-depth escaping)</li>
+          <li>Goal-bar percentage now reads 100% correctly when the target weight is already met</li>
+          <li>Light-day calorie estimates follow each plan's own copy instead of a flat 60% (bulk = TDEE, lite/maintenance ≈ −300-500 cal)</li>
+          <li>Day-count and weight-projection math is now daylight-saving-proof (round, not floor)</li>
+          <li>Under-the-hood only — your data and daily workflow are unchanged</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="cl-entry reveal">
+      <div class="cl-dot"></div>
+      <div class="cl-body">
+        <div class="cl-head">
+          <div class="cl-ver">v8.8.0</div>
+          <div class="cl-date">JUN 2026</div>
           <div class="cl-tag">MINOR · BETA</div>
         </div>
         <h4>Workout Engine — AGRO morning + evening split</h4>
@@ -1043,7 +1062,7 @@ if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.s
     </a>
     <a href="#" class="btn-ghost" onclick="openInstall(); return false;">INSTALL GUIDE</a>
   </div>
-  <div class="note">v8.8.0 · Installable PWA · Offline ready</div>
+  <div class="note">v8.8.1 · Installable PWA · Offline ready</div>
 </section>
 
 <!-- FOOTER -->
@@ -1056,7 +1075,7 @@ if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.s
       </div>
       <p>Installable PWA. On your device. No cloud.</p>
       <div class="footer-stats">
-        <div><span class="v">v8.8.0</span><span class="l">CURRENT</span></div>
+        <div><span class="v">v8.8.1</span><span class="l">CURRENT</span></div>
         <div><span class="v">100+</span><span class="l">SHIPPED</span></div>
         <div><span class="v">0</span><span class="l">APIS</span></div>
       </div>
@@ -1087,7 +1106,7 @@ if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.s
   </div>
 
   <div class="footer-bottom">
-    <div>© 2026 PROTOCOL HEALTH · v8.8.0 · ALL RIGHTS RESERVED</div>
+    <div>© 2026 PROTOCOL HEALTH · v8.8.1 · ALL RIGHTS RESERVED</div>
     <div class="fb-tags">
       <span>NO ACCOUNTS</span>
       <span>NO CLOUD</span>
@@ -1355,8 +1374,8 @@ if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.s
 
 <!-- Scripts -->
 <script src="assets/landing.js"></script>
-<script src="assets/landing-v5.js?v=8.8.0"></script>
-<script src="assets/install-guide.js?v=8.8.0"></script>
+<script src="assets/landing-v5.js?v=8.8.1"></script>
+<script src="assets/install-guide.js?v=8.8.1"></script>
 
 </body>
 </html>

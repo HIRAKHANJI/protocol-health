@@ -1861,18 +1861,28 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '8.8.0';
-const APP_VERSION_MSG = 'Workout Engine (BETA): the AGRO plan now generates a separate MORNING card (activation, ~20 min) and a heavier EVENING card (main session, ~40-45 min) for each training day — exactly like the hand-built AGRO plan, at matching or greater density (a Monday is now a ~7-exercise morning + a ~14-exercise evening). Other plans stay single-session. Still opt-in and OFF by default — your normal workouts and data are unchanged until you turn it on.';
+const APP_VERSION = '8.8.1';
+const APP_VERSION_MSG = 'Stability + safety fixes: hardened the day-notes, weight history, and backup-history displays against malformed input; corrected the goal-bar percentage when the target is already met; light-day calorie estimates now follow each plan\'s own copy instead of a flat 60%; and the day-count / projection math is now daylight-saving-proof. Nothing about your data or workflow changes — these are under-the-hood correctness fixes.';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
 
 // Static lookup arrays used throughout rendering
 const MONTHS_LIST = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const DAYS_SHORT = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
-const AUTO_WORKOUT_IDS = ['m2','m3','e1','e2','e3']; // Checklist items auto-derived from workout tab
-
-// Map each auto-workout item to a session type. Items tick when their session's exercises are ≥80% done.
-const WORKOUT_ITEM_SESSION = { m2:'morning', m3:'morning', e1:'evening', e2:'evening', e3:'evening' };
+// AUTO_WORKOUT_IDS / WORKOUT_ITEM_SESSION are PLAN-AWARE (v8.8.1 fix). Each plan declares
+// its own `autoWorkoutItems` map { checklistId: 'morning'|'evening' } for the items whose tick
+// state is auto-derived from WORKOUTS-tab completion. Only AGRO (bimodal) maps all five; the
+// other plans map only their real training + post-training-stretch items, so breakfast (m3)
+// and the daily walk (e2) are normal manual ticks instead of being wrongly driven by workout
+// completion. Exposed as LIVE getters on window so classic code and ES modules (bare-name →
+// globalThis) always read the active plan's set. Falls back to {} (no auto items) if the
+// active plan is momentarily unavailable during init.
+function _activeAutoWorkoutMap() {
+  try { const m = getActivePlan().autoWorkoutItems; return (m && typeof m === 'object') ? m : {}; }
+  catch (e) { return {}; }
+}
+Object.defineProperty(window, 'WORKOUT_ITEM_SESSION', { configurable: true, get: _activeAutoWorkoutMap });
+Object.defineProperty(window, 'AUTO_WORKOUT_IDS',     { configurable: true, get: () => Object.keys(_activeAutoWorkoutMap()) });
 
 // ─── GLOBAL EXPOSURE FOR ES MODULES (added v5.4.0) ───────────────────────────
 // The modules in /modules/ reference these constants by bare name (SK, MONTHS_LIST, etc.).
@@ -1880,7 +1890,7 @@ const WORKOUT_ITEM_SESSION = { m2:'morning', m3:'morning', e1:'evening', e2:'eve
 // them explicitly here. Function declarations (defined later) ARE on window by default.
 // This is done before modules evaluate so bare identifier lookup in modules resolves via
 // the global object (globalThis fallback).
-Object.assign(window, { SK, MONTHS_LIST, DAYS_SHORT, AUTO_WORKOUT_IDS, WORKOUT_ITEM_SESSION });
+Object.assign(window, { SK, MONTHS_LIST, DAYS_SHORT }); // AUTO_WORKOUT_IDS/WORKOUT_ITEM_SESSION are live getters defined above
 
 // Classify a workout card's session type from its title text
 function classifyWorkoutCard(card) {
@@ -2097,8 +2107,11 @@ function computeMacros(dateStr) {
       warnings:['Water fast day — no macros to track'], signal:'fast', isFastDay:true, isFeasible:true };
   }
 
-  // Light days use ~60% of TDEE as calorie ceiling
-  const cal = lightDay ? Math.round((s.tdee || 2600) * 0.6) : (s.calories || 1500);
+  // Light-day ceiling is plan-aware: each plan declares lightDayCalorieFactor (× TDEE)
+  // to match its own light-day guidance (bulk ≈ TDEE, maintenance ≈ slightly below).
+  // Falls back to 0.6 only if a plan doesn't specify one.
+  const _ldf = (typeof plan.lightDayCalorieFactor === 'number') ? plan.lightDayCalorieFactor : 0.6;
+  const cal = lightDay ? Math.round((s.tdee || 2600) * _ldf) : (s.calories || 1500);
 
   const dow = strToDate(dateStr).getDay();
   const eveningText = (plan.eveningSub && plan.eveningSub[dow]) || '';
@@ -2414,8 +2427,8 @@ function openNotesMgr() {
       const dt = strToDate(dateStr);
       const dayName = dt.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
       const parts = [];
-      if(log.weight) parts.push(log.weight + 'kg');
-      if(log.energy) parts.push(log.energy);
+      if(log.weight) parts.push(esc(String(log.weight)) + 'kg');
+      if(log.energy) parts.push(esc(log.energy));
       return `<div class="note-mgr-item" data-date="${dateStr}" onclick="toggleNoteSelection(this,'${dateStr}')">
         <div class="note-mgr-cb" id="ncb-${dateStr}">✓</div>
         <div style="flex:1;min-width:0">
@@ -3319,7 +3332,11 @@ function updateGoalBar(current) {
   const isBulk = target > start;
   const totalChange = isBulk ? (target - start) : (start - target);
   const progress = isBulk ? (current - start) : (start - current);
-  const pct = totalChange > 0 ? Math.min(100, Math.max(0, Math.round((progress / totalChange) * 100))) : 0;
+  // When start == target (single weigh-in already at goal, or distance is zero), show 100%
+  // if current is at target, else 0% — instead of the old always-0 fallback.
+  const pct = totalChange > 0
+    ? Math.min(100, Math.max(0, Math.round((progress / totalChange) * 100)))
+    : (Math.abs(current - target) < 0.05 ? 100 : 0);
   const remain = isBulk ? Math.max(0, (target - current)).toFixed(1) : Math.max(0, (current - target)).toFixed(1);
   document.getElementById('currentWeightDisplay').textContent = current;
   document.getElementById('gs-current').textContent = current;
@@ -3339,7 +3356,7 @@ function updateDurationBar() {
   }
   const start = strToDate(sched.startDate);
   const now = new Date(); now.setHours(0,0,0,0);
-  const elapsed = Math.max(0, Math.floor((now - start)/86400000));
+  const elapsed = Math.max(0, Math.round((now - start)/86400000)); // round: a DST 23h/25h day must count as 1
   const dayNum = Math.min(elapsed + 1, sched.totalDays); // cap at total — don't show DAY N+1/N
   const pct = sched.totalDays > 0 ? Math.min(100, Math.round((elapsed/sched.totalDays)*100)) : 0;
   document.getElementById('durationStrip').classList.add('visible');
@@ -3480,7 +3497,7 @@ function updateProjection() {
   // Blend observed rate with formula rate
   // v7.1.0: implausible observed rate (>2 kg/wk) drops weight to 0.1 — formula dominates
   const observedRate = rawDailyLoss;
-  const observedWeight = rawIsImplausible ? 0.1 : Math.min(0.75, recent.length / 10);
+  const observedWeight = rawIsImplausible ? 0.1 : Math.min(0.75, rateWindow.length / 10); // confidence from the TRIMMED window the rate actually uses
   const blendedRate = (observedRate * observedWeight) + (formulaRate * (1 - observedWeight));
   const adjustedRate = blendedRate * complianceScore;
 
@@ -3510,7 +3527,7 @@ function updateProjection() {
   document.getElementById('projHigh').textContent = highCase + 'kg';
 
   const basisParts = [];
-  basisParts.push(`Based on ${recent.length} day${recent.length>1?'s':''} of data`);
+  basisParts.push(`Based on ${rateWindow.length} day${rateWindow.length>1?'s':''} of data`);
   basisParts.push(`${observedRate>0?'-':'+'} ${Math.abs(observedRate).toFixed(2)}kg/day observed`);
   if(fastDaysAhead > 0) basisParts.push(`${fastDaysAhead} fast day${fastDaysAhead!==1?'s':''} ahead`);
   if(lightDaysAhead > 0) basisParts.push(`${lightDaysAhead} light day${lightDaysAhead!==1?'s':''} ahead`);
@@ -3799,7 +3816,7 @@ function renderWeights() {
     const prev=weights[i+1];
     let delta='—',cls='delta-same';
     if(prev){const d=e.weight-prev.weight;delta=(d>0?'+':'')+d.toFixed(1)+'kg';cls=d<0?'delta-down':d>0?'delta-up':'delta-same';}
-    return `<div class="weight-entry"><div class="we-date">${e.date}</div><div class="we-weight">${e.weight} kg</div><div class="we-delta ${cls}">${delta}</div></div>`;
+    return `<div class="weight-entry"><div class="we-date">${esc(String(e.date))}</div><div class="we-weight">${esc(String(e.weight))} kg</div><div class="we-delta ${cls}">${delta}</div></div>`;
   }).join('');
   if(weights.length) updateGoalBar(weights[0].weight);
 }
@@ -3869,7 +3886,7 @@ function renderRecentNotes() {
     const parts = [];
     if(log.weight) parts.push(`<span style="color:var(--accent2)">${log.weight}kg</span>`);
     if(log.water) parts.push(`<span style="color:#70c8ff">${log.water}L water</span>`);
-    if(log.energy) parts.push(`<span style="color:var(--muted)">${log.energy}</span>`);
+    if(log.energy) parts.push(`<span style="color:var(--muted)">${esc(log.energy)}</span>`);
     const checks = Object.values(log.checks||{});
     if(checks.length) parts.push(`<span style="color:var(--green)">${checks.filter(Boolean).length}/${checks.length} done</span>`);
     return `<div class="weight-entry" style="flex-direction:column;align-items:flex-start;gap:5px">
@@ -5419,7 +5436,7 @@ function openManageSchedule() {
   // Current status text
   const startW  = sched.startWeight || s.currentKg || 0;
   const curW    = getLatestWeight() || startW;
-  const elapsed = Math.max(0, Math.floor((new Date().getTime() - strToDate(sched.startDate).getTime()) / 86400000));
+  const elapsed = Math.max(0, Math.round((new Date().getTime() - strToDate(sched.startDate).getTime()) / 86400000)); // round: DST-safe day count
   const isBulkSched = (s.targetKg||91) > startW;
   const changed = isBulkSched ? parseFloat((curW - startW).toFixed(1)) : parseFloat((startW - curW).toFixed(1));
   const rate    = elapsed > 0 ? parseFloat((changed / elapsed * 7).toFixed(2)) : 0;
@@ -5501,7 +5518,7 @@ function calcAdjust() {
   const curW = (_adjTrim && _adjTrim.rateLatest && _adjTrim.rateLatest.weight)
     ? _adjTrim.rateLatest.weight
     : (getLatestWeight() || startW);
-  const elapsed = Math.max(1, Math.floor((new Date().getTime() - strToDate(sched.startDate).getTime()) / 86400000));
+  const elapsed = Math.max(1, Math.round((new Date().getTime() - strToDate(sched.startDate).getTime()) / 86400000)); // round: DST-safe day count for rate
   const isBulkAdj = newTarget > startW;
 
   // v7.1.0: trajectory-aware TDEE. As the user moves from current weight to
@@ -5806,7 +5823,7 @@ function updateEditStartDatePreview() {
     : sched.startDate;
   const cur = strToDate(newDate);
   const end = strToDate(lastDay);
-  const daysCount = Math.floor((end.getTime() - cur.getTime()) / 86400000) + 1;
+  const daysCount = Math.round((end.getTime() - cur.getTime()) / 86400000) + 1; // round: match the DST-safe write loop
 
   out.innerHTML =
     `Start date: <b>${sched.startDate}</b> → <b style="color:var(--accent)">${newDate}</b><br>` +
@@ -5860,7 +5877,7 @@ function applyEditStartDate() {
     showAlert('New start date is after the schedule end. Cannot apply.');
     return;
   }
-  const previewDaysCount = Math.floor((_end.getTime() - _cur.getTime()) / 86400000) + 1;
+  const previewDaysCount = Math.round((_end.getTime() - _cur.getTime()) / 86400000) + 1; // round: match the DST-safe write loop
 
   const confirmMsg =
     `Start date: ${sched.startDate} → ${newStart}\n` +
@@ -6053,7 +6070,7 @@ function renderBackupHistory() {
   }
   el.style.display = 'block';
   el.innerHTML = '<div class="backup-history-header">RECENT BACKUPS</div>'
-    + arr.map(e => `<div class="backup-history-row"><span class="bh-when">${_fmtRelativeTime(e.ts)}</span><span class="bh-name">${e.filename || 'protocol-health-backup.json'}</span></div>`).join('');
+    + arr.map(e => `<div class="backup-history-row"><span class="bh-when">${_fmtRelativeTime(e.ts)}</span><span class="bh-name">${esc(e.filename || 'protocol-health-backup.json')}</span></div>`).join('');
 }
 
 // exportMigrationLog: downloads the current ph_sch_v1 schema record as JSON.
@@ -6086,7 +6103,10 @@ const _SK_EXPECTED_TYPE = {
   foodLog: 'object', foodLib: 'array', exLevels: 'object',
   lightDays: 'object', fastDayUnsets: 'object', lightDayUnsets: 'object',
   swDismissedVer: 'string', backupTs: 'string', backupHistory: 'array',
-  schemaVersion: 'object'
+  schemaVersion: 'object',
+  // v8.8.1 fix: the v8.5.0 engine keys were missing here, so they skipped restore
+  // type-validation. Added so a tampered backup can't write the wrong shape.
+  exerciseCompletion: 'object', exerciseLevelLocks: 'object', progressionEvents: 'array'
 };
 function _isExpectedType(val, expected) {
   if (val === null || val === undefined) return true; // null is allowed (missing key)
@@ -6110,7 +6130,17 @@ function _commitBackupRestore(backup, keys, exported) {
       rejectedKeys.push(key + ' (expected ' + expected + ', got ' + (Array.isArray(val) ? 'array' : typeof val) + ')');
       return;
     }
-    ss(storageKey, val);
+    // v8.8.1 deep-sanitise the two keys whose inner shapes reach HTML/onclick sinks, so a
+    // tampered backup can't inject via a non-date dayLogs key or a non-numeric weight entry.
+    let safeVal = val;
+    if (key === 'dayLogs' && val && typeof val === 'object') {
+      safeVal = {};
+      for (const dk in val) if (/^\d{4}-\d{2}-\d{2}$/.test(dk)) safeVal[dk] = val[dk];
+    } else if (key === 'weights' && Array.isArray(val)) {
+      safeVal = val.filter(e => e && typeof e === 'object'
+        && !isNaN(parseFloat(e.weight)) && /^\d{4}-\d{2}-\d{2}$/.test(String(e.date || '')));
+    }
+    ss(storageKey, safeVal);
   });
   // Full UI refresh via dispatcher
   const s = getSettings();
@@ -6311,6 +6341,10 @@ async function runInit() {
       console.error('[migrations] Halting init:', result);
       return;
     }
+    // v8.8.1: if a migration actually transformed data, reconcile the IndexedDB mirror
+    // immediately rather than waiting for the deferred 2s sync — so a crash right after a
+    // migration can't later restore the pre-migration shape under a 'migrated' schema record.
+    if (result.ran > 0 && typeof idbSyncAll === 'function') { try { await idbSyncAll(); } catch (e) {} }
   }
 
   const s = getSettings();

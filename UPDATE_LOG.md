@@ -4,6 +4,47 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 8.8.1 — 2026-06-08
+
+**Scope:** Patch (audit fixes). Stability + safety hardening surfaced by a read-only full-repo audit (bugs, stored-data integrity, input→process→handoff correctness, dispatcher, all 5 non-engine plans). No schema change. No data mutation. Workout Engine untouched (remains opt-in, default OFF).
+**Banner:** silent (patch) — under-the-hood correctness fixes; data and workflow unchanged.
+**CACHE_NAME:** v42 → v43. Schema unchanged at v7.
+
+### Why
+
+A focused audit (everything except the BETA workout engine) flagged a small set of real correctness and defence-in-depth issues across the live app: a self-reachable stored-XSS surface in the day-notes textarea, several unescaped user-data displays, a goal-bar division edge case, a flat-60% light-day calorie assumption that didn't match every plan's actual copy, daylight-saving off-by-one in day-count/projection math, and a couple of restore/backup robustness gaps. None caused data loss, but each was worth fixing cleanly before more features land.
+
+### What changed
+
+**XSS / display hardening (defence-in-depth `esc()` / `_esc()`)**
+- `modules/calendar.js` — day-modal notes textarea now escapes `log.notes` (the one self-reachable stored-XSS path).
+- `app.html` — Manage-Notes energy/weight, weight-history rows, Recent-Notes energy, and backup-history filename now escaped.
+- `modules/export.js` — energy/weight fields in the markdown export escaped.
+
+**Calculation correctness**
+- Goal bar (`app.html`) — percentage now reads 100% when the target is already met (guards the `totalChange === 0` divide).
+- Projection basis — uses the actual rate window length instead of the raw recent-entries length.
+- `computeMacros` light-day calories — now use each plan's `lightDayCalorieFactor` (bulk = 1.0/TDEE, lite + maintenance ≈ 0.85, default 0.6) instead of a hardcoded 60%.
+
+**Daylight-saving safety (`Math.floor` → `Math.round` on day spans)**
+- Duration-bar DAY X, manage-schedule day count, calcAdjust rate, and EDIT START DATE preview math are now DST-proof.
+
+**Plan-aware auto-workout mapping**
+- `AUTO_WORKOUT_IDS` / `WORKOUT_ITEM_SESSION` are now live getters driven by each plan's `autoWorkoutItems` map (agro: m2/m3 morning + e1/e2/e3 evening; lite/cut/bulk/maintenance: m2 morning + e1 evening) instead of an AGRO-only hardcoded constant.
+
+**Restore / migration robustness (`app.html`)**
+- `_SK_EXPECTED_TYPE` now covers the v8.5.0 engine keys (`exerciseCompletion`, `exerciseLevelLocks`, `progressionEvents`).
+- `_commitBackupRestore` sanitizes `dayLogs` date keys and filters malformed weight-log entries before writing.
+- `runInit` reconciles IndexedDB after any migration that ran.
+
+### Deferred
+- H3 — legacy fast-session UTC→local date migration. Intentionally deferred to its own data-migration pass (requires `requiresBackup` + dedicated on-device verification); not bundled into this patch.
+
+### Files touched
+`app.html`, `modules/calendar.js`, `modules/export.js`, `plans/lite.js`, `plans/cut.js`, `plans/bulk.js`, `plans/maintenance.js`, `plans/agro.js`, `sw.js` (CACHE v43), `index.html` (surfaces + changelog), `CLAUDE.md`, `README.md`, `UPDATE_LOG.md`.
+
+---
+
 ## Version 8.8.0 — 2026-06-07
 
 **Scope:** Minor (Workout Engine BETA — AGRO morning/evening two-card split). No schema change. No data mutation. Engine remains opt-in, default OFF.

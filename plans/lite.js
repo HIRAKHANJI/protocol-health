@@ -13,8 +13,12 @@ export const lite = {
     fastDaysDow: [0, 3, 6], // Sun/Wed/Sat
     lightDaysPerWeek: 0,
     lightDaysDow: [],
+    // Auto-derived-from-workout items: m2 = morning movement, e1 = evening session.
+    // m3 (breakfast) and e2 (stretch) are normal manual ticks — NOT workout-driven.
+    autoWorkoutItems: { m2:'morning', e1:'evening' },
     macroSplit: { base:[30,45,25], rest:[35,40,25], preFast:[30,45,25], stall:[35,40,25], satiety:[35,40,25] },
     proteinFloorMultiplier: 1.0,
+    lightDayCalorieFactor: 0.85, // light days ≈ 300-500 cal below normal (plan copy), not 60%
     // Phase 3 (v7.2.2): plan-direction-aware calorie safety bounds.
     // 'floor' mode → warn if calorie ceiling drops below minCalories.
     // 1200 cal is the general safe minimum for sustained eating without

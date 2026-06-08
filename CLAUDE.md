@@ -233,10 +233,10 @@ Nothing else changes. `getActivePlan()` reads `settings.plan`, looks up `PLANS[s
 
 | File | Purpose |
 |------|---------|
-| `app.html` | App bootstrap — HTML, CSS, and the inline orchestration script (runInit + helpers that stay in classic scope). ~6,512 lines as of v8.8.0 (grew from 4,637 post-v6.0.0-refactor through Phases A–D / calibration + multi-day fasts + v8.1.0 audit fixes + v8.2.0 auto-derivation completeness fix + v8.3.0 EDIT START DATE recovery control). Plans, large function groups, shared components, and migrations load as ES modules — see Section 23. Zero build process, zero bundler, zero framework. |
+| `app.html` | App bootstrap — HTML, CSS, and the inline orchestration script (runInit + helpers that stay in classic scope). ~6,692 lines as of v8.8.1 (grew from 4,637 post-v6.0.0-refactor through Phases A–D / calibration + multi-day fasts + v8.1.0 audit fixes + v8.2.0 auto-derivation completeness fix + v8.3.0 EDIT START DATE recovery control). Plans, large function groups, shared components, and migrations load as ES modules — see Section 23. Zero build process, zero bundler, zero framework. |
 | `index.html` | Landing/product page. Links to `app.html`. |
 | `manifest.json` | PWA manifest. App name, icons, display mode (standalone = fullscreen), theme color. |
-| `sw.js` | Service Worker. Caches all app files after first load for offline use. Cache-first strategy. Current cache name: `protocol-health-v42`. Bump version on major deploys. |
+| `sw.js` | Service Worker. Caches all app files after first load for offline use. Cache-first strategy. Current cache name: `protocol-health-v43`. Bump version on major deploys. |
 | `PH_LOGO_192.png` | Home screen icon at 192×192px. |
 | `PH_LOGO_512.png` | Splash screen icon at 512×512px. |
 
@@ -326,11 +326,17 @@ Total deficit needed = (currentKg - targetKg) × 7700 cal
 
 Weekly deficit = eating days × (TDEE - calories)
                + fast days × TDEE
-               + exercise burn × 7
 
-If fast days + exercise already covers the required deficit:
+If fast days already cover the required deficit:
   → calcCals = TDEE (eating days at maintenance, no restriction needed)
 ```
+
+> **Note (v8.8.1):** the calculator models the deficit from eating-day restriction +
+> fast-day burn only. There is **no separate exercise-burn input** — exercise is treated
+> as already baked into the user's TDEE (activity multiplier), not added on top. The earlier
+> doc listed an `+ exercise burn × 7` term that the code never implemented; it was removed
+> here to keep the spec honest. If a dedicated exercise-burn input is ever added, re-introduce
+> the term in both calculator modes.
 
 ### Risk Tolerance Flags
 
@@ -460,7 +466,7 @@ Push to GitHub → GitHub Pages serves new files (~60s)
 
 The service worker caches files under `CACHE_NAME` in `sw.js`. If this name does not change, the SW may keep serving the old cached version even after new files are pushed.
 
-**Current version:** `protocol-health-v42`
+**Current version:** `protocol-health-v43`
 
 > **Rule: Bump `CACHE_NAME` on every significant update to `main`.**
 > - Only bump when merging or pushing to `main` — feature branches do not need cache version increments
@@ -471,7 +477,7 @@ The service worker caches files under `CACHE_NAME` in `sw.js`. If this name does
 
 ```javascript
 // sw.js — line 22
-const CACHE_NAME = 'protocol-health-v42'; // ← increment this on every significant push
+const CACHE_NAME = 'protocol-health-v43'; // ← increment this on every significant push
 ```
 
 ### Files That Must Be Pushed Together
@@ -556,7 +562,7 @@ The app has two independent version numbers that serve different purposes:
 | **+0.1.0** (minor) | A new feature, a meaningful UI change, or 4+ bug fixes bundled together | Yes | Added streak counter, redesigned settings panel, new checklist group |
 | **+1.0.0** (major) | New plan added, major rework of a core system, or something that changes how you use the app | Yes | New combat training plan, schedule system rewrite, new tab added |
 
-**Current version:** `8.8.0`
+**Current version:** `8.8.1`
 
 > **Self-Update Rule:** Whenever `APP_VERSION` is bumped in `app.html`, also update ALL version references in this file (`CLAUDE.md`) to match — including this line and the Quick Reference section below. Never leave stale version numbers in project documentation.
 
@@ -573,7 +579,7 @@ The app has two independent version numbers that serve different purposes:
 When making changes, update these two lines near the top of the script in `app.html`:
 
 ```javascript
-const APP_VERSION = '8.8.0';                         // ← bump according to rules above
+const APP_VERSION = '8.8.1';                         // ← bump according to rules above
 const APP_VERSION_MSG = 'Description of changes.';    // ← short description of what changed
 ```
 
@@ -609,7 +615,7 @@ const APP_VERSION_MSG = 'Description of changes.';    // ← short description o
 
 ```bash
 # Replace OLD with the previous version, NEW with the new version
-OLD="8.8.0"; NEW="8.8.1"
+OLD="8.8.1"; NEW="8.8.2"
 grep -rn "v${OLD}\|protocol-health-v[0-9]\+" \
   app.html sw.js index.html manifest.json CLAUDE.md README.md UPDATE_LOG.md \
   | grep -v "^UPDATE_LOG.md\|^WORKING_VERSIONS.md\|cl-ver\|cl-body" | grep -v "v${NEW}"
@@ -634,7 +640,7 @@ Any output other than historical changelog references inside `.cl-ver` / `.cl-bo
 ```
 Repository:   github.com/HIRAKHANJI/protocol-health
 Live URL:     https://hirakhanji.github.io/protocol-health/
-App file:     app.html (bootstrap, ~6,512 lines as of v8.8.0; plans/modules/components load as ES modules — see Section 23)
+App file:     app.html (bootstrap, ~6,692 lines as of v8.8.1; plans/modules/components load as ES modules — see Section 23)
 Landing:      index.html (product page)
 PWA files:    manifest.json, sw.js, PH_LOGO_192.png, PH_LOGO_512.png
 
@@ -657,7 +663,7 @@ Storage keys (all in SK object at top of script):
   ph_bts_v1 — backup timestamp (drives reminder banner)
   ph_bh_v1  — backup history (Phase 11, v7.7.0 — last 5 backups)
   ph_sw_v1  — last dismissed SW cache version (for reload banner)
-  ph_sch_v1 — schema version record (migration framework, v5.1.0+; currently v7 as of v8.8.0)
+  ph_sch_v1 — schema version record (migration framework, v5.1.0+; currently v7 as of v8.8.1)
   ph_ec_v1  — exercise completion log (v8.5.0 engine BETA; { dateStr: { exId: { actualReps, formOk, ts } } })
   ph_ell_v1 — exercise level locks (v8.5.0 engine BETA; { groupId: { level, reason, ts } })
   ph_pe_v1  — progression events audit (v8.5.0 engine BETA; [{ ts, group, from, to, kind }])
@@ -677,8 +683,8 @@ Day types:    getDayType(dateStr) → 'fast' | 'light' | 'normal'
 Data writes:  always end with dispatch("EVENT_NAME")
 Dialogs:      showConfirm(), showAlert() — never native confirm/alert
 Dates:        dateToStr(d), strToDate(s), todayStr() — never toISOString()
-Cache:        sw.js CACHE_NAME = "protocol-health-v42" — bump on every significant push
-App version:  APP_VERSION = "8.8.0" — bump on notable updates (see Section 12)
+Cache:        sw.js CACHE_NAME = "protocol-health-v43" — bump on every significant push
+App version:  APP_VERSION = "8.8.1" — bump on notable updates (see Section 12)
 Update log:   UPDATE_LOG.md — every version bump must be documented here
 ```
 
@@ -906,7 +912,7 @@ As of v6.0.0 the app is a modular ES-module PWA, not a single-file app. Zero bui
 
 ```
 /
-├── app.html                  # Bootstrap: HTML + CSS + inline orchestration script (~6,512 lines as of v8.8.0)
+├── app.html                  # Bootstrap: HTML + CSS + inline orchestration script (~6,692 lines as of v8.8.1)
 ├── index.html                # Landing page (not the app entry point — that's app.html)
 ├── manifest.json             # PWA manifest
 ├── sw.js                     # Service worker (cache list covers every module file)
@@ -1145,9 +1151,9 @@ Procedure:
 
 Approximate targets. Exceeding them is a hint to split, not a failure.
 
-| File | Target | Actual (v8.8.0) | Status |
+| File | Target | Actual (v8.8.1) | Status |
 |------|--------|-----------------|--------|
-| `app.html` | ≤ 6,500 lines | ~6,512 | ⚠ marginally over soft limit; ok pending v8.4+ engine split |
+| `app.html` | ≤ 6,500 lines | ~6,692 | ⚠ marginally over soft limit; ok pending v8.4+ engine split |
 | Any `plans/*.js` | ≤ 800 lines | max 580 (agro) | ✓ |
 | Any `modules/*.js` | ≤ 1,000 lines | max 964 (calibration) | ⚠ approaching limit |
 | Any `components/*.js` | ≤ 600 lines | max 635 (fast-window) | ⚠ over soft limit |

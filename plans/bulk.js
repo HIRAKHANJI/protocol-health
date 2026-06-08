@@ -13,8 +13,12 @@ export const bulk = {
   bannerBorder: 'rgba(247,220,111,0.35)',
   fastDaysDow: [],
   lightDaysDow: [0, 3],  // Sun/Wed — rest days = light eating days for gut recovery
+  // Auto-derived-from-workout items: m2 = training session, e1 = post-training stretch.
+  // m3 (breakfast) and e2 (rest-day walk) are normal manual ticks — NOT workout-driven.
+  autoWorkoutItems: { m2:'morning', e1:'evening' },
   macroSplit: { base:[30,50,20], rest:[35,45,20], preFast:[30,50,20], stall:[35,45,20], satiety:[35,45,20] },
   proteinFloorMultiplier: 1.6, // Iraki et al. 2019 (PMC6680710): 1.6–2.2g/kg for muscle growth
+  lightDayCalorieFactor: 1.0,  // light days = maintenance/TDEE for gut recovery (plan copy: "eat at or slightly below TDEE")
   // Phase 3 (v7.2.2): plan-direction-aware calorie safety bounds.
   // 'above-tdee' mode → warn if calorie ceiling falls at or below TDEE
   // (would mean an accidental cut on a bulk plan). minCalories computed

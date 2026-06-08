@@ -13,6 +13,9 @@ export const agro = {
     fastDaysDow: [0, 3, 6], // Sun/Wed/Sat
     lightDaysPerWeek: 0,
     lightDaysDow: [],
+    // Checklist items whose tick state is auto-derived from WORKOUTS-tab completion.
+    // AGRO is bimodal so all five are workout-driven (mobility/workout/clothes/session/stretch).
+    autoWorkoutItems: { m2:'morning', m3:'morning', e1:'evening', e2:'evening', e3:'evening' },
     macroSplit: { base:[50,30,20], rest:[58,22,20], preFast:[46,34,20], stall:[56,24,20], satiety:[58,22,20] },
     proteinFloorMultiplier: 1.3,
     // Phase 3 (v7.2.2): plan-direction-aware calorie safety bounds.

@@ -377,7 +377,7 @@ export function generateExport() {
       }
       out += `| ${dateStr} | ${type} | ${score} | ${status} |`;
       if(incWater) out += ` ${log.water ? log.water+'L' : '—'} |`;
-      if(incEnergy) out += ` ${log.energy || '—'} |`;
+      if(incEnergy) out += ` ${_esc(log.energy || '—')} |`;
       out += `\n`;
     });
     out += `\n`;
@@ -606,8 +606,8 @@ export function generateExport() {
         md += `### ${dateStr}\n\n`;
         md += `> ${_esc(log.notes).replace(/\n/g, '\n> ')}\n`;
         const extras = [];
-        if(log.energy) extras.push(`Energy: ${log.energy}`);
-        if(log.weight) extras.push(`Weight: ${log.weight}kg`);
+        if(log.energy) extras.push(`Energy: ${_esc(log.energy)}`);
+        if(log.weight) extras.push(`Weight: ${_esc(String(log.weight))}kg`);
         if(extras.length) md += `> ${extras.join(' · ')}\n`;
         md += `\n`;
       });

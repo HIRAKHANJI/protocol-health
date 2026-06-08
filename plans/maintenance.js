@@ -13,8 +13,12 @@ export const maintenance = {
   bannerBorder: 'rgba(130,224,170,0.35)',
   fastDaysDow: [],
   lightDaysDow: [0],  // Sunday — weekly light eating day for digestive reset
+  // Auto-derived-from-workout items: m2 = movement session, e1 = post-session stretch.
+  // m3 (breakfast) and e2 (30-min movement) are normal manual ticks — NOT workout-driven.
+  autoWorkoutItems: { m2:'morning', e1:'evening' },
   macroSplit: { base:[30,45,25], rest:[35,40,25], preFast:[30,45,25], stall:[35,40,25], satiety:[35,40,25] },
   proteinFloorMultiplier: 1.2,
+  lightDayCalorieFactor: 0.85, // light days ≈ 300-500 cal below TDEE (plan copy), not 60%
   // Phase 3 (v7.2.2): plan-direction-aware calorie safety bounds.
   // 'tdee-band' mode → warn if calorie ceiling falls outside TDEE ± 300 cal.
   // Both bounds computed dynamically by validateCaloriesAgainstPlan.
