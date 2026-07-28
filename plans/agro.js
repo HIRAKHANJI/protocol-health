@@ -43,10 +43,10 @@ export const agro = {
     eveningSub: {
       0:'SUNDAY — Rest. Walk + full hip session. No structured workout.',
       1:'MONDAY — Evening A: Push/Pull Balance · Push-up ladder + Inverted row · Decline + Y-T-W · Archer + Scapular · Pike · Planche lean · Handstand',
-      2:'TUESDAY — Evening B: Legs + Posterior Chain · Nordic curl + Inverted row · Bulgarian · Single-leg RDL · Glute bridge march · Good morning · Side plank',
+      2:'TUESDAY — Evening B: Legs + Posterior Chain · Nordic curl + Inverted row · Bulgarian · Single-leg RDL · Glute bridge march + hold · Reverse snow angels · Good morning · Side plank',
       3:'WEDNESDAY — Midweek Run · 5 min walk → 20 min run → 5 min walk → jump squats/burpees/mountain climbers',
-      4:'THURSDAY — Evening C: Skill + Core + Pull Focus · Towel row · Scapular push-up · Crow/L-sit · Dead bug · Hollow rock · Dragon flag · Side plank',
-      5:'FRIDAY — Evening B: Legs + Posterior Chain · Nordic curl + Inverted row · Bulgarian · Single-leg RDL · Glute bridge march · Good morning · Side plank',
+      4:'THURSDAY — Evening C: Skill + Core + Pull Focus · Towel row · Scapular push-up · Prone W pull · Crow/L-sit · Pike press · Dead bug · Hollow rock · Dragon flag · Side plank',
+      5:'FRIDAY — Evening B: Legs + Posterior Chain · Nordic curl + Inverted row · Bulgarian · Single-leg RDL · Glute bridge march + hold · Reverse snow angels · Good morning · Side plank',
       6:'SATURDAY — Run + Conditioning · 5 min walk → 30 min run → circuit: push-ups/jump squats/sprawls/plank × 3 rounds'
     },
     stretchSub: {
@@ -225,7 +225,9 @@ export const agro = {
         exRowWithLevel('squat','Bulgarian split squat','Rear foot elevated \u2014 quad + glute','4\u00d710/leg')+
         exRow('Single-leg RDL (BW)','Control the descent \u2014 lower back + hamstring','3\u00d710/leg')+
         exRow('Glute bridge march','Alternate legs in bridge \u2014 stability','3\u00d715')+
+        exRowWithLevel('skill_bridge','Glute bridge hold','Hips high, shoulders grounded \u2014 posterior-chain isometric (bridge skill)','3\u00d730\u201345 sec')+
         exRowWithLevel('hinge','Good morning (BW)','Hip hinge, erector strengthening','3\u00d712')+
+        exRow('Reverse snow angels','Face down, sweep arms hips\u2192overhead. Rear delt + scapular balance.','3\u00d715')+
         exRow('Wall sit','90\u00b0 hold','2\u00d745 sec')+
         exRow('Side plank + hip dip','Lateral core \u2014 was missing from this session','3\u00d712/side')+
         exRowWithLevel('core','Hollow body hold','Lower back protection','2\u00d730 sec'),
@@ -240,9 +242,11 @@ export const agro = {
       ${workoutCard('EVENING C — SKILL + CORE + PULL FOCUS','THU \u00b7 40 MIN',
         exRowWithLevel('pull','Towel row','Loop towel around door handle. Pull chest to door.','4\u00d78\u201310')+
         exRowWithLevel('pull','Scapular push-up','Protract/retract \u2014 planche prereq','3\u00d712')+
+        exRow('Prone W pull','Face down, drive elbows back + down, rotate hands up \u2014 bodyweight face pull. Rear delt + external rotation.','3\u00d712')+
         exRowWithLevel('skill_crow','Crow/frog stand attempts','Multiple attempts \u2014 build the balance','5 min')+
         exRowWithLevel('skill_crow','Tuck hold (crow position)','Build balance','4\u00d715\u201320 sec')+
         exRowWithLevel('skill_lsit','L-sit tuck (floor)','Hands pressing, tuck knees','4\u00d715 sec')+
+        exRowWithLevel('skill_press','Elevated pike press','Feet on chair, press head to floor and back \u2014 vertical press to handstand','3\u00d76\u20138')+
         exRowWithLevel('core','Dead bug','Deep core, back pressed to floor','3\u00d710/side')+
         exRowWithLevel('core','Hollow body rock','True core tension \u2014 rock gently','3\u00d710')+
         exRow('Dragon flag negative','Bed edge \u2014 lower slowly','3\u00d73')+

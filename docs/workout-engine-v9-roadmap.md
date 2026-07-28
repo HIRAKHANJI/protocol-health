@@ -22,7 +22,19 @@ Owner asked to take the existing `WORKOUTS_LIBRARY.md` and `EXERCISE_PROGRESSION
 
 ## 2. Audit findings (from 2026-05-14 four-agent audit)
 
-### `WORKOUTS_LIBRARY.md` — 96% complete
+> **UPDATE (2026-06-06, v8.4.0):** The library has since been finalized and extended.
+> Current state: **199 documented exercises** (74 progression + 125 non-progression),
+> 7,800+ lines, **12 progression groups** (6 skill tracks). The dated gaps below have
+> been **closed**: the 7 missing exercises were added, all skill tracks carry explicit
+> progression prerequisites, and Section 2.3 provides a demographic→exercise
+> contraindication matrix. v8.4.0 additionally added a rear-deltoid training group (4
+> moves) and two new skill ladders — `skill_press` (press-to-handstand) and
+> `skill_bridge` (bridge/backbend), both prescribed by AGRO. The remaining items
+> (machine-readable schema, per-exercise quantitative enums) are intentionally deferred
+> to Phase 1 (`plans/exercise-db.js`) — they are CODE deliverables, not library-prose
+> gaps. The snapshot below is preserved as the historical baseline; do not edit it.
+
+### `WORKOUTS_LIBRARY.md` — 96% complete (snapshot 2026-05-14)
 
 - **6,916 lines, 168/175 documented exercises** across 12 modalities
 - All 10 progression groups (push, pull, shoulder, squat, hinge, core, skill_crow/handstand/lsit/planche) fully documented with per-plan prescription tables (LITE / CUT / BULK / MAINTENANCE / AGRO)
@@ -146,7 +158,7 @@ export const EXERCISE_DB = {
     citation: 'PMC 7927075 (Schoenfeld 2021 repetition continuum)',
     libraryRef: 'WORKOUTS_LIBRARY.md:#push-l0-wall-pushup'
   },
-  // ... 175 total entries
+  // ... 199 total entries
 };
 ```
 
@@ -295,16 +307,58 @@ Sources for the limits are documented in CLAUDE.md §15 lines 752–770. Engine 
 
 Each phase is a minor release with smoke + tag + log per CLAUDE.md §11. Final phase consolidates to v9.0.0.
 
-### Phase 1 — `v8.4.0` — Exercise Database Conversion
+> **VERSION SHIFT (2026-06-06):** `v8.4.0` was used for a content release — the
+> rear-deltoid training group and two new calisthenics skill ladders (press-to-handstand,
+> bridge). The engine phases below therefore each shift up by one minor (Phase 1 = v8.5.0
+> … Phase 5 = v8.9.0), still consolidating at v9.0.0. The library is now 199 exercises /
+> 12 progression groups / 74 levels — exercise-db.js (Phase 1) must cover all of them.
+> Note: `skill_planche` is *still* not prescribed by any plan, but `skill_press` and
+> `skill_bridge` are now prescribed by AGRO (Thursday + Tue/Fri evenings respectively).
+
+> **SHIPPED as v8.5.0 BETA (2026-06-06):** Phases 1–4 are effectively built and wired,
+> compressed into a single opt-in BETA release rather than five sequential ships:
+> `exercise-db.js` (199 entries) + `session-templates.js` + `engine-helpers.js` +
+> `engine-focus.js` + `workout-engine.js` + `components/engine-session.js`, plus the
+> `app.html` wiring (non-gating loader, defensive `renderWorkouts()` branch with legacy
+> fallback, Settings → WORKOUT ENGINE (BETA) controls, 3 additive SK keys). The engine is
+> **OFF by default**; legacy `workoutContent()` remains the default render path.
+> The muscle-focus / physique-goal customiser (originally a post-engine idea) shipped in
+> the same release via `engine-focus.js`. **What remains for v9.0.0 (consolidation):**
+> on-device smoke + owner sign-off, a per-exercise completion-logger UI in the day modal
+> (to feed auto-progression with real data), an APPLY button for progression suggestions,
+> and flipping the engine ON by default. Auto-progression is currently **suggest-only**
+> and surfaces nothing until completion data exists.
+
+> **v8.6.0 (2026-06-06):** Added the `functional` "All-Round Strength" goal + a week-level
+> `balanceWeek` algorithm that fills under-trained movement patterns with the user's-level
+> compound progression exercise (per-day dedup) and tops up pull to hold the WEEKLY
+> push:pull ≤ 1:1 rule. This replaced a first cut whose region-blind `volumeBias` accessory
+> flooded one region (caught by a balance audit before ship). Added plan-aware preset
+> gating (`PLAN_PRESETS`/`presetsForPlan`/`isPresetAllowed` — Lite gets balanced only;
+> Cut/Bulk/AGRO the full set) and moved the Settings section to the top. NOTE: the audit
+> also flagged that the *static* AGRO plan (what the owner follows when the engine is off)
+> is leg/pull-heavy with ~0 direct arm and starved chest/shoulder volume — a separate,
+> optional static-plan rebalance the owner can request.
+
+> **v8.7.0 (2026-06-07):** Rebuilt session generation around the full 7-block anatomy
+> (warm-up → mains → accessory → skill → core → conditioning → cool-down). ARCHETYPE_SLOTS
+> now carry complete recipes; VOLUME_CAPS cap WORKING exercises only (warm-up/cool-down
+> exempt) so density scales per plan (Lite ~5-6, Cut ~8-10, Bulk ~10, AGRO ~12-15). Goals
+> are a purely-additive emphasis pass (addEmphasis) on top of a full session — structurally
+> unable to drop body parts. Fixed: strength rep-bias was dropped; per-session push:pull
+> trim ate mains (now weekly-only, trims push accessories only). Renderer shows block headers.
+> Verified across all 40 plan×goal combos. Engine still opt-in / OFF by default.
+
+### Phase 1 — `v8.5.0` — Exercise Database Conversion
 
 **Scope:** Convert `WORKOUTS_LIBRARY.md` + `EXERCISE_PROGRESSIONS` + `workoutContent()` prescriptions into the single canonical `plans/exercise-db.js` module. **No UI changes, no engine logic, no behaviour change.**
 
-- Create `plans/exercise-db.js` with full schema for all ~175 exercises
+- Create `plans/exercise-db.js` with full schema for all 199 exercises (library now finalized — the 7 previously-missing exercises were added 2026-06-06)
 - Each exercise has: id, name, aliases, progressionGroup, level, pattern, equipment, muscles, difficulty, jointImpact, plyometric flag, contraindications, per-plan prescriptions, progression unlocks, safety overrides, citation, libraryRef
-- Migrate the 7 missing exercises (isometric variants, jump rope variations, shadowboxing modules) — bring total to 175
-- Add explicit progression prerequisites to the 4 SKILL exercises currently missing them
-- Naming canonicalisation: pick one spelling per exercise, store aliases for matching
-- Add the central contraindication matrix
+- ~~Migrate the 7 missing exercises~~ — DONE (library at 199, exceeds old 175 target)
+- ~~Add explicit progression prerequisites to the 4 SKILL exercises~~ — DONE (all 4 skill tracks carry prerequisites + paths)
+- Naming canonicalisation: pick one spelling per exercise, store aliases for matching (library already uses `(skill)` disambiguation suffixes — port these as aliases)
+- Build the machine-readable per-exercise contraindication matrix (Section 2.3's demographic matrix is the prose source)
 - Add machine-readable safety overrides per exercise
 
 **Verification:** unit-test-style assertions in a one-off script that confirms every exercise prescribed in current `workoutContent()` HTML maps cleanly to an `EXERCISE_DB` entry via name or alias.
@@ -313,7 +367,7 @@ Each phase is a minor release with smoke + tag + log per CLAUDE.md §11. Final p
 
 **Estimated effort:** 2–3 weeks of structured data entry. Most of this is mechanical conversion from the existing prose library.
 
-### Phase 2 — `v8.5.0` — Storage Layer + Completion Logger
+### Phase 2 — `v8.6.0` — Storage Layer + Completion Logger
 
 **Scope:** Add the three new SK keys + completion logger backend. UI surfaces a "log completion" toggle per exercise in the day modal but doesn't drive any progression yet.
 
@@ -329,7 +383,7 @@ Each phase is a minor release with smoke + tag + log per CLAUDE.md §11. Final p
 
 **Estimated effort:** 1 week.
 
-### Phase 3 — `v8.6.0` — Session Templates + Static Engine Generator
+### Phase 3 — `v8.7.0` — Session Templates + Static Engine Generator
 
 **Scope:** Build `plans/session-templates.js` + a static (rule-based, no auto-progression) `generateWeek()` in `modules/workout-engine.js`. Hook it into the WORKOUTS tab behind a feature flag.
 
@@ -345,7 +399,7 @@ Each phase is a minor release with smoke + tag + log per CLAUDE.md §11. Final p
 
 **Estimated effort:** 2 weeks.
 
-### Phase 4 — `v8.7.0` — Auto-Progression Suggestions
+### Phase 4 — `v8.8.0` — Auto-Progression Suggestions
 
 **Scope:** `evaluateProgressions(userState)` runs at app init, checks completion history against advancement criteria, and surfaces suggestions. Auto-apply is **off** — suggestions only, owner taps APPLY.
 
@@ -360,7 +414,7 @@ Each phase is a minor release with smoke + tag + log per CLAUDE.md §11. Final p
 
 **Estimated effort:** 1.5 weeks.
 
-### Phase 5 — `v8.8.0` — Polish + Safety Audit + Documentation
+### Phase 5 — `v8.9.0` — Polish + Safety Audit + Documentation
 
 **Scope:** Final QoL pass, comprehensive safety audit, science-citation cross-check, full WORKOUTS_LIBRARY.md update with the new schema.
 
@@ -403,7 +457,7 @@ Each phase is a minor release with smoke + tag + log per CLAUDE.md §11. Final p
 | Phase 5 — Polish + audit | v8.8.0 | 1 week | 7.5–8.5 weeks |
 | Phase 6 — Consolidation | v9.0.0 | 0.5 weeks | **~8 weeks total** |
 
-This is a substantial project. The biggest single time sink is Phase 1 — the data entry to convert 175 exercises into structured form with all the metadata each one needs. That phase has the highest scope risk because every gap discovered downstream forces a return to Phase 1 to fill it in.
+This is a substantial project. The biggest single time sink is Phase 1 — the data entry to convert 199 exercises into structured form with all the metadata each one needs. That phase has the highest scope risk because every gap discovered downstream forces a return to Phase 1 to fill it in.
 
 ---
 

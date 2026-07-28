@@ -22,6 +22,65 @@ or prescribing any workout content in `app.html`.
 
 ---
 
+## Library Status
+
+**Status: COMPLETE & FINALIZED** (audited 2026-06-06)
+
+| Metric | Value |
+|---|---|
+| Total documented exercises | **199** (74 progression + 125 non-progression) |
+| Progression groups | 12 (push, pull, shoulder, squat, hinge, core + 6 skill tracks) |
+| Progression levels | 74 — exact 1:1 match with `plans/exercise-progressions.js` |
+| Training modalities | 12 (Section 1) |
+| Demographic matrix | Complete (Section 2, 5 sub-matrices) |
+| Auto-prescription data model | Specification complete (implementation = v9 Workout Engine) |
+| Evidence citations | 100% from CLAUDE.md §15 approved sources — zero brand/influencer/video sources |
+
+**Completeness contract:** every exercise entry carries Category, Equipment, primary +
+secondary target muscles, movement type, description, common mistakes, safety notes, a
+5-row per-plan prescription table (Lite / Cut / Bulk / Maintenance / AGRO), and an
+evidence citation. Progression exercises additionally carry progression group, level,
+prerequisites, and progression path. Non-progression exercises legitimately omit the
+progression fields.
+
+**Maintenance rule:** when adding an exercise, update the count above and the relevant
+Table of Contents line. When adding a progression level, it MUST mirror
+`plans/exercise-progressions.js` exactly (names may carry a `(skill)` disambiguation
+suffix where a label collides across groups — e.g. handstand L1 vs shoulder L4).
+
+---
+
+## Table of Contents
+
+- [Section 1 — Training Modalities](#section-1--training-modalities) — 12 modalities
+- [Section 2 — Demographic Stratification Matrix](#section-2--demographic-stratification-matrix) — 2.1 eligibility · 2.2 modulators · 2.3 restrictions · 2.4 disclaimer · 2.5 engine algorithm
+- [Progression Exercises](#progression-exercises) — 74 levels across 12 groups
+  - [Push Progression](#push-progression-10-levels) — 10 levels
+  - [Pull Progression](#pull-progression-9-levels) — 9 levels
+  - [Shoulder Progression](#shoulder-progression-6-levels) — 6 levels
+  - [Squat Progression](#squat-progression-9-levels) — 9 levels
+  - [Hinge Progression](#hinge-progression-7-levels) — 7 levels
+  - [Core Progression](#core-progression-10-levels) — 10 levels
+  - [Skill Progressions](#skill-progressions) — Crow (4) · Handstand (4) · L-sit (3) · Planche (4) · Press-to-Handstand (4) · Bridge (4)
+- [Non-Progression Exercises](#non-progression-exercises) — 125 accessories / conditioning / mobility
+  - [Calisthenics / Resistance](#calisthenics--resistance) — 14
+  - [Rear Deltoid / Posterior Shoulder](#rear-deltoid--posterior-shoulder) — 4
+  - [HIIT Protocols](#hiit-protocols) — 2
+  - [Shadowboxing](#shadowboxing) — 3
+  - [Jump Rope](#jump-rope) — 4
+  - [Animal Flow / QMT](#animal-flow--qmt) — 9
+  - [Yoga Poses](#yoga-poses) — 18
+  - [Pilates Exercises](#pilates-exercises) — 13
+  - [Tai Chi — Yang Style 8-Form](#tai-chi--yang-style-8-form) — 8
+  - [Chair Exercises (Lite Protocol)](#chair-exercises-lite-protocol) — 25
+  - [Isometric Finishers](#isometric-finishers) — 5
+  - [Warmup Movements](#warmup-movements) — 5
+  - [Cooldown / Stretch Movements](#cooldown--stretch-movements) — 13
+  - [Neck Protocol](#neck-protocol) — 2
+- [Auto-Prescription Data Model](#auto-prescription-data-model) — engine spec (v9.0.0)
+
+---
+
 ## Section 1 — Training Modalities
 
 Protocol Health uses 12 distinct training modalities across its 5 plans. Each modality has
@@ -378,16 +437,16 @@ level.
 
 | Demographic | Blocked exercise classes |
 |---|---|
-| Age ≥ 65 | All plyometrics (jump squats, burpees, jumping jacks at high tempo), all skill_planche levels, all skill_handstand L3-L4, all skill_lsit L3, jump rope, HIIT >70% HRmax, shadowboxing power rounds, Nordic hamstring curl, isometric finisher holds >20 sec |
-| Age ≥ 50 (under 65) | Plyometrics on consecutive days, jump rope continuous >5 min, skill_planche L3-L4, skill_handstand L4 (free-standing) |
+| Age ≥ 65 | All plyometrics (jump squats, burpees, jumping jacks at high tempo), all skill_planche levels, all skill_handstand L3-L4, all skill_lsit L3, all skill_press levels (handstand-based pressing), skill_bridge L3-L4 (full backbend), jump rope, HIIT >70% HRmax, shadowboxing power rounds, Nordic hamstring curl, isometric finisher holds >20 sec |
+| Age ≥ 50 (under 65) | Plyometrics on consecutive days, jump rope continuous >5 min, skill_planche L3-L4, skill_handstand L4 (free-standing), skill_press L4 (free press to handstand) |
 | Weight 100-120kg | Jump squats, burpees, double-under jump rope, plyometric variants of any exercise — substitute the non-jump variant from the same progression group |
-| Weight > 120kg | All plyometrics, all skill progressions, decline variants of push-ups, deep squat hold >20 sec, Nordic hamstring curl |
+| Weight > 120kg | All plyometrics, all skill progressions (crow/handstand/L-sit/planche/press/bridge), decline variants of push-ups, deep squat hold >20 sec, Nordic hamstring curl |
 | First 4 weeks (beginner) | Skill progressions L2+ in any track, archer variants of any movement, one-arm push-up assist, Nordic hamstring curl L5+ |
-| Active wrist injury | All skill progressions (crow/handstand/L-sit/planche), pseudo-planche lean, all push variants with hands on floor without wrist warm-up |
-| Active shoulder injury | All overhead pressing, all handstand work, all archer variants, dragon flag |
-| Active lower-back injury | Dragon flag, hollow body rock with full extension, Nordic hamstring curl L5+, deep squat hold |
+| Active wrist injury | All skill progressions (crow/handstand/L-sit/planche/press/bridge L2+), pseudo-planche lean, all push variants with hands on floor without wrist warm-up |
+| Active shoulder injury | All overhead pressing, all handstand work, all press-to-handstand work, all archer variants, skill_bridge L2+ (loaded shoulder extension), dragon flag |
+| Active lower-back injury | Dragon flag, hollow body rock with full extension, all skill_bridge L2+ (loaded spinal extension), Nordic hamstring curl L5+, deep squat hold |
 | Active knee injury | Pistol squat, Bulgarian split squat, jump squat, all squat progression L6+ |
-| Active wrist tendinopathy | All skill_planche levels, deep push-up positions, anything with fingers pointed backward |
+| Active wrist tendinopathy | All skill_planche levels, all skill_press levels, deep push-up positions, anything with fingers pointed backward |
 
 **Source:** ICFSR 2021/2025 + ACSM exercise contraindication guidelines + NSCA
 position stands on injury-specific exercise restriction. Wrist/shoulder/back rules
@@ -2598,16 +2657,22 @@ continued progression in the support-hold family.
 
 ### SKILL PROGRESSIONS
 
-**Skill unlock rule:** Skill tracks are only available when core level ≥ 4 (hollow body
-hold) AND push level ≥ 5 (diamond push-up). Per-plan: AGRO only (Thursday evening skill
-work). All other plans = N/A.
+**Skill unlock rule:** The balance/pressing skill tracks (crow, handstand, L-sit,
+planche, press-to-handstand) are only available when core level ≥ 4 (hollow body hold)
+AND push level ≥ 5 (diamond push-up); the press track adds shoulder ≥ 4 on top. The
+**bridge** track is the exception — being a posterior-chain / spinal-extension skill, it
+gates on core ≥ 4 AND hinge ≥ 4 (not push). Per-plan: AGRO only — the balance/press
+skills on Thursday evening, the bridge on the Tue/Fri posterior-chain session. All other
+plans = N/A.
 
-Skill tracks are isometric balance and support-hold practices rather than rep-based
-strength work. Their purpose is motor learning, proprioception, and positional strength
-in the straight-arm and inverted postures that traditional bodyweight strength work
-does not reach. Entries below are intentionally concise — each exercise is a hold
-position with a practice dose. Source of truth: `EXERCISE_PROGRESSIONS.skill_crow`,
-`skill_handstand`, `skill_lsit`, and `skill_planche` in `app.html`.
+Skill tracks are mostly isometric balance and support-hold practices rather than
+rep-based strength work (the press-to-handstand ladder is the one dynamic exception).
+Their purpose is motor learning, proprioception, and positional strength in the
+straight-arm, inverted, and full-extension postures that traditional bodyweight strength
+work does not reach. Entries below are intentionally concise — each is a hold or a short
+dynamic effort with a practice dose. Source of truth: `EXERCISE_PROGRESSIONS.skill_crow`,
+`skill_handstand`, `skill_lsit`, `skill_planche`, `skill_press`, and `skill_bridge` in
+`plans/exercise-progressions.js`.
 
 ---
 
@@ -3241,6 +3306,340 @@ straight-arm milestone.
 
 ---
 
+#### PRESS TO HANDSTAND (4 Levels)
+
+The press-to-handstand ladder is the dynamic vertical-pressing track — the only skill
+ladder that is not a static hold. It bridges the shoulder progression's pike/handstand
+pressing strength with the handstand skill ladder's balance, training the strength and
+compression needed to lift from the floor into a handstand with straight arms. Built
+into AGRO's Thursday evening skill session alongside the balance skills. Requires
+shoulder strength on top of the standard skill gate.
+
+---
+
+#### Elevated pike press
+
+**Category:** Skill — Press to Handstand
+**Progression group:** skill_press | **Level:** 1
+**Equipment:** None | Required: chair or bed for foot elevation
+**Target muscles (primary):** Anterior deltoid, medial deltoid, triceps
+**Target muscles (secondary):** Upper trapezius, core, serratus anterior
+**Movement type:** Compound (vertical press)
+
+**Description:** Set the feet on a chair or bed in an elevated pike (hips stacked high
+over the shoulders). Bend the elbows to lower the crown of the head toward the floor,
+then press back to a locked-out, fully stacked position. The strength foundation for
+the press — trains the vertical pressing pattern under a near-vertical load before any
+balance demand is added.
+
+**Common mistakes:**
+- Letting the hips drift back over the feet, turning the press into a shallow pike push-up
+- Flaring the elbows wide, shifting load off the shoulders and onto the elbow joint
+
+**Safety notes:** Warm the wrists and shoulders thoroughly. Keep the head movement
+controlled — never bang the crown on the floor. Stop on any sharp shoulder or wrist pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not available |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | 3×6–8 | Normal | 60-90s | 1× | Thursday evening skill + core session |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022, Oranchuk 2019 (isometric)
+**Progression prerequisites:** Core ≥ 4 (hollow body hold 3×30 sec), push ≥ 5 (diamond
+push-up 3×10), shoulder ≥ 4 (wall handstand hold 3×20–30 sec).
+**Progression path:** → Wall handstand negative (L2) once 3×8 is pressed cleanly with a
+stable stacked lockout.
+
+---
+
+#### Wall handstand negative
+
+**Category:** Skill — Press to Handstand
+**Progression group:** skill_press | **Level:** 2
+**Equipment:** None | Required: clear wall space
+**Target muscles (primary):** Anterior deltoid, triceps, medial deltoid
+**Target muscles (secondary):** Core, trapezius, wrist flexors
+**Movement type:** Compound (eccentric press)
+
+**Description:** Kick up to a wall handstand, then lower the crown of the head toward
+the floor under control across a slow 4–5 second eccentric, and press back up if able.
+Builds the eccentric pressing strength that the freestanding press demands, in the
+supported safety of the wall.
+
+**Common mistakes:**
+- Dropping fast instead of controlling the negative, which removes the strength stimulus
+- Arching the lower back to compensate for tight shoulders rather than keeping a stacked line
+
+**Safety notes:** **Bail laterally**, never backward onto the spine. Wrist warmup
+essential. A cushion under the head is sensible while learning the depth.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not available |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | 3×3–5 | 5-sec eccentric | 60-90s | 1× | Thursday evening skill + core session |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022, Oranchuk 2019 (isometric), Schoenfeld 2015 (tempo / eccentric)
+**Progression prerequisites:** Elevated pike press 3×8 clean.
+**Progression path:** → Straddle press negative (wall) (L3) once 3×5 controlled
+negatives are owned with a press-back on at least the first rep.
+
+---
+
+#### Straddle press negative (wall)
+
+**Category:** Skill — Press to Handstand
+**Progression group:** skill_press | **Level:** 3
+**Equipment:** None | Required: clear wall space
+**Target muscles (primary):** Anterior deltoid, core (compression), triceps
+**Target muscles (secondary):** Hip flexors, adductors, trapezius, wrist flexors
+**Movement type:** Compound (straight-arm eccentric)
+
+**Description:** From a wall handstand, keep the arms straight and lower the body by
+hinging at the hips into a wide straddle, bringing the straddled legs down toward the
+floor with control as the shoulders lean forward to counterbalance. This reverses the
+exact straight-arm press pattern and trains the compression + straight-arm strength the
+freestanding press requires.
+
+**Common mistakes:**
+- Bending the arms to "cheat" the descent, which trains a different (bent-arm) pattern
+- Failing to lean the shoulders forward as the legs lower, causing a backward fall
+
+**Safety notes:** Straight-arm loading is demanding on the wrists and biceps tendon —
+warm thoroughly and stop on any sharp pain. Bail by stepping the feet down in sequence.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not available |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | 3×3–5 | Controlled | 60-90s | 1× | Thursday evening skill + core session |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022, Oranchuk 2019 (isometric)
+**Progression prerequisites:** Wall handstand negative 3×5 controlled.
+**Progression path:** → Freestanding press to handstand (L4) once 3×5 straight-arm
+straddle negatives are controlled away from the wall.
+
+---
+
+#### Freestanding press to handstand
+
+**Category:** Skill — Press to Handstand
+**Progression group:** skill_press | **Level:** 4
+**Equipment:** None
+**Target muscles (primary):** Anterior deltoid, core (compression), triceps
+**Target muscles (secondary):** Hip flexors, adductors, trapezius, wrist flexors, balance
+**Movement type:** Compound (straight-arm press, balance)
+
+**Description:** From a standing forward fold with hands on the floor, press straight-armed
+from a pike or straddle position up into a freestanding handstand without kicking or
+jumping. The terminal exercise of the press ladder — combines straight-arm pressing
+strength, deep compression, and handstand balance into one dynamic skill.
+
+**Common mistakes:**
+- Kicking or jumping into the handstand instead of pressing — a different, easier skill
+- Losing the balance the moment the feet leave the floor from rushing the press
+
+**Safety notes:** **Bail laterally** out of any failed handstand. Practise on a clear
+surface. Warm wrists and shoulders fully. Accumulate attempts gradually — this is a
+years-long skill.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not available |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | 5 × attempts | Controlled | 90s | 1× | Thursday evening skill + core session |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022, Oranchuk 2019 (isometric)
+**Progression prerequisites:** Straddle press negative (wall) 3×5 controlled.
+**Progression path:** → End of press progression. Advance toward a pike (legs-together)
+press and a deficit press as the next long-term pressing milestones.
+
+---
+
+#### BRIDGE (4 Levels)
+
+The bridge ladder is the posterior-chain and spinal-extension track — the only skill
+ladder that loads the back of the body and trains thoracic + shoulder extension mobility.
+Every other skill ladder is anterior-chain dominant (chest, shoulders, hip flexors,
+abs); the bridge balances that by building glute, erector, and rear-shoulder strength
+through a full backbend. Built into AGRO's Tuesday/Friday evening posterior-chain
+session. Gated on hinge strength rather than push strength.
+
+---
+
+#### Glute bridge hold
+
+**Category:** Skill — Bridge
+**Progression group:** skill_bridge | **Level:** 1
+**Equipment:** None
+**Target muscles (primary):** Gluteus maximus, erector spinae, hamstrings
+**Target muscles (secondary):** Core, posterior deltoid
+**Movement type:** Isometric (posterior chain)
+
+**Description:** Lie on the back with knees bent and feet flat, then drive the hips up
+until the body forms a straight line from knees to shoulders and hold. The isometric
+entry to the bridge ladder — builds the glute and erector endurance needed before any
+spinal-extension load is added. Distinct from the hinge ladder's rep-based glute bridge:
+here it is held for time.
+
+**Common mistakes:**
+- Overarching the lower back instead of driving the hips with the glutes
+- Letting the hips sag during the hold rather than maintaining a locked straight line
+
+**Safety notes:** Keep the chin tucked and shoulders grounded. Drive through the heels.
+Stop on any lower-back pinching — the work should be felt in the glutes, not the spine.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not available |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | 3×30–45 sec | Hold | 60-90s | 2× | Tue/Fri evening posterior-chain session |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022, Oranchuk 2019 (isometric)
+**Progression prerequisites:** Core ≥ 4 (hollow body hold 3×30 sec), hinge ≥ 4 (bodyweight
+RDL 3×10–12/leg).
+**Progression path:** → Short bridge (crown support) (L2) once 3×45 sec is held with a
+locked, sag-free line.
+
+---
+
+#### Short bridge (crown support)
+
+**Category:** Skill — Bridge
+**Progression group:** skill_bridge | **Level:** 2
+**Equipment:** None
+**Target muscles (primary):** Gluteus maximus, erector spinae, anterior deltoid
+**Target muscles (secondary):** Triceps, hamstrings, thoracic extensors
+**Movement type:** Isometric (spinal extension)
+
+**Description:** Lie on the back, place the hands flat by the ears with fingers pointing
+toward the shoulders, then press the hips and chest up until the crown of the head rests
+lightly on the floor. A partial backbend that introduces shoulder-extension and
+thoracic-extension load before committing to a full bridge.
+
+**Common mistakes:**
+- Letting the elbows flare wide, which prevents the shoulders from stacking and stalls the press
+- Bearing real weight on the head/neck instead of keeping it a light touch point
+
+**Safety notes:** The head is a light touch point only — never load the cervical spine.
+Stop on any neck, shoulder, or wrist pain. Requires shoulder-extension mobility; work
+the chest-opener and shoulder-dislocate stretches alongside this.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not available |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | 3×20–30 sec | Hold | 60-90s | 2× | Tue/Fri evening posterior-chain session |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022, Oranchuk 2019 (isometric)
+**Progression prerequisites:** Glute bridge hold 3×45 sec clean.
+**Progression path:** → Full bridge hold (L3) once 3×30 sec on the crown is held with the
+elbows tracking straight and no neck loading.
+
+---
+
+#### Full bridge hold
+
+**Category:** Skill — Bridge
+**Progression group:** skill_bridge | **Level:** 3
+**Equipment:** None
+**Target muscles (primary):** Gluteus maximus, erector spinae, anterior deltoid, triceps
+**Target muscles (secondary):** Hamstrings, thoracic extensors, wrist flexors
+**Movement type:** Isometric (full spinal extension)
+
+**Description:** From the short-bridge position, press fully through the arms and legs to
+lift the head off the floor into a full backbend, driving the chest back toward the
+hands and opening the shoulders. The complete bridge — the benchmark of posterior-chain
+strength and spinal-extension mobility in the ladder.
+
+**Common mistakes:**
+- Keeping the weight back over the feet instead of shifting the chest toward the hands
+- Holding the breath; breathing must continue throughout the extension hold
+
+**Safety notes:** Build the hold time gradually. Requires healthy wrists, shoulders, and
+a pain-free spine. Come down by tucking the chin and rolling down through the spine —
+never collapse. Stop on any sharp back or shoulder pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not available |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | 3×15–20 sec | Hold | 60-90s | 2× | Tue/Fri evening posterior-chain session |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022, Oranchuk 2019 (isometric)
+**Progression prerequisites:** Short bridge (crown support) 3×30 sec clean.
+**Progression path:** → Bridge with single-leg lift (L4) once 3×20 sec full bridge is
+held with the chest stacked over the hands.
+
+---
+
+#### Bridge with single-leg lift
+
+**Category:** Skill — Bridge
+**Progression group:** skill_bridge | **Level:** 4
+**Equipment:** None
+**Target muscles (primary):** Gluteus maximus, erector spinae, anterior deltoid
+**Target muscles (secondary):** Hamstrings, core (anti-rotation), triceps, wrist flexors
+**Movement type:** Isometric (unilateral spinal extension)
+
+**Description:** From a stable full bridge, lift one leg straight off the floor and hold,
+keeping the hips level and the bridge height stable. The asymmetric load demands single-leg
+glute and erector strength plus core anti-rotation while maintaining the full backbend.
+
+**Common mistakes:**
+- Letting the hips drop or twist toward the lifted-leg side, losing the level pelvis
+- Shortening the bridge height to make the leg lift easier instead of holding the full arch
+
+**Safety notes:** Master a stable full bridge first. Lift the leg slowly under control.
+Stop on any sharp back, shoulder, or wrist pain. Come down through both feet before
+resting.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Not available |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | 3×5–8 sec/side | Hold | 60-90s | 2× | Tue/Fri evening posterior-chain session |
+
+**Evidence:** Kotarsky 2018, Plotkin 2022, Oranchuk 2019 (isometric)
+**Progression prerequisites:** Full bridge hold 3×20 sec clean.
+**Progression path:** → End of bridge progression. Advance toward a stand-to-bridge
+(wall walk-down) and ultimately a bridge wall-walk as the next spinal-extension milestones.
+
+---
+
 ## NON-PROGRESSION EXERCISES
 
 This section catalogs exercises that are not part of a level-based progression ladder.
@@ -3744,6 +4143,160 @@ push-up form is not yet clean at standard volume.
 
 **Evidence:** Kotarsky 2018 (push-up strength), Plotkin 2022 (rep progression),
 Schoenfeld 2021 (rep continuum)
+
+---
+
+### Rear Deltoid / Posterior Shoulder
+
+Dedicated posterior-deltoid and scapular-retraction isolation work. The push and shoulder
+progressions are anterior-deltoid dominant (pike push-ups, handstand work, and every
+push-up variant load the front delt), so this group exists to balance shoulder
+development and protect the shoulder joint. All moves are zero-equipment, prone or
+floor-based, and belong to the **pull** movement pattern — adding them increases weekly
+pull volume and keeps the push:pull ratio pull-dominant (CLAUDE.md §15: Cools 2016 +
+Prinold 2016). These complement the **Prone Y-T-W raises** entry in the PULL progression
+(L2), which remains the primary multi-position rear-delt builder.
+
+---
+
+#### Reverse snow angels
+
+**Category:** Pull / Posterior shoulder
+**Equipment:** None
+**Target muscles (primary):** Posterior deltoid, mid-trapezius, lower trapezius
+**Target muscles (secondary):** Rhomboids, erector spinae, rotator cuff
+**Movement type:** Isolation (dynamic full-arc)
+
+**Description:** Lie face down with the chest lifted slightly and arms by the sides,
+palms down. Sweep both arms in a wide arc along the floor from the hips all the way
+overhead and back, like a snow angel, keeping the arms low and the shoulder blades
+working through the full range. Trains the posterior deltoid and the entire scapular
+retraction chain through a long range of motion.
+
+**Common mistakes:**
+- Lifting the arms high off the floor instead of skimming the full arc — shortens the range
+- Using momentum and speed rather than slow, deliberate scapular control
+
+**Safety notes:** Keep the gaze down and the neck long. Move slowly through the overhead
+portion — if the front of the shoulder pinches near the top, reduce the arc. Stop on any
+sharp shoulder pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Uses chair exercises (seated row) instead |
+| Cut | 2×15 | Slow | 45-60s | 2× | Mon upper + Sat full body |
+| Bulk | 3×15 | Slow | 60-90s | 2× | Mon + Fri upper |
+| Maintenance | 2×15 | Slow | 45-60s | 1× | Mon upper |
+| AGRO | 3×15 | Slow | 60s | 2× | Tue/Fri evening posterior-chain session |
+
+**Evidence:** Cools 2016 (scapular stabilisers), Prinold 2016
+
+---
+
+#### Prone reverse fly
+
+**Category:** Pull / Posterior shoulder
+**Equipment:** None
+**Target muscles (primary):** Posterior deltoid
+**Target muscles (secondary):** Mid-trapezius, rhomboids, infraspinatus
+**Movement type:** Isolation (single-plane)
+
+**Description:** Lie face down with the chest lifted and arms hanging straight down or
+held out, then raise both arms out to the sides in a wide "T" — leading with the thumbs
+or pinkies — squeezing the shoulder blades together at the top, then lower under control.
+The bodyweight analogue of a dumbbell reverse fly, isolating the posterior deltoid in its
+primary horizontal-abduction role.
+
+**Common mistakes:**
+- Bending the elbows and turning the fly into a row, shifting load to the lats
+- Shrugging the traps up toward the ears instead of squeezing the blades back and down
+
+**Safety notes:** Keep a soft, fixed elbow angle throughout. Lift only to the point of a
+firm scapular squeeze — do not hyperextend the shoulders. Gaze down, neck neutral.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Uses chair exercises (seated row) instead |
+| Cut | 3×12 | Normal | 45-60s | 2× | Mon upper + Sat full body |
+| Bulk | 3×12-15 | 3-1-2-0 | 60-90s | 2× | Mon + Fri upper |
+| Maintenance | 3×12 | Normal | 45-60s | 1× | Mon upper |
+| AGRO | N/A | — | — | — | AGRO covers rear delt via Y-T-W raises + reverse snow angels + prone W pull |
+
+**Evidence:** Cools 2016 (scapular stabilisers), Prinold 2016
+
+---
+
+#### Prone W pull (bodyweight face pull)
+
+**Category:** Pull / Posterior shoulder
+**Equipment:** None
+**Target muscles (primary):** Posterior deltoid, external rotators (infraspinatus, teres minor)
+**Target muscles (secondary):** Mid-trapezius, lower trapezius, rhomboids
+**Movement type:** Isolation (rear delt + external rotation)
+
+**Description:** Lie face down with the chest lifted and elbows bent so the upper arms
+are out to the sides and the hands point forward. Pull the elbows back and down toward
+the hips while rotating the hands upward, finishing in a "W" with the shoulder blades
+pinched. This is the floor-based, zero-equipment equivalent of a cable face pull — the
+single best rear-delt + external-rotation movement for shoulder health, normally done
+with a band or cable.
+
+**Common mistakes:**
+- Leading with the hands instead of driving the elbows back and down
+- Failing to add the external rotation, which removes the rotator-cuff benefit
+
+**Safety notes:** Move slowly and deliberately; this is a control exercise, not a power
+move. Keep the neck neutral. Stop on any front-of-shoulder pinching.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Uses chair exercises (seated row) instead |
+| Cut | 3×12 | Slow | 45-60s | 1× | Mon upper |
+| Bulk | 3×12 | Slow | 60-90s | 1× | Mon upper |
+| Maintenance | 3×12 | Slow | 45-60s | 1× | Mon upper |
+| AGRO | 3×12 | Slow | 60s | 1× | Thursday evening skill + core + pull session |
+
+**Evidence:** Cools 2016 (scapular stabilisers), Prinold 2016
+
+---
+
+#### Prone reverse fly hold
+
+**Category:** Pull / Posterior shoulder
+**Equipment:** None
+**Target muscles (primary):** Posterior deltoid, mid-trapezius
+**Target muscles (secondary):** Rhomboids, lower trapezius, rotator cuff
+**Movement type:** Isometric
+
+**Description:** Lie face down, lift both arms out to a "T" with the shoulder blades
+retracted, and hold the position statically for time. The isometric companion to the
+prone reverse fly — maximises time-under-tension on the posterior deltoid and trains the
+postural endurance the rear delt needs to oppose the anterior-dominant push work.
+
+**Common mistakes:**
+- Letting the arms drift downward as fatigue sets in rather than holding the height
+- Holding the breath through the isometric instead of breathing steadily
+
+**Safety notes:** Hold only at a height where the scapular squeeze is firm and pain-free.
+Gaze down, neck neutral. Stop on any sharp shoulder pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | N/A | — | — | — | Uses chair exercises (seated row) instead |
+| Cut | 3×20-30 sec | Hold | 45-60s | 1× | Upper-day finisher |
+| Bulk | 3×30 sec | Hold | 60-90s | 1× | Upper-day finisher |
+| Maintenance | 2×20-30 sec | Hold | 45-60s | 1× | Upper-day finisher |
+| AGRO | N/A | — | — | — | Optional finisher — AGRO rear-delt volume covered by the moves above |
+
+**Evidence:** Cools 2016 (scapular stabilisers), Oranchuk 2019 (isometric)
 
 ---
 
@@ -6380,6 +6933,180 @@ creates anxiety.
 
 ---
 
+#### Seated towel row (isometric)
+
+**Category:** Pull (chair)
+**Equipment:** Chair | Required: towel
+**Target muscles (primary):** Latissimus dorsi, rhomboids, biceps
+**Target muscles (secondary):** Posterior deltoid, mid-trapezius
+**Movement type:** Isometric (self-resistance)
+
+**Description:** Sit tall toward the front of the chair. Loop a towel under both feet
+and grip an end in each hand. Keeping the chest up, pull the elbows back toward the ribs
+against the towel's resistance and squeeze the shoulder blades together. Hold the
+contraction, then release slowly. A seated, self-resistance row that loads the back
+without any weight — the chair-track equivalent of the inverted row.
+
+**Common mistakes:**
+- Rounding the back and pulling with the arms only instead of driving the elbows back with the mid-back
+- Shrugging the shoulders up toward the ears instead of squeezing the blades down and back
+
+**Safety notes:** Keep the spine tall and neutral — do not round forward to reach. Build
+resistance gradually by pressing the feet down harder into the towel. Stop on any sharp
+lower-back or shoulder pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 2×8 (5s holds) | Hold | 45-60s | 2× (Mon/Fri) | Seated back strength |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** ICFSR 2021 (CLAUDE.md §15), Oranchuk 2019 (isometric)
+
+---
+
+#### Seated towel pull-apart
+
+**Category:** Pull (chair)
+**Equipment:** Chair | Required: towel
+**Target muscles (primary):** Posterior deltoid, rhomboids, mid-trapezius
+**Target muscles (secondary):** Rotator cuff, lower trapezius
+**Movement type:** Isometric (self-resistance)
+
+**Description:** Sit tall and hold a towel a little wider than shoulder width at chest
+height, arms extended forward. Pull the ends of the towel apart, tensioning it
+isometrically while squeezing the shoulder blades together, then release slowly. The
+seated, zero-equipment analogue of a band pull-apart — the terminal chair-pull move,
+biasing the posterior deltoid and scapular retractors that seated rounding neglects.
+
+**Common mistakes:**
+- Bending the elbows and turning it into a row instead of keeping arms long for a true pull-apart
+- Letting the shoulders creep up toward the ears rather than drawing the blades down and together
+
+**Safety notes:** Keep the neck long and shoulders down. Tension the towel only to a
+firm, pain-free squeeze. Stop on any front-of-shoulder pinching.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 2×10 (3s holds) | Hold | 45-60s | 1× (Fri) | Posture + rear-delt finisher |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** ICFSR 2021 (CLAUDE.md §15), Cools 2016 (scapular stabilisers)
+
+---
+
+#### Seated side bend
+
+**Category:** Core (chair)
+**Equipment:** Chair
+**Target muscles (primary):** Obliques
+**Target muscles (secondary):** Erector spinae, transverse abdominis
+**Movement type:** Isolation
+
+**Description:** Sit tall with feet flat. Reach one hand down toward the floor alongside
+the chair, bending sideways at the waist (lateral flexion), then contract the opposite
+side's waist to return upright. Alternate sides. A gentle seated oblique movement that
+reintroduces lateral-trunk control.
+
+**Common mistakes:**
+- Leaning forward or rotating instead of bending purely to the side
+- Using momentum to swing rather than controlling the bend with the waist
+
+**Safety notes:** Move slowly through a comfortable range. Keep both sit-bones on the
+chair. Stop on any sharp lower-back pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 2×8/side | Slow | 30-45s | 2× (Wed/Fri) | Seated oblique work |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** ICFSR 2021 (CLAUDE.md §15)
+
+---
+
+#### Seated knee-to-chest
+
+**Category:** Core (chair)
+**Equipment:** Chair
+**Target muscles (primary):** Rectus abdominis, hip flexors
+**Target muscles (secondary):** Obliques
+**Movement type:** Isolation
+
+**Description:** Sit tall toward the front of the chair, hands lightly holding the seat
+edges for support. Brace the core and draw one knee up toward the chest, then lower it
+with control. Alternate legs. Progresses the seated-core track by adding a dynamic
+lower-abdominal demand under a braced trunk.
+
+**Common mistakes:**
+- Rounding the back and collapsing the chest toward the knee instead of staying tall
+- Letting the leg drop fast instead of lowering under control
+
+**Safety notes:** Keep the chest up and the spine tall throughout. Hold the chair for
+stability. Stop on any lower-back discomfort — reduce the knee height if needed.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 2×8/side | Slow | 30-45s | 2× (Wed/Fri) | Seated lower-ab work |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** ICFSR 2021 (CLAUDE.md §15)
+
+---
+
+#### Seated core brace + leg extension
+
+**Category:** Core (chair)
+**Equipment:** Chair
+**Target muscles (primary):** Rectus abdominis, transverse abdominis
+**Target muscles (secondary):** Hip flexors, quadriceps
+**Movement type:** Isometric (anti-extension)
+
+**Description:** Sit tall with hands lightly on the seat edges. Brace the core hard as
+if bracing for a light tap to the stomach, then extend one leg out straight and hold it,
+keeping the torso completely upright and still — the brace resists the trunk wanting to
+lean back. Lower with control and alternate. The terminal chair-core move: an
+anti-extension brace under a moving-limb load.
+
+**Common mistakes:**
+- Leaning back as the leg extends instead of holding the trunk upright with the brace
+- Holding the breath through the brace rather than breathing steadily
+
+**Safety notes:** Maintain the tall, braced trunk the whole time — if the lower back
+arches or the torso tips back, shorten the leg extension. Stop on any lower-back pain.
+
+**Per-Plan Prescription:**
+
+| Plan | Sets × Reps | Tempo | Rest | Freq/week | Notes |
+|------|-------------|-------|------|-----------|-------|
+| Lite | 2×5/leg (5s holds) | Hold | 45-60s | 1× (Fri) | Seated anti-extension brace |
+| Cut | N/A | — | — | — | Not in plan structure |
+| Bulk | N/A | — | — | — | Not in plan structure |
+| Maintenance | N/A | — | — | — | Not in plan structure |
+| AGRO | N/A | — | — | — | Not in plan structure |
+
+**Evidence:** ICFSR 2021 (CLAUDE.md §15), Oranchuk 2019 (isometric)
+
+---
+
 ### Isometric Finishers
 
 > **Plan integration:** Bulk-only finishers that cap the push and lower sessions.
@@ -7301,7 +8028,7 @@ Stop immediately on any dizziness, tingling, or sharp pain.
 1. **Daily exercise list** — specific exercises with sets, reps, tempo, rest tailored to user's level and plan
 2. **Weekly schedule** — modality rotation per plan requirements
 3. **Progression recommendations** — flag exercises ready for level advancement based on streak data
-4. **Deload week trigger** — every 8-10 weeks or when completion < 70% for 2 consecutive weeks
+4. **Deload week trigger** — every 6-10 weeks (default 8) or when completion < 70% for 2 consecutive weeks
 5. **Exercise substitutions** — swap exercises that load injured body regions
 
 ### Volume Caps Per Plan
@@ -7334,8 +8061,8 @@ Stop immediately on any dizziness, tingling, or sharp pain.
 |------|-------------|
 | Streak threshold | 3 consecutive completed sessions at current level -> recommend advancement (Lite: 5) |
 | Failure threshold | 2 consecutive sessions < 60% completion -> recommend regression |
-| Deload trigger | 8-10 weeks continuous OR 2 weeks with completion < 70% |
-| Deload protocol | Reduce volume 40% (fewer sets, not exercises). Maintain frequency. 1 week. |
+| Deload trigger | 6-10 weeks continuous (default 8) OR 2 weeks with completion < 70% |
+| Deload protocol | Reduce volume 40-50% (fewer sets, not exercises). Maintain frequency. 1 week. |
 | Cross-level dependency | Bulgarian split squat (squat L6) requires hinge >= 2 |
 | Skill unlock | Skills available when core >= 4 AND push >= 5 |
 
@@ -7350,7 +8077,7 @@ Stop immediately on any dizziness, tingling, or sharp pain.
 7. All plans: push:pull ratio <= 1:1 (pull-dominant preferred)
 8. Weight > 100kg: no plyometrics unless user overrides in settings
 9. Age > 50: default Lite variants unless manually overridden
-10. Deload weeks: reduce volume 40%, maintain frequency
+10. Deload weeks: reduce volume 40-50%, maintain frequency
 11. Max 2 compound push exercises per session
 12. Always pair push with pull in same session
 13. Lower body sessions: minimum 1 hinge + 1 squat movement

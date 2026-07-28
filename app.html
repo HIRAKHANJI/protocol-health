@@ -909,6 +909,26 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
     </div>
     <div class="settings-body">
 
+      <!-- WORKOUT ENGINE (BETA) — v8.8.0 · opt-in, default OFF · placed first so it isn't buried -->
+      <div class="settings-section">
+        <div class="settings-section-title">Workout Engine <span style="color:var(--accent2)">· BETA</span></div>
+        <p style="font-size:0.75rem;color:var(--muted);margin:0 0 10px">Experimental. Auto-builds your training week from the 199-exercise database at your current levels, with a focus/goal picker and optional safety brakes. <b>Default OFF</b> — your normal workouts are unchanged until you switch this on, and you can switch it off anytime. Your data is never affected.</p>
+        <label style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 13px;background:var(--surface);border:1px solid var(--border);border-radius:8px;cursor:pointer;margin-bottom:10px">
+          <span style="font-family:'DM Mono',monospace;font-size:0.7rem;letter-spacing:1px;color:var(--text)">USE WORKOUT ENGINE</span>
+          <input type="checkbox" id="engineEnabledToggle" onchange="toggleEngineEnabled(this.checked)">
+        </label>
+        <div id="engineOptions" style="display:none">
+          <div style="font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:1px;color:var(--muted);margin:4px 0 6px">FOCUS / GOAL</div>
+          <div id="engineGoalBtns" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px"></div>
+          <p style="font-size:0.58rem;color:var(--muted);margin:0 0 12px;line-height:1.6;font-family:'DM Mono',monospace">Options shown depend on your plan. <b>All-Round Strength</b> develops the whole body evenly through functional, compound, calisthenics-progression work — the recommended default for overall development.</p>
+          <label style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 13px;background:var(--surface);border:1px solid var(--border);border-radius:8px;cursor:pointer">
+            <span style="font-family:'DM Mono',monospace;font-size:0.62rem;letter-spacing:1px;color:var(--text)">SAFETY BRAKES (this plan)</span>
+            <input type="checkbox" id="engineBrakesToggle" onchange="toggleEngineBrakes(this.checked)">
+          </label>
+          <p style="font-size:0.6rem;color:var(--muted);margin:8px 0 0;line-height:1.6;font-family:'DM Mono',monospace">Brakes apply age/weight volume reductions, deload nudges and fast-day intensity caps. Default ON for most plans, OFF for AGRO. <b>Active-injury blocks always apply</b> regardless of this toggle.</p>
+        </div>
+      </div>
+
       <!-- YOUR NAME -->
       <div class="settings-section">
         <div class="settings-section-title">Your Name</div>
@@ -1652,6 +1672,33 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
   window.dispatchEvent(new Event('ph:components-ready'));
 </script>
 
+<!-- ─── WORKOUT ENGINE LOADER (v8.5.0 — BETA, opt-in, NON-GATING) ─────────────
+     Loads the v9 workout engine (modules/workout-engine.js) + its renderer
+     (components/engine-session.js) and exposes them on window.* for the inline
+     renderWorkouts() branch. INTENTIONALLY non-gating: runInit() does NOT await
+     this, and a dynamic import in try/catch means an engine load failure can
+     NEVER block core app startup. renderWorkouts() falls back to the legacy
+     workoutContent() whenever window.generateWeek is missing or throws. The
+     engine only renders when the user opts in via Settings → WORKOUT ENGINE
+     (BETA), which defaults OFF. -->
+<script type="module">
+  try {
+    const Engine = await import('./modules/workout-engine.js');
+    const EngineSession = await import('./components/engine-session.js');
+    const Focus = await import('./modules/engine-focus.js');
+    window.generateWeek = Engine.generateWeek;
+    window.generateSession = Engine.generateSession;
+    window.explainSession = Engine.explainSession;
+    window.renderEngineWeek = EngineSession.renderEngineWeek;
+    window.GOAL_PRESETS = Focus.GOAL_PRESETS;
+    window.presetsForPlan = Focus.presetsForPlan;
+    window.isPresetAllowed = Focus.isPresetAllowed;
+    window._PH_ENGINE_READY = true;
+  } catch(e) {
+    console.warn('[PH] workout engine (BETA) failed to load — legacy workouts unaffected:', e);
+  }
+</script>
+
 <script>
 // ─── STORAGE KEYS ────────────────────────────────────────────────────────────
 // All localStorage keys live here in one place.
@@ -1802,7 +1849,12 @@ const SK = {
   swDismissedVer: 'ph_sw_v1', // string — last SW cache version the user dismissed the reload banner for
   backupTs: 'ph_bts_v1', // number — timestamp of last backup (for reminder banner)
   backupHistory: 'ph_bh_v1', // array of last 5 backup events: [{ ts, filename }]  (Phase 11, v7.7.0)
-  schemaVersion: 'ph_sch_v1' // object — schema record: { schemaVersion, migrationsApplied[], lastMigration, establishedAt, establishedFrom }
+  schemaVersion: 'ph_sch_v1', // object — schema record: { schemaVersion, migrationsApplied[], lastMigration, establishedAt, establishedFrom }
+  // v8.5.0 Workout Engine (BETA) — additive keys. No migration needed: each defaults
+  // sensibly when absent, and the backup system auto-includes any key listed in SK.
+  exerciseCompletion: 'ph_ec_v1',  // object keyed by dateStr → { exId: { actualReps, formOk, ts } } — completion logger feed
+  exerciseLevelLocks: 'ph_ell_v1', // object: { groupId: { level, reason, ts } } — manual level-down locks
+  progressionEvents: 'ph_pe_v1'    // array of { ts, group, from, to, kind } — advancement/regression audit trail
 };
 
 // ─── APP VERSION ─────────────────────────────────────────────────────────────
@@ -1811,8 +1863,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '8.4.0';
-const APP_VERSION_MSG = 'New plan: TEMP CUT — a 10-day depletion protocol (Jul 29 → Aug 7 weigh-in). PSMF-style eating with a hard protein floor, daily two-session training at wave intensity (BIG/MOD/MED), machine work + single-dumbbell + bodyweight, creatine + capped-caffeine preworkout protocol, low-residue finish, weigh-in procedure, and post-cut event-mode maintenance rules. Select it in Settings → Training Plan. Temporary by design — switch away after the block ends.';
+const APP_VERSION = '8.9.0';
+const APP_VERSION_MSG = 'New plan: TEMP CUT — a 10-day depletion protocol (Jul 29 → Aug 7 weigh-in). PSMF-style eating with a hard protein floor, daily two-session training at wave intensity (BIG/MOD/MED), machine work + single-dumbbell + bodyweight, creatine + capped-caffeine preworkout protocol, low-residue finish, weigh-in procedure, and post-cut event-mode maintenance rules. Select it in Settings → Training Plan. Temporary by design — switch away after the block ends. (Also includes v8.8.0\'s Workout Engine BETA improvements — still opt-in, OFF by default.)';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
 
@@ -1859,7 +1911,7 @@ function strToDate(s) { const [y,m,d]=s.split('-').map(Number); return new Date(
 // getSettings: always returns a full settings object with defaults. Never returns null.
 // Add any new settings fields here with a default value.
 function getSettings() {
-  const defaults = { plan:'default', currentKg:null, targetKg:null, calories:null, tdee:2600, risk:'aggressive', startDate:null, age:null, height:null, sex:'male', activityLevel:'1.55', activityByDayType:null, name:'', wakeTime:null, lastMealTime:null, eveningSessionTime:null, eatingWindowStart:null, supplementsEnabled:true, tdeeManualOverride:false, lastCalibrationAt:null, lastCalibrationFormula:null, lastCalibrationObserved:null, lastCalibrationOutcome:'never-run', linkedOffsetMode:false, targetOffset:null };
+  const defaults = { plan:'default', currentKg:null, targetKg:null, calories:null, tdee:2600, risk:'aggressive', startDate:null, age:null, height:null, sex:'male', activityLevel:'1.55', activityByDayType:null, name:'', wakeTime:null, lastMealTime:null, eveningSessionTime:null, eatingWindowStart:null, supplementsEnabled:true, tdeeManualOverride:false, lastCalibrationAt:null, lastCalibrationFormula:null, lastCalibrationObserved:null, lastCalibrationOutcome:'never-run', linkedOffsetMode:false, targetOffset:null, engineEnabled:false, engineSafetyBrakes:{ lite:true, cut:true, bulk:true, maintenance:true, agro:false }, engineFocus:{ muscles:[], regions:[], goalPreset:null } };
   const saved = gs(SK.settings);
   if(!saved) return defaults;
   return Object.assign({}, defaults, saved);
@@ -3486,12 +3538,104 @@ function buildWeekGrid() {
 // renderWorkouts: rebuilds the WORKOUTS tab HTML from the active plan's workoutContent().
 // Also rebuilds the week grid (emoji pill row showing today's session type).
 // Workout cards are collapsible — click header to expand/collapse.
+// v8.5.0 BETA: build the engine's userState from stored settings + level + completion data.
+function buildEngineUserState(plan) {
+  const s = getSettings();
+  const levels = {};
+  const ex = gs(SK.exLevels) || {};
+  for (const d of Object.keys(ex).sort()) for (const g in ex[d]) levels[g] = ex[d][g]; // last (most recent) wins
+  const compRaw = gs(SK.exerciseCompletion) || {};
+  const completionHistory = {};
+  for (const d of Object.keys(compRaw).sort()) for (const exId in compRaw[d]) {
+    (completionHistory[exId] = completionHistory[exId] || []).push(Object.assign({ date: d }, compRaw[d][exId]));
+  }
+  const wlog = gs(SK.weights) || [];
+  const weight = (wlog[0] && wlog[0].weight) || s.currentKg || 80;
+  const brakes = (s.engineSafetyBrakes && typeof s.engineSafetyBrakes[plan] === 'boolean') ? s.engineSafetyBrakes[plan] : (plan !== 'agro');
+  return {
+    plan, levels,
+    age: s.age ? Number(s.age) : 30,
+    weight,
+    sex: s.sex || 'male',
+    experience: 'intermediate',
+    reentryDaysAgo: 0,
+    daysSinceDeload: 0,
+    completionHistory,
+    focus: (() => {
+      const f = s.engineFocus || { muscles: [], regions: [], goalPreset: null };
+      // If the stored preset isn't valid for this plan, fall back to balanced (neutral).
+      if (f.goalPreset && typeof isPresetAllowed === 'function' && !isPresetAllowed(plan, f.goalPreset))
+        return Object.assign({}, f, { goalPreset: null });
+      return f;
+    })(),
+    safetyBrakesEnabled: brakes,
+    injuries: [],
+    medicalClearance: true
+  };
+}
+function engineFocusLabel(focus) {
+  if (focus && focus.goalPreset && window.GOAL_PRESETS && GOAL_PRESETS[focus.goalPreset]) return GOAL_PRESETS[focus.goalPreset].label;
+  const bits = [...((focus && focus.regions) || []), ...((focus && focus.muscles) || [])];
+  return bits.length ? bits.slice(0, 3).join(', ') : 'Balanced';
+}
+
+// ─── WORKOUT ENGINE (BETA) SETTINGS WIRING ───────────────────────────────────
+// All defensive: never throw, never touch user data. Called from Settings; repaints
+// the engine controls and re-renders the WORKOUTS tab so changes are immediately visible.
+function paintEngineSettings() {
+  const s = getSettings();
+  const t = document.getElementById('engineEnabledToggle'); if (t) t.checked = !!s.engineEnabled;
+  const opt = document.getElementById('engineOptions'); if (opt) opt.style.display = s.engineEnabled ? 'block' : 'none';
+  const plan = (s.plan === 'default' || !s.plan) ? 'lite' : s.plan;
+  const wrap = document.getElementById('engineGoalBtns');
+  if (wrap) {
+    const presets = window.GOAL_PRESETS || { balanced: { label: 'Balanced' } };
+    // Only show presets this plan exposes (plan-aware). Sanitise a stored preset that
+    // isn't valid for the current plan back to 'balanced'.
+    const allowed = (typeof presetsForPlan === 'function') ? presetsForPlan(plan) : Object.keys(presets);
+    let cur = (s.engineFocus && s.engineFocus.goalPreset) || 'balanced';
+    if (!allowed.includes(cur)) cur = 'balanced';
+    wrap.innerHTML = allowed.map(k => {
+      const p = presets[k] || { label: k };
+      const active = (k === cur);
+      const style = 'flex:0 0 auto;width:auto;margin-top:0;padding:6px 11px;' + (active ? 'border-color:var(--accent);color:var(--accent)' : '');
+      return '<button class="reset-btn" onclick="setEngineGoal(\'' + k + '\')" style="' + style + '">' + (p.label || k) + '</button>';
+    }).join('');
+  }
+  const b = document.getElementById('engineBrakesToggle');
+  if (b) { const br = (s.engineSafetyBrakes && typeof s.engineSafetyBrakes[plan] === 'boolean') ? s.engineSafetyBrakes[plan] : (plan !== 'agro'); b.checked = br; }
+}
+function _engineRerender() { try { if (typeof renderWorkouts === 'function') renderWorkouts(); } catch (e) { console.error('[PH] engine re-render failed', e); } }
+function toggleEngineEnabled(on) { const s = getSettings(); s.engineEnabled = !!on; saveSettings(s); paintEngineSettings(); _engineRerender(); }
+function setEngineGoal(key) { const s = getSettings(); s.engineFocus = Object.assign({ muscles: [], regions: [], goalPreset: null }, s.engineFocus, { goalPreset: key === 'balanced' ? null : key }); saveSettings(s); paintEngineSettings(); _engineRerender(); }
+function toggleEngineBrakes(on) { const s = getSettings(); const plan = (s.plan === 'default' || !s.plan) ? 'lite' : s.plan; s.engineSafetyBrakes = Object.assign({ lite: true, cut: true, bulk: true, maintenance: true, agro: false }, s.engineSafetyBrakes, { [plan]: !!on }); saveSettings(s); _engineRerender(); }
+
 function renderWorkouts() {
   const plan = getActivePlan();
   const s = getSettings();
   const container = document.getElementById('workoutContent');
   buildWeekGrid();
   _resetExRowInstances();
+  // ── v8.5.0 WORKOUT ENGINE BRANCH (opt-in BETA) ──────────────────────────────
+  // Fully defensive: only runs when the user enabled it AND the engine loaded.
+  // ANY runtime error falls through to the legacy workoutContent() path below, so
+  // the WORKOUTS tab can never end up blank because of the engine.
+  if (s.engineEnabled && typeof window.generateWeek === 'function' && typeof window.renderEngineWeek === 'function') {
+    try {
+      const enginePlan = (s.plan === 'default' || !s.plan) ? 'lite' : s.plan;
+      const week = generateWeek(enginePlan, buildEngineUserState(enginePlan));
+      container.innerHTML = renderEngineWeek(week, { focusLabel: engineFocusLabel(s.engineFocus) });
+      container.querySelectorAll('.workout-card').forEach(card => {
+        const h = card.querySelector('.workout-card-header'); if (!h) return;
+        const body = card.querySelector('.workout-body'); const chev = h.querySelector('.chevron');
+        if (body) body.classList.add('open'); if (chev) chev.classList.add('open');
+        h.addEventListener('click', () => toggleWorkout(h));
+      });
+      return;
+    } catch (e) {
+      console.error('[PH] workout engine render failed — falling back to legacy workouts:', e);
+    }
+  }
   container.innerHTML = plan.workoutContent(s);
   const todayDay = DAYS_SHORT[new Date().getDay()]; // 'SUN','MON', etc.
   container.querySelectorAll('.workout-card').forEach(card=>{
@@ -3816,6 +3960,8 @@ function openSettings() {
   // v8.3.4: paint the APP UPDATES diagnostic + refresh the SW cache version
   if(typeof paintUpdatePanel === 'function') paintUpdatePanel();
   if(typeof querySwCacheVersion === 'function') querySwCacheVersion();
+  // v8.5.0: paint the WORKOUT ENGINE (BETA) controls
+  if(typeof paintEngineSettings === 'function') paintEngineSettings();
   // Populate schema version display (migration framework, v5.1.0+)
   const schemaV = (typeof window.getSchemaVersion === 'function') ? window.getSchemaVersion() : null;
   const schemaEl = document.getElementById('schemaVersionDisplay');

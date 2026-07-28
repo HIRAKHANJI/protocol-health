@@ -20,7 +20,7 @@
 // VERSION: bump CACHE_NAME (e.g. 'protocol-health-v8') when you deploy a major update.
 // This forces old caches to be deleted and new files to be fetched fresh.
 
-const CACHE_NAME = 'protocol-health-v38';
+const CACHE_NAME = 'protocol-health-v43';
 
 // ─── INSTALL ─────────────────────────────────────────────────────────────────
 // Runs once when the service worker is first registered (or when CACHE_NAME changes).
@@ -60,6 +60,12 @@ self.addEventListener('install', event => {
         './components/rule-card.js',
         './components/checklist.js',
         './components/fast-window.js',
+        './components/engine-session.js',
+        './plans/exercise-db.js',
+        './plans/session-templates.js',
+        './modules/workout-engine.js',
+        './modules/engine-helpers.js',
+        './modules/engine-focus.js',
         './assets/landing.css',
         './assets/landing-sections.css',
         './assets/landing-demos.css',

@@ -4,22 +4,22 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
-## Version 8.4.0 — 2026-07-28
+## Version 8.9.0 — 2026-07-28
 
 **Scope:** Minor (new selectable plan: TEMP CUT). No schema change, no migration, no storage-shape change.
 **Banner:** shown — "New plan: TEMP CUT — a 10-day depletion protocol (Jul 29 → Aug 7 weigh-in). PSMF-style eating with a hard protein floor, daily two-session training at wave intensity, machine work + single-dumbbell + bodyweight, creatine + capped-caffeine preworkout protocol, low-residue finish, weigh-in procedure, and post-cut event-mode maintenance rules. Select it in Settings → Training Plan. Temporary by design — switch away after the block ends."
-**CACHE_NAME:** v37 → v38 (new file `plans/tempcut.js` added to the cache list — offline-first rule).
+**CACHE_NAME:** v42 → v43 (new file `plans/tempcut.js` added to the cache list — offline-first rule).
 
 ### Versioning note
 
-CLAUDE.md §12 lists "new plan added" as a major-bump example. This release is deliberately **minor** (8.4.0, not 9.0.0): TEMP CUT is a temporary, owner-personal 10-day protocol designed to be switched away from after Aug 7 — not a permanent core plan — and v9.0.0 remains reserved for the Workout Engine per `docs/workout-engine-v9-roadmap.md`. Documented here so the deviation is explicit, not accidental.
+Originally authored as v8.4.0 against a pre-engine main; renumbered to **v8.9.0** at merge time because main had meanwhile shipped v8.4.0 (rear-delt groups) through v8.8.0 (Workout Engine BETA) from parallel sessions. Deliberately **minor**, not the §12 new-plan major: TEMP CUT is a temporary, owner-personal 10-day protocol designed to be switched away from after Aug 7 — and v9.0.0 remains reserved for the Workout Engine's consolidation release per `docs/workout-engine-v9-roadmap.md`. Note the version-rollover rule: after 8.10.x the next minor becomes 9.0.0.
 
 ### What was added
 
 **`plans/tempcut.js` (new, ~318 lines)** — sixth plan, key `tempcut`, owner-designed aggressive mini-cut co-developed in-session against the CLAUDE.md §15 science rules:
 
 - **Structure:** 0 fast days (PSMF days are eating days with a low ceiling — no `fastDaysDow`), 0 light days, `caloriesMode: 'floor'` with `minCalories: 700`, `proteinFloorMultiplier: 1.8` (g/kg — muscle-sparing floor), `macroSplit` base [65% P / 15% C / 20% F] (at the 1,100 MOD ceiling ≈ 179g P / 41g C / 24g F), `activityByDayType { eatDay: 1.95 }` reflecting daily two-session training + 12-15k steps, plan-default `tdee: 4000`.
-- **WORKOUTS tab:** date-labelled 10-day calendar (Jul 29 → Aug 6 training, Fri Aug 7 weigh-in) at wave intensity — 3 BIG days (AM depletion circuit + swing/snatch EMOM finishers, PM hypertrophy session), 3 MOD (PM only + DB arms), 2 MED, 1 FLUSH (pre-scale smooth-tempo day, explicitly no new max-eccentric damage). Machine work integrated per owner's equipment: lat pulldown (wide + close-grip with drop-sets, scapular pulldowns), seated chest press (rest-pause + drop-set ladder), leg extension (high-rep only, knee-shear note). Single 10kg dumbbell programming throughout (rows, thrusters, push press, swings, snatches, suitcase carries, arms block). Daily extras card: steps, post-meal walk, stomach vacuums, neck protocol.
+- **WORKOUTS tab:** date-labelled 10-day calendar (Jul 29 → Aug 6 training, Fri Aug 7 weigh-in) at wave intensity — 3 BIG days (AM depletion circuit + swing/snatch EMOM finishers, PM hypertrophy session), 3 MOD (PM only + DB arms), 2 MED, 1 FLUSH (pre-scale smooth-tempo day, explicitly no new max-eccentric damage). Machine work per owner's equipment: lat pulldown (wide + close-grip with drop-sets, scapular pulldowns), seated chest press (rest-pause + drop-set ladder), leg extension (high-rep only, knee-shear note). Single 10kg dumbbell programming throughout (rows, thrusters, push press, swings, snatches, suitcase carries, arms block). Daily extras card: steps, post-meal walk, stomach vacuums, neck protocol.
 - **NUTRITION tab:** macros-by-day-type card (BIG 700 / MOD 1,100 / MED 800-900 with per-type protein targets), live TODAY'S INTAKE bar vs the MOD ceiling, low-residue final-60h protocol, **creatine + preworkout protocol section** (creatine 5g daily / timing-irrelevant / no loading per ISSN 2018 + app rule; caffeine 250-300mg pre-AM = 2.5-3mg/kg ergogenic zone, hard cap 400mg/day, zero after 3PM; what-makes-you-last-2.5h priority list), daily supplement clock, six-layer belly-reduction guidance (subcutaneous / visceral / glycogen / gut content / cortisol water / TVA corset).
 - **RULES tab:** six red lines (caffeine cap, no water cutting ever, joint-pain swap rule, palpitations STOP rule carried over from AGRO, sleep auto-downgrade, protein untradeable), weigh-in protocol with expected-landing decomposition, event-mode Aug 7-11 maintenance (pre-accepted +2-3kg glycogen rebound, 35-min hotel room circuit, three food rules), and an explicit "this plan ends Aug 12 — switch away" card.
 - **Checklist:** mirrors AGRO's id semantics exactly (m1-m4 / f1-f5 / e1-e3 / s1-s3 / n2) so the AUTO_WORKOUT_IDS auto-derivation system (m3 = morning session, e2 = evening session) works unchanged; creatine added to the s1 morning-supplement subItems; water target 4.0L; `checklistFast` present (shape-required) but only reachable via a manual calendar fast-day toggle.
@@ -27,19 +27,196 @@ CLAUDE.md §12 lists "new plan added" as a major-bump example. This release is d
 **Registration (per CLAUDE.md §4, exactly two changes + cache):**
 - `plans/index.js` — import + `tempcut` key in `PLANS`.
 - `app.html` — native `<option value="tempcut">` + custom-dropdown option (both selector surfaces).
-- `sw.js` — `./plans/tempcut.js` added to the critical cache list; `CACHE_NAME` v37 → v38.
+- `sw.js` — `./plans/tempcut.js` added to the critical cache list; `CACHE_NAME` v42 → v43.
+
+**Engine note:** TEMP CUT is not registered in the Workout Engine BETA's `session-templates.js` — the engine toggle simply has no effect on this plan (static `workoutContent()` renders as always). Intentional: the plan is date-driven and expires Aug 12.
 
 ### Verification
 
-- `node --check` on `plans/tempcut.js`, `plans/index.js` + inline-script extraction of `app.html`.
-- Module-import smoke: `plans/index.js` imported in node — `PLANS` assembles with 6 keys, `tempcut` present.
-- Field-conformance check vs the 5 existing plans: all required fields present (name/badge/badgeClass/descClass/goalMode/subtitle/banner*/tdee/fastDays*/lightDays*/macroSplit/proteinFloorMultiplier/caloriesMode/minCalories/activityByDayType/defaultTimes/weekIcons/morningSub/eveningSub/stretchSub 0-6/checklistNormal/checklistFast/foodGroup*/3 content functions); checklist ids unique within plan; `fastDaysDow.length === fastDaysPerWeek` (0/0).
-- Content-function runtime smoke: `workoutContent()` / `nutritionContent(s)` / `rulesContent(s)` executed with stubbed helpers — no ReferenceErrors, HTML returned from all three.
-- Version-sync grep per §12 checklist — no stale v8.3.4 / v37 refs outside historical entries.
+- `node --check` on `plans/tempcut.js`, `plans/index.js`, `sw.js` + inline-script extraction of `app.html` (re-run post-merge).
+- Module-import smoke post-merge: `plans/index.js` — `PLANS` assembles with 6 keys + engine modules intact, `tempcut` present.
+- Field-conformance check vs the 5 existing plans: all required fields present; 7-day maps complete; macroSplit rows sum to 100; checklist ids unique; `fastDaysDow.length === fastDaysPerWeek`; m3/e2 AUTO semantics verified.
+- Content-function runtime smoke: `workoutContent()` / `nutritionContent(s)` / `rulesContent(s)` executed with stubbed helpers incl. defaults path — no ReferenceErrors.
+- Version-sync grep per §12 checklist — no stale v8.8.0 / v42 refs outside historical entries.
 
 ### Files changed
 
-`plans/tempcut.js` (new) · `plans/index.js` · `app.html` (selector options ×2, APP_VERSION 8.3.4 → 8.4.0, APP_VERSION_MSG) · `sw.js` (cache list + v38) · `index.html` (title, nav chip, hero, CTA note, footer stats, copyright, 9 cache-bust strings, changelog entry + demote) · `CLAUDE.md` (§3 six plans + TEMP CUT blurb, §13 plans list, version refs, line-count anchors) · `README.md` (6 plans, anchors) · `UPDATE_LOG.md` (this entry). `WORKING_VERSIONS.md` follows after on-device smoke.
+`plans/tempcut.js` (new) · `plans/index.js` · `app.html` (selector options ×2, APP_VERSION → 8.9.0, APP_VERSION_MSG) · `sw.js` (cache list + v43) · `index.html` (title, nav chip, hero, CTA note, footer stats, copyright, 9 cache-bust strings, changelog entry + demote) · `CLAUDE.md` (§3 six plans + TEMP CUT blurb, §13 plans list, version refs, line-count anchors) · `README.md` (6 plans, anchors) · `UPDATE_LOG.md` (this entry). `WORKING_VERSIONS.md` follows after on-device smoke.
+
+---
+
+## Version 8.8.0 — 2026-06-07
+
+**Scope:** Minor (Workout Engine BETA — AGRO morning/evening two-card split). No schema change. No data mutation. Engine remains opt-in, default OFF.
+**Banner:** shown — AGRO engine now renders a Morning card + an Evening card per training day.
+**CACHE_NAME:** v41 → v42. Schema unchanged at v7.
+
+### Why
+
+Owner asked for the engine to mirror the hand-built AGRO plan's structure — a short morning activation session and a separate, heavier evening session — rather than one merged card, and explicitly required the engine to match or exceed the real plan's density, never less.
+
+### What changed
+
+**AGRO bimodal block recipes (`plans/session-templates.js`)**
+- Added per-day `slots` to `SESSION_TEMPLATES.agro`, each slot tagged `block:'AM'|'PM'`, composed from reusable block recipes: Morning A (push+pull activation), Morning B (lower+hinge), Evening A (upper balance), Evening B (legs+posterior), Evening C (skill+core+pull), and the fasted run block. Sized to meet/exceed the real plan.
+
+**Engine (`modules/workout-engine.js`)**
+- `generateSession` carries each slot's `block` onto the exercise entry (`formatEntry` gains a `block` field); all-round/emphasis fills tag `PM`.
+
+**Renderer (`components/engine-session.js`)**
+- A day whose exercises carry `block:'AM'` renders TWO cards (`DAY · Morning` + `DAY · Evening`), each with its own warm-up/cool-down and block labels. All non-AGRO plans (no AM tags) stay single-card.
+
+### Validation
+- AGRO renders Morning (6-7 ex) + Evening (14 ex on Mon/Tue/Thu/Fri; lighter run days Wed/Sat) — meeting/exceeding the hand-built plan. Re-ran all 40 plan×goal combos: still full sessions, warm-up+cool-down every day, weekly push:pull ≤ 1:1; only AGRO is bimodal; renderer never throws.
+
+### Files touched
+`plans/session-templates.js`, `modules/workout-engine.js`, `components/engine-session.js`, `app.html` (APP_VERSION + banner), `sw.js` (CACHE v42), `index.html` (surfaces + changelog), `CLAUDE.md`, `README.md`, `UPDATE_LOG.md`.
+
+---
+
+## Version 8.7.0 — 2026-06-07
+
+**Scope:** Minor (Workout Engine BETA rebuild). Session-generation rewrite + rich archetype recipes + plan-scaled density. No schema change. No data mutation. Engine remains opt-in, default OFF.
+**Banner:** shown — see APP_VERSION_MSG (engine now builds complete 8-15 exercise sessions; goals add emphasis without dropping body parts).
+**CACHE_NAME:** v40 → v41. Schema unchanged at v7.
+
+### Why
+
+Owner tried the engine's All-Round goal and got ~3 exercises/day vs the hand-built AGRO's real 13-15 (morning + evening). A five-agent reverse-engineering of all 5 plans confirmed the engine was building only the "compound spine" — no warm-up, no accessory volume, no cool-down, too few mains — and that selecting a goal *filtered* the session down and dropped body parts. Both are now fixed.
+
+### What changed
+
+**Full 7-block session anatomy (`plans/session-templates.js` ARCHETYPE_SLOTS rewrite)**
+- Every archetype now declares the complete recipe: WARM-UP → MAIN(compounds) → ACCESSORY → SKILL → CORE → CONDITIONING → COOL-DOWN, sized to the real plans (e.g. resistance-upper ≈ 9 working + warm-up/cool-down; push-pull ≈ 10; chair ≈ 5-6 gentle).
+- VOLUME_CAPS `maxExercisesPerSession` now caps WORKING exercises only (warm-up/cool-down exempt) so one rich recipe scales per plan: Lite ~5-6, Cut ~8-10, Bulk ~10, AGRO ~12-15. Accessories trim first; mains/core/skill/warm-up/cool-down never trim.
+
+**Generator rebuild (`modules/workout-engine.js`)**
+- New slot resolvers: `warmup`/`cooldown` (by `warmup-`/`cooldown-` id-prefix), `recovery-main` (yoga/pilates/tai-chi/animal-flow), `conditioning`, richer `accessory:<region>` (incl. balance/wrist/pull/calves/hamstrings), `core` (chair_core on Lite), `skill`, and `main:<group>` (a `push×2` slot now yields two different push variants like the real plans).
+- The model is INVERTED: build a FULL base session first, then a purely-additive goal pass (`addEmphasis`) layers focus volume on top — a goal can no longer remove a base movement (the structural fix for "dropped body parts").
+- `strength` rep-bias bug fixed (it was silently dropped); removed the per-session push:pull trim that ate mains — now enforced WEEKLY (`enforceWeeklyPushPull`), trimming only push accessories, never mains.
+- `balanceWeek` (All-Round) retained as a coverage guarantee.
+
+**Renderer (`components/engine-session.js`)**
+- Renders block headers (WARM-UP / MAIN / ACCESSORY / SKILL / CORE / COOL-DOWN) so engine output reads like the hand-built plans.
+
+### Validation
+- Executed all 40 plan×goal combinations: every training day is full with a warm-up + cool-down, every goal stays ≥ the balanced full session, and weekly push:pull ≤ 1:1 across all of them. AGRO renders ~13-15 exercise days; Lite stays gentle (5-6 working). Render path verified (block-structured HTML, graceful ineligible path).
+
+### Files touched
+`plans/session-templates.js`, `modules/workout-engine.js`, `components/engine-session.js`, `app.html` (APP_VERSION + banner), `sw.js` (CACHE v41), `index.html` (surfaces + changelog), `CLAUDE.md`, `README.md`, `UPDATE_LOG.md`, `docs/*`.
+
+---
+
+## Version 8.6.0 — 2026-06-06
+
+**Scope:** Minor (Workout Engine BETA enhancement). New goal preset + a week-level balancing algorithm + plan-aware preset gating + Settings reorder. No schema change. No data mutation. Engine remains opt-in, default OFF.
+**Banner:** shown — "Workout Engine (BETA) upgrade: a new ALL-ROUND STRENGTH goal that develops the whole body evenly through functional, compound, calisthenics-progression work — it actively fills under-trained movement patterns across your week while keeping push:pull balanced. Goal options are now tailored per plan (the heavier functional/athletic goals show on Cut/Bulk/AGRO; Lite stays gentle). The WORKOUT ENGINE section also moved to the top of Settings so it is easy to find. Still opt-in and OFF by default — your normal workouts and all your data are unchanged until you turn it on."
+**CACHE_NAME:** v39 → v40. Schema unchanged at v7.
+
+### Why
+
+Owner asked for a goal that builds the whole body for functional strength + calisthenics progress (not an aesthetic split), noting the static AGRO plan "lacks overall body development and is more intensive on some things than others." A four-agent-style balance audit confirmed it with numbers: static AGRO ≈ **56 leg / 37 back / 17 chest / 15 shoulder / 0 direct-arm** weekly sets — leg/posterior/pull heavy, starved chest/shoulders/arms (push:pull 0.5, within the ≤1:1 rule).
+
+### What shipped
+
+**New `functional` / "All-Round Strength" goal preset (`modules/engine-focus.js`)**
+- Covers all six major regions; `functionalBias` scoring bonus (+2 compound, +2 progression-group) prefers functional calisthenics work.
+
+**Week-level balance algorithm (`modules/workout-engine.js` `balanceWeek`)** — the real fix:
+- The first cut of the preset was net-negative (audit caught it): the score bonus was inert on single-pick slots and a region-blind `volumeBias` accessory flooded AGRO with 33 leg sets. Replaced with `balanceWeek`, which fills UNDER-trained movement patterns across the week with the user's-level compound progression exercise (per-day dedup), and tops up PULL when adding push-side work so the **weekly** push:pull ≤ 1:1 rule (CLAUDE.md §15) always holds.
+- Result on AGRO: all 6 major patterns trained ≥2 days (shoulder 0→2), push:pull 12:12. Verified by execution across all 5 plans (cut 9:9, bulk 18:20, maintenance 6:6, agro 12:12, lite via balanced 4:4 — all ≤1:1).
+- Focus accessories (for aesthetic presets) now dedup across the week, fixing the same-exercise-every-day flood.
+
+**Plan-aware preset gating (`engine-focus.js` `PLAN_PRESETS` / `presetsForPlan` / `isPresetAllowed`)**
+- Lite → `balanced` only (catered/gentle). Maintenance → balanced/functional/core. Cut/Bulk/AGRO → full set led by functional. Settings shows only a plan's eligible presets; a stored preset invalid for the current plan is sanitised to balanced (in the UI and in `buildEngineUserState`).
+
+**Settings UX (`app.html`)**
+- The WORKOUT ENGINE (BETA) section moved to the TOP of the settings body (was last, after APP UPDATES) so it isn't buried.
+
+### Files touched
+`modules/engine-focus.js` (preset + gating + functionalBias), `modules/workout-engine.js` (balanceWeek + accessory dedup + week-level push:pull cap + shared formatEntry), `app.html` (move settings section, plan-aware paint + sanitise, expose presetsForPlan/isPresetAllowed), `sw.js` (CACHE v40), `index.html` (surfaces + changelog), `CLAUDE.md`, `README.md`, `UPDATE_LOG.md`, `docs/*`.
+
+---
+
+## Version 8.5.0 — 2026-06-06
+
+**Scope:** Minor (new opt-in feature — the Workout Engine, shipped as BETA, default OFF). New ES modules + additive SK keys (no migration). app.html wiring behind a feature flag. No schema change. No data mutation.
+**Banner:** shown — "NEW (opt-in BETA): a WORKOUT ENGINE that auto-builds your training week from the full 199-exercise database at your current levels — with a muscle-focus / physique-goal picker (V-taper, athletic, upper/lower, core, strength…) and optional safety brakes. Turn it on in Settings → WORKOUT ENGINE (BETA); it is OFF by default, so your normal workouts are completely unchanged until you choose to try it, and you can switch it off anytime. No data changes — your logs, weights, and settings are untouched."
+**CACHE_NAME:** v38 → v39. Schema unchanged at v7.
+
+### What shipped — the v9 Workout Engine, as an opt-in BETA
+
+The engine that the v9 roadmap describes is now built and wired, but **OFF by default**. With the toggle off, the WORKOUTS tab renders byte-identically to before (legacy `workoutContent()`). v9.0.0 remains reserved for when/if the engine becomes the default.
+
+**New data layer + logic modules (previously committed dormant; now wired):**
+- `plans/exercise-db.js` — 199-exercise machine-readable database (focus-ready muscle/region metadata).
+- `plans/session-templates.js` — 5 plans × 7-day skeletons, archetype→slot rules, volume caps.
+- `modules/engine-helpers.js` — pure functions: plan eligibility, age/weight/sex/experience/re-entry modulators, injury blocks (always-on), demographic brakes (opt-in), prereq checks, push:pull cap, fast-day modifier, deload + suggest-only progression evaluation.
+- `modules/engine-focus.js` — muscle-focus / physique-goal customiser: 7 goal presets + scoring/ranking.
+- `modules/workout-engine.js` — `generateWeek()` / `generateSession()` / `explainSession()` orchestrator.
+- `components/engine-session.js` — pure HTML renderer for engine output (reuses the app's workout-card styling).
+
+**app.html wiring (all behind the OFF-by-default flag):**
+- Non-gating engine loader (dynamic `import()` in try/catch — a load failure can never block startup).
+- `renderWorkouts()` branch: `if (engineEnabled && engine loaded) try engine else/catch → legacy`. The WORKOUTS tab can never blank out from the engine.
+- `buildEngineUserState()` assembles the engine's input from settings + `SK.exLevels` + completion logs.
+- Settings → **WORKOUT ENGINE (BETA)**: enable toggle, goal/focus preset buttons, per-plan safety-brakes toggle.
+- 3 additive SK keys (`ph_ec_v1`, `ph_ell_v1`, `ph_pe_v1`) — no migration (default sensibly when absent).
+
+**Safety model:** demographic/volume brakes are opt-in per plan (AGRO OFF by default, others ON, user-toggleable); active-injury contraindications ALWAYS block regardless of the toggle.
+
+### Validation
+- All 4 engine modules + the renderer validated by EXECUTION against the real 199-exercise DB: all 5 plans generate valid weeks; muscle focus surfaces targeted regions first; 125kg user blocked → routed to Lite; wrist injury removes hand-loaded moves even with brakes off; deload triggers.
+- Every inline `app.html` script block syntax-checked; the exact `renderWorkouts()` call path (`generateWeek`→`renderEngineWeek`) verified to render all 5 plans without throwing.
+
+### Files touched
+New: `plans/session-templates.js`, `modules/workout-engine.js`, `modules/engine-helpers.js`, `modules/engine-focus.js`, `components/engine-session.js` (and `plans/exercise-db.js` from prior dormant commits, now cached/wired). Modified: `app.html` (SK keys, settings defaults, engine loader, renderWorkouts branch, settings UI + wiring), `sw.js` (CACHE_NAME v39 + 6 new files cached), `index.html` (all version surfaces + changelog), `CLAUDE.md`, `README.md`, `UPDATE_LOG.md`, `docs/*`.
+
+---
+
+## Version 8.4.0 — 2026-06-06
+
+**Scope:** Minor (workout content + library finalization). New exercises, two new progression groups, AGRO prescription update. No schema change. No data mutation.
+**Banner:** shown — "Two new calisthenics skill ladders are now level-pickable: PRESS TO HANDSTAND and BRIDGE / BACKBEND (4 levels each). A dedicated REAR DELTOID / POSTERIOR SHOULDER training group was added to close the front/rear shoulder imbalance — reverse snow angels, prone reverse fly, a bodyweight face pull, and an isometric fly hold. AGRO CUT now trains rear delts 4×/week and folds the two new skills into its evening sessions. The workout library is finalized at 194 documented exercises across 12 progression groups. No data changes — your logs, weights, and settings are untouched."
+**CACHE_NAME:** v37 → v38. Schema unchanged at v7.
+
+### Root motivation
+
+Owner is taking AGRO CUT CALISTHENICS to a more aggressive off-books version, with the app as the foundation. Two gaps were identified in the foundation review:
+
+1. **Rear-delt imbalance.** A four-agent audit of `WORKOUTS_LIBRARY.md` found an 11:1 front-to-rear primary-deltoid ratio. Every push/shoulder progression (push-ups, pike push-ups, handstand work) is anterior-deltoid dominant; the only dedicated rear-delt isolation was Prone Y-T-W raises (Pull L2), prescribed by AGRO just once a week (Monday). Front-delt work appeared in 5+ sessions/week.
+2. **Skill-track coverage.** The four existing skill ladders (crow, handstand, L-sit, planche) are all anterior-chain holds. Two high-value zero-equipment skills were missing: a dynamic vertical press (press-to-handstand) and a posterior-chain spinal-extension skill (bridge).
+
+### What was added
+
+**Two new calisthenics skill ladders (`plans/exercise-progressions.js` + `WORKOUTS_LIBRARY.md`)**
+
+- `skill_press` — PRESS TO HANDSTAND (4 levels): elevated pike press → wall handstand negative → straddle press negative (wall) → freestanding press to handstand. The only dynamic skill ladder. Gated on core ≥ 4 AND push ≥ 5 AND shoulder ≥ 4.
+- `skill_bridge` — BRIDGE / BACKBEND (4 levels): glute bridge hold → short bridge (crown support) → full bridge hold → bridge with single-leg lift. The only posterior-chain / spinal-extension skill. Gated on core ≥ 4 AND hinge ≥ 4 (not push).
+- Both fully level-pickable via the existing `exRowWithLevel` selector. Progression groups now total 12 (6 skill tracks); progression levels now total 74.
+
+**Rear-deltoid training group (`WORKOUTS_LIBRARY.md` non-progression)**
+
+- New "Rear Deltoid / Posterior Shoulder" subsection: reverse snow angels, prone reverse fly, prone W pull (bodyweight face pull), prone reverse fly hold (isometric). All zero-equipment, pull-pattern, evidence-cited (Cools 2016 + Prinold 2016).
+
+**AGRO CUT prescription update (`plans/agro.js`)**
+
+- Rear-delt work now runs 4×/week: Mon (Y-T-W raises, existing) + Tue/Fri (reverse snow angels, Evening B) + Thu (prone W pull, Evening C). Balances the 5+ weekly front-delt sessions; push:pull stays pull-dominant.
+- Bridge skill added to Tue/Fri Evening B (posterior-chain session). Press-to-handstand skill added to Thu Evening C (skill session). Evening-session description sub-text updated to match.
+
+**Library finalization**
+
+- `WORKOUTS_LIBRARY.md` now documents 194 exercises (74 progression + 120 non-progression). Section 2.3 contraindication matrix extended to cover the two new skill tracks (notably: full bridge blocked for active lower-back injury; press-to-handstand blocked for active wrist/shoulder injury). TOC and Library Status block updated.
+
+### Safety / science
+
+- Rear-delt moves cite Cools 2016 (scapular stabilisers) + Prinold 2016 — both CLAUDE.md §15 Tier 1 (Push:Pull balance).
+- New skills cite Kotarsky 2018, Plotkin 2022, Oranchuk 2019 (isometric), Schoenfeld 2015 (tempo/eccentric for the press negative) — all §15 approved.
+- Push:pull ratio across AGRO remains ≤ 1:1 (pull-dominant) per the §15 hard rule — the rear-delt additions are pull-pattern and increase pull volume.
+
+### Files touched
+
+`plans/exercise-progressions.js`, `plans/agro.js`, `WORKOUTS_LIBRARY.md`, `app.html` (APP_VERSION + message), `sw.js` (CACHE_NAME v37→v38), `index.html` (all version surfaces + changelog), `CLAUDE.md`, `README.md`, `docs/WORKOUTS_LIBRARY_STATUS.md`, `docs/workout-engine-v9-roadmap.md`, `UPDATE_LOG.md`.
 
 ---
 
