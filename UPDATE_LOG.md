@@ -4,6 +4,45 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 8.4.0 — 2026-07-28
+
+**Scope:** Minor (new selectable plan: TEMP CUT). No schema change, no migration, no storage-shape change.
+**Banner:** shown — "New plan: TEMP CUT — a 10-day depletion protocol (Jul 29 → Aug 7 weigh-in). PSMF-style eating with a hard protein floor, daily two-session training at wave intensity, machine work + single-dumbbell + bodyweight, creatine + capped-caffeine preworkout protocol, low-residue finish, weigh-in procedure, and post-cut event-mode maintenance rules. Select it in Settings → Training Plan. Temporary by design — switch away after the block ends."
+**CACHE_NAME:** v37 → v38 (new file `plans/tempcut.js` added to the cache list — offline-first rule).
+
+### Versioning note
+
+CLAUDE.md §12 lists "new plan added" as a major-bump example. This release is deliberately **minor** (8.4.0, not 9.0.0): TEMP CUT is a temporary, owner-personal 10-day protocol designed to be switched away from after Aug 7 — not a permanent core plan — and v9.0.0 remains reserved for the Workout Engine per `docs/workout-engine-v9-roadmap.md`. Documented here so the deviation is explicit, not accidental.
+
+### What was added
+
+**`plans/tempcut.js` (new, ~318 lines)** — sixth plan, key `tempcut`, owner-designed aggressive mini-cut co-developed in-session against the CLAUDE.md §15 science rules:
+
+- **Structure:** 0 fast days (PSMF days are eating days with a low ceiling — no `fastDaysDow`), 0 light days, `caloriesMode: 'floor'` with `minCalories: 700`, `proteinFloorMultiplier: 1.8` (g/kg — muscle-sparing floor), `macroSplit` base [65% P / 15% C / 20% F] (at the 1,100 MOD ceiling ≈ 179g P / 41g C / 24g F), `activityByDayType { eatDay: 1.95 }` reflecting daily two-session training + 12-15k steps, plan-default `tdee: 4000`.
+- **WORKOUTS tab:** date-labelled 10-day calendar (Jul 29 → Aug 6 training, Fri Aug 7 weigh-in) at wave intensity — 3 BIG days (AM depletion circuit + swing/snatch EMOM finishers, PM hypertrophy session), 3 MOD (PM only + DB arms), 2 MED, 1 FLUSH (pre-scale smooth-tempo day, explicitly no new max-eccentric damage). Machine work integrated per owner's equipment: lat pulldown (wide + close-grip with drop-sets, scapular pulldowns), seated chest press (rest-pause + drop-set ladder), leg extension (high-rep only, knee-shear note). Single 10kg dumbbell programming throughout (rows, thrusters, push press, swings, snatches, suitcase carries, arms block). Daily extras card: steps, post-meal walk, stomach vacuums, neck protocol.
+- **NUTRITION tab:** macros-by-day-type card (BIG 700 / MOD 1,100 / MED 800-900 with per-type protein targets), live TODAY'S INTAKE bar vs the MOD ceiling, low-residue final-60h protocol, **creatine + preworkout protocol section** (creatine 5g daily / timing-irrelevant / no loading per ISSN 2018 + app rule; caffeine 250-300mg pre-AM = 2.5-3mg/kg ergogenic zone, hard cap 400mg/day, zero after 3PM; what-makes-you-last-2.5h priority list), daily supplement clock, six-layer belly-reduction guidance (subcutaneous / visceral / glycogen / gut content / cortisol water / TVA corset).
+- **RULES tab:** six red lines (caffeine cap, no water cutting ever, joint-pain swap rule, palpitations STOP rule carried over from AGRO, sleep auto-downgrade, protein untradeable), weigh-in protocol with expected-landing decomposition, event-mode Aug 7-11 maintenance (pre-accepted +2-3kg glycogen rebound, 35-min hotel room circuit, three food rules), and an explicit "this plan ends Aug 12 — switch away" card.
+- **Checklist:** mirrors AGRO's id semantics exactly (m1-m4 / f1-f5 / e1-e3 / s1-s3 / n2) so the AUTO_WORKOUT_IDS auto-derivation system (m3 = morning session, e2 = evening session) works unchanged; creatine added to the s1 morning-supplement subItems; water target 4.0L; `checklistFast` present (shape-required) but only reachable via a manual calendar fast-day toggle.
+
+**Registration (per CLAUDE.md §4, exactly two changes + cache):**
+- `plans/index.js` — import + `tempcut` key in `PLANS`.
+- `app.html` — native `<option value="tempcut">` + custom-dropdown option (both selector surfaces).
+- `sw.js` — `./plans/tempcut.js` added to the critical cache list; `CACHE_NAME` v37 → v38.
+
+### Verification
+
+- `node --check` on `plans/tempcut.js`, `plans/index.js` + inline-script extraction of `app.html`.
+- Module-import smoke: `plans/index.js` imported in node — `PLANS` assembles with 6 keys, `tempcut` present.
+- Field-conformance check vs the 5 existing plans: all required fields present (name/badge/badgeClass/descClass/goalMode/subtitle/banner*/tdee/fastDays*/lightDays*/macroSplit/proteinFloorMultiplier/caloriesMode/minCalories/activityByDayType/defaultTimes/weekIcons/morningSub/eveningSub/stretchSub 0-6/checklistNormal/checklistFast/foodGroup*/3 content functions); checklist ids unique within plan; `fastDaysDow.length === fastDaysPerWeek` (0/0).
+- Content-function runtime smoke: `workoutContent()` / `nutritionContent(s)` / `rulesContent(s)` executed with stubbed helpers — no ReferenceErrors, HTML returned from all three.
+- Version-sync grep per §12 checklist — no stale v8.3.4 / v37 refs outside historical entries.
+
+### Files changed
+
+`plans/tempcut.js` (new) · `plans/index.js` · `app.html` (selector options ×2, APP_VERSION 8.3.4 → 8.4.0, APP_VERSION_MSG) · `sw.js` (cache list + v38) · `index.html` (title, nav chip, hero, CTA note, footer stats, copyright, 9 cache-bust strings, changelog entry + demote) · `CLAUDE.md` (§3 six plans + TEMP CUT blurb, §13 plans list, version refs, line-count anchors) · `README.md` (6 plans, anchors) · `UPDATE_LOG.md` (this entry). `WORKING_VERSIONS.md` follows after on-device smoke.
+
+---
+
 ## Version 8.3.4 — 2026-05-14
 
 **Scope:** Patch (service-worker user-facing diagnostics + landing-page version audit fixes). No schema change. No data mutation.

@@ -950,6 +950,7 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
           <option value="bulk">DEFAULT BULK</option>
           <option value="maintenance">DEFAULT MAINTENANCE</option>
           <option value="agro">AGRO CUT CALISTHENICS PLAN</option>
+          <option value="tempcut">TEMP CUT (10-DAY DEPLETION)</option>
         </select>
         <div class="custom-select" id="planSelectCustom">
           <div class="custom-select-trigger" id="planSelectTrigger" onclick="toggleCustomSelect('planSelectCustom')">LITE PROTOCOL</div>
@@ -959,6 +960,7 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
             <div class="custom-select-option" data-value="bulk" onclick="selectCustomOption('planSelectCustom','planSelect',this)">DEFAULT BULK</div>
             <div class="custom-select-option" data-value="maintenance" onclick="selectCustomOption('planSelectCustom','planSelect',this)">DEFAULT MAINTENANCE</div>
             <div class="custom-select-option" data-value="agro" onclick="selectCustomOption('planSelectCustom','planSelect',this)">AGRO CUT CALISTHENICS PLAN</div>
+            <div class="custom-select-option" data-value="tempcut" onclick="selectCustomOption('planSelectCustom','planSelect',this)">TEMP CUT (10-DAY DEPLETION)</div>
           </div>
         </div>
         <div class="plan-description" id="planDescription">
@@ -1809,8 +1811,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '8.3.4';
-const APP_VERSION_MSG = 'Added a CHECK FOR UPDATES button in Settings → APP UPDATES that forces a service-worker update check on demand and shows your current cache version + service-worker state so you always know what code your device is actually running. Also fixed the landing page (index.html) which was stuck at v7.8.1 in the title, nav, footer, copyright and asset cache-bust strings — all 13 stale references corrected and the changelog updated to cover the six v8.x releases. Startup now logs the running APP_VERSION + schema version to the browser console so debugging "is the deploy live yet" is unambiguous. No data changes.';
+const APP_VERSION = '8.4.0';
+const APP_VERSION_MSG = 'New plan: TEMP CUT — a 10-day depletion protocol (Jul 29 → Aug 7 weigh-in). PSMF-style eating with a hard protein floor, daily two-session training at wave intensity (BIG/MOD/MED), machine work + single-dumbbell + bodyweight, creatine + capped-caffeine preworkout protocol, low-residue finish, weigh-in procedure, and post-cut event-mode maintenance rules. Select it in Settings → Training Plan. Temporary by design — switch away after the block ends.';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
 
