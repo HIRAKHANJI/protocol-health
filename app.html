@@ -970,6 +970,7 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
           <option value="bulk">DEFAULT BULK</option>
           <option value="maintenance">DEFAULT MAINTENANCE</option>
           <option value="agro">AGRO CUT CALISTHENICS PLAN</option>
+          <option value="tempcut">TEMP CUT (10-DAY DEPLETION)</option>
         </select>
         <div class="custom-select" id="planSelectCustom">
           <div class="custom-select-trigger" id="planSelectTrigger" onclick="toggleCustomSelect('planSelectCustom')">LITE PROTOCOL</div>
@@ -979,6 +980,7 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
             <div class="custom-select-option" data-value="bulk" onclick="selectCustomOption('planSelectCustom','planSelect',this)">DEFAULT BULK</div>
             <div class="custom-select-option" data-value="maintenance" onclick="selectCustomOption('planSelectCustom','planSelect',this)">DEFAULT MAINTENANCE</div>
             <div class="custom-select-option" data-value="agro" onclick="selectCustomOption('planSelectCustom','planSelect',this)">AGRO CUT CALISTHENICS PLAN</div>
+            <div class="custom-select-option" data-value="tempcut" onclick="selectCustomOption('planSelectCustom','planSelect',this)">TEMP CUT (10-DAY DEPLETION)</div>
           </div>
         </div>
         <div class="plan-description" id="planDescription">
@@ -1861,8 +1863,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '8.8.0';
-const APP_VERSION_MSG = 'Workout Engine (BETA): the AGRO plan now generates a separate MORNING card (activation, ~20 min) and a heavier EVENING card (main session, ~40-45 min) for each training day — exactly like the hand-built AGRO plan, at matching or greater density (a Monday is now a ~7-exercise morning + a ~14-exercise evening). Other plans stay single-session. Still opt-in and OFF by default — your normal workouts and data are unchanged until you turn it on.';
+const APP_VERSION = '8.9.0';
+const APP_VERSION_MSG = 'New plan: TEMP CUT — a 10-day depletion protocol (Jul 29 → Aug 7 weigh-in). PSMF-style eating with a hard protein floor, daily two-session training at wave intensity (BIG/MOD/MED), machine work + single-dumbbell + bodyweight, creatine + capped-caffeine preworkout protocol, low-residue finish, weigh-in procedure, and post-cut event-mode maintenance rules. Select it in Settings → Training Plan. Temporary by design — switch away after the block ends. (Also includes v8.8.0\'s Workout Engine BETA improvements — still opt-in, OFF by default.)';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
 
