@@ -4,6 +4,37 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 8.10.0 — 2026-07-30
+
+**Scope:** Minor (TEMP CUT rebuilt as v2 — full plan-content rework). No schema change, no migration, no new SK key.
+**Banner:** shown — "TEMP CUT v2 — the plan is rebuilt as a 14-day depletion block (Jul 30 → Aug 14 weigh-in): 92-hour fast opener with electrolyte + refeed scripting, bar-based PSMF at a 100g daily protein floor, a new A/B/C/D session rotation, checkpoints + a contingency gate + a pre-agreed 48h overtime extension, and creatine paused until day 15."
+**CACHE_NAME:** v43 → v44.
+
+### Versioning note
+
+8.10.0 is the LAST allowed minor before the rollover rule (§12) forces the next minor to v9.0.0 — which remains reserved for the Workout Engine consolidation. Any further releases before the engine consolidation must be patches (8.10.x).
+
+### What changed (full rewrite of `plans/tempcut.js`, ~370 lines)
+
+Owner reset the protocol mid-block (v1's 10-day window was disrupted on day 1). v2 spec co-designed in-session over three discussion rounds:
+
+- **Structure:** 14 days, Thu Jul 30 (D0, fast began 1PM) → Thu Aug 13 (D14), weigh-in Fri Aug 14 morning. Opens with a **92-hour water fast** (Thu 1PM → Mon Aug 3 9AM) tracked via the app's fast-session system — the 16h rule auto-marks Fri/Sat/Sun as fast days, so `checklistFast` is now a first-class fast-phase checklist (electrolyte clock: salt ×3-4/day + K-tabs ×2, capped 70-80% training, Sunday 72h+ = walk-only rule, scripted Monday refeed, STOP-cluster check item).
+- **Eating:** bar-based PSMF ~1,050 cal — 4 low-carb bars (~80g P) + one of tuna/5th bar/yogurt (label law: whey isolate first ingredient, <5g sugar alcohols) + carrots + pickles. **Protein floor 100g/day** (`proteinFloorMultiplier` 1.8 → 1.0 — owner's hard ceiling; retention tax acknowledged in-session, daily resistance training carries the load). `macroSplit` base [65,15,20] → [40,25,35] (bars are fat-carried). `tdee` 4000 → 3500; `activityByDayType` { eatDay 1.70, fastDay 1.45 }.
+- **Training:** new A/B/C/D rotation replacing v1's session set, built to the owner's focus list — A: shoulders all 3 heads + upper/lower chest (chest-press rest-pause + drop-set ladder, strict laterals, Y-T-W + rear-delt fly); B: back + hams + steel lower back (**sliding leg curls replace Nordics** — no equipment for Nordics; pulldown drop-sets; tibialis + forearm block); C: legs + **high-tension "brick" abs** (dragon flag negatives, RKC plank, DB-loaded crunch) + obliques + both calf heads; D: full pump + arms/forearms (reverse curls, wrist work, towel wring) + **neck protocol doubled**. Every session ends with a 10-min conditioning burst. **Steps requirement dropped** to the post-meal walk only (owner constraint; burn partially recovered via the bursts).
+- **Governance:** checkpoints (Aug 6 ≤96.8, Aug 10 ≤95.2), contingency gate (Sun Aug 9 >95.6 → second 38h fast / 850 cal / second burst), **pre-agreed 48h OVERTIME extension** (Fri 14 reads 90.1-91.5 → two 700-cal liquid days → Sunday Aug 16 final weigh-in), projected day-by-day morning weights in the WORKOUTS calendar card, energy-numbers cards (BMR 2,030 · existing TDEE ~2,500 · 14-day ledger OUT ~48-51k / IN ~11.5k / net ~37-39.5k ≈ 4.7-5.1kg fat, landing 91.1-92.2 central).
+- **Supplements:** creatine explicitly PAUSED until Aug 14 (water weight vs the target); event-mode section removed (event cancelled); caffeine framed as owner's throttle with the STOP cluster retained as law.
+- `app.html`: selector labels "(10-DAY" → "(14-DAY DEPLETION)" in both native select + custom dropdown.
+
+### Verification
+
+Re-ran the full plan-conformance suite post-rewrite: `node --check` on all touched files + extracted inline script · PLANS assembles 6 keys · all required fields, 7-day sub-maps complete, macroSplit rows sum to 100, checklist ids unique (incl. new wf1-wf8 fast list), m3/e2 AUTO-id semantics intact · all three content functions executed with stubbed helpers (incl. fast-day path and defaults path) · all 7 day-codes present in workout cards · §12 stale-ref grep clean.
+
+### Files changed
+
+`plans/tempcut.js` (rewritten) · `app.html` (selector labels, APP_VERSION → 8.10.0, APP_VERSION_MSG) · `sw.js` (v44) · `index.html` (full §12 sweep + changelog entry, v8.9.0 demoted) · `CLAUDE.md` (§3 TEMP CUT blurb → v2, version refs) · `README.md` (14-day) · `UPDATE_LOG.md` (this entry). `WORKING_VERSIONS.md` after on-device smoke.
+
+---
+
 ## Version 8.9.0 — 2026-07-28
 
 **Scope:** Minor (new selectable plan: TEMP CUT). No schema change, no migration, no storage-shape change.
