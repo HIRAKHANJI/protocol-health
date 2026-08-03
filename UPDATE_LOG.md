@@ -4,6 +4,34 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 8.10.1 — 2026-08-03
+
+**Scope:** Patch (TEMP CUT rebuilt as v3 "THE DUBAI 13" — full plan-content rework; forced to patch level by the §12 rollover rule, since v9.0.0 stays reserved for the Workout Engine consolidation). No schema change, no migration, no new SK key.
+**Banner:** none (patch — silent version update; SW reload banner fires from the cache bump).
+**CACHE_NAME:** v44 → v45.
+
+### What changed (full rewrite of `plans/tempcut.js`, ~330 lines)
+
+Owner reset the protocol again before the v2 window ran (the 92h opener was broken on day 2; flight to India moved the wall to Aug 15). v3 spec co-designed in-session 2026-08-02, plain-English edition requested and delivered:
+
+- **Structure:** 13 days, Sun Aug 2 (D1) → Fri Aug 14 (D13), weigh-in Sat Aug 15 morning before the flight — **no overtime exists this round**, so the gates fire earlier and harder. **6 scheduled water fasts** replacing the single long fast: two Sun+Mon back-to-back doubles (Aug 2-3, Aug 9-10) + two Thu singles (Aug 6, Aug 13). `fastDaysDow` [] → **[0,1,4]**, `fastDaysPerWeek` 0 → 3. Deep Mondays (~48h fasted) are WALK-ONLY by law; fast Sundays train Session B-lite @75%; fast Thursdays train moderate @80%. Real-2026 calendar correction baked in (Aug 2 = Sunday — the in-chat design's weekday labels were off by one; dates kept as law, weekdays fixed).
+- **Eating:** ~900 cal in a **9AM–3PM window** on the 7 eating days — protein powder ×2 scoops (50g P) + 2 clean bars (40g P) + rice cakes ×2-3 + carrots/pickles (salt supply). Protein floor stays 100g flat. `tdee` 3500 → 3400, `macroSplit` all rows → [45,30,25], `defaultTimes` window 09:00–15:00. FLUSH day (Fri Aug 14) ~750 cal, powder + rice cakes only; low-residue rules start Thu Aug 13 (bars out).
+- **Training:** A/B/C/D re-targeted to the owner's stated goals (grow abs + biceps + visible muscle, steel core, whale lower back, debloat/APT fix) with **every exercise carrying a plain-English how-to** in its card, plus a jargon dictionary card — A: chest + biceps + weighted abs (adds the **⭐ kneeling pulldown-machine ab crunch**, the progressive-load ab-grower); B: back + whale lower back (superman/bird-dog isometric block) + forearms; C: legs + side-abs + the **gut-tilt (APT) fix block** (glute bridge march, single-leg hip thrust, slow dead bugs, daily hip-flexor couch stretch); D: shoulders + arms rd 2 + steel core (dragon flag negatives, hollow hold, vacuum ladder, neck ×2). Anti-burnout contract: leave 2 in the tank everywhere except ONE marked finisher per session; exhaustion lives in the daily 10-min burst.
+- **New:** 🥷 sneaky-exercise drip table in RULES (+100-200 cal/day of invisible mini-exercises, two safety laws) + a matching `x1` SNEAKY checklist item.
+- **Governance:** two gates — Thu Aug 6 ≤98.2 · Mon Aug 10 ≤95.0 — with three pre-agreed levers (pick ONE at the gate): +2 bursts daily / eating days to 800 / extend the Aug 13 fast to Fri 9AM. 13-day ledger cards: OUT ~44,000-49,500 · IN ~6,300 · NET ~38,000-43,000 → lands 91.0-92.2 base, 90.1-91.2 with the extras column.
+- **Supplements: D3+K2 removed from the stack entirely (owner call).** Eating days: Osteocare ×2 + MCT gel + zinc M/W/F at 9AM · omega-3 · electrolyte pre-session · magnesium at bed. Fast days: MCT gel + zinc M/W/F + K-tabs ×2 + salt clock, no Osteocare. Creatine paused until Aug 15 (starts in India).
+- `app.html`: selector labels "(14-DAY DEPLETION)" → "(THE DUBAI 13)" in both native select + custom dropdown.
+
+### Verification
+
+Re-ran the plan-conformance suite: `node --check` on touched JS + extracted inline script · PLANS assembles 6 keys · required fields present, 7-day sub-maps complete, macroSplit rows sum to 100, checklist ids unique, m3/e2 AUTO-id semantics intact · all three content functions executed with stubbed helpers (fast-day + defaults paths) · §12 stale-ref grep clean.
+
+### Files changed
+
+`plans/tempcut.js` (rewritten) · `app.html` (selector labels, APP_VERSION → 8.10.1, APP_VERSION_MSG) · `sw.js` (v45) · `index.html` (full §12 sweep + changelog entry, v8.10.0 demoted) · `CLAUDE.md` (§3 TEMP CUT blurb → v3, cache + version refs) · `README.md` (Dubai 13) · `UPDATE_LOG.md` (this entry). `WORKING_VERSIONS.md` after on-device smoke.
+
+---
+
 ## Version 8.10.0 — 2026-07-30
 
 **Scope:** Minor (TEMP CUT rebuilt as v2 — full plan-content rework). No schema change, no migration, no new SK key.

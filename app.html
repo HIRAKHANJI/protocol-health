@@ -970,7 +970,7 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
           <option value="bulk">DEFAULT BULK</option>
           <option value="maintenance">DEFAULT MAINTENANCE</option>
           <option value="agro">AGRO CUT CALISTHENICS PLAN</option>
-          <option value="tempcut">TEMP CUT (14-DAY DEPLETION)</option>
+          <option value="tempcut">TEMP CUT (THE DUBAI 13)</option>
         </select>
         <div class="custom-select" id="planSelectCustom">
           <div class="custom-select-trigger" id="planSelectTrigger" onclick="toggleCustomSelect('planSelectCustom')">LITE PROTOCOL</div>
@@ -980,7 +980,7 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
             <div class="custom-select-option" data-value="bulk" onclick="selectCustomOption('planSelectCustom','planSelect',this)">DEFAULT BULK</div>
             <div class="custom-select-option" data-value="maintenance" onclick="selectCustomOption('planSelectCustom','planSelect',this)">DEFAULT MAINTENANCE</div>
             <div class="custom-select-option" data-value="agro" onclick="selectCustomOption('planSelectCustom','planSelect',this)">AGRO CUT CALISTHENICS PLAN</div>
-            <div class="custom-select-option" data-value="tempcut" onclick="selectCustomOption('planSelectCustom','planSelect',this)">TEMP CUT (14-DAY DEPLETION)</div>
+            <div class="custom-select-option" data-value="tempcut" onclick="selectCustomOption('planSelectCustom','planSelect',this)">TEMP CUT (THE DUBAI 13)</div>
           </div>
         </div>
         <div class="plan-description" id="planDescription">
@@ -1863,8 +1863,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '8.10.0';
-const APP_VERSION_MSG = 'TEMP CUT v2 — the plan is rebuilt as a 14-day depletion block (Jul 30 → Aug 14 weigh-in): 92-hour fast opener with electrolyte + refeed scripting, bar-based PSMF at a 100g daily protein floor, a new A/B/C/D session rotation (all delt heads, back + steel lower back, sliding-leg-curl hamstrings, tibialis, forearms, calves, high-tension brick abs, obliques, upper + lower chest, daily neck work), checkpoints + a contingency gate + a pre-agreed 48h overtime extension, and creatine paused until day 15. Full day-by-day calendar with projected weights in the WORKOUTS and RULES tabs.';
+const APP_VERSION = '8.10.1';
+const APP_VERSION_MSG = 'TEMP CUT v3 — THE DUBAI 13: 13-day pre-flight block (Aug 2 → Aug 14, weigh-in Sat Aug 15). 6 water fasts (two Sun+Mon doubles + two Thu singles), 900-cal 9AM–3PM eating days built on protein powder + 2 clean bars + rice cakes at a 100g protein floor, plain-English A/B/C/D sessions with the pulldown-machine ab crunch and the gut-tilt (APT) fix block, two hard gates (Aug 6 ≤98.2 · Aug 10 ≤95.0) with pre-agreed levers, the sneaky-exercise drip table in RULES, and a low-residue flush finish. D3+K2 removed from the supplement stack. Creatine starts Aug 15.';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
 
