@@ -4,6 +4,24 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 8.10.2 — 2026-08-03
+
+**Scope:** Patch (TEMP CUT usability — TODAY strip on the WORKOUTS tab). No schema change, no migration, no new SK key.
+**Banner:** none (patch).
+**CACHE_NAME:** v45 → v46.
+
+### What changed
+
+Owner reported (day 2, deep-fast Monday): "no workout mentioned for Monday" and "the workout card doesn't open for the day I'm on." Headless reproduction (Playwright against the live plan on a simulated Monday) showed the auto-open logic working correctly — the DEEP MONDAYS card (data-days MON) auto-expands — but it sits fifth on the page below four collapsed session cards, so the tab appears to open with nothing for today. Mondays deliberately have no lettered session (walk-only at ~48h fasted).
+
+- `plans/tempcut.js` `workoutContent()` now renders a **computed TODAY strip** as the first card: today's day-of-week resolves to what today is (session letter per date, fast type, walk-only law, gate reminders) and where today's auto-expanded card sits. Content-only change; no shared renderer/UI code touched.
+
+### Files changed
+
+`plans/tempcut.js` (TODAY strip) · `app.html` (APP_VERSION → 8.10.2, APP_VERSION_MSG) · `sw.js` (v46) · `index.html` (full §12 sweep + changelog entry, v8.10.1 demoted) · `CLAUDE.md` / `README.md` (version refs) · `UPDATE_LOG.md` (this entry).
+
+---
+
 ## Version 8.10.1 — 2026-08-03
 
 **Scope:** Patch (TEMP CUT rebuilt as v3 "THE DUBAI 13" — full plan-content rework; forced to patch level by the §12 rollover rule, since v9.0.0 stays reserved for the Workout Engine consolidation). No schema change, no migration, no new SK key.

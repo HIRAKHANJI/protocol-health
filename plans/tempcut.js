@@ -123,8 +123,27 @@ export const tempcut = {
     foodGroupColor: '#ff5566',
 
     workoutContent() {
+      // "TODAY" strip — computed at render time so the tab always opens with
+      // today's marching orders on top (today's matching card auto-expands
+      // below, but it can sit under collapsed session cards — this points at it).
+      const _todayByDow = {
+        0: { label:'SUNDAY — FAST DAY 1 OF THE DOUBLE', what:'SESSION B-LITE @75% + burst. Open the SESSION B card below — one set less on everything, nothing near failure.' },
+        1: { label:'MONDAY — DEEP FAST ~48H', what:'WALK ONLY — 40-60 min easy + hips + vacuums. NO lifting session today by design (48h fasted = lifting eats muscle). Your card: DEEP MONDAYS, already open below. Aug 10: GATE 2 ≤95.0.' },
+        2: { label:'TUESDAY — EATING DAY (900 · 9AM-3PM)', what:'Aug 4: SESSION A (chest + biceps + weighted abs) · Aug 11: SESSION C (legs + side-abs + gut-tilt fix). Card is open below.' },
+        3: { label:'WEDNESDAY — EATING DAY (900 · 9AM-3PM)', what:'Aug 5: SESSION B (back + whale lower back + forearms) · Aug 12: SESSION D (shoulders + arms + steel core). Card is open below.' },
+        4: { label:'THURSDAY — FAST DAY', what:'Aug 6: SESSION C-MODERATE @80% fasted + GATE 1 ≤98.2 · Aug 13: SESSION A-MODERATE @80%, low-residue starts tonight. Card is open below.' },
+        5: { label:'FRIDAY', what:'Aug 7: eating day — SESSION D (shoulders + arms + steel core) · Aug 14: FLUSH — smooth circuit ×3 only, ~750 cal, bed by 10. Card is open below.' },
+        6: { label:'SATURDAY', what:'Aug 8: eating day — SESSION A (chest + biceps + weighted abs) · Aug 15: WEIGH-IN morning → flight → creatine. The block is over.' }
+      };
+      const _t = _todayByDow[new Date().getDay()];
       return `
       <div class="section-title">TEMP CUT v3 <span>— THE DUBAI 13</span></div>
+
+      <div class="rule-card" style="border-left-color:var(--accent)">
+        <div class="rule-num" style="color:var(--accent)">▶ TODAY — ${_t.label}</div>
+        <div class="rule-text">${_t.what}</div>
+      </div>
+
       <p class="section-note">Sun Aug 2 → Fri Aug 14 · WEIGH-IN Sat Aug 15 morning, then the flight. One ~100-min evening session/day on the A/B/C/D rotation, every exercise explained in plain English below. The exhaustion lives in the 10-min burst — muscles stay protected, only the lungs suffer.</p>
 
       <div class="rule-card" style="border-left-color:#ff5566">
