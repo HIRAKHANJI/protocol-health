@@ -4,6 +4,29 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 8.10.3 — 2026-08-03
+
+**Scope:** Patch (TEMP CUT v3.1 — calendar recalendared to the owner's actual fast pattern, reported on day 1). No schema change, no migration, no new SK key.
+**Banner:** none (patch).
+**CACHE_NAME:** v46 → v47.
+
+### What changed (rewrite of `plans/tempcut.js` calendar layer; sessions unchanged)
+
+Owner reported living a different fast pattern than the shipped v3 calendar: fasts on **Wed/Sat/Sun**, each running **6PM the evening before → 9AM the morning after** (Wed singles ≈ 39h, weekend Sat+Sun double ≈ 63h), with Monday a normal eating/training day (owner ate the full 900 template and asked for Monday + Thursday sessions).
+
+- `fastDaysDow` [0,1,4] → **[0,3,6]** (same DOW set as AGRO).
+- Training week is now **Mon=A · Tue=B · Thu=C · Fri=D** (all four eating days carry a full session; Fri Aug 14 overrides to FLUSH). Fast-day movement: Sat light full-body @75%, Sun WALK ONLY (law), Wed 10-min burst + walk + optional light circuit.
+- Session content unchanged — cards re-labelled/re-dayed only; dedicated Wednesday-fast and Saturday-fast cards added; Sunday deep card retained.
+- **Gates re-anchored to end-of-fast mornings, weighed BEFORE breaking the fast:** Thu Aug 6 9AM ≤98.2 (after the Wed fast) · Mon Aug 10 9AM ≤95.0 (after the weekend double). Lever (c) updated: extend the Wed Aug 12 fast through Fri 9AM.
+- Ledger re-run for the real structure (4 fasts + 7 eating days + flush): OUT ~38,000-41,500 base · IN ~7,050 · NET ~31,000-34,500 — landing ~91.5-92.5 base, ~90.5-91.5 with extra bursts + both gates + clean finish. Honest note in-card that two fewer zero-days than the 6-fast sketch makes the extras column matter more.
+- TODAY strip, morning/evening/stretch sub-texts, checklists (wf3/wf4 fast-window spec, e2 session-day listing, m3/m4 gate weigh-first), and supplement clock all re-aligned. D3+K2 stays out.
+
+### Files changed
+
+`plans/tempcut.js` (recalendar) · `app.html` (APP_VERSION → 8.10.3, APP_VERSION_MSG) · `sw.js` (v47) · `index.html` (full §12 sweep + changelog entry, v8.10.2 demoted) · `CLAUDE.md` (§3 blurb → v3.1 pattern, version refs) · `README.md` · `UPDATE_LOG.md` (this entry).
+
+---
+
 ## Version 8.10.2 — 2026-08-03
 
 **Scope:** Patch (TEMP CUT usability — TODAY strip on the WORKOUTS tab). No schema change, no migration, no new SK key.
