@@ -4,6 +4,31 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 8.10.4 — 2026-08-03
+
+**Scope:** Patch (TEMP CUT v3.2 — Monday rest + burn redistribution; owner-approved after discussion). No schema change, no migration, no new SK key.
+**Banner:** none (patch).
+**CACHE_NAME:** v47 → v48.
+
+### What changed (`plans/tempcut.js` restructure; exercise content preserved)
+
+Owner requested (after an unplanned rest day + ~800-cal social meal): Monday becomes a no-workout rest day; the other days must burn more. Owner's approval conditions: muscle goals from the previous version must keep applying, and fast days must burn a chunky amount cleanly.
+
+- **Monday = official REST day** — eats the full 900 template, post-meal walk + vacuums + sneaky drips only; dedicated MONDAY REST card (GATE 2 weigh-first retained on Aug 10). Rationale: Monday follows the ~63h weekend double, the worst training slot.
+- **Mandatory DOUBLE BURST** (2×10 min: one mid-day, one post-session) on Tue (B) / Thu (C) / Fri (D) — new RULE 05.
+- **Session A relocated to Saturday fasted @80%** with an explicit no-finisher/no-drop-set/no-burnout contract card row (chest + biceps + weighted abs preserved; single burst + 30-40 min walk).
+- **Wednesday fast upgraded to a burn day:** light circuit ×3 @75% now standard + two bursts + 60-min walk (~550-700 deliberate).
+- **Sunday walk extended to 60-75 min** (walk-only law unchanged).
+- **New MUSCLE GOALS card** documenting ≥2 weekly touches per target after the reshuffle (abs A+D+vacuums · biceps A+B+D · shoulders A+D · back/lower back B+carries · legs/calves C+Wed circuit · forearms A+B).
+- Ledger card re-run: Monday's dropped session (~-1,000/wk) vs doubles (+~780/wk) + Wed upgrade (+~250/wk) + Sat A vs light circuit (+~450/wk) = net positive. Fast-day caps framed as what keeps the fast-day burn clean (fasted lifting near failure eats muscle). `activityByDayType.fastDay` 1.45 → 1.50.
+- TODAY strip, sub-texts, checklists (m3/e2/wf4), and rules re-aligned. Gates, diet, low-residue finish, supplement clock (D3+K2 out) unchanged.
+
+### Files changed
+
+`plans/tempcut.js` (v3.2 restructure) · `app.html` (APP_VERSION → 8.10.4, APP_VERSION_MSG) · `sw.js` (v48) · `index.html` (full §12 sweep + changelog entry, v8.10.3 demoted) · `CLAUDE.md` (§3 blurb → v3.2, version refs) · `README.md` · `UPDATE_LOG.md` (this entry).
+
+---
+
 ## Version 8.10.3 — 2026-08-03
 
 **Scope:** Patch (TEMP CUT v3.1 — calendar recalendared to the owner's actual fast pattern, reported on day 1). No schema change, no migration, no new SK key.
