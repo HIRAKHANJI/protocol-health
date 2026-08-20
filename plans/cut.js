@@ -226,7 +226,7 @@ export const cut = {
     </div>
     ${_supOn ? `
     <div class="section-title" style="margin-top:12px">SUPPLEMENTS <span>(OPTIONAL)</span></div>
-    <div class="rule-card"><div class="rule-num">CREATINE</div><div class="rule-text">5g/day. ISSN 2018: strongest evidence for preserving muscle during deficit. Take daily, timing irrelevant.</div></div>
+    <div class="rule-card"><div class="rule-num">CREATINE</div><div class="rule-text">5g/day, NO loading phase. ISSN 2018: strongest evidence for preserving muscle during deficit. Take daily, timing irrelevant.</div></div>
     <div class="rule-card"><div class="rule-num">VITAMIN D3</div><div class="rule-text">2,000\u20134,000 IU/day with food. NIH UL: 4,000 IU/day.</div></div>
     <div class="rule-card"><div class="rule-num">OMEGA-3</div><div class="rule-text">2,000mg EPA+DHA/day with largest meal. Heart + joint health.</div></div>
     <div class="rule-card"><div class="rule-num">MAGNESIUM</div><div class="rule-text">200\u2013350mg/day before bed. Sleep + muscle recovery. NIH supplemental UL: 350mg.</div></div>

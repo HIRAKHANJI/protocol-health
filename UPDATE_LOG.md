@@ -4,6 +4,44 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 8.10.5 — 2026-08-03
+
+**Scope:** Patch (deep-dive audit release — 10 high-severity fixes + 12 medium/low fixes across data layer, goal calculator, TDEE calibration, calendar/fast logic, workout engine, and plan content). No schema change, no migration, no new SK key.
+**Banner:** none (patch).
+**CACHE_NAME:** v48 → v49.
+
+### Context
+
+Owner requested a full-app deep-dive ("There has to be a lot wrong with the app… hunt/fix all those"). Six parallel read-only investigations ran against v8.10.4; every finding was re-verified against source (two prior-audit claims were refined in the process — the fast-editor DELETE button itself was clickable; it was its confirm dialog that was buried). Full findings register — fixed, deferred, and the science-layer review — lives in `docs/v8.10.5-audit-report.md`.
+
+### Critical/high fixes
+
+- **Migration auto-backups are now restorable** (`app.html` `_commitBackupRestore`): the runner writes raw `ph_*` keys but restore looked up SK logical names — every auto-backup key was silently skipped while the status line claimed success. Restore now reverse-maps raw keys, reports honest restored/skipped counts, and no longer misattributes skips to "a newer app version".
+- **Pre-restore snapshot**: every restore now auto-downloads a snapshot of the current data first — restore was the only destructive full overwrite with no undo.
+- **Eternal-splash boot failures fixed**: the four module gates now time out at 15s → splash removed + actionable alert (was: forever-pulsing opaque splash with console-only errors). Migration-failure alerts also drop the splash first.
+- **Dialog stacking**: `confirmDialog`/`alertDialog` z-index 9000 → 10500 — above the z-9999 splash and the z-9100 fast-edit modal. Fixes the invisible migration-failure alert AND the dead fast-session DELETE flow (its confirm opened behind the editor).
+- **TDEE manual-override freeze respected**: `autoFillTDEE` (auto-invoked from openSettings + plan-dropdown changes) was silently overwriting a frozen TDEE that `recomputeTDEE` correctly protects.
+- **Bulk/maintenance goal math models light eating days**: the promised bulk surplus could be a real-world deficit (5×2700 + 2×1440 < 7×2400). MODE A raises eating-day calories to cover the light-day deficit; MODE B and maintenance report the true weekly balance; `calcAdjust` gets the light-day term and loses the `Math.abs` that flipped a bulk deficit into a fake gain rate.
+- **Calibration activity inference un-deadened**: the 28-day gate was mathematically unreachable (a 28-day window spans max 27) — same off-by-one class as the fixed v7.10.0 calibration gate.
+- **Zero-tick days no longer poison calibration**: days where the user logged food/weight but never touched the checklist scored 0% → "low-compliance" exclusion → 3+ in a row read as a phantom sickness pattern deferring calibration forever. Low-compliance now requires actual checklist interaction.
+- **Engine falls back on unsupported plans**: engine ON + TEMP CUT rendered a fake all-rest week (7 error-days → "Rest") replacing the real program; all-error weeks now throw into the existing legacy-content fallback. `isPlanEligible` also blocks >120 kg on tempcut now.
+- **`plans/bulk.js` argument-shift fixed** (comma-for-`+` at the SAT card): its rows rendered in the stretch wrapper, `data-days` was lost, and the card's 5 rows counted into EVERY day's workout totals.
+- **TEMP CUT Friday counting fixed**: Session D + FLUSH + EVERY DAY cards pooled into one 23-row evening aggregate, making the e2 auto-tick nearly unreachable on Aug 7 and guaranteed-failed on Aug 14. FLUSH/D are date-gated at render time; the EVERY DAY constants card now classifies `daily` and stays out of session aggregates.
+
+### Medium/low fixes
+
+Fast-day −20% engine volume reduction actually applies (token mismatch made it a no-op) · protein-floor advisory uses the previewed plan's real macro split (was a fictional 50% + the saved plan) · fast↔light cross-map unsets recorded (no more days that are both fast and light after ADJUST) · day-modal rest cards no longer emit an orphan header + unclosed div · creatine mentions carry the §15-mandated "NO loading phase" in cut/bulk/maintenance/tempcut · manage-schedule Day N caps at total · `PLAN_ACTIVITY_DEFAULTS.tempcut` added · aggressive-floor comment drift (400→300) corrected.
+
+### Verification
+
+Plan-conformance suite ALL CHECKS PASSED · `node --check` clean on all modules + 7 inline app.html script blocks · engine behavior verified under Node (fast-day cut applies, tempcut template absence detected, 125 kg tempcut blocked) · headless Playwright against the real app: engine+tempcut falls back to Dubai-13 content, raw-key backup restores (weights land in `ph_wt_v1`), dialogs at z-10500, EVERY DAY card classifies `daily` · §12 stale-ref grep clean.
+
+### Files changed
+
+`app.html` (restore/boot/dialog/calculator/classify fixes, APP_VERSION → 8.10.5) · `modules/calibration.js` · `modules/workout-engine.js` · `modules/engine-helpers.js` · `modules/calendar.js` · `plans/bulk.js` · `plans/tempcut.js` · `plans/cut.js` · `plans/maintenance.js` · `sw.js` (v49) · `index.html` (§12 sweep + changelog) · `CLAUDE.md` / `README.md` (refs) · `docs/v8.10.5-audit-report.md` (new) · `UPDATE_LOG.md` (this entry).
+
+---
+
 ## Version 8.10.4 — 2026-08-03
 
 **Scope:** Patch (TEMP CUT v3.2 — Monday rest + burn redistribution; owner-approved after discussion). No schema change, no migration, no new SK key.

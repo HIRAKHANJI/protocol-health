@@ -138,6 +138,15 @@ export const tempcut = {
         6: { label:'SATURDAY — FASTED SESSION A DAY', what:'Aug 8: SESSION A-MODERATE @80% this evening — chest + biceps + weighted abs, NO finisher, 2 in the tank everywhere + 30-40 min walk · Aug 15: WEIGH-IN morning → flight → creatine.' }
       };
       const _t = _todayByDow[new Date().getDay()];
+      // v8.10.5 audit fix: Session D and FLUSH both claimed 'FRI', so every
+      // Friday counted BOTH cards' rows into the evening session aggregate
+      // (23 rows) — making the e2 auto-tick nearly unreachable on Aug 7 and
+      // guaranteed-failed on Aug 14. data-days can't express dates, so gate
+      // by date at render time: 'NONE' matches no day-of-week token, keeping
+      // the off-date card visible but excluded from auto-open and counting.
+      const _isFlushFriday = todayStr() === '2026-08-14';
+      const _dDays = _isFlushFriday ? 'NONE' : 'FRI';
+      const _flushDays = _isFlushFriday ? 'FRI' : 'NONE';
       return `
       <div class="section-title">TEMP CUT v3.2 <span>— THE DUBAI 13</span></div>
 
@@ -217,7 +226,7 @@ export const tempcut = {
         exRow('Arms: curls + overhead triceps','Curls 2×12 · DB behind the head, elbows pointing up, extend to straight 3×12/arm.','2 moves')+
         exRow('NECK ROUTINE ×2 TODAY + SECOND BURST','Full 5-min neck protocol morning AND evening. First burst was mid-day; this one closes. The weekend double starts 6PM tonight.','2×5 + 10 min'),
         stretchRow('Doorframe chest + rear shoulder + wrists + hip-flexor stretch','','8 min'),
-        'FRI'
+        _dDays
       )}
 
       ${workoutCard('SESSION A — CHEST + BICEPS + WEIGHTED ABS · FASTED @80%','SATURDAY AUG 8 (AUG 15 = WEIGH-IN) · NO FINISHER',
@@ -271,7 +280,7 @@ export const tempcut = {
         exRow('Circuit ×3, everything smooth','Chest press ×15 · pulldown ×15 · goblet ×15 · leg extension ×20 · DB row ×10/arm — smooth tempo, nowhere near failure.','3 rounds')+
         exRow('Powder + rice cakes only · bed by 10','Tomorrow: wake → bathroom → scale → write it down → real breakfast → flight → creatine begins.','—'),
         stretchRow('Everything, nothing aggressive','','12 min'),
-        'FRI'
+        _flushDays
       )}
 
       <div class="section-title">DAILY <span>CONSTANTS</span></div>
@@ -344,7 +353,7 @@ export const tempcut = {
       <div class="section-title" style="margin-top:8px">SUPPLEMENT <span>CLOCK — D3+K2 IS OUT</span></div>
       ${ruleCard('FAST DAYS (WED 5 · SAT 8 · SUN 9 · WED 12)','Wake: MCT gel · zinc if Mon/Wed/Fri · K-tab mid-AM + mid-PM · salt ⅓ tsp ×3 (×4 Sundays) · magnesium at bed.','NO Osteocare — calcium needs food. Preworkout is your throttle; the STOP rule is extra-live during fasted training.','#82e0aa')}
       ${ruleCard('EATING DAYS (MON/TUE/THU/FRI)','9AM with first food: Osteocare ×2 + MCT gel + zinc (Mon/Wed/Fri) · omega-3 with the biggest feeding · electrolyte tab + 500ml water pre-session · magnesium at bed.','Magnesium every night, no exceptions — at 6h sleep it carries your recovery.','#82e0aa')}
-      ${ruleCard('CREATINE — STARTS SAT AUG 15, IN INDIA','5g/day from weigh-in morning onward, with the rebuild phase.','Its ~1kg intramuscular water fights the 90.0 target and its benefits arrive after the window. Different molecule than your preworkout — this one is my call, that one is yours.','#82e0aa')}
+      ${ruleCard('CREATINE — STARTS SAT AUG 15, IN INDIA','5g/day, NO loading phase (ISSN 2018) — from weigh-in morning onward, with the rebuild phase.','Its ~1kg intramuscular water fights the 90.0 target and its benefits arrive after the window. Different molecule than your preworkout — this one is my call, that one is yours.','#82e0aa')}
 
       <div class="section-title" style="margin-top:8px">THE GUT — <span>DEBLOAT STACK</span></div>
       ${ruleCard('FAT + GUT CONTENT','The net deficit kills the fat layer — slowly, systemically, no spot reduction. The fasts + 3PM cutoff empty the gut every single evening.','Visceral fat responds FASTEST to daily work — the waistband loosens before the mirror does.')}

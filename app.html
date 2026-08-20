@@ -1231,7 +1231,7 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
 </div>
 
 <!-- ══ GENERIC CONFIRM DIALOG (replaces native confirm/alert — blocked in sandboxed iframes) ══ -->
-<div class="popup-overlay" id="confirmDialog" style="z-index:9000">
+<div class="popup-overlay" id="confirmDialog" style="z-index:10500">
   <div class="popup-box">
     <h3 id="confirmTitle">CONFIRM</h3>
     <p id="confirmMsg" style="font-size:0.82rem;color:var(--muted);line-height:1.6;margin:0 0 14px"></p>
@@ -1249,7 +1249,7 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
 </div>
 
 <!-- ══ ALERT DIALOG (replaces native alert) ══ -->
-<div class="popup-overlay" id="alertDialog" style="z-index:9000">
+<div class="popup-overlay" id="alertDialog" style="z-index:10500">
   <div class="popup-box">
     <p id="alertMsg" style="font-size:0.82rem;color:var(--muted);line-height:1.6;margin:0 0 14px"></p>
     <div class="popup-btns">
@@ -1863,8 +1863,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '8.10.4';
-const APP_VERSION_MSG = 'TEMP CUT v3.2 — Monday is now the rest day (recovery after the 63h weekend double). The burn moved: mandatory double bursts on Tue/Thu/Fri sessions, Session A relocated to Saturday fasted at 80% (no finisher), Wednesday fast upgraded to circuit + two bursts + 60-min walk, Sunday walk extended. All muscle goals keep their weekly coverage — see the MUSCLE GOALS card on WORKOUTS.';
+const APP_VERSION = '8.10.5';
+const APP_VERSION_MSG = 'Deep-dive audit release — 10 high-severity fixes: migration auto-backups are now actually restorable (+ a pre-restore snapshot downloads before any restore), boot failures show an error instead of an eternal splash, dialogs render above all modals (fast-editor delete works again), the TDEE manual-override freeze is respected everywhere, bulk-mode goal math now models light eating days, TDEE calibration\'s activity inference and zero-tick-day handling are fixed, the workout engine falls back to plan workouts on unsupported plans, and TEMP CUT\'s Friday/EVERY-DAY cards no longer pollute the auto-tick counters. Full findings register in docs/v8.10.5-audit-report.md.';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
 
@@ -1889,7 +1889,7 @@ function classifyWorkoutCard(card) {
   const title = (card.querySelector('h3')?.textContent || '').toUpperCase();
   if(title.includes('MORNING') || title.includes('ACTIVATION')) return 'morning';
   if(title.includes('REST') || title.includes('WALK')) return 'rest';
-  if(title.includes('NECK')) return 'daily';
+  if(title.includes('NECK') || title.includes('EVERY DAY') || title.includes('NON-NEGOTIABLE')) return 'daily';
   return 'evening'; // everything else: evening, push, pull, lower, full body, run, skill, conditioning
 }
 
@@ -3624,6 +3624,15 @@ function renderWorkouts() {
     try {
       const enginePlan = (s.plan === 'default' || !s.plan) ? 'lite' : s.plan;
       const week = generateWeek(enginePlan, buildEngineUserState(enginePlan));
+      // v8.10.5 audit fix: a plan with no SESSION_TEMPLATES entry (e.g.
+      // tempcut) produced 7 error-days that rendered as a fake all-rest week
+      // — replacing the plan's real program with "Rest" ×7 and never hitting
+      // the legacy fallback because nothing threw. Throw so the catch below
+      // falls through to the plan's built-in workoutContent().
+      if (week && week.eligible && Array.isArray(week.days) && week.days.length &&
+          week.days.every(d => d && d.error)) {
+        throw new Error('engine has no session template for plan: ' + enginePlan);
+      }
       container.innerHTML = renderEngineWeek(week, { focusLabel: engineFocusLabel(s.engineFocus) });
       container.querySelectorAll('.workout-card').forEach(card => {
         const h = card.querySelector('.workout-card-header'); if (!h) return;
@@ -4285,7 +4294,8 @@ const PLAN_ACTIVITY_DEFAULTS = {
   agro:        '1.55',  // AGRO weekly avg = 1.55 (4 eat × 1.70 + 3 fast × 1.35)
   cut:         '1.55',  // CUT eat-day = 1.55, no fast days
   bulk:        '1.55',  // BULK weekly avg ≈ 1.51 (5 eat × 1.55 + 2 light × 1.40)
-  maintenance: '1.375'  // MAINT weekly avg ≈ 1.36 (6 eat × 1.375 + 1 light × 1.30)
+  maintenance: '1.375', // MAINT weekly avg ≈ 1.36 (6 eat × 1.375 + 1 light × 1.30)
+  tempcut:     '1.55'   // TEMP CUT weekly avg = 1.61 (4 eat × 1.70 + 3 fast × 1.50) — nearest dropdown step
 };
 
 // ─── v7.9.0: TDEE MODEL UPGRADE ─────────────────────────────────────────────
@@ -4754,6 +4764,10 @@ function syncCurrentKgFromLatestWeight() {
 }
 
 function autoFillTDEE() {
+  // v8.10.5 audit fix: honor the TDEE manual-override freeze. This function
+  // is auto-invoked from openSettings and every plan-dropdown change — it was
+  // silently overwriting a frozen TDEE that recomputeTDEE correctly protects.
+  if (getSettings().tdeeManualOverride) return;
   const tdee = computeAutoTDEE();
   if(tdee && tdee > 0) {
     const field = document.getElementById('settingTdee');
@@ -4953,7 +4967,12 @@ function calcDuration() {
 
   // plan already defined above (planMode check)
   const fastDaysPerWeek = plan.fastDaysPerWeek || 0;
-  const eatDaysPerWeek  = 7 - fastDaysPerWeek;
+  // v8.10.5 audit fix: light eating days (~60% TDEE, auto-set by bulk/
+  // maintenance schedules) were priced as full eating days, so the promised
+  // bulk surplus could actually be a real-world deficit. Model them.
+  const lightDaysPerWeek = plan.lightDaysPerWeek || 0;
+  const lightDayDeficitWk = lightDaysPerWeek * 0.4 * tdee; // each light day ≈ tdee−0.6·tdee below maintenance
+  const eatDaysPerWeek  = 7 - fastDaysPerWeek - lightDaysPerWeek;
   const totalKg         = Math.abs(curKg - tgtKg);  // always positive — weight to change
   const totalCalChange  = totalKg * 7700;            // total calories to gain or lose
 
@@ -4963,9 +4982,12 @@ function calcDuration() {
   if(planMode === 'maintenance') {
     calcCals = hasCalOverride ? calOverride : tdee;
     calcDays = (!isNaN(totalDays) && totalDays > 0) ? totalDays : 90; // default 90-day schedule
-    weeklySurplusOrDeficit = 0;
-    dailySurplusOrDeficit = 0;
-    impliedRate = '0.00';
+    // v8.10.5 audit fix: report the true weekly balance including light days
+    // instead of a hardcoded 0 — eating at TDEE with 1 light day/week is a
+    // small deliberate deficit, not perfect balance.
+    weeklySurplusOrDeficit = (eatDaysPerWeek * (calcCals - tdee)) - lightDayDeficitWk;
+    dailySurplusOrDeficit = weeklySurplusOrDeficit / 7;
+    impliedRate = (weeklySurplusOrDeficit / 7700).toFixed(2);
   }
   // ── BULK MODE — surplus math (target > current) ──
   else if(planMode === 'bulk') {
@@ -4973,18 +4995,24 @@ function calcDuration() {
       const requiredNetSurplus = totalCalChange / totalDays;
       dailySurplusOrDeficit = requiredNetSurplus;
       weeklySurplusOrDeficit = dailySurplusOrDeficit * 7;
-      calcCals = Math.round(tdee + requiredNetSurplus);
+      // v8.10.5 audit fix: eating days must also cover the light days'
+      // built-in deficit, or the schedule under-delivers the surplus.
+      calcCals = eatDaysPerWeek > 0
+        ? Math.round(tdee + (requiredNetSurplus * 7 + lightDayDeficitWk) / eatDaysPerWeek)
+        : Math.round(tdee + requiredNetSurplus);
       calcDays = totalDays;
       impliedRate = (weeklySurplusOrDeficit / 7700).toFixed(2);
     } else if(hasCalOverride) {
       calcCals = calOverride;
-      const netDailySurplus = calcCals - tdee;
+      // v8.10.5 audit fix: net weekly surplus must subtract the light days.
+      const weeklyNetSurplus = (eatDaysPerWeek * (calcCals - tdee)) - lightDayDeficitWk;
+      const netDailySurplus = weeklyNetSurplus / 7;
       if(netDailySurplus <= 0) {
         flagEl.textContent = '✗ CALORIES MUST BE ABOVE TDEE FOR BULK';
         flagEl.style.cssText='display:block;background:rgba(255,68,68,0.12);color:var(--danger);padding:7px 10px;border-radius:6px;font-size:0.75rem;font-weight:700;letter-spacing:1px';
         resultEl.classList.add('visible'); schedBtn.classList.remove('visible'); schedBtnReal.style.display='none'; return;
       }
-      weeklySurplusOrDeficit = netDailySurplus * 7;
+      weeklySurplusOrDeficit = weeklyNetSurplus;
       dailySurplusOrDeficit = netDailySurplus;
       calcDays = Math.ceil(totalCalChange / netDailySurplus);
       impliedRate = (weeklySurplusOrDeficit / 7700).toFixed(2);
@@ -5157,7 +5185,10 @@ function calcDuration() {
     // this correctly; the viability check was the only place still using
     // 1.3, producing false-alarm "PROTEIN FLOOR IMPOSSIBLE" warnings on
     // plans that declare a lower multiplier (e.g. LITE, MAINTENANCE).
-    const _planForFloor = (typeof getActivePlan === 'function') ? getActivePlan() : null;
+    // v8.10.5 audit fix: use the plan selected in the calculator (preview),
+    // falling back to the saved plan — the floor check used the saved plan
+    // while the rest of the calculator used the previewed one.
+    const _planForFloor = (typeof plan !== 'undefined' && plan) ? plan : ((typeof getActivePlan === 'function') ? getActivePlan() : null);
     const _pfm = (_planForFloor && _planForFloor.proteinFloorMultiplier) || 1.3;
     const proteinFloor = Math.round(currentKgForCheck * _pfm);
     const fatFloor = 20;
@@ -5167,7 +5198,11 @@ function calcDuration() {
         calcCals + ' cal cannot simultaneously meet protein minimum (' + proteinFloor + 'g = ' + (proteinFloor*4) + ' cal) and fat minimum (' + fatFloor + 'g = ' + (fatFloor*9) + ' cal). Minimum viable ceiling: ' + minCalsNeeded + ' cal.';
       macroViabilityEl.style.display = 'block';
     } else {
-      const proteinAtDefault = Math.round(calcCals * 0.5 / 4);
+      // v8.10.5 audit fix: use the plan's real base protein split — the old
+      // hardcoded 50% matched no plan (lite 30 / cut 40 / tempcut 45 / bulk 30)
+      // and wrongly suppressed or inflated the advisory on every plan.
+      const _splitP = (_planForFloor && _planForFloor.macroSplit && _planForFloor.macroSplit.base && _planForFloor.macroSplit.base[0]) || 40;
+      const proteinAtDefault = Math.round(calcCals * (_splitP / 100) / 4);
       if(proteinAtDefault < proteinFloor) {
         macroViabilityEl.innerHTML = '<span style="color:var(--accent2);font-weight:700">⚡ PROTEIN FLOOR ADVISORY</span><br>' +
           'Default split gives ' + proteinAtDefault + 'g protein at ' + calcCals + ' cal — below the ' + proteinFloor + 'g minimum for ' + Math.round(currentKgForCheck) + 'kg bodyweight. Achievable with deliberate choices: anchor every meal with eggs, tuna, chicken, lentils.';
@@ -5433,7 +5468,7 @@ function openManageSchedule() {
     : ' · <span style="color:var(--accent)">EXACT</span>';
 
   document.getElementById('msStatusText').innerHTML =
-    `Started: <b>${sched.startDate}</b> · Day <b>${elapsed+1}</b> of <b>${sched.totalDays}</b>${modeLabel}<br>` +
+    `Started: <b>${sched.startDate}</b> · Day <b>${Math.min(elapsed+1, sched.totalDays)}</b> of <b>${sched.totalDays}</b>${modeLabel}<br>` +
     `Start weight: <b>${startW}kg</b> → Current: <b>${curW}kg</b><br>` +
     `${changeLabel}: <b>${Math.max(0,changed)}kg</b> · Rate: <b>${rate}kg/week actual</b><br>` +
     `Still to target: <b>${Math.max(0,remain)}kg</b>`;
@@ -5520,13 +5555,18 @@ function calcAdjust() {
 
   const plan = PLANS[s.plan||'default'] || PLANS.default;
   const fastDaysPerWeek = plan.fastDaysPerWeek || 0;
-  const eatDaysPerWeek  = 7 - fastDaysPerWeek;
+  // v8.10.5 audit fix: include light eating days (~60% TDEE) in the weekly
+  // balance, and stop wrapping the bulk rate in Math.abs — a bulk adjustment
+  // with calories BELOW TDEE was flipping a real deficit into a fake gain
+  // rate. Negative surplus now clamps to 0 (no fabricated progress).
+  const lightDaysPerWeekAdj = plan.lightDaysPerWeek || 0;
+  const eatDaysPerWeek  = 7 - fastDaysPerWeek - lightDaysPerWeekAdj;
   const avgActualForAdjust = getAvgActualCalories(7);
   const effectiveCal = avgActualForAdjust !== null
     ? Math.round(newCal * 0.6 + avgActualForAdjust * 0.4)
     : newCal;
-  const weeklyDeficit = (eatDaysPerWeek * (tdee - effectiveCal)) + (fastDaysPerWeek * tdee);
-  const formulaRate   = isBulkAdj ? Math.abs(weeklyDeficit / 7 / 7700) : weeklyDeficit / 7 / 7700; // kg/day formula
+  const weeklyDeficit = (eatDaysPerWeek * (tdee - effectiveCal)) + (fastDaysPerWeek * tdee) + (lightDaysPerWeekAdj * 0.4 * tdee);
+  const formulaRate   = isBulkAdj ? Math.max(0, -weeklyDeficit) / 7 / 7700 : weeklyDeficit / 7 / 7700; // kg/day formula
 
   // Select rate based on adjust mode
   let useRate, modeLabel;
@@ -6100,14 +6140,42 @@ function _isExpectedType(val, expected) {
 }
 
 function _commitBackupRestore(backup, keys, exported) {
+  // v8.10.5 audit fix (CRITICAL): download a pre-restore snapshot of the
+  // current data FIRST — restore was the only destructive full overwrite in
+  // the app with no undo of any kind. Best-effort: a blocked download must
+  // not stop a restore the user already confirmed.
+  try {
+    const snap = {
+      version: 'ph_v1', preRestoreSnapshot: true,
+      schemaVersion: (typeof window.getSchemaVersion === 'function' ? window.getSchemaVersion() : 1) || 1,
+      appVersion: APP_VERSION, exportedAt: dateToStr(new Date()), data: {}
+    };
+    Object.entries(SK).forEach(([k, sk2]) => { const v = gs(sk2); if (v !== null) snap.data[k] = v; });
+    if (Object.keys(snap.data).length) {
+      const blob = new Blob([JSON.stringify(snap, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `pre-restore-snapshot-${dateToStr(new Date())}.json`;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  } catch (e) { console.warn('[restore] pre-restore snapshot failed:', e); }
+
+  // v8.10.5 audit fix (CRITICAL): accept RAW localStorage key names
+  // (ph_dl_v1, …) as well as SK logical names. Migration auto-backups are
+  // written with raw keys; before this fix every one of their keys was
+  // silently skipped — the migration safety net restored nothing.
+  const RAW_TO_LOGICAL = {};
+  Object.entries(SK).forEach(([lk, rk]) => { RAW_TO_LOGICAL[rk] = lk; });
   const skippedKeys = [];
   const rejectedKeys = []; // v8.0.0 (H5): keys whose value type didn't match expected
   Object.entries(backup.data).forEach(([key, val]) => {
-    const storageKey = SK[key];
+    const logicalKey = SK[key] ? key : RAW_TO_LOGICAL[key];
+    const storageKey = logicalKey ? SK[logicalKey] : undefined;
     if (!storageKey) { skippedKeys.push(key); return; }
     // v8.0.0 (H5 fix): type-check against the SK expected shape. Reject any
     // key whose value type is wrong (would crash renderers downstream).
-    const expected = _SK_EXPECTED_TYPE[key];
+    const expected = _SK_EXPECTED_TYPE[logicalKey];
     if (expected && !_isExpectedType(val, expected)) {
       rejectedKeys.push(key + ' (expected ' + expected + ', got ' + (Array.isArray(val) ? 'array' : typeof val) + ')');
       return;
@@ -6131,10 +6199,12 @@ function _commitBackupRestore(backup, keys, exported) {
   dispatch('FOOD_LOGGED');
   dispatch('FAST_DAY_TOGGLED');
   if(typeof EXERCISE_PROGRESSIONS !== 'undefined') dispatch('EXERCISE_LEVEL_CHANGED');
-  const skippedNote = skippedKeys.length ? ` (${skippedKeys.length} key${skippedKeys.length>1?'s':''} from a newer app version could not be restored: ${skippedKeys.join(', ')})` : '';
+  // v8.10.5 audit fix: honest wording — skips can be unknown/legacy keys, not
+  // only newer-version keys.
+  const skippedNote = skippedKeys.length ? ` (${skippedKeys.length} key${skippedKeys.length>1?'s':''} could not be mapped to app data and were skipped: ${skippedKeys.join(', ')})` : '';
   // v8.0.0 (H5 fix): surface type-rejected keys so user knows the backup was malformed.
   const rejectedNote = rejectedKeys.length ? ` (${rejectedKeys.length} key${rejectedKeys.length>1?'s':''} rejected for wrong type: ${rejectedKeys.join(', ')})` : '';
-  showBackupStatus(`✓ Restored ${keys.length - rejectedKeys.length} data sets from backup (${exported}). All data reloaded.${skippedNote}${rejectedNote}`,
+  showBackupStatus(`✓ Restored ${keys.length - rejectedKeys.length - skippedKeys.length} data sets from backup (${exported}). A pre-restore snapshot of your previous data was downloaded.${skippedNote}${rejectedNote}`,
                    rejectedKeys.length ? 'var(--accent2)' : 'var(--green)');
 }
 
@@ -6255,33 +6325,34 @@ document.getElementById('settingsOverlay').addEventListener('click',e=>{if(e.tar
 // the IndexedDB mirror before rendering. After init, a full IDB sync ensures
 // the mirror is current.
 
+// v8.10.5 audit fix: bounded module gate. The four init gates used to await
+// their ready events forever — one 404'd/throwing module meant an eternal
+// opaque splash with no error surface at all. 15s covers slow first loads;
+// after that the splash comes down and the user gets an actionable message.
+async function _awaitModuleGate(flagName, eventName, label) {
+  if (window[flagName]) return true;
+  const ok = await new Promise(resolve => {
+    const t = setTimeout(() => resolve(false), 15000);
+    window.addEventListener(eventName, () => { clearTimeout(t); resolve(true); }, { once: true });
+  });
+  if (!ok && !window[flagName]) {
+    const _sp = document.getElementById('splashScreen');
+    if (_sp) _sp.remove();
+    console.error('[init] module gate timed out:', eventName);
+    if (typeof showAlert === 'function') {
+      showAlert('The app could not load its ' + label + ' module.\n\nYour data is safe — nothing has been changed.\n\nTry: reload the app. If you are offline, reconnect once so the update can finish downloading. If it keeps happening, clear this site\'s service worker (browser settings → site data) and reload.');
+    }
+    return false;
+  }
+  return true;
+}
+
 async function runInit() {
-  // Gate 1: wait for the migrations ES module to finish loading.
-  // Flag check first — no wait if already resolved (fast path).
-  if (!window._PH_MIGRATIONS_READY) {
-    await new Promise(resolve => window.addEventListener('ph:migrations-ready', resolve, { once: true }));
-  }
-
-  // Gate 1b (added v5.3.0): wait for the plans ES module to finish loading.
-  // Same flag+event pattern. Required because runInit below reads getActivePlan()
-  // which depends on window.PLANS being populated by plans/index.js.
-  if (!window._PH_PLANS_READY) {
-    await new Promise(resolve => window.addEventListener('ph:plans-ready', resolve, { once: true }));
-  }
-
-  // Gate 1c (added v5.4.0): wait for the function-module group (export, calendar,
-  // radar, schedule-html). Required because runInit calls renderCalendar/renderRadar
-  // etc., which now live in ES modules promoted to window.* by the loader shim.
-  if (!window._PH_FNMODULES_READY) {
-    await new Promise(resolve => window.addEventListener('ph:fnmodules-ready', resolve, { once: true }));
-  }
-
-  // Gate 1d (added v5.5.0): wait for component modules (workout-card, rule-card,
-  // checklist). Plans' workoutContent/rulesContent templates reference these helpers
-  // by bare name, and runInit → loadChecklist (TODAY tab) needs the checklist module.
-  if (!window._PH_COMPONENTS_READY) {
-    await new Promise(resolve => window.addEventListener('ph:components-ready', resolve, { once: true }));
-  }
+  // Gates 1-1d: bounded waits for the four ES-module groups (see _awaitModuleGate).
+  if (!(await _awaitModuleGate('_PH_MIGRATIONS_READY', 'ph:migrations-ready', 'data-migrations'))) return;
+  if (!(await _awaitModuleGate('_PH_PLANS_READY', 'ph:plans-ready', 'training-plans'))) return;
+  if (!(await _awaitModuleGate('_PH_FNMODULES_READY', 'ph:fnmodules-ready', 'core-functions'))) return;
+  if (!(await _awaitModuleGate('_PH_COMPONENTS_READY', 'ph:components-ready', 'UI-components'))) return;
 
   // Gate 2: if localStorage was wiped (iOS eviction), restore from the IDB mirror
   // BEFORE migrations run. Otherwise the schema record would be written for an
@@ -6294,6 +6365,11 @@ async function runInit() {
   if (typeof window.runMigrations === 'function') {
     const result = await window.runMigrations(Object.values(SK));
     if (!result.ok) {
+      // v8.10.5 audit fix: remove the opaque z-index:9999 splash before
+      // alerting — the failure explanation used to render underneath it,
+      // leaving an eternal pulsing logo with an invisible alert.
+      const _sp = document.getElementById('splashScreen');
+      if (_sp) _sp.remove();
       if (typeof showAlert === 'function') {
         // v8.0.0 (L4 fix): explain WHY migration failed instead of a generic error.
         // Helps the user understand whether it's a download-block (browser

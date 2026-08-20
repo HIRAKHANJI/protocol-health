@@ -447,13 +447,16 @@ export function toggleModalWorkoutChecklist(dateStr) {
     // Only show cards for this date's day-of-week
     if(daysAttr && daysAttr !== 'DAILY' && !daysAttr.split(',').includes(targetDay)) return;
 
+    // v8.10.5 audit fix: classify BEFORE emitting the header — rest cards used
+    // to print an orphan title with no rows and leave the wrapper div unclosed,
+    // nesting every subsequent card inside it.
+    const cardSession = classifyWorkoutCard(card);
+    if(cardSession === 'rest') return;
+
     const title = card.querySelector('h3');
     const meta = card.querySelector('.meta');
     html += `<div style="margin-bottom:10px"><div style="font-family:'Bebas Neue',sans-serif;font-size:0.8rem;letter-spacing:1.5px;color:var(--accent);margin-bottom:4px">${title ? title.textContent : 'WORKOUT'}</div>`;
     if(meta) html += `<div style="font-family:'DM Mono',monospace;font-size:0.5rem;color:var(--muted);margin-bottom:6px">${meta.textContent}</div>`;
-
-    const cardSession = classifyWorkoutCard(card);
-    if(cardSession === 'rest') return;
     card.querySelectorAll('.wex-row').forEach(row => {
       const wid = row.dataset.wid;
       if(!wid) return;
@@ -580,7 +583,13 @@ export function toggleFastDay(dateStr) {
     delete fdu[dateStr]; // user re-set it; clear any prior unset record
     // Clear light day if exists (mutually exclusive)
     const ld = gs(SK.lightDays)||{};
-    if(ld[dateStr]) { delete ld[dateStr]; ss(SK.lightDays, ld); }
+    if(ld[dateStr]) {
+      delete ld[dateStr]; ss(SK.lightDays, ld);
+      // v8.10.5 audit fix: record the light-day unset too, so a later
+      // schedule ADJUST doesn't auto-re-mark the light day we just cleared.
+      const ldu = gs(SK.lightDayUnsets)||{};
+      ldu[dateStr] = true; ss(SK.lightDayUnsets, ldu);
+    }
   }
   ss(SK.fastDays, fd);
   ss(SK.fastDayUnsets, fdu);
@@ -602,7 +611,14 @@ export function toggleLightDay(dateStr) {
     delete ldu[dateStr];
     // Clear fast day if exists (mutually exclusive)
     const fd = gs(SK.fastDays)||{};
-    if(fd[dateStr]) { delete fd[dateStr]; ss(SK.fastDays, fd); }
+    if(fd[dateStr]) {
+      delete fd[dateStr]; ss(SK.fastDays, fd);
+      // v8.10.5 audit fix: record the fast-day unset too — otherwise a later
+      // autoSetPlanFastDays (schedule ADJUST) re-marks the date as fast on
+      // top of the light mark, creating a day that is BOTH fast and light.
+      const fdu = gs(SK.fastDayUnsets)||{};
+      fdu[dateStr] = true; ss(SK.fastDayUnsets, fdu);
+    }
   }
   ss(SK.lightDays, ld);
   ss(SK.lightDayUnsets, ldu);

@@ -233,7 +233,7 @@ export const maintenance = {
     </div>
     ${_supOn ? `
     <div class="section-title" style="margin-top:12px">SUPPLEMENTS <span>(OPTIONAL)</span></div>
-    <div class="rule-card"><div class="rule-num">CREATINE</div><div class="rule-text">3\u20135g/day. Maintains strength + cognitive benefits.</div></div>
+    <div class="rule-card"><div class="rule-num">CREATINE</div><div class="rule-text">3\u20135g/day, NO loading phase (ISSN 2018). Maintains strength.</div></div>
     <div class="rule-card"><div class="rule-num">VITAMIN D3</div><div class="rule-text">2,000 IU/day with food.</div></div>
     <div class="rule-card"><div class="rule-num">OMEGA-3</div><div class="rule-text">1,000\u20132,000mg EPA+DHA/day.</div></div>
     <div class="rule-card"><div class="rule-num">MAGNESIUM</div><div class="rule-text">200mg/day before bed.</div></div>` : `
