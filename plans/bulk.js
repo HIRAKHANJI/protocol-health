@@ -176,7 +176,7 @@ export const bulk = {
     )}
 
     ${workoutCard('FULL BODY + PILATES CORE','SAT \u00b7 45\u201355 MIN',
-      exRow('--- RESISTANCE (30 min) ---','',''),
+      exRow('--- RESISTANCE (30 min) ---','','')+
       exRowWithLevel('push','Push-up variation','Different from Mon/Fri','3\u00d710\u201312')+
       exRowWithLevel('pull','Inverted row or towel row','Back + biceps','3\u00d78\u201310')+
       exRowWithLevel('squat','Squat variation','Compound lower','3\u00d712')+
@@ -251,7 +251,7 @@ export const bulk = {
     </div>
     ${_supOn ? `
     <div class="section-title" style="margin-top:12px">SUPPLEMENTS <span>(OPTIONAL)</span></div>
-    <div class="rule-card"><div class="rule-num">CREATINE</div><div class="rule-text">5g/day. ISSN 2018: strongest evidence for muscle mass + strength. Daily, timing irrelevant.</div></div>
+    <div class="rule-card"><div class="rule-num">CREATINE</div><div class="rule-text">5g/day, NO loading phase. ISSN 2018: strongest evidence for muscle mass + strength. Daily, timing irrelevant.</div></div>
     <div class="rule-card"><div class="rule-num">VITAMIN D3</div><div class="rule-text">2,000\u20134,000 IU/day with food. NIH UL: 4,000 IU/day.</div></div>
     <div class="rule-card"><div class="rule-num">OMEGA-3</div><div class="rule-text">2,000mg EPA+DHA/day. Joint + heart health.</div></div>
     <div class="rule-card"><div class="rule-num">MAGNESIUM</div><div class="rule-text">200\u2013350mg/day before bed. Sleep + recovery.</div></div>

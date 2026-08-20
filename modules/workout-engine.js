@@ -165,7 +165,10 @@ function buildPrescription(exercise, user, fasted, deloadActive, resolvedFocus, 
   let px = basePrescription(exercise, user.plan, kind);
   if (kind !== 'warmup' && kind !== 'cooldown') {
     px = H.applyModulators(px, exercise, user);
-    if (fasted) px = H.fastDayModifier(px, 'resistance');
+    // v8.10.5 audit fix: pass the exercise's actual type — the literal
+    // 'resistance' matched neither RESISTANCE_TYPES nor RECOVERY_TYPES in
+    // fastDayModifier, so the -20% fast-day volume cut was a silent no-op.
+    if (fasted) px = H.fastDayModifier(px, exercise.type);
     // repBias applies to resistance work only (mains + accessories), and now fires whenever
     // a bias is set — fixing the 'strength' goal whose bias was silently dropped before.
     if (resolvedFocus && resolvedFocus.repBias != null && (kind === 'main' || kind === 'accessory'))

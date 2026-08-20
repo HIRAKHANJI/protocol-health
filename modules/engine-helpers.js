@@ -59,7 +59,10 @@ export function isPlanEligible(plan, user) {
 
   // Weight > 120kg — §2.1 row.
   if (weight > 120) {
-    if (plan === 'cut' || plan === 'bulk' || plan === 'agro') {
+    // v8.10.5 audit fix: tempcut (an aggressive depletion cut) was falling
+    // through this block to the generic eligible:true — same restriction class
+    // as cut/agro applies.
+    if (plan === 'cut' || plan === 'bulk' || plan === 'agro' || plan === 'tempcut') {
       return { eligible: false, reason: `Weight ${weight}kg >120: ${plan.toUpperCase()} blocked — use LITE first.` };
     }
     if (plan === 'maintenance') {

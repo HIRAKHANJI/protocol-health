@@ -52,7 +52,13 @@ function _getDayExclusion(ds, dayLogs) {
   if (dayLog.sick === true) return 'sick';
   if (typeof getValidCheckCompletion === 'function') {
     const vc = getValidCheckCompletion(ds);
-    if (vc && vc.total > 0 && (vc.pct || 0) < LOW_COMPLIANCE_PCT) {
+    // v8.10.5 audit fix: vc.total is derived from the plan definition and is
+    // always > 0, so a day with ZERO ticks (user logged food/weight but never
+    // touched the checklist) scored 0% and was excluded as "low-compliance" —
+    // and 3+ such days in a row read as a phantom sickness pattern that
+    // deferred calibration forever. Only judge compliance on days where the
+    // user actually interacted with the checklist (done > 0).
+    if (vc && vc.total > 0 && (vc.done || 0) > 0 && (vc.pct || 0) < LOW_COMPLIANCE_PCT) {
       return 'low-compliance';
     }
   }
@@ -583,7 +589,11 @@ export function inferActivityMultiplier() {
     return { valid: false, reason: obs.reason || 'observation-invalid',
              daysAvailable: obs.daysAvailable || 0, daysLogged: obs.daysLogged || 0 };
   }
-  if (obs.daysAvailable < ACTIVITY_INFER_MIN_DAYS) {
+  // v8.10.5 audit fix: a `days`-day window spans at most `days-1` (newest −
+  // oldest), so requiring >= ACTIVITY_INFER_MIN_DAYS made this gate
+  // unreachable (same off-by-one class the v7.10.0 header documents for the
+  // calibration gate). Require the true maximum span instead.
+  if (obs.daysAvailable < ACTIVITY_INFER_MIN_DAYS - 1) {
     return { valid: false, reason: 'need-28-days', daysAvailable: obs.daysAvailable, daysLogged: obs.daysLogged };
   }
   if (obs.daysLogged < ACTIVITY_INFER_MIN_LOGS) {
