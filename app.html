@@ -971,6 +971,7 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
           <option value="maintenance">DEFAULT MAINTENANCE</option>
           <option value="agro">AGRO CUT CALISTHENICS PLAN</option>
           <option value="tempcut">TEMP CUT (THE DUBAI 13)</option>
+          <option value="cycle">CYCLE (SEASONS RECOMP)</option>
         </select>
         <div class="custom-select" id="planSelectCustom">
           <div class="custom-select-trigger" id="planSelectTrigger" onclick="toggleCustomSelect('planSelectCustom')">LITE PROTOCOL</div>
@@ -981,6 +982,7 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
             <div class="custom-select-option" data-value="maintenance" onclick="selectCustomOption('planSelectCustom','planSelect',this)">DEFAULT MAINTENANCE</div>
             <div class="custom-select-option" data-value="agro" onclick="selectCustomOption('planSelectCustom','planSelect',this)">AGRO CUT CALISTHENICS PLAN</div>
             <div class="custom-select-option" data-value="tempcut" onclick="selectCustomOption('planSelectCustom','planSelect',this)">TEMP CUT (THE DUBAI 13)</div>
+            <div class="custom-select-option" data-value="cycle" onclick="selectCustomOption('planSelectCustom','planSelect',this)">CYCLE (SEASONS RECOMP)</div>
           </div>
         </div>
         <div class="plan-description" id="planDescription">
@@ -1863,8 +1865,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '8.10.5';
-const APP_VERSION_MSG = 'Deep-dive audit release — 10 high-severity fixes: migration auto-backups are now actually restorable (+ a pre-restore snapshot downloads before any restore), boot failures show an error instead of an eternal splash, dialogs render above all modals (fast-editor delete works again), the TDEE manual-override freeze is respected everywhere, bulk-mode goal math now models light eating days, TDEE calibration\'s activity inference and zero-tick-day handling are fixed, the workout engine falls back to plan workouts on unsupported plans, and TEMP CUT\'s Friday/EVERY-DAY cards no longer pollute the auto-tick counters. Full findings register in docs/v8.10.5-audit-report.md.';
+const APP_VERSION = '8.10.6';
+const APP_VERSION_MSG = 'NEW PLAN: CYCLE — the seasons recomp plan. Bodyweight-first (backpack = the only weight; machines and DBs are optional upgrades), fast Sundays, Mon/Wed/Fri strength + Tue/Thu run ramp + Sat skill & speed, loaded-core layer, budget shopping list + bone-broth skin stack, protein triage for honest bad days, phase system (Sept 1,500 → Oct glide 2,050 → 88-92 band autopilot) and a week-12 replan checkpoint. Find it in Settings → plan selector.';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
 
@@ -4295,7 +4297,8 @@ const PLAN_ACTIVITY_DEFAULTS = {
   cut:         '1.55',  // CUT eat-day = 1.55, no fast days
   bulk:        '1.55',  // BULK weekly avg ≈ 1.51 (5 eat × 1.55 + 2 light × 1.40)
   maintenance: '1.375', // MAINT weekly avg ≈ 1.36 (6 eat × 1.375 + 1 light × 1.30)
-  tempcut:     '1.55'   // TEMP CUT weekly avg = 1.61 (4 eat × 1.70 + 3 fast × 1.50) — nearest dropdown step
+  tempcut:     '1.55',  // TEMP CUT weekly avg = 1.61 (4 eat × 1.70 + 3 fast × 1.50) — nearest dropdown step
+  cycle:       '1.55'   // CYCLE weekly avg = 1.61 (6 eat × 1.65 + 1 fast × 1.35) — nearest dropdown step
 };
 
 // ─── v7.9.0: TDEE MODEL UPGRADE ─────────────────────────────────────────────

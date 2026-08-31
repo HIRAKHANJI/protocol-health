@@ -15,7 +15,7 @@ Tracks three things:
 2. **Weight over time** — daily logging, goal-bar progress, forward-looking projection to Sunday.
 3. **Calorie/deficit planning** — goal calculator modeling fasting days, eating windows, exercise burn, and compliance rate, flagging plans as realistic / aggressive / unrealistic.
 
-6 training plans: **LITE PROTOCOL** (gentle, all-ages), **AGRO CUT CALISTHENICS**, **DEFAULT CUT**, **DEFAULT BULK**, **DEFAULT MAINTENANCE**, **TEMP CUT** (temporary 13-day "Dubai 13" depletion block). Switched via Settings.
+7 training plans: **LITE PROTOCOL** (gentle, all-ages), **AGRO CUT CALISTHENICS**, **DEFAULT CUT**, **DEFAULT BULK**, **DEFAULT MAINTENANCE**, **TEMP CUT** (historical 13-day "Dubai 13" depletion block), **CYCLE** (seasons-long bodyweight-first recomp). Switched via Settings.
 
 All data stored in the browser's `localStorage` (and mirrored to `IndexedDB` as a recovery backup). Nothing ever leaves the device.
 
@@ -24,9 +24,9 @@ All data stored in the browser's `localStorage` (and mirrored to `IndexedDB` as 
 ## Architecture at a glance
 
 ```
-app.html                  # Bootstrap: HTML + CSS + inline orchestration (~6,647 lines as of v8.10.5)
+app.html                  # Bootstrap: HTML + CSS + inline orchestration (~6,647 lines as of v8.10.6)
 index.html, manifest.json, sw.js
-plans/                    # 6 plan modules + exercise progressions + index assembler
+plans/                    # 7 plan modules + exercise progressions + index assembler
 modules/                  # export.js, calendar.js, radar.js, schedule-html.js, calibration.js
 components/               # workout-card.js, rule-card.js, checklist.js, fast-window.js
 migrations/               # runner, registry, helpers (schema versioning)
