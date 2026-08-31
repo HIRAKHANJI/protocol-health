@@ -4,6 +4,34 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 8.10.6 — 2026-08-29
+
+**Scope:** Patch (new selectable plan: CYCLE — would be major under §12 thresholds, but the rollover rule reserves v9.0.0 for the Workout Engine consolidation, same precedent as v8.9.0/v8.10.x). No schema change, no migration, no new SK key.
+**Banner:** none (patch — the APP_VERSION_MSG announces the plan for the Settings "current version" surface).
+**CACHE_NAME:** v49 → v50.
+
+### What changed (new `plans/cycle.js`, ~430 lines)
+
+Owner-designed over a multi-session coaching arc (science-cited: ISSN 2018 creatine, Trepanowski 2017 ADF, Longland 2016 recomp, collagen RCTs): **CYCLE**, the seasons-long body-recomposition successor to the crash-cut pattern. Starting point ~101-102kg, target 88-92kg band, then hold.
+
+- **Design law:** bodyweight-first — every exercise defaults to zero equipment (a loaded backpack is the only implied weight); DBs/machines/bars appear only as UPGRADE notes. Pull day carries a no-bar substitute (heavy table towel-rows).
+- **Weekly skeleton (fixed):** Mon PUSH (push-up + pike→HSPU tracks, pseudo-planche serratus work) · Tue RUN 1 + spine armor · Wed PULL (5×3-5 pull-up strength centerpiece, hanging-raise track) · Thu RUN 2 + fresh skill · Fri LEGS + glutes + loaded core (pistol track, backpack hip thrusts, loaded crunches, obliques, APT block) · Sat SKILL + BLACK FLASH (shadowbox/rope/dragon flags) + batch-cook · Sun FAST + 60-90-min walk. Run ramp: 3K run/walk → 4K → 5Ks + strides; sprints gated to <~97kg per the demographic matrix.
+- **Grown-core layer:** 4 loaded exposures/week (backpack crunches, hanging raises, dragon flags, obliques/carries) doubling as planche/front-lever/L-sit scaffolding; honest body-fat-vs-visibility note in-content.
+- **Phases:** PHASE 0 (Sept budget month, ~1,500 · 100g protein floor · walks as the 92-lever · Oct 1-3 protein-only ~500 mini-fast with NO training · Oct 4 pre-committed rollover) → PHASE A (glide ~2,050) → PHASE B (band 88-92 autopilot: two weekly averages >92 → second fast; <88 → +200). The workoutContent phase banner is date-aware for the September arc, evergreen after.
+- **Budget nutrition:** one ~110-130 AED weekly shop (eggs/whole chickens/dal/rice/laban/frozen veg/fruit), one fixed daily template, "diet foods" (bars/rice cakes/salami/juice) formally fired as money traps, bone-broth + vitamin-C zero-cost skin stack, creatine-only supplement floor (5g, NO loading — ISSN 2018) with a funded-month re-add order.
+- **Armor:** protein-triage rule (collapsed day = 100g protein + walk + one drill = GREEN, hard cap 2/week), Minimum Viable Day, waist-over-scale scoreboard, September waypoint bands (not gates), week-12 replan checkpoint.
+- Wiring: `plans/index.js` import + PLANS entry · both selector options in app.html · `PLAN_ACTIVITY_DEFAULTS.cycle` · engine `isPlanEligible` >120kg block includes cycle (engine has no cycle template — v8.10.5 fallback renders legacy content) · `sw.js` cache list + v50.
+
+### Verification
+
+Rebuilt plan-conformance suite for 7 plans: ALL CHECKS PASSED (assembly, 32 required fields, 7-day maps, macro sums, AUTO ids, day-code coverage, signature content, phase-banner rendering on Phase 0 / mini-fast / Phase A-B dates) · `node --check` clean on all touched JS · §12 stale-ref grep clean.
+
+### Files changed
+
+`plans/cycle.js` (new) · `plans/index.js` · `app.html` (selector ×2, activity default, APP_VERSION → 8.10.6) · `modules/engine-helpers.js` · `sw.js` (cache entry + v50) · `index.html` (§12 sweep + changelog, v8.10.5 demoted) · `CLAUDE.md` (§3 CYCLE blurb, 7 plans, refs) · `README.md` · `UPDATE_LOG.md` (this entry).
+
+---
+
 ## Version 8.10.5 — 2026-08-03
 
 **Scope:** Patch (deep-dive audit release — 10 high-severity fixes + 12 medium/low fixes across data layer, goal calculator, TDEE calibration, calendar/fast logic, workout engine, and plan content). No schema change, no migration, no new SK key.
