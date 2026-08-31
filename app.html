@@ -970,7 +970,6 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
           <option value="bulk">DEFAULT BULK</option>
           <option value="maintenance">DEFAULT MAINTENANCE</option>
           <option value="agro">AGRO CUT CALISTHENICS PLAN</option>
-          <option value="tempcut">TEMP CUT (THE DUBAI 13)</option>
           <option value="cycle">CYCLE (SEASONS RECOMP)</option>
         </select>
         <div class="custom-select" id="planSelectCustom">
@@ -981,7 +980,6 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
             <div class="custom-select-option" data-value="bulk" onclick="selectCustomOption('planSelectCustom','planSelect',this)">DEFAULT BULK</div>
             <div class="custom-select-option" data-value="maintenance" onclick="selectCustomOption('planSelectCustom','planSelect',this)">DEFAULT MAINTENANCE</div>
             <div class="custom-select-option" data-value="agro" onclick="selectCustomOption('planSelectCustom','planSelect',this)">AGRO CUT CALISTHENICS PLAN</div>
-            <div class="custom-select-option" data-value="tempcut" onclick="selectCustomOption('planSelectCustom','planSelect',this)">TEMP CUT (THE DUBAI 13)</div>
             <div class="custom-select-option" data-value="cycle" onclick="selectCustomOption('planSelectCustom','planSelect',this)">CYCLE (SEASONS RECOMP)</div>
           </div>
         </div>
@@ -1865,8 +1863,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '8.10.6';
-const APP_VERSION_MSG = 'NEW PLAN: CYCLE — the seasons recomp plan. Bodyweight-first (backpack = the only weight; machines and DBs are optional upgrades), fast Sundays, Mon/Wed/Fri strength + Tue/Thu run ramp + Sat skill & speed, loaded-core layer, budget shopping list + bone-broth skin stack, protein triage for honest bad days, phase system (Sept 1,500 → Oct glide 2,050 → 88-92 band autopilot) and a week-12 replan checkpoint. Find it in Settings → plan selector.';
+const APP_VERSION = '8.10.7';
+const APP_VERSION_MSG = 'TEMP CUT removed — its 13-day block is over and CYCLE supersedes it. Any device still set to TEMP CUT is automatically switched to CYCLE (your logged history, weights and calendar data are untouched). Six plans remain: LITE, AGRO, CUT, BULK, MAINTENANCE, CYCLE.';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
 
@@ -4297,7 +4295,6 @@ const PLAN_ACTIVITY_DEFAULTS = {
   cut:         '1.55',  // CUT eat-day = 1.55, no fast days
   bulk:        '1.55',  // BULK weekly avg ≈ 1.51 (5 eat × 1.55 + 2 light × 1.40)
   maintenance: '1.375', // MAINT weekly avg ≈ 1.36 (6 eat × 1.375 + 1 light × 1.30)
-  tempcut:     '1.55',  // TEMP CUT weekly avg = 1.61 (4 eat × 1.70 + 3 fast × 1.50) — nearest dropdown step
   cycle:       '1.55'   // CYCLE weekly avg = 1.61 (6 eat × 1.65 + 1 fast × 1.35) — nearest dropdown step
 };
 
@@ -6395,6 +6392,15 @@ async function runInit() {
   }
 
   const s = getSettings();
+
+  // v8.10.7: TEMP CUT was removed from PLANS (superseded by CYCLE). Any device
+  // still storing plan:'tempcut' is remapped to 'cycle' here — without this,
+  // getActivePlan()'s fallback would silently render LITE and the plan
+  // selector would desync. One-time, idempotent, data untouched.
+  if (s.plan === 'tempcut') {
+    s.plan = 'cycle';
+    saveSettings(s);
+  }
 
   // Splash screen — show plan name, then fade out
   const splash = document.getElementById('splashScreen');

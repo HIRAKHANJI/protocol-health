@@ -4,6 +4,28 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 8.10.7 — 2026-08-31
+
+**Scope:** Patch (TEMP CUT plan removed — superseded by CYCLE). No schema change, no migration framework change, no SK key touched.
+**Banner:** none (patch).
+**CACHE_NAME:** v50 → v51.
+
+### What changed
+
+- `plans/tempcut.js` deleted; import + PLANS entry removed from `plans/index.js`; both selector entries removed from `app.html`; `PLAN_ACTIVITY_DEFAULTS.tempcut` removed; engine `isPlanEligible` >120kg list drops the token; `sw.js` cache entry removed (required — a listed 404 rejects the whole SW install) and bumped to v51.
+- **Safety remap:** `runInit` now remaps any stored `plan:'tempcut'` → `'cycle'` once at boot (idempotent). Without it, `getActivePlan()`'s `|| PLANS.default` fallback would have silently rendered LITE and desynced the plan selector. All logged data (weights, day logs, fast days/sessions, food log) is untouched; TEMP CUT-era calendar days are henceforth scored against the active plan's checklist (documented known limitation, unchanged behavior class).
+- Doc sweep: CLAUDE.md §3 TEMP CUT blurb removed + 6-plan counts, §13 plans line; README 6-plan list; index.html changelog entry (v8.10.6 demoted).
+
+### Verification
+
+Conformance suite (6 plans): ALL CHECKS PASSED · headless Playwright: app boots with stored `plan:'tempcut'`, remaps to CYCLE, renders TODAY strip + selector in sync; no console/page errors · `node --check` clean on all touched files · §12 stale-ref grep clean.
+
+### Files changed
+
+`plans/tempcut.js` (deleted) · `plans/index.js` · `app.html` (selectors, activity default, remap, APP_VERSION → 8.10.7) · `modules/engine-helpers.js` · `sw.js` (v51) · `index.html` (§12 sweep + changelog) · `CLAUDE.md` / `README.md` · `UPDATE_LOG.md` (this entry).
+
+---
+
 ## Version 8.10.6 — 2026-08-29
 
 **Scope:** Patch (new selectable plan: CYCLE — would be major under §12 thresholds, but the rollover rule reserves v9.0.0 for the Workout Engine consolidation, same precedent as v8.9.0/v8.10.x). No schema change, no migration, no new SK key.

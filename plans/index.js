@@ -9,7 +9,6 @@ import { agro } from './agro.js';
 import { cut } from './cut.js';
 import { bulk } from './bulk.js';
 import { maintenance } from './maintenance.js';
-import { tempcut } from './tempcut.js';
 import { cycle } from './cycle.js';
 import { EXERCISE_PROGRESSIONS } from './exercise-progressions.js';
 
@@ -19,7 +18,6 @@ export const PLANS = {
   cut,
   bulk,
   maintenance,
-  tempcut,         // TEMP CUT — 13-day depletion protocol (temporary by design, historical)
   cycle            // CYCLE — the seasons recomp plan (v8.10.6)
 };
 
