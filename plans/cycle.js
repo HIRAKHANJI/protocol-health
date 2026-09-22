@@ -3,7 +3,7 @@
 // by design law: every exercise defaults to zero equipment; the only implied
 // "weight" is a loaded backpack, and DBs/machines/bars appear only as UPGRADE
 // notes. Three phases, one weekly skeleton:
-//   PHASE 0 (Sep 2026, budget month): eating days ~1,500 · protein 100g floor
+//   SPRINT (date-gated blocks, e.g. Sep 22-Oct 5 2026): eating days ~1,000 · 100g floor
 //     (owner ruling — retention mode, lifts sacred) · fast Sundays · daily
 //     60-90 min walks as the 92kg lever · Oct 1-3 protein-only ~500 mini-fast
 //     (NO training) · Oct 4 pre-committed rollover to Phase A at 2,050.
@@ -89,7 +89,7 @@ export const cycle = {
       { id:'m3', group:'MORNING', label:'Morning role done (see WORKOUTS + today’s sub-text)', sub:'Mostly: start banking the daily walk minutes early. Saturdays: waist tape too.' },
       { id:'m4', group:'MORNING', label:'Walk minutes banked: 60-90 total today', sub:'Split freely — calls, errands, stairs. This is the free lever that moves the scale ~0.5kg/month on its own. Costs nothing, spares muscle.' },
       { id:'f1', group:'EATING', label:'Protein 100g hit — the floor, zero exceptions', sub:'3-4 eggs (24g) + chicken portion (40g) + dal+rice (16g) + laban/egg night (20g). Phase A/B raises this toward 1.6g/kg.' },
-      { id:'f2', group:'EATING', label:'Stayed at today’s ceiling (Phase 0: ~1,500 · A: ~2,050 · B: ~2,350)', sub:'Log THE MEAL in FOOD LOG — add your staples to the library once, they autocomplete forever.', type:'info' },
+      { id:'f2', group:'EATING', label:'Stayed at today’s ceiling (Settings — sprint 1,000 · glide 2,050 · band 2,350)', sub:'Log THE MEAL in FOOD LOG — add your staples to the library once, they autocomplete forever.', type:'info' },
       { id:'f3', group:'EATING', label:'THE MEAL eaten — chicken + rice + dal + veg', sub:'Any cuisine works if calories are dealt with. Batch-cooked Saturday = zero decisions today.' },
       { id:'f4', group:'EATING', label:'3.5L+ water across the day', sub:'+500ml on run days. Never restricted.', type:'water', waterTarget:3.5 },
       { id:'f5', group:'EATING', label:'Zero money traps: no bars, no rice cakes, no salami, no juice', sub:'The "diet foods" cost 3-8× more per gram of protein than eggs, whole chicken, dal and rice. Boring normal food IS the budget plan.' },
@@ -110,7 +110,7 @@ export const cycle = {
     checklistFast: [
       { id:'wf1', group:'FAST', label:'500ml water + ⅓ tsp salt on waking, again mid-afternoon', sub:'Pickle juice counts. One fast day — no heroics needed, just hygiene.' },
       { id:'wf2', group:'FAST', label:'Electrolyte tab mid-day', sub:'Or a K-tab if that’s what’s in the cupboard.' },
-      { id:'wf3', group:'FAST', label:'No food. Water, black coffee, green tea only', sub:'Breaks Monday morning with the normal eggs — gentle, not a feast.' },
+      { id:'wf3', group:'FAST', label:'No food. Water, black coffee, green tea only', sub:'Breaks at 9AM the morning after — gentle (powder/eggs), not a feast.' },
       { id:'wf4', group:'FAST', label:'Walk 60-90 min + full hip session', sub:'No lifting on fast days — the walk IS the session. ~300-400 clean cal.' },
       { id:'wf5', group:'FAST', label:'3L+ water total today', sub:'Sip constantly.', type:'water', waterTarget:3.0 },
       { id:'wf6', group:'FAST', label:'Weekly shop done (today or Saturday)', sub:'The list lives in NUTRITION — ~110-130 AED covers the whole week.' },
@@ -126,9 +126,10 @@ export const cycle = {
       const _ds = todayStr();
       // Phase banner — date-aware for the September launch arc, then evergreen.
       let _phase;
-      if (_ds < '2026-10-01')      _phase = { label:'PHASE 0 — SEPTEMBER BUDGET MONTH', text:'Eating days ~1,500 · 100g protein floor · fast Sundays · walks 60-90 min daily (the 92-lever). Lifts are SACRED. Ends with the Oct 1-3 protein-only mini-fast, then Phase A auto-starts Oct 4 at ~2,050 — pre-committed, because day 4 is where crashes die.' };
-      else if (_ds <= '2026-10-03') _phase = { label:'OCT 1-3 — THE MINI-FAST', text:'~500 cal/day, ALL protein (powder/laban/chicken, nothing else). NO training — walks 60-90 + vacuums only. Salt ×2-3, electrolyte, 3L+. Sun Oct 4 morning: scale + waist tape = THE READ, then eat 2,050. No Sunday fast this week.' };
-      else                          _phase = { label:'PHASE A/B — THE LONG GAME', text:'Phase A: eating days ~2,050, glide to 92. At 92 → Phase B: ~2,350, band autopilot 88-92 (two weekly averages >92 → second fast until back · <88 → +200 cal). Protein rises toward 1.6g/kg as budget allows. Week-12 replan checkpoint: renegotiate from progress, never abandon from impulse.' };
+      // v8.10.8: the September Phase-0 arc never ran — replaced with the live
+      // SPRINT block (owner-committed 2026-09-22), then evergreen phases.
+      if (_ds <= '2026-10-05')      _phase = { label:'SPRINT BLOCK — SEP 22 → OCT 5 (14 DAYS)', text:'Eating days ~1,000 in a ~3h window, 100g protein FIRST (powder/eggs/chicken before anything else) · fasts Wed/Sat/Sun + the Tue Sep 22 kickoff (7 fasts total) · ~2h daily incl. the 30-min fast walk · creatine 5g every day incl. fasts · fast days: salt ×2-3 + K-tab + 3.5-4L · SECOND DAY OF ANY BACK-TO-BACK DOUBLE = WALK ONLY · sleep floor 6h — under it the loss shifts from fat to muscle. Final morning Tue Oct 6 = THE READ (scale + waist tape, before breaking the fast-adjacent day).' };
+      else                          _phase = { label:'PHASE A/B — THE LONG GAME', text:'After a sprint: first week back eats at glide (~2,050) — the +2-3kg that returns is glycogen and food mass, not fat; the waist tape holds the truth. Phase A: eating days ~2,050, glide to 92. At 92 → Phase B: ~2,350, band autopilot 88-92 (two weekly averages >92 → second fast until back · <88 → +200 cal). Protein rises toward 1.6g/kg. Week-12 replan checkpoint: renegotiate from progress, never abandon from impulse.' };
       const _todayByDow = {
         0: { label:'SUNDAY — FAST + WALK', what:'0 cal, 0 AED, 0 decisions. Walk 60-90 min + full hip session. Shop/batch if not done Saturday. Card is open below.' },
         1: { label:'MONDAY — PUSH', what:'Push-up track, pike→handstand press, planche leans, dips, side raises. ~45-60 min, 2 in the tank everywhere. Card is open below.' },
@@ -138,7 +139,14 @@ export const cycle = {
         5: { label:'FRIDAY — LEGS + GLUTES + LOADED CORE', what:'Pistol track, backpack Bulgarians, single-leg hip thrusts, sliding curls, LOADED crunches, obliques, carries. Pack the backpack.' },
         6: { label:'SATURDAY — SKILL + BLACK FLASH + BATCH-COOK', what:'Skill circuit → shadowbox 3×3 → rope 3×1 → dragon flags + hollow + vacuums. Then roast 2 chickens, portion, freeze, bones → broth pot. Waist tape this morning.' }
       };
-      const _t = _todayByDow[new Date().getDay()];
+      const _dowNow = new Date().getDay();
+      let _t = _todayByDow[_dowNow];
+      // v8.10.8: during the sprint (and any manual fast), non-Sunday dates can
+      // be marked fast — the strip must not prescribe a full session on them.
+      if (typeof getDayType === 'function' && getDayType(_ds) === 'fast' && _dowNow !== 0) {
+        _t = { label: _t.label + ' · FASTED TODAY',
+               what: 'This date is marked as a FAST. Cap any session at 75-80% with 2 in the tank — or swap it for a 45-60 min walk. Second day of a back-to-back double = WALK ONLY, law. Salt ×2-3 + K-tab + 3.5-4L water. Original slot: ' + _t.what };
+      }
       return `
       <div class="section-title">CYCLE <span>— THE SEASONS PLAN</span></div>
 
@@ -254,7 +262,7 @@ export const cycle = {
 
       return `
       <div class="section-title">CYCLE <span>NUTRITION</span></div>
-      <p class="section-note">One shopping list, one daily template, zero diet foods. Set the Settings ceiling to your phase: 1,500 (Phase 0) · 2,050 (A) · 2,350 (B).</p>
+      <p class="section-note">One shopping list, one daily template, zero diet foods. Set the Settings ceiling to your mode: sprint 1,000 · glide 2,050 (A) · band 2,350 (B).</p>
 
       <div class="macro-grid">
         <div class="macro-box"><div class="macro-val" style="color:#82e0aa">${cal}</div><div class="macro-lbl">Day ceiling</div></div>
@@ -266,7 +274,7 @@ export const cycle = {
 
       ${(()=>{
         const _dt = getDayType(todayStr());
-        if(_dt === 'fast') return '<div class="rule-card" style="border-left-color:var(--fast)"><div class="rule-num">FAST SUNDAY ACTIVE</div><div class="rule-text">No food. Water, black coffee, green tea. Salt ×2 · electrolyte · 3L water · creatine still happens.</div><div class="rule-sub">Breaks Monday morning with the normal eggs — gentle, not a feast.</div></div>';
+        if(_dt === 'fast') return '<div class="rule-card" style="border-left-color:var(--fast)"><div class="rule-num">FAST DAY ACTIVE</div><div class="rule-text">No food. Water, black coffee, green tea. Salt ×2-3 · K-tab · 3.5-4L water · creatine still happens.</div><div class="rule-sub">Breaks at 9AM the morning after — gentle (powder/eggs), not a feast. Back-to-back double? Day 2 is WALK ONLY.</div></div>';
         const _dc = getDayCalories(todayStr());
         const _rem = cal - _dc.total;
         const _cls = !_dc.hasData ? 'var(--muted)' : _dc.total > cal ? 'var(--danger)' : (_rem <= 100 ? 'var(--accent2)' : 'var(--accent)');
@@ -283,9 +291,9 @@ export const cycle = {
       </div>
 
       <div class="rule-card" style="border-left-color:#ff9966">
-        <div class="rule-num">THE DAILY PLATE — PHASE 0 (~1,500 · ~100g PROTEIN)</div>
+        <div class="rule-num">THE DAILY PLATE — SCALES TO YOUR CEILING (~100g PROTEIN ALWAYS)</div>
         <div class="rule-text">Morning (2 min): 3 eggs + banana — ~300 cal, 20g P<br>THE MEAL: chicken portion (~150g cooked) + rice + dal + veg, any cuisine — ~850-900 cal, 60g P<br>Night (1 min): glass of laban + 1 egg or dal leftover — ~250 cal, 20g P<br>Anytime: a mug of bone broth</div>
-        <div class="rule-sub">Phase A grows THE MEAL ~350 cal and re-adds a morning oats portion; Phase B adds ~300 more. Same skeleton forever — only portions change.</div>
+        <div class="rule-sub">SPRINT @1,000 (3h window): powder + 3-4 eggs + chicken portion FIRST (~100g P, ~700 cal), the last ~300 free. GLIDE @2,050 grows THE MEAL + oats; BAND @2,350 adds ~300 more. Same skeleton — only portions change.</div>
       </div>
 
       <div class="rule-card" style="border-left-color:var(--accent2)">
@@ -295,7 +303,7 @@ export const cycle = {
       </div>
 
       <div class="section-title" style="margin-top:8px">SKIN — <span>THE ZERO-DIRHAM SAG DEFENSE</span></div>
-      ${ruleCard('RATE CONTROL IS THE TREATMENT','The 1,500 floor exists FOR your skin — sag punishes speed. ~1.2-1.4kg/week is the ceiling this month; Phase A slows to ~1/week; skin remodels over 6-24 months behind the loss.','Youth + time are doing the heavy lifting. Your job is not to outrun them.','#82e0aa')}
+      ${ruleCard('RATE CONTROL IS THE TREATMENT','The calorie floor exists FOR your skin — sag punishes speed. ~1.2-1.4kg/week is the ceiling this month; Phase A slows to ~1/week; skin remodels over 6-24 months behind the loss.','Youth + time are doing the heavy lifting. Your job is not to outrun them.','#82e0aa')}
       ${ruleCard('BONE BROTH + VITAMIN C — THE BROKE MAN’S COLLAGEN','Saturday’s chicken carcasses + splash of vinegar, simmered 3-4h = glycine + proline, the literal collagen building blocks, at zero cost. The oranges/carrots in the cart supply the vitamin C collagen synthesis requires.','Collagen powder is the paid version of this mug. Resume it in a funded month if you like; the broth does the job now.','#82e0aa')}
       ${ruleCard('MUSCLE FILLS THE SPACE','The lifts + the glute block + the loaded core are the #1 skin-tightener — tissue growing under the skin as fat leaves. Vacuums + the APT block reclaim the posture centimeter on top.','This is why the sessions are sacred at the 100g floor.','#82e0aa')}
 
@@ -308,7 +316,7 @@ export const cycle = {
       return `
       <div class="section-title">THE <span>LAWS</span></div>
       ${ruleCard('LAW 01','The Mon/Wed/Fri lifts are sacred.','At the 100g protein floor, training carries ALL the muscle retention. Miss food if life happens — never miss the lifts. Body + backpack + gravity is the gym.')}
-      ${ruleCard('LAW 02','Never below ~1,500 on a normal day. The floor IS the skin treatment.','Sag punishes speed. The crash pattern (500-1,000/day) is what built the current sag — it does not get a third run.')}
+      ${ruleCard('LAW 02','Eating-day floor: 1,000 — and 1,000 is SPRINT-ONLY (14 days, then done). 1,500+ is the season floor.','Sag punishes speed. Below 1,000, or sprinting past 14 days, is the crash pattern that built the sag — it does not get another run. Protein 100g survives every mode.')}
       ${ruleCard('LAW 03','Protein triage cap: 2 collapsed days/week beyond Sunday.','A collapsed day = 100g protein + 20-min walk + one drill = GREEN. Three or more = you’re crash-dieting with extra steps.')}
       ${ruleCard('LAW 04','Walks are the lever, never the punishment.','60-90 min daily moves the month ~0.5kg on its own and costs nothing. First thing CUT on a wrecked day, never the lifts.')}
       ${ruleCard('LAW 05','STOP cluster: palpitations · chest tightness · vision narrowing','Salt water + 50g carbs immediately, whatever day it is. Zero shame, total obedience.')}

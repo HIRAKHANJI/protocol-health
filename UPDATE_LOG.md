@@ -4,6 +4,32 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 8.10.8 — 2026-09-22
+
+**Scope:** Patch (CYCLE sprint-awareness + owner-requested full-loop health check). No schema change, no migration, no SK key touched.
+**Banner:** none (patch).
+**CACHE_NAME:** v51 → v52.
+
+### What changed (`plans/cycle.js`)
+
+Owner requested a check that "everything is working… nothing annoying… no engine giving wrong readings, specially in CYCLE" ahead of a committed 14-day sprint (Sep 22 → Oct 5: ~1,000-cal eating days in a ~3h window, fasts Wed/Sat/Sun + Tue Sep 22 kickoff = 7 fasts, 100g protein, creatine, ~2h daily training incl. 30-min fast walk, 6h sleep floor).
+
+**Wrong readings found and fixed:**
+- The date-gated phase banner still described the September Phase-0 arc that never ran, and from Oct 1-3 would have actively instructed "NO training, ~500 cal, no Sunday fast" — mid-sprint. Replaced with a SPRINT block banner (≤ Oct 5) carrying the live protocol + safety rails, then evergreen Phase A/B copy (with post-sprint rebound note).
+- The WORKOUTS ▶ TODAY strip prescribed a full session on any weekday even when that date is marked as a fast. It now detects `getDayType(today) === 'fast'` on non-Sundays and overlays capped-session guidance (75-80% or walk; second day of a back-to-back double = WALK ONLY; salt + K-tab + water).
+- Fast copy was Sunday-specific ("Breaks Monday morning", "FAST SUNDAY ACTIVE") — now pattern-agnostic for the 3-fasts/week sprint.
+- Ceiling labels (checklist f2, nutrition note, daily plate) updated from Phase-0 wording to mode wording (sprint 1,000 · glide 2,050 · band 2,350) with a sprint plate line (protein-first ~700, ~300 free). LAW 02 reconciled: 1,000 is sprint-only (14 days max), 1,500+ is the season floor, protein 100g survives every mode.
+
+### Health-check verification (nothing else needed fixing)
+
+6-plan conformance suite ALL CHECKS PASSED (content fns on normal/fast/defaults; sprint banner gating verified on Sep 23 / Oct 2 / Oct 7; strip override on/off) · headless Playwright full-loop: fast-marked day renders the fast checklist (salt/K-tab/STOP), TODAY strip shows the FASTED overlay, sprint banner live, projection + calendar render clean, zero page errors · macro engine verified correct: fast days intentionally report zero macros ("no macros to track"); eating days at the 1,000 ceiling floor protein at 101g (1g/kg × current weight) with the enforcement warning · `node --check` clean · §12 sweep + stale-ref grep clean.
+
+### Files changed
+
+`plans/cycle.js` · `app.html` (APP_VERSION → 8.10.8) · `sw.js` (v52) · `index.html` (§12 sweep + changelog, v8.10.7 demoted) · `CLAUDE.md` / `README.md` (refs) · `UPDATE_LOG.md` (this entry).
+
+---
+
 ## Version 8.10.7 — 2026-08-31
 
 **Scope:** Patch (TEMP CUT plan removed — superseded by CYCLE). No schema change, no migration framework change, no SK key touched.
