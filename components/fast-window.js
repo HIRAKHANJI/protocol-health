@@ -607,6 +607,17 @@ export function saveFastEditFromModal() {
     showAlert('End time must be after start time.');
     return;
   }
+  // v8.10.9: an empty save used to turn a 24h legacy fast into a 0h junk
+  // session; a past date with only a start time created a phantom fast that
+  // was still "running" today.
+  if (!startISO) {
+    showAlert('Enter a start date and time for this fast (or tap CANCEL to keep it as a full-day fast).');
+    return;
+  }
+  if (!endISO && dateStr < todayStr()) {
+    showAlert('A fast on a past day needs an end time too.');
+    return;
+  }
   editFastWindow(dateStr, null, startISO, endISO, broken);
   closeFastEditModal();
   if (typeof openDayModal === 'function') {

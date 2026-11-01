@@ -55,7 +55,15 @@ export const MIGRATIONS = [
       const fsKey = 'ph_fs_v1';
       const fw = data[fwKey] || {};
       const fd = data[fdKey] || {};
-      const sessions = [];
+      // v8.10.9: never overwrite real sessions. If ph_fs_v1 already holds data
+      // (e.g. the schema record was corrupted or rolled back by a restore),
+      // keep it and only backfill uncovered fast days below.
+      const _existing = Array.isArray(data[fsKey]) ? data[fsKey] : [];
+      const sessions = _existing.slice();
+      // Local-midnight bounds (the old 'Z' UTC strings shifted the day for
+      // users far from UTC, which a later migration then read as a <16h fast).
+      const _dayStart = d => { const [y,m,dd] = d.split('-').map(Number); return new Date(y, m-1, dd, 0, 0, 0, 0).toISOString(); };
+      const _dayEnd   = d => { const [y,m,dd] = d.split('-').map(Number); return new Date(y, m-1, dd, 23, 59, 59, 999).toISOString(); };
       const seenSig = new Set();
       const baseTs = Date.now();
 
@@ -63,7 +71,7 @@ export const MIGRATIONS = [
       // Dedupe by (date|start|end) signature in case Phase C ever
       // double-wrote a window across dates.
       let serial = 0;
-      const fwDates = Object.keys(fw).sort();
+      const fwDates = _existing.length ? [] : Object.keys(fw).sort();
       for (const date of fwDates) {
         const arr = Array.isArray(fw[date]) ? fw[date] : [];
         for (const win of arr) {
@@ -73,8 +81,8 @@ export const MIGRATIONS = [
           seenSig.add(sig);
           sessions.push({
             id: 'fs_mig_' + baseTs + '_' + (serial++),
-            start: win.start || (date + 'T00:00:00.000Z'),
-            end:   win.end   || (date + 'T23:59:59.999Z'),
+            start: win.start || _dayStart(date),
+            end:   win.end   || _dayEnd(date),
             broken: !!win.broken,
             brokenBy: Array.isArray(win.brokenBy) ? win.brokenBy.slice() : [],
             dates: [date],
@@ -95,8 +103,8 @@ export const MIGRATIONS = [
         if (coveredDates.has(date)) continue;
         sessions.push({
           id: 'fs_legacy_' + date.replace(/-/g, ''),
-          start: date + 'T00:00:00.000Z',
-          end:   date + 'T23:59:59.999Z',
+          start: _dayStart(date),
+          end:   _dayEnd(date),
           broken: false,
           brokenBy: [],
           dates: [date],
@@ -218,7 +226,8 @@ export const MIGRATIONS = [
         agro:    [0, 3, 6], // AGRO: Sun/Wed/Sat
         cut:     [],
         bulk:    [],
-        maintenance: []
+        maintenance: [],
+        cycle:   [0]        // CYCLE: Sunday
       };
       const fastDow = FAST_DOW_BY_PLAN[planKey] || [];
 

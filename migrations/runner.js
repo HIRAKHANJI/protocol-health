@@ -57,6 +57,12 @@ export async function runMigrations(skKeys) {
       establishedAt: _localDateStr(),
       establishedFrom: hasAnyAppData() ? 'existing-user' : 'fresh-install'
     };
+    // v8.10.9: a brand-new install has nothing to migrate — stamp the latest
+    // schema directly instead of running the whole chain (which also fired two
+    // confusing auto-backup downloads of empty data on first launch).
+    if (record.establishedFrom === 'fresh-install') {
+      record.schemaVersion = MIGRATIONS.reduce((mx, m) => Math.max(mx, m.to), 1);
+    }
     writeSchemaRecord(record);
     console.log(`[migrations] Schema record established: v${record.schemaVersion} (${record.establishedFrom})`);
   }
@@ -77,7 +83,7 @@ export async function runMigrations(skKeys) {
       return { ok: false, error: 'version-mismatch', migration: m };
     }
 
-    if (m.requiresBackup) {
+    if (m.requiresBackup && hasAnyAppData()) {
       const allKeys = Object.keys(localStorage).filter(k => k.startsWith('ph_'));
       const snapshot = {};
       for (const k of allKeys) {
@@ -102,7 +108,8 @@ export async function runMigrations(skKeys) {
 
     const beforeMap = readAllAppData(skKeys);
     let afterMap;
-    try { afterMap = m.run(structuredClone(beforeMap)); }
+    const _clone = (typeof structuredClone === 'function') ? structuredClone : (x => JSON.parse(JSON.stringify(x)));
+    try { afterMap = m.run(_clone(beforeMap)); }
     catch (e) {
       console.error(`[migrations] v${m.from}→v${m.to} threw:`, e);
       return { ok: false, error: 'run-threw', migration: m, thrown: e };
@@ -123,7 +130,7 @@ export async function runMigrations(skKeys) {
       schemaVersion: m.to,
       lastMigration: new Date().toISOString(),
       migrationsApplied: [
-        ...record.migrationsApplied,
+        ...(Array.isArray(record.migrationsApplied) ? record.migrationsApplied : []),
         { from: m.from, to: m.to, description: m.description, at: new Date().toISOString() }
       ]
     };

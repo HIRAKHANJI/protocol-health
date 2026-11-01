@@ -139,7 +139,10 @@ export function getDayBreakdown(days = 14) {
   // Phase 6 (v7.4.0): exclusion counters consistent with computeObservedTDEE
   let excludedSick = 0, excludedLowCompliance = 0;
 
-  for (let d = new Date(oldestDate); d <= newestDate; d.setDate(d.getDate() + 1)) {
+  // v8.10.9: stop BEFORE the newest weigh-in day — that day's food is eaten
+  // after the weigh-in (and today's log is usually still incomplete), so it
+  // can't explain the measured change. Counting it biased observed TDEE low.
+  for (let d = new Date(oldestDate); d < newestDate; d.setDate(d.getDate() + 1)) {
     const ds = dateToStr(d);
     const fl = foodLog[ds];
     const isFast = !!fastDays[ds];
@@ -282,8 +285,12 @@ export function computeATPFactor(settings, weights, plan) {
   // when available so brief sickness/water spikes don't reset the baseline.
   // Weights are stored newest-first in SK.weights.
   const sortedAsc = weights.slice().sort((a, b) => a.date.localeCompare(b.date));
-  const startWeight = sortedAsc[0].weight;
-  const currentWeight = sortedAsc[sortedAsc.length - 1].weight;
+  // v8.10.9: measure loss from the plan start, not from the first weight ever
+  // logged — old history inflated the rate and pinned ATP at its floor.
+  const _sinceStart = sortedAsc.filter(w => w.date >= settings.startDate);
+  const _base = _sinceStart.length >= 2 ? _sinceStart : sortedAsc;
+  const startWeight = _base[0].weight;
+  const currentWeight = _base[_base.length - 1].weight;
   const cumulativeLoss = startWeight - currentWeight;
   if (cumulativeLoss < 1.0) return 1.0; // No real loss yet → no ATP
 
@@ -529,6 +536,10 @@ export function weeklyCalibration() {
     return { applied: false, reason: 'within-threshold', oldTdee: old, newTdee: newT };
   }
   s.tdee = newT;
+  // v8.10.9: remember this came from calibration (and its ratio to the
+  // formula) so recomputeTDEE keeps it instead of resetting to raw formula.
+  s.tdeeSource = 'calibrated';
+  s.tdeeCalibrationRatio = (status.formulaTDEE > 0) ? Math.round((newT / status.formulaTDEE) * 1000) / 1000 : null;
   s.lastCalibrationOutcome = 'applied';
   saveSettings(s);
   dispatch('TDEE_CHANGED');
@@ -615,7 +626,11 @@ export function inferActivityMultiplier() {
     return { valid: false, reason: 'bmr-invalid' };
   }
   const observedTDEE = obs.tdee;
-  const rawEffective = observedTDEE / bmr;
+  // v8.10.9: observed TDEE already contains metabolic adaptation; the formula
+  // multiplies ATP back in, so divide it out here or APPLY double-counts it.
+  const _planForAtp = _getActivePlanForCalibration();
+  const _atp = (typeof computeATPFactor === 'function') ? computeATPFactor(s, gs(SK.weights) || [], _planForAtp) : 1.0;
+  const rawEffective = observedTDEE / (bmr * (_atp > 0 ? _atp : 1));
   // Clamp to plan default ± delta. Cap names mirror Mifflin × multiplier
   // convention so downstream code can reapply to settings.activityLevel.
   // v7.9.0 (Fix D): plans with fast days have a wider cap range (± 0.35)
@@ -634,7 +649,12 @@ export function inferActivityMultiplier() {
   const cappedEffective = Math.max(lowerCap, Math.min(upperCap, rawEffective));
   // Round to 3 decimals for stable display + storage equality checks
   const effective = Math.round(cappedEffective * 1000) / 1000;
-  const current = parseFloat(s.activityLevel) || 1.55;
+  // v8.10.9: compare against the multiplier the formula actually uses (the
+  // plan's weekly day-type average), not the legacy dropdown value.
+  const _planNow = _getActivePlanForCalibration();
+  const current = (typeof getWeeklyAvgActivity === 'function' && _planNow)
+    ? Math.round(getWeeklyAvgActivity(_planNow, s) * 1000) / 1000
+    : (parseFloat(s.activityLevel) || 1.55);
   const gap = current > 0 ? ((effective - current) / current) * 100 : 0;
   return {
     valid: true,
@@ -767,6 +787,8 @@ export function autoRevertImplausibleTdee() {
   const s = getSettings();
   const old = s.tdee;
   s.tdee = check.formulaTDEE;
+  s.tdeeSource = 'formula';
+  s.tdeeCalibrationRatio = null;
   s.lastCalibrationAt = null; // unblock cadence — let weeklyCalibration retry
   s.lastCalibrationOutcome = 'reverted';
   s.lastCalibrationFormula = check.formulaTDEE;

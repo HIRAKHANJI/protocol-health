@@ -26,6 +26,10 @@ export const maintenance = {
   // Eat-day = lightly active baseline; light day = sedentary-leaning
   // recovery. Weekly weighted: 6×1.375 + 1×1.30 = 1.36.
   activityByDayType: { eatDay: 1.375, lightDay: 1.30 },
+  // Checklist ids derived from WORKOUTS-tab progress (breakfast, walks, stretches are hand-ticked).
+  autoWorkoutIds: ['m2'],
+  // Light day: ~300-500 cal below TDEE.
+  lightDayCalFraction: 0.82,
 
   defaultTimes: { wakeTime:'07:00', lastMealTime:'20:00', eveningSessionTime:'18:00', eatingWindowStart:null },
 
@@ -64,8 +68,8 @@ export const maintenance = {
     { id:'m2', group:'MORNING', label:'Today\'s movement session', sub:'See WORKOUTS tab. Strength, cardio, yoga, Animal Flow, or recreation.' },
     { id:'m3', group:'MORNING', label:'Balanced breakfast', sub:'Protein + carbs + fat. Eggs, oats, fruit, yogurt \u2014 whatever works.' },
     { id:'m4', group:'MORNING', label:'Log weight (weekly)', sub:'Weekly average. Do not stress daily fluctuations.' },
-    { id:'f1', group:'EATING', label:'Ate near TDEE', sub:'\u00b1200 cal is fine. Maintenance is eating normally while staying active.' },
-    { id:'f2', group:'EATING', label:'Protein in every meal', sub:'1.2\u20131.6g/kg total. Distribute across meals.', type:'info' },
+    { id:'f1', group:'EATING', label:'Ate near TDEE', sub:'\u00b1300 cal is fine. Maintenance is eating normally while staying active.', type:'info' },
+    { id:'f2', group:'EATING', label:'Protein in every meal', sub:'1.2\u20131.6g/kg total. Distribute across meals.' },
     { id:'f3', group:'EATING', label:'80/20 eating', sub:'80% whole foods, 20% flexible. No food is banned.' },
     { id:'f4', group:'EATING', label:'2L+ water today', sub:'Tea and herbal drinks count.', type:'water', waterTarget:2.0 },
     { id:'e1', group:'EVENING', label:'Post-session stretch or cooldown', sub:'5 min minimum. See WORKOUTS tab.' },
@@ -213,7 +217,7 @@ export const maintenance = {
     </div>
     <div class="rule-card" style="border-left-color:#82e0aa">
       <div class="rule-num">EAT AT TDEE</div>
-      <div class="rule-text">\u00b1200 cal. No deficit, no surplus. The body self-regulates when not under extreme restriction.</div>
+      <div class="rule-text">\u00b1300 cal. No deficit, no surplus. The body self-regulates when not under extreme restriction.</div>
     </div>
     <div class="rule-card">
       <div class="rule-num">PROTEIN</div>
@@ -244,7 +248,7 @@ export const maintenance = {
     const cal = s.calories || 2200;
     return `
     <div class="section-title">EATING <span>RULES</span></div>
-    ${ruleCard('RULE 01','Eat near ' + cal + ' cal/day (\u00b1200 cal).','At TDEE \u2014 not a deficit, not a surplus.')}
+    ${ruleCard('RULE 01','Eat near ' + cal + ' cal/day (\u00b1300 cal).','At TDEE \u2014 not a deficit, not a surplus.')}
     ${ruleCard('RULE 02','Protein in every meal.','1.2\u20131.6g/kg. Distribute across 2\u20134 meals.')}
     ${ruleCard('RULE 03','80/20 flexible eating.','Sustainable indefinitely. No rigid restrictions.')}
     ${ruleCard('RULE 04','2L+ water daily.','Basic hydration supports everything.')}

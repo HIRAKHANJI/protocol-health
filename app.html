@@ -462,7 +462,7 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
 .popup-overlay.active { display:flex; }
 .popup-box { background:var(--bg); border:1px solid var(--border); border-radius:14px; max-width:360px; width:100%; padding:22px; animation:slideUp 0.2s ease; }
 .popup-box h3 { font-family:'Bebas Neue',sans-serif; font-size:1.2rem; letter-spacing:2px; color:var(--accent); margin-bottom:8px; }
-.popup-box p { font-size:0.8rem; color:var(--muted); line-height:1.6; margin-bottom:16px; }
+.popup-box p { font-size:0.8rem; color:var(--muted); line-height:1.6; margin-bottom:16px; white-space:pre-line; }
 .popup-btns { display:flex; gap:8px; }
 .popup-yes { flex:1; padding:11px; background:var(--accent); color:#000; border:none; border-radius:8px; font-family:'Bebas Neue',sans-serif; font-size:0.95rem; letter-spacing:2px; cursor:pointer; }
 .popup-no { flex:1; padding:11px; background:none; border:1px solid var(--border); border-radius:8px; color:var(--muted); font-family:'DM Mono',monospace; font-size:0.7rem; cursor:pointer; }
@@ -661,7 +661,7 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
   </div>
   <div class="header-right">
     <div class="weight-badge">
-      <div class="w-num" id="currentWeightDisplay">104</div>
+      <div class="w-num" id="currentWeightDisplay">—</div>
       <div class="w-label">KG NOW</div>
     </div>
     <div class="settings-btn" onclick="openSettings()" title="Settings">⚙</div>
@@ -683,11 +683,11 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
 <div class="section active" id="tab-today">
   <div style="height:10px"></div>
   <div class="goal-strip">
-    <div class="goal-block"><div class="goal-val current" id="gs-current">104</div><div class="goal-lbl">Current</div></div>
+    <div class="goal-block"><div class="goal-val current" id="gs-current">—</div><div class="goal-lbl">Current</div></div>
     <div class="goal-divider"></div>
-    <div class="goal-block"><div class="goal-val target" id="gs-target">91</div><div class="goal-lbl">Target</div></div>
+    <div class="goal-block"><div class="goal-val target" id="gs-target">—</div><div class="goal-lbl">Target</div></div>
     <div class="goal-divider"></div>
-    <div class="goal-block"><div class="goal-val remain" id="gs-remain">13</div><div class="goal-lbl">To go</div></div>
+    <div class="goal-block"><div class="goal-val remain" id="gs-remain">—</div><div class="goal-lbl">To go</div></div>
     <div class="goal-divider"></div>
     <div class="goal-bar-wrap">
       <div class="goal-bar-track"><div class="goal-bar-fill" id="goalBarFill" style="width:0%"></div></div>
@@ -762,7 +762,7 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
   <div style="height:10px"></div>
   <div class="month-nav">
     <button class="month-nav-btn" onclick="changeMonth(-1)">◀ PREV</button>
-    <div class="month-title" id="monthTitle">MARCH <span>2026</span></div>
+    <div class="month-title" id="monthTitle"></div>
     <button class="month-nav-btn" onclick="changeMonth(1)">NEXT ▶</button>
   </div>
   <div class="month-stats" id="monthStats"></div>
@@ -819,7 +819,7 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
   <div class="section-title">WEIGHT <span>LOG</span></div>
   <p class="section-note">Weigh first thing morning, after toilet, before food. Same conditions every time.</p>
   <div class="weight-input-wrap">
-    <input class="weight-input" type="number" id="weightInput" placeholder="e.g. 103.5" step="0.1" min="60" max="250">
+    <input class="weight-input" type="number" id="weightInput" placeholder="Weight (kg)" step="0.1" min="60" max="250">
     <button class="log-btn" onclick="logWeight()">LOG</button>
   </div>
   <div class="weight-history">
@@ -997,13 +997,13 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
           <div>
             <label class="field-label">Current weight (kg)</label>
             <div style="display:flex;gap:6px">
-              <input class="field-input" type="number" id="settingCurrentKg" placeholder="104" step="0.1" min="40" max="250" oninput="autoFillTDEE();calcDuration()" style="flex:1">
+              <input class="field-input" type="number" id="settingCurrentKg" placeholder="kg" step="0.1" min="40" max="250" oninput="autoFillTDEE();calcDuration()" style="flex:1">
               <button class="log-btn" style="font-size:0.7rem;padding:8px 12px;white-space:nowrap" onclick="setCurrentWeight()">SET</button>
             </div>
           </div>
           <div>
             <label class="field-label">Target weight (kg)</label>
-            <input class="field-input" type="number" id="settingTargetKg" placeholder="91" step="0.1" min="40" max="250" oninput="calcDuration()">
+            <input class="field-input" type="number" id="settingTargetKg" placeholder="kg" step="0.1" min="40" max="250" oninput="calcDuration()">
           </div>
         </div>
         <div class="duration-inputs">
@@ -1019,11 +1019,11 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
         <div class="duration-inputs" style="grid-template-columns:1fr 1fr 1fr">
           <div>
             <label class="field-label">Age (years)</label>
-            <input class="field-input" type="number" id="settingAge" min="16" max="99" placeholder="e.g. 23" oninput="autoFillTDEE()">
+            <input class="field-input" type="number" id="settingAge" min="16" max="99" placeholder="years" oninput="autoFillTDEE()">
           </div>
           <div>
             <label class="field-label">Height (cm)</label>
-            <input class="field-input" type="number" id="settingHeight" min="140" max="220" placeholder="e.g. 177" oninput="autoFillTDEE()">
+            <input class="field-input" type="number" id="settingHeight" min="140" max="220" placeholder="cm" oninput="autoFillTDEE()">
           </div>
           <div>
             <label class="field-label">Sex</label>
@@ -1103,15 +1103,15 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
         <div class="duration-single">
           <label class="field-label">Risk tolerance</label>
           <select class="plan-select" id="settingRisk" onchange="calcDuration()">
-            <option value="standard">Standard — safe limits enforced</option>
-            <option value="aggressive" selected>Aggressive — your protocol (fasting + low cal)</option>
+            <option value="standard" selected>Standard — safe limits enforced</option>
+            <option value="aggressive">Aggressive — fasting + low cal allowed</option>
             <option value="unrestricted">Unrestricted — show math, no blocks</option>
           </select>
           <div class="custom-select" id="riskSelectCustom" style="margin-top:4px">
-            <div class="custom-select-trigger" id="riskSelectTrigger" onclick="toggleCustomSelect('riskSelectCustom')">Aggressive — your protocol (fasting + low cal)</div>
+            <div class="custom-select-trigger" id="riskSelectTrigger" onclick="toggleCustomSelect('riskSelectCustom')">Standard — safe limits enforced</div>
             <div class="custom-select-dropdown">
-              <div class="custom-select-option" data-value="standard" onclick="selectCustomOption('riskSelectCustom','settingRisk',this)">Standard — safe limits enforced</div>
-              <div class="custom-select-option selected" data-value="aggressive" onclick="selectCustomOption('riskSelectCustom','settingRisk',this)">Aggressive — your protocol (fasting + low cal)</div>
+              <div class="custom-select-option selected" data-value="standard" onclick="selectCustomOption('riskSelectCustom','settingRisk',this)">Standard — safe limits enforced</div>
+              <div class="custom-select-option" data-value="aggressive" onclick="selectCustomOption('riskSelectCustom','settingRisk',this)">Aggressive — fasting + low cal allowed</div>
               <div class="custom-select-option" data-value="unrestricted" onclick="selectCustomOption('riskSelectCustom','settingRisk',this)">Unrestricted — show math, no blocks</div>
             </div>
           </div>
@@ -1419,11 +1419,11 @@ textarea.field-input { min-height:65px; resize:vertical; font-family:'DM Sans',s
         <div class="duration-inputs">
           <div>
             <label class="field-label">New target weight (kg)</label>
-            <input class="field-input" type="number" id="msTargetKg" placeholder="91" step="0.1" min="40" max="250" oninput="calcAdjust()">
+            <input class="field-input" type="number" id="msTargetKg" placeholder="kg" step="0.1" min="40" max="250" oninput="calcAdjust()">
           </div>
           <div>
             <label class="field-label">New daily calories</label>
-            <input class="field-input" type="number" id="msCalories" placeholder="1000" step="50" min="0" max="5000" oninput="calcAdjust()">
+            <input class="field-input" type="number" id="msCalories" placeholder="cal" step="50" min="0" max="5000" oninput="calcAdjust()">
           </div>
         </div>
         <div class="calc-result" id="adjustResult" style="display:none">
@@ -1863,8 +1863,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '8.10.8';
-const APP_VERSION_MSG = 'CYCLE health-check release — the WORKOUTS phase banner now shows the live SPRINT block (Sep 22 → Oct 5: 1,000-cal eating days, Wed/Sat/Sun fasts, salt + K-tab rules, 6h sleep floor, double-day walk-only law) instead of the stale September copy; the TODAY strip now flags any date marked as a fast with capped-session guidance; fast cards and ceiling labels are pattern-agnostic. Full loop re-verified: checklists, day types, macro floor (100g at any ceiling), projection, calendar — all reading correctly.';
+const APP_VERSION = '8.10.9';
+const APP_VERSION_MSG = 'Cleanup + bug-fix release: the app no longer contains anyone’s built-in personal details — plans, defaults and targets now come only from your Settings and logs. Checklist items can always be ticked by hand, rest days can reach full completion, plan switches keep your history, and calibrated or typed TDEE values are no longer reset on every launch.';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
 
@@ -1884,6 +1884,55 @@ const WORKOUT_ITEM_SESSION = { m2:'morning', m3:'morning', e1:'evening', e2:'eve
 // the global object (globalThis fallback).
 Object.assign(window, { SK, MONTHS_LIST, DAYS_SHORT, AUTO_WORKOUT_IDS, WORKOUT_ITEM_SESSION });
 
+// v8.10.9: a plan declares which checklist ids are DERIVED from WORKOUTS-tab
+// progress (plan.autoWorkoutIds). Previously the five ids m2/m3/e1/e2/e3 were
+// auto-derived on every plan, so ordinary items that happened to use those ids
+// (breakfast, bone broth, vacuums, "change clothes") could never be hand-ticked.
+function getAutoWorkoutIds(plan) {
+  if (!plan) plan = (typeof getActivePlan === 'function') ? getActivePlan() : null;
+  return (plan && Array.isArray(plan.autoWorkoutIds)) ? plan.autoWorkoutIds : AUTO_WORKOUT_IDS;
+}
+// v8.10.9: fraction of TDEE eaten on a light day, per plan (was a hardcoded
+// 0.6 that contradicted BULK "at or slightly below TDEE" and MAINTENANCE
+// "300-500 below TDEE").
+function getLightDayFraction(plan) {
+  if (!plan) plan = (typeof getActivePlan === 'function') ? getActivePlan() : null;
+  const f = plan && plan.lightDayCalFraction;
+  return (typeof f === 'number' && f > 0 && f <= 1.2) ? f : 0.6;
+}
+// v8.10.9: number of countable (non-rest, non-daily) exercise rows the active
+// plan schedules on a date's weekday. 0 means the session-derived checklist
+// items are N/A that day — rest/walk days used to be impossible to complete.
+const _countableRowsCache = {};
+function getCountableWorkoutRows(dateStr) {
+  const plan = (typeof getActivePlan === 'function') ? getActivePlan() : null;
+  if (!plan || typeof plan.workoutContent !== 'function') return null;
+  const dow = DAYS_SHORT[strToDate(dateStr).getDay()];
+  const key = (plan.name || '') + '|' + dow;
+  if (Object.prototype.hasOwnProperty.call(_countableRowsCache, key)) return _countableRowsCache[key];
+  let count = 0;
+  try {
+    const temp = document.createElement('div');
+    if (typeof _resetExRowInstances === 'function') _resetExRowInstances();
+    temp.innerHTML = plan.workoutContent(getSettings());
+    if (typeof _resetExRowInstances === 'function') _resetExRowInstances();
+    temp.querySelectorAll('.workout-card').forEach(card => {
+      const d = card.dataset.days;
+      if (d && d !== 'DAILY' && !d.split(',').includes(dow)) return;
+      const t = classifyWorkoutCard(card);
+      if (t === 'rest' || t === 'daily') return;
+      count += card.querySelectorAll('.wex-row').length;
+    });
+  } catch (e) { return null; }
+  _countableRowsCache[key] = count;
+  return count;
+}
+// v8.10.9: one place that maps legacy/invalid stored plan keys onto a real plan.
+function normalizePlanKey(k) {
+  if (k === 'tempcut') return 'cycle';
+  return (k && typeof PLANS !== 'undefined' && PLANS[k]) ? k : 'default';
+}
+
 // Classify a workout card's session type from its title text
 function classifyWorkoutCard(card) {
   const title = (card.querySelector('h3')?.textContent || '').toUpperCase();
@@ -1899,7 +1948,7 @@ function esc(s) { const d=document.createElement('div'); d.textContent=s; return
 // gs (get storage): safely reads and JSON-parses a localStorage key. Returns null on missing or parse error.
 function gs(k) { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } }
 // ss (set storage): safely JSON-stringifies and writes to localStorage + mirrors to IndexedDB.
-function ss(k,v) { try { localStorage.setItem(k, JSON.stringify(v)); idbPut(k, v); } catch(e) { if(e.name==='QuotaExceededError'||e.code===22) { if(typeof showAlert==='function') showAlert('Storage is full. Your data may not be saved. Back up now and clear old data.'); } } }
+function ss(k,v) { try { localStorage.setItem(k, JSON.stringify(v)); idbPut(k, v); return true; } catch(e) { if(e.name==='QuotaExceededError'||e.code===22) { if(typeof showAlert==='function') showAlert('Storage is full. Your data may not be saved. Back up now and clear old data.'); } return false; } }
 // todayStr: returns today as "YYYY-MM-DD" — the universal date format used everywhere in the app.
 function todayStr() { return dateToStr(new Date()); }
 // dateToStr: converts a JS Date object to "YYYY-MM-DD" string, handling timezone correctly.
@@ -1911,7 +1960,7 @@ function strToDate(s) { const [y,m,d]=s.split('-').map(Number); return new Date(
 // getSettings: always returns a full settings object with defaults. Never returns null.
 // Add any new settings fields here with a default value.
 function getSettings() {
-  const defaults = { plan:'default', currentKg:null, targetKg:null, calories:null, tdee:2600, risk:'aggressive', startDate:null, age:null, height:null, sex:'male', activityLevel:'1.55', activityByDayType:null, name:'', wakeTime:null, lastMealTime:null, eveningSessionTime:null, eatingWindowStart:null, supplementsEnabled:true, tdeeManualOverride:false, lastCalibrationAt:null, lastCalibrationFormula:null, lastCalibrationObserved:null, lastCalibrationOutcome:'never-run', linkedOffsetMode:false, targetOffset:null, engineEnabled:false, engineSafetyBrakes:{ lite:true, cut:true, bulk:true, maintenance:true, agro:false }, engineFocus:{ muscles:[], regions:[], goalPreset:null } };
+  const defaults = { plan:'default', currentKg:null, targetKg:null, calories:null, tdee:2600, tdeeSource:'formula', tdeeCalibrationRatio:null, risk:'standard', startDate:null, age:null, height:null, sex:'male', activityLevel:'1.55', activityByDayType:null, name:'', wakeTime:null, lastMealTime:null, eveningSessionTime:null, eatingWindowStart:null, supplementsEnabled:true, tdeeManualOverride:false, lastCalibrationAt:null, lastCalibrationFormula:null, lastCalibrationObserved:null, lastCalibrationOutcome:'never-run', linkedOffsetMode:false, targetOffset:null, engineEnabled:false, engineSafetyBrakes:{ lite:true, cut:true, bulk:true, maintenance:true, agro:false }, engineFocus:{ muscles:[], regions:[], goalPreset:null } };
   const saved = gs(SK.settings);
   if(!saved) return defaults;
   return Object.assign({}, defaults, saved);
@@ -2100,11 +2149,11 @@ function computeMacros(dateStr) {
   }
 
   // Light days use ~60% of TDEE as calorie ceiling
-  const cal = lightDay ? Math.round((s.tdee || 2600) * 0.6) : (s.calories || 1500);
+  const cal = lightDay ? Math.round((s.tdee || 2600) * getLightDayFraction(plan)) : (s.calories || 1500);
 
   const dow = strToDate(dateStr).getDay();
   const eveningText = (plan.eveningSub && plan.eveningSub[dow]) || '';
-  const isRestDay = dow === 0 || eveningText.toLowerCase().includes('rest');
+  const isRestDay = dow === 0 || /\brest\b(?!s\b| of\b| between\b| period\b)/i.test(eveningText);
 
   const tomorrow = new Date(strToDate(dateStr));
   tomorrow.setDate(tomorrow.getDate() + 1);
@@ -2115,7 +2164,10 @@ function computeMacros(dateStr) {
   const pfm = plan.proteinFloorMultiplier || 1.3;
 
   // Biological floors
-  const currentKg = getLatestWeight() || s.currentKg || 104;
+  // v8.10.9: no hardcoded fallback body weight — without a logged/entered
+  // weight the floor uses a neutral 70kg reference and says so below.
+  const _knownKg = getLatestWeight() || s.currentKg || null;
+  const currentKg = _knownKg || 70;
   const proteinFloor = Math.round(currentKg * pfm);
   const fatFloor = 20;
   const proteinFloorCal = proteinFloor * 4;
@@ -2169,7 +2221,9 @@ function computeMacros(dateStr) {
       const shortfall = (proteinFloor - proteinG) * 4;
       proteinG = proteinFloor;
       carbsG   = Math.max(0, Math.round(carbsG - shortfall / 4));
-      warnings.push('Protein floor enforced — ' + proteinFloor + 'g minimum at your current weight (' + Math.round(currentKg) + 'kg × ' + pfm + 'g/kg). Requires deliberate high-protein food choices.');
+      warnings.push(_knownKg
+        ? 'Protein floor enforced — ' + proteinFloor + 'g minimum at your current weight (' + Math.round(currentKg) + 'kg × ' + pfm + 'g/kg). Requires deliberate high-protein food choices.'
+        : 'Protein floor estimated at ' + proteinFloor + 'g — log your weight (TRACK tab) for a personal number.');
     }
     if(fatG < fatFloor) {
       fatG = fatFloor;
@@ -2292,7 +2346,7 @@ function onFoodModalNameInput(input) {
     const matches = lib.filter(f => f.name.toLowerCase().includes(lower)).slice(0, 5);
     if(!matches.length) { sugEl.classList.remove('visible'); return; }
     sugEl.innerHTML = matches.map(f =>
-      `<div class="food-sug-item" onmousedown="selectFoodModalSuggestion('${esc(f.name).replace(/\\/g,'\\\\').replace(/'/g,"\\'")}',${f.lastCalories},${f.lastProtein != null ? f.lastProtein : 'null'},${f.lastCarbs != null ? f.lastCarbs : 'null'},${f.lastFat != null ? f.lastFat : 'null'})">
+      `<div class="food-sug-item" onmousedown="selectFoodModalSuggestion('${esc(f.name).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;')}',${f.lastCalories},${f.lastProtein != null ? f.lastProtein : 'null'},${f.lastCarbs != null ? f.lastCarbs : 'null'},${f.lastFat != null ? f.lastFat : 'null'})">
         <span>${esc(f.name)}</span><span class="food-sug-cal">${f.lastCalories} cal</span>
       </div>`
     ).join('');
@@ -2340,7 +2394,7 @@ function renderFoodModalEntries() {
     `<div class="food-entry">
       <div class="food-entry-info"><div class="food-entry-name">${esc(e.name)}</div>${e.notes ? `<div class="food-entry-notes">${esc(e.notes)}</div>` : ''}</div>
       <div class="food-entry-cal">${e.calories}</div>
-      <button class="food-entry-del" onclick="showConfirm('REMOVE','Remove ${esc(e.name).replace(/\\/g,'\\\\').replace(/'/g,"\\'")}?',()=>{removeFoodEntry('${today}','${e.id}')},{yesLabel:'REMOVE',danger:true})">×</button>
+      <button class="food-entry-del" onclick="showConfirm('REMOVE','Remove ${esc(e.name).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;')}?',()=>{removeFoodEntry('${today}','${e.id}')},{yesLabel:'REMOVE',danger:true})">×</button>
     </div>`
   ).join('');
   const s = getSettings();
@@ -2667,6 +2721,8 @@ function showVersionInfo() {
 function checkVersionUpdate() {
   const seen = gs(SK.seenVer);
   if(seen === APP_VERSION) return;
+  // v8.10.9: a brand-new install has nothing "new" to announce.
+  if(!seen) { ss(SK.seenVer, APP_VERSION); return; }
   // Determine if this is a minor/major bump (popup-worthy) or just a patch
   if(seen) {
     const [sMaj,sMin] = seen.split('.').map(Number);
@@ -2930,25 +2986,21 @@ function resolveSupplementSub(itemId, originalSub, dayOfWeek, dayType, s) {
 
   if(itemId === 's1') {
     // Eating day morning stack — take with breakfast at eating window start
-    const pills = ['Osteocare 2 tabs', 'D3+K2 1 tab'];
+    const pills = ['Vitamin D3 1,000-2,000 IU'];
     if(isZincDay) pills.push('Zinc 50mg');
-    pills.push('MCT 1 gel');
     return pills.join(' · ') + ' — take at ' + ewStart + ' with breakfast.';
   }
   if(itemId === 'sf1') {
-    // Fast day morning stack — take on waking (no food, MCT gel is fat carrier for D3)
-    const pills = ['D3+K2 1 tab + MCT gel (fat carrier)'];
-    if(isZincDay) pills.push('Zinc 50mg');
-    pills.push('2 MCT gels pre-training (~' + preTime + ')');
-    return pills.join(' · ') + ' — morning dose at ' + formatTime(wakeRaw) + '.';
+    // Fast day morning — vitamins that need food wait for the next eating day
+    return (isZincDay ? 'Zinc 50mg on waking at ' + formatTime(wakeRaw) + '. ' : '') + 'Electrolyte tab mid-morning (~' + midMorning + '). Vitamin D waits for the next eating day.';
   }
   if(itemId === 's2') {
     // Omega-3 — eating days only, with largest meal
-    return '3 caps (1,485mg EPA + 990mg DHA = 2,475mg). Take with your largest meal.';
+    return '1-2g EPA+DHA (check your label). Take with your largest meal.';
   }
   if(itemId === 's3' || itemId === 'sf2') {
     // Magnesium — every night before bed
-    return '1 serving (~67.6mg elemental Mg). Take before bed tonight.';
+    return '200-300mg elemental magnesium (≤350mg/day supplemental). Take before bed tonight.';
   }
   return originalSub;
 }
@@ -3087,8 +3139,11 @@ function getValidCheckCompletion(dateStr) {
 
   let done = 0;
   let total = 0;
+  const _autoIds = getAutoWorkoutIds(plan);
+  const _noSession = getCountableWorkoutRows(dateStr) === 0;
 
   checklist.forEach(item => {
+    if (_noSession && _autoIds.includes(item.id)) return; // N/A: nothing scheduled
     if (item.subItems && item.subItems.length) {
       // Parent with subItems is a derived aggregate — not counted independently.
       // Each sub counts if its day-of-week filter (if any) allows it.
@@ -3105,8 +3160,8 @@ function getValidCheckCompletion(dateStr) {
 
   // _workout: counted only when the fallback card is actually rendered
   // (checklist has no AUTO_WORKOUT items — typically fast/light days).
-  const hasWorkoutItems = checklist.some(i => AUTO_WORKOUT_IDS.includes(i.id));
-  if (!hasWorkoutItems) {
+  const hasWorkoutItems = checklist.some(i => _autoIds.includes(i.id));
+  if (!hasWorkoutItems && !_noSession) {
     total++;
     if (checks['_workout']) done++;
   }
@@ -3142,11 +3197,16 @@ function migrateOrphanedChecks() {
     });
     validIds.add('_workout');
 
+    // v8.10.9: never destroy history. Ids not in the current plan's checklist
+    // move to log.checksArchive (kept, not counted) instead of being deleted —
+    // switching plans used to silently erase every past day's ticks.
     Object.keys(checks).forEach(checkId => {
-      // Whitelist wex* IDs (workout exercise checks)
       if(checkId.startsWith('wex')) return;
-      // Remove orphaned IDs not in current checklist
-      if(!validIds.has(checkId)) { delete checks[checkId]; changed = true; }
+      if(!validIds.has(checkId)) {
+        log.checksArchive = log.checksArchive || {};
+        log.checksArchive[checkId] = checks[checkId];
+        delete checks[checkId]; changed = true;
+      }
     });
 
     // v8.2.0 fix: derive auto-workout items from workoutSessions for EVERY date
@@ -3158,7 +3218,7 @@ function migrateOrphanedChecks() {
     // every session was 100% complete. Inserting based on validIds + threshold
     // makes the derivation idempotent across init for all historical days.
     const sessions = log.workoutSessions || {};
-    AUTO_WORKOUT_IDS.forEach(itemId => {
+    getAutoWorkoutIds(plan).forEach(itemId => {
       // Only derive items that the rendered checklist for this date contains
       // (e.g. fast-day checklists don't include m2/m3/e1/e2/e3 — leave them alone)
       if(!validIds.has(itemId)) return;
@@ -3174,7 +3234,7 @@ function migrateOrphanedChecks() {
     // rendered checklist has no AUTO_WORKOUT items (fast/light days). Derive
     // from global workoutToday counts so retroactive logging flips those days
     // to FULL on the calendar without needing the user to tick anything.
-    const hasAutoWorkoutInChecklist = AUTO_WORKOUT_IDS.some(id => validIds.has(id));
+    const hasAutoWorkoutInChecklist = getAutoWorkoutIds(plan).some(id => validIds.has(id));
     if(!hasAutoWorkoutInChecklist && log.workoutTodayTotal > 0) {
       const globalPct = (log.workoutTodayDone || 0) / log.workoutTodayTotal;
       const shouldBeDone = globalPct >= 0.8;
@@ -3303,7 +3363,7 @@ function getSpikeTrimmedWeights(weights, opts) {
 // if the user updates settings later with a lower current weight.
 function updateGoalBar(current) {
   const s = getSettings();
-  const target = s.targetKg || 91;
+  const target = s.targetKg || null; // v8.10.9: no hardcoded personal target
   // Start = oldest logged weight entry, fall back to settings.currentKg
   const weights = gs(SK.weights)||[];
   const start = weights.length ? weights[weights.length-1].weight : (s.currentKg || current);
@@ -3311,10 +3371,19 @@ function updateGoalBar(current) {
   if(current === null || current === undefined) {
     document.getElementById('currentWeightDisplay').textContent = '—';
     document.getElementById('gs-current').textContent = '—';
-    document.getElementById('gs-target').textContent = target;
+    document.getElementById('gs-target').textContent = target || '—';
     document.getElementById('gs-remain').textContent = '—';
     document.getElementById('goalBarFill').style.width = '0%';
     document.getElementById('goalPct').textContent = 'No data yet';
+    return;
+  }
+  if(!target) {
+    document.getElementById('currentWeightDisplay').textContent = current;
+    document.getElementById('gs-current').textContent = current;
+    document.getElementById('gs-target').textContent = '—';
+    document.getElementById('gs-remain').textContent = '—';
+    document.getElementById('goalBarFill').style.width = '0%';
+    document.getElementById('goalPct').textContent = 'Set a target weight in Settings';
     return;
   }
   // Detect plan direction: bulk (gaining) vs cut (losing)
@@ -3427,11 +3496,16 @@ function updateProjection() {
   const settingsCal = s.calories || 1500;
   if(recentLogs.length >= 3){
     const avgCompliance = recentLogs.reduce((sum,entry)=>{
-      const checks = Object.values(entry.log.checks||{});
-      let dayScore = checks.length ? checks.filter(Boolean).length/checks.length : 0.5;
+      // v8.10.9: score against the day's rendered checklist (not every stored
+      // key — sub-items, parents, archived/orphaned ids and _workout all
+      // inflated or deflated it).
+      const _vc = getValidCheckCompletion(entry.dateStr);
+      let dayScore = (_vc && _vc.total > 0) ? _vc.done / _vc.total : 0.5;
       // Calorie compliance: if food log exceeds ceiling, penalise proportionally
+      // (not on bulk — eating above the target is the point there).
       const dc = getDayCalories(entry.dateStr);
-      if(dc.hasData && dc.total > settingsCal && !isFastDay(entry.dateStr) && !isLightDay(entry.dateStr)) {
+      const _isBulkPlan = (getActivePlan() || {}).goalMode === 'bulk';
+      if(!_isBulkPlan && dc.hasData && dc.total > settingsCal && !isFastDay(entry.dateStr) && !isLightDay(entry.dateStr)) {
         dayScore *= Math.min(1, settingsCal / dc.total);
       }
       return sum + dayScore;
@@ -3448,7 +3522,7 @@ function updateProjection() {
   const tdee = s.tdee || 2600;
   const cal = s.calories || 1500;
   const fastDayDeficit = tdee / 7700; // kg lost on a full fast day
-  const lightDayCal = Math.round(tdee * 0.6); // light days ~60% of TDEE
+  const lightDayCal = Math.round(tdee * getLightDayFraction()); // per-plan light-day intake
 
   // Calculate formula rate using actual intake data where available
   // For days ahead, use actual logged data if available (today), else use s.calories
@@ -3484,7 +3558,9 @@ function updateProjection() {
   const observedRate = rawDailyLoss;
   const observedWeight = rawIsImplausible ? 0.1 : Math.min(0.75, recent.length / 10);
   const blendedRate = (observedRate * observedWeight) + (formulaRate * (1 - observedWeight));
-  const adjustedRate = blendedRate * complianceScore;
+  // v8.10.9: compliance only shrinks a projected LOSS. Applying it to a gain
+  // made low compliance project a smaller gain, which is backwards.
+  const adjustedRate = blendedRate > 0 ? blendedRate * complianceScore : blendedRate;
 
   const projectedDrop = adjustedRate * daysToSunday;
   const projSunday = parseFloat((latest.weight - projectedDrop).toFixed(1));
@@ -3500,7 +3576,7 @@ function updateProjection() {
   sundayEl.textContent = projSunday + ' kg';
   deltaEl.textContent = delta > 0 ? `−${delta}kg by Sun` : delta < 0 ? `+${Math.abs(delta)}kg by Sun` : 'no change';
 
-  const target = s.targetKg || 91;
+  const target = s.targetKg || latest.weight; // v8.10.9: no target set → neutral colouring
   const isBulkProj = target > latest.weight;
   if(isBulkProj) {
     sundayEl.className = 'proj-main ' + (projSunday >= target ? 'good' : projSunday > latest.weight ? 'good' : 'warn');
@@ -3673,9 +3749,17 @@ function toggleWorkout(header) {
 // Each exercise row has a checkbox. States stored in dayLogs[today].workoutChecks.
 
 function toggleWorkoutEx(el) {
+  const todayDay = DAYS_SHORT[new Date().getDay()];
+  // v8.10.9: only today's cards are tickable here (past days: use the day
+  // modal on MONTHS). Ticks on other days' cards looked saved but were dropped.
+  const _card = el.closest('.workout-card');
+  const _cd = _card && _card.dataset.days;
+  if (_cd && _cd !== 'DAILY' && !_cd.split(',').includes(todayDay)) {
+    if (typeof showAlert === 'function') showAlert('Only today’s workout can be ticked here. To log another day, open it on the MONTHS calendar.');
+    return;
+  }
   el.classList.toggle('wex-done');
   const today = todayStr();
-  const todayDay = DAYS_SHORT[new Date().getDay()];
   // Save exercises from today's cards with per-session counts
   const wChecks = {};
   let todayTotal = 0, todayDone = 0;
@@ -3939,7 +4023,8 @@ function openSettings() {
   document.getElementById('settingDays').value = '';
   document.getElementById('settingTargetDate').value = '';
   document.getElementById('settingStartDate').value = todayStr();
-  document.getElementById('settingRisk').value = s.risk||'aggressive';
+  document.getElementById('settingStartDate').dataset.prefill = todayStr();
+  document.getElementById('settingRisk').value = s.risk||'standard';
   // TDEE auto-calc fields
   document.getElementById('settingAge').value = s.age||'';
   document.getElementById('settingHeight').value = s.height||'';
@@ -4179,7 +4264,14 @@ function _cleanupCrossPlanCheckIds(oldPlanKey, newPlanKey) {
     scanned++;
     let dirty = false;
     for (const id of idsToClear) {
-      if (id in log.checks) { delete log.checks[id]; dirty = true; cleared++; }
+      if (id in log.checks) {
+        // v8.10.9: archive (keyed by the plan it belonged to) instead of
+        // deleting — the tick history survives a plan switch and can be
+        // recovered; archived ids are never counted toward completion.
+        log.checksArchive = log.checksArchive || {};
+        log.checksArchive[oldPlanKey + ':' + id] = log.checks[id];
+        delete log.checks[id]; dirty = true; cleared++;
+      }
     }
     if (dirty) dayLogs[ds] = log;
   }
@@ -4190,23 +4282,32 @@ function _cleanupCrossPlanCheckIds(oldPlanKey, newPlanKey) {
 // confirmPlan: saves all settings inputs to storage, updates the header badge,
 // and dispatches PLAN_CHANGED + CALORIES_CHANGED to refresh all tabs
 function confirmPlan() {
-  const val = document.getElementById('planSelect').value;
+  const val = normalizePlanKey(document.getElementById('planSelect').value);
   const s = getSettings();
   const oldPlanKey = s.plan; // capture BEFORE we overwrite
   s.plan = val;
   s.name = (document.getElementById('settingName').value||'').trim();
   const calInput = parseFloat(document.getElementById('settingCalories').value);
-  if(!isNaN(calInput) && calInput >= 0) s.calories = calInput;
+  if(!isNaN(calInput) && calInput > 0) s.calories = calInput;
   const tdeeInput = parseFloat(document.getElementById('settingTdee').value);
-  if(!isNaN(tdeeInput) && tdeeInput >= 1200) s.tdee = tdeeInput;
+  if(!isNaN(tdeeInput) && tdeeInput >= 1200 && tdeeInput <= 5000) {
+    if (s.tdee && Math.abs(tdeeInput - s.tdee) >= 1) { s.tdeeSource = 'manual'; s.tdeeCalibrationRatio = null; }
+    s.tdee = tdeeInput;
+  }
   const curInput = parseFloat(document.getElementById('settingCurrentKg').value);
   const tgtInput = parseFloat(document.getElementById('settingTargetKg').value);
   // v8.0.0 (H4 fix): unified weight bounds 40-250 kg (HTML, JS validators, setCurrentWeight all agree).
   // Out-of-range values are silently dropped (user keeps their previous valid value).
   if(!isNaN(curInput) && curInput >= 40 && curInput <= 250) s.currentKg = curInput;
   if(!isNaN(tgtInput) && tgtInput >= 40 && tgtInput <= 250) s.targetKg = tgtInput;
-  s.risk = document.getElementById('settingRisk').value || 'aggressive';
-  s.startDate = document.getElementById('settingStartDate').value || todayStr();
+  s.risk = document.getElementById('settingRisk').value || 'standard';
+  // v8.10.9: the start-date field doubles as the goal calculator's schedule
+  // start and is pre-filled with today — saving it on every CONFIRM reset the
+  // plan start (and the adaptive-thermogenesis factor that reads it). Only
+  // persist it when the user actually changed it, or when none is set yet.
+  const _sdEl = document.getElementById('settingStartDate');
+  if (_sdEl && _sdEl.value && (!s.startDate || _sdEl.value !== _sdEl.dataset.prefill)) s.startDate = _sdEl.value;
+  else if (!s.startDate) s.startDate = todayStr();
   // TDEE auto-calc fields
   const ageInput = parseFloat(document.getElementById('settingAge').value);
   s.age = (!isNaN(ageInput) && ageInput >= 16) ? ageInput : null;
@@ -4380,6 +4481,9 @@ function computeAutoTDEE() {
   const age    = parseFloat(document.getElementById('settingAge').value);
   const sex    = document.getElementById('settingSex').value;
   if (!weight || !height || !age || !sex) return null;
+  // v8.10.9: ignore half-typed values (e.g. weight "9", age "2") — they used
+  // to be computed and SAVED as the TDEE while the user was still typing.
+  if (weight < 40 || weight > 250 || height < 140 || height > 230 || age < 16 || age > 100) return null;
   // Build a transient settings shape that reflects the current Settings panel
   // input values so the recompute reflects unsaved DOM edits.
   const transient = Object.assign({}, getSettings(), {
@@ -4394,10 +4498,18 @@ function computeAutoTDEE() {
 // user has frozen TDEE via the manual-override toggle (Phase D).
 function recomputeTDEE() {
   const s = getSettings();
-  if (s.tdeeManualOverride) return null;
+  // v8.10.9: a TDEE the user typed is never auto-replaced; a calibrated one
+  // keeps its calibration ratio and only drifts with body weight. Before this,
+  // every app load / weight log reset TDEE to the plain formula, undoing the
+  // weekly calibration the next morning.
+  if (s.tdeeManualOverride || s.tdeeSource === 'manual') return null;
   const weight = getLatestWeight();
   if (!weight) return null;
-  return _computeFormulaTDEE(weight, s, null);
+  const f = _computeFormulaTDEE(weight, s, null);
+  if (f == null) return null;
+  const r = parseFloat(s.tdeeCalibrationRatio);
+  if (s.tdeeSource === 'calibrated' && r >= 0.6 && r <= 1.5) return Math.round(f * r);
+  return f;
 }
 
 // Phase 1 (v7.2.0): Reality Check explainer modal handlers
@@ -4608,6 +4720,9 @@ function applyInferredActivityLevel() {
     // Legacy fallback: no day-type model on this plan
     s.activityLevel = String(r.effective);
   }
+  // v8.10.9: the inferred activity level now carries the user's real burn —
+  // drop any calibration ratio so it isn't applied on top a second time.
+  if (s.tdeeSource === 'calibrated') { s.tdeeSource = 'formula'; s.tdeeCalibrationRatio = null; }
   saveSettings(s);
   // Update the hidden native select + custom dropdown trigger for visibility
   const sel = document.getElementById('settingActivityLevel');
@@ -4682,6 +4797,8 @@ function commitTdeeManual() {
   const s = getSettings();
   if (s.tdee === v) return;
   s.tdee = v;
+  s.tdeeSource = 'manual'; // v8.10.9: typed values stay put
+  s.tdeeCalibrationRatio = null;
   saveSettings(s);
   dispatch('TDEE_CHANGED');
 }
@@ -4719,6 +4836,8 @@ function resetTdeeToFormula() {
   }
   const formula = computeFormulaTDEEAtWeight(weight, s);
   s.tdee = formula;
+  s.tdeeSource = 'formula';
+  s.tdeeCalibrationRatio = null;
   s.lastCalibrationAt = new Date().toISOString();
   saveSettings(s);
   const field = document.getElementById('settingTdee');
@@ -4767,8 +4886,12 @@ function autoFillTDEE() {
   // v8.10.5 audit fix: honor the TDEE manual-override freeze. This function
   // is auto-invoked from openSettings and every plan-dropdown change — it was
   // silently overwriting a frozen TDEE that recomputeTDEE correctly protects.
-  if (getSettings().tdeeManualOverride) return;
-  const tdee = computeAutoTDEE();
+  // v8.10.9: also respect a typed TDEE, and keep a calibrated one's ratio.
+  const _s0 = getSettings();
+  if (_s0.tdeeManualOverride || _s0.tdeeSource === 'manual') return;
+  let tdee = computeAutoTDEE();
+  const _r0 = parseFloat(_s0.tdeeCalibrationRatio);
+  if (tdee && _s0.tdeeSource === 'calibrated' && _r0 >= 0.6 && _r0 <= 1.5) tdee = Math.round(tdee * _r0);
   if(tdee && tdee > 0) {
     const field = document.getElementById('settingTdee');
     field.value = tdee;
@@ -4902,7 +5025,7 @@ function calcDuration() {
   const tgtKg  = parseFloat(document.getElementById('settingTargetKg').value);
   const tdee   = parseFloat(document.getElementById('settingTdee').value) || 2600;
   const planVal= document.getElementById('planSelect').value;
-  const risk   = document.getElementById('settingRisk').value || 'aggressive';
+  const risk   = document.getElementById('settingRisk').value || 'standard';
   const startDateStr = document.getElementById('settingStartDate').value;
 
   // Days can come from either the days field OR the target date field
@@ -4971,7 +5094,7 @@ function calcDuration() {
   // maintenance schedules) were priced as full eating days, so the promised
   // bulk surplus could actually be a real-world deficit. Model them.
   const lightDaysPerWeek = plan.lightDaysPerWeek || 0;
-  const lightDayDeficitWk = lightDaysPerWeek * 0.4 * tdee; // each light day ≈ tdee−0.6·tdee below maintenance
+  const lightDayDeficitWk = lightDaysPerWeek * (1 - getLightDayFraction(plan)) * tdee; // per-plan light-day deficit
   const eatDaysPerWeek  = 7 - fastDaysPerWeek - lightDaysPerWeek;
   const totalKg         = Math.abs(curKg - tgtKg);  // always positive — weight to change
   const totalCalChange  = totalKg * 7700;            // total calories to gain or lose
@@ -5064,7 +5187,7 @@ function calcDuration() {
   //   Aggressive:  800–1200 cal/day OR 1.0–1.5 kg/week
   //   Achievable:  > 1200 cal/day AND < 1.0 kg/week
   //
-  // AGGRESSIVE:   your protocol — fasting + low cal is expected, higher thresholds
+  // AGGRESSIVE:   fasting + low cal is expected, higher thresholds
   //   Unrealistic: weekly avg intake < 300 cal/day (extreme even for fasting)
   //   Aggressive:  > 2.5 kg/week
   //   Achievable:  everything else (includes 2 kg/week)
@@ -5278,6 +5401,14 @@ function calcDuration() {
   renderCalorieSafetyWarning(calcCals, plan, tdee);
 
   resultEl.classList.add('visible');
+  // v8.10.9: never offer a schedule whose eating-day ceiling is <= 0 or with
+  // no start date — both used to be stored and then read back as 1,500 cal /
+  // "NaN-NaN-NaN" day keys.
+  if (!(calcCals > 0) || !startDateStr) {
+    schedBtn.classList.remove('visible'); schedBtnReal.style.display = 'none';
+    window._pendingSchedule = null;
+    return;
+  }
   schedBtn.classList.add('visible');
 
   // Show realistic schedule button when realistic section is visible
@@ -5457,10 +5588,11 @@ function openManageSchedule() {
   const startW  = sched.startWeight || s.currentKg || 0;
   const curW    = getLatestWeight() || startW;
   const elapsed = Math.max(0, Math.floor((new Date().getTime() - strToDate(sched.startDate).getTime()) / 86400000));
-  const isBulkSched = (s.targetKg||91) > startW;
+  const _msTarget = s.targetKg || startW; // v8.10.9: no hardcoded personal target
+  const isBulkSched = _msTarget > startW;
   const changed = isBulkSched ? parseFloat((curW - startW).toFixed(1)) : parseFloat((startW - curW).toFixed(1));
   const rate    = elapsed > 0 ? parseFloat((changed / elapsed * 7).toFixed(2)) : 0;
-  const remain  = isBulkSched ? parseFloat(((s.targetKg||91) - curW).toFixed(1)) : parseFloat((curW - (s.targetKg||91)).toFixed(1));
+  const remain  = isBulkSched ? parseFloat((_msTarget - curW).toFixed(1)) : parseFloat((curW - _msTarget).toFixed(1));
   const changeLabel = isBulkSched ? 'Gained' : 'Lost';
 
   const modeLabel = sched.scheduleMode === 'realistic'
@@ -5474,7 +5606,7 @@ function openManageSchedule() {
     `Still to target: <b>${Math.max(0,remain)}kg</b>`;
 
   // Pre-fill adjust fields
-  document.getElementById('msTargetKg').value = s.targetKg||91;
+  document.getElementById('msTargetKg').value = s.targetKg||'';
   document.getElementById('msCalories').value = s.calories||1500;
   document.getElementById('adjustResult').style.display = 'none';
   document.getElementById('adjConfirmBtn').style.display = 'none';
@@ -5548,7 +5680,10 @@ function calcAdjust() {
   // and TDEE-at-target-weight as a first-order approximation.
   const tdeeNow    = computeFormulaTDEEAtWeight(curW, s);
   const tdeeTarget = computeFormulaTDEEAtWeight(newTarget, s);
-  const tdee       = Math.round((tdeeNow + tdeeTarget) / 2);
+  // v8.10.9: scale the formula trajectory to the user's actual TDEE level —
+  // ADJUST used raw Mifflin and ignored a frozen/calibrated/typed TDEE.
+  const _rawAvg    = (tdeeNow + tdeeTarget) / 2;
+  const tdee       = (s.tdee && tdeeNow) ? Math.round(s.tdee * _rawAvg / tdeeNow) : Math.round(_rawAvg);
 
   const changed   = isBulkAdj ? Math.max(0, curW - startW) : Math.max(0, startW - curW);
   const actualRate = changed / elapsed; // kg/day observed
@@ -5565,7 +5700,7 @@ function calcAdjust() {
   const effectiveCal = avgActualForAdjust !== null
     ? Math.round(newCal * 0.6 + avgActualForAdjust * 0.4)
     : newCal;
-  const weeklyDeficit = (eatDaysPerWeek * (tdee - effectiveCal)) + (fastDaysPerWeek * tdee) + (lightDaysPerWeekAdj * 0.4 * tdee);
+  const weeklyDeficit = (eatDaysPerWeek * (tdee - effectiveCal)) + (fastDaysPerWeek * tdee) + (lightDaysPerWeekAdj * (1 - getLightDayFraction(plan)) * tdee);
   const formulaRate   = isBulkAdj ? Math.max(0, -weeklyDeficit) / 7 / 7700 : weeklyDeficit / 7 / 7700; // kg/day formula
 
   // Select rate based on adjust mode
@@ -5700,7 +5835,7 @@ function endScheduleToday() {
 function removeSchedule() {
   showConfirm(
     'REMOVE SCHEDULE',
-    'Wipe schedule structure completely? Today\'s and future auto-set fast and light eating days will be cleared. All logged weights, notes, and day logs are kept.',
+    'Wipe schedule structure completely? All fast and light eating days AFTER today will be cleared — including ones you marked by hand. All logged weights, notes, and day logs are kept.',
     () => {
       const today = todayStr();
       const fd = gs(SK.fastDays)||{};
@@ -6128,7 +6263,8 @@ const _SK_EXPECTED_TYPE = {
   foodLog: 'object', foodLib: 'array', exLevels: 'object',
   lightDays: 'object', fastDayUnsets: 'object', lightDayUnsets: 'object',
   swDismissedVer: 'string', backupTs: 'string', backupHistory: 'array',
-  schemaVersion: 'object'
+  schemaVersion: 'object',
+  exerciseCompletion: 'object', exerciseLevelLocks: 'object', progressionEvents: 'array'
 };
 function _isExpectedType(val, expected) {
   if (val === null || val === undefined) return true; // null is allowed (missing key)
@@ -6169,10 +6305,16 @@ function _commitBackupRestore(backup, keys, exported) {
   Object.entries(SK).forEach(([lk, rk]) => { RAW_TO_LOGICAL[rk] = lk; });
   const skippedKeys = [];
   const rejectedKeys = []; // v8.0.0 (H5): keys whose value type didn't match expected
+  const failedKeys = [];
+  const _own = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
   Object.entries(backup.data).forEach(([key, val]) => {
-    const logicalKey = SK[key] ? key : RAW_TO_LOGICAL[key];
+    const logicalKey = _own(SK, key) ? key : (_own(RAW_TO_LOGICAL, key) ? RAW_TO_LOGICAL[key] : null);
     const storageKey = logicalKey ? SK[logicalKey] : undefined;
     if (!storageKey) { skippedKeys.push(key); return; }
+    // v8.10.9: never overwrite the device's schema record from a backup — a
+    // restored older record made the next boot re-run old migrations over
+    // current-shape data (e.g. rebuilding real fast sessions as placeholders).
+    if (logicalKey === 'schemaVersion') return;
     // v8.0.0 (H5 fix): type-check against the SK expected shape. Reject any
     // key whose value type is wrong (would crash renderers downstream).
     const expected = _SK_EXPECTED_TYPE[logicalKey];
@@ -6180,12 +6322,16 @@ function _commitBackupRestore(backup, keys, exported) {
       rejectedKeys.push(key + ' (expected ' + expected + ', got ' + (Array.isArray(val) ? 'array' : typeof val) + ')');
       return;
     }
-    ss(storageKey, val);
+    if (!ss(storageKey, val)) failedKeys.push(key);
   });
   // Full UI refresh via dispatcher
   const s = getSettings();
+  // v8.10.9: a restored backup can carry a retired plan key (e.g. 'tempcut') —
+  // normalise it here too, not only at boot.
+  const _np = normalizePlanKey(s.plan);
+  if (_np !== s.plan) { s.plan = _np; s.activityByDayType = null; saveSettings(s); }
   document.getElementById('planSelect').value = s.plan || 'default';
-  document.getElementById('settingRisk').value = s.risk || 'aggressive';
+  document.getElementById('settingRisk').value = s.risk || 'standard';
   document.getElementById('settingSex').value = s.sex || 'male';
   document.getElementById('settingActivityLevel').value = s.activityLevel || '1.55';
   applyPlanUI(s.plan||'default');
@@ -6204,8 +6350,10 @@ function _commitBackupRestore(backup, keys, exported) {
   const skippedNote = skippedKeys.length ? ` (${skippedKeys.length} key${skippedKeys.length>1?'s':''} could not be mapped to app data and were skipped: ${skippedKeys.join(', ')})` : '';
   // v8.0.0 (H5 fix): surface type-rejected keys so user knows the backup was malformed.
   const rejectedNote = rejectedKeys.length ? ` (${rejectedKeys.length} key${rejectedKeys.length>1?'s':''} rejected for wrong type: ${rejectedKeys.join(', ')})` : '';
-  showBackupStatus(`✓ Restored ${keys.length - rejectedKeys.length - skippedKeys.length} data sets from backup (${exported}). A pre-restore snapshot of your previous data was downloaded.${skippedNote}${rejectedNote}`,
-                   rejectedKeys.length ? 'var(--accent2)' : 'var(--green)');
+  const failedNote = failedKeys.length ? ` (${failedKeys.length} key${failedKeys.length>1?'s':''} could NOT be written — storage may be full: ${failedKeys.join(', ')})` : '';
+  const _restoredN = keys.length - rejectedKeys.length - skippedKeys.length - failedKeys.length;
+  showBackupStatus(`${failedKeys.length ? '⚠' : '✓'} Restored ${_restoredN} data sets from backup (${exported}). A pre-restore snapshot of your previous data was downloaded.${skippedNote}${rejectedNote}${failedNote}`,
+                   (rejectedKeys.length || failedKeys.length) ? 'var(--accent2)' : 'var(--green)');
 }
 
 // restoreData: triggered by the hidden file input when a file is picked.
@@ -6359,7 +6507,11 @@ async function runInit() {
   // empty DB and then restored data would arrive under a stale schema version.
   // idbAutoRestore is internally guarded (no-op if localStorage already has data),
   // so calling it unconditionally is safe and idempotent.
-  try { await idbAutoRestore(); } catch (e) { console.warn('[init] idbAutoRestore failed:', e); }
+  // v8.10.9: bounded — some WebKit builds never settle an IndexedDB open,
+  // which used to leave the splash up forever on a first launch.
+  try {
+    await Promise.race([idbAutoRestore(), new Promise(r => setTimeout(r, 5000))]);
+  } catch (e) { console.warn('[init] idbAutoRestore failed:', e); }
 
   // Gate 3: run schema migrations. Halts init on failure with a user-visible alert.
   if (typeof window.runMigrations === 'function') {
@@ -6397,9 +6549,13 @@ async function runInit() {
   // still storing plan:'tempcut' is remapped to 'cycle' here — without this,
   // getActivePlan()'s fallback would silently render LITE and the plan
   // selector would desync. One-time, idempotent, data untouched.
-  if (s.plan === 'tempcut') {
-    s.plan = 'cycle';
-    saveSettings(s);
+  {
+    const _np = normalizePlanKey(s.plan || 'default');
+    if (_np !== (s.plan || 'default')) {
+      s.plan = _np;
+      s.activityByDayType = null; // an override inferred under another plan's model doesn't apply
+      saveSettings(s);
+    }
   }
 
   // Splash screen — show plan name, then fade out
@@ -6485,18 +6641,31 @@ async function runInit() {
   if (typeof weeklyCalibration === 'function') {
     try { weeklyCalibration(); } catch (e) { console.warn('[calibration] failed:', e); }
   }
+  window._PH_INIT_DONE = true;
 }
 
 // Entry point. runInit is now async and handles idbAutoRestore + migrations
 // internally in the correct order. Any throw is caught to avoid unhandled promise rejections.
-runInit().catch(err => console.error('[init] runInit failed:', err));
+runInit().catch(err => {
+  console.error('[init] runInit failed:', err);
+  // v8.10.9: surface it instead of leaving the splash up forever.
+  const _sp = document.getElementById('splashScreen');
+  if (_sp) _sp.remove();
+  if (typeof showAlert === 'function') showAlert('The app hit an error while starting up.\n\nYour data is safe — nothing was changed.\n\nTry reloading. If it keeps happening, export a backup from Settings → Data Management and report it.');
+});
 
 // ─── VISIBILITY CHANGE — CALENDAR REFRESH ON APP FOREGROUND ─────────────────
 // When the PWA returns from background (or user switches back to the tab),
 // re-render the calendar to catch date changes across midnight and update
 // today's day label and checklist.
 document.addEventListener('visibilitychange', () => {
+  // v8.10.9: don't render (or write) anything if init halted — e.g. after a
+  // failed migration whose alert says not to use the app.
+  if(!window._PH_INIT_DONE) return;
   if(document.visibilityState === 'visible') {
+    const _cl = document.getElementById('todayChecklistContainer');
+    const _dateChanged = !!(_cl && _cl.dataset.renderedFor && _cl.dataset.renderedFor !== todayStr());
+    if (_dateChanged && typeof dispatch === 'function') { try { dispatch('PLAN_CHANGED'); } catch (e) {} }
     // Refresh today label
     document.getElementById('todayDayName').textContent = FULL_DAYS[new Date().getDay()];
     // Refresh TODAY tab checklist and fast UI in case date changed (midnight crossover)

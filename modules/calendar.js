@@ -165,7 +165,7 @@ export function openDayModal(dateStr, dt) {
   </button>`;
 
   if(isFast) html+=`<div class="fast-protocol-box"><div class="fast-protocol-title">⚡ FAST PROTOCOL</div>
-    <div class="fast-protocol-body">Wake: 500ml water + salt · Mid-morning: electrolyte tablet · Allowed: water/black coffee/green tea · Pre-training: electrolyte 20 min before · Sleep: 400mg magnesium<br><strong style="color:#cc4444">Stop if:</strong> palpitations · chest tightness · vision goes dark</div></div>`;
+    <div class="fast-protocol-body">Wake: 500ml water + salt · Mid-morning: electrolyte tablet · Allowed: water/black coffee/green tea · Pre-training: electrolyte 20 min before · Sleep: magnesium per your plan (≤350mg supplemental)<br><strong style="color:#cc4444">Stop if:</strong> palpitations · chest tightness · vision goes dark</div></div>`;
 
   // Phase C: fast-window editor — shows actual start/end times if logged,
   // or "legacy 24h fast" fallback. Edit button opens the time-picker modal.
@@ -256,7 +256,12 @@ export function openDayModal(dateStr, dt) {
             <div style="width:22px;display:flex;align-items:center;justify-content:center">${_calFail ? '<span style="color:var(--danger);font-weight:bold;font-size:12px">\u2717</span>' : (_dc.hasData && _act <= _ceil ? '<span style="color:var(--accent);font-weight:bold;font-size:10px">\u2714</span>' : '')}</div>
             <div><div class="m-title">${_r.label}</div><div style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text)">${_infoText}</div></div>
           </div>`;
-        } else if(AUTO_WORKOUT_IDS.includes(item.id)) {
+        } else if(getAutoWorkoutIds(plan).includes(item.id) && getCountableWorkoutRows(dateStr) === 0) {
+          html += `<div class="modal-check-item" style="cursor:default;opacity:0.45">
+            <div class="modal-cb">–</div>
+            <div><div class="m-title">${_r.label}</div><div class="m-sub">No session scheduled this day</div></div>
+          </div>`;
+        } else if(getAutoWorkoutIds(plan).includes(item.id)) {
           // Auto workout — per-session counts
           const _mSessions = log.workoutSessions || {};
           const _mSessType = WORKOUT_ITEM_SESSION[item.id] || 'evening';
@@ -539,9 +544,12 @@ export function toggleModalWorkoutEx(el, dateStr, wid) {
     const newChecks = Object.assign({}, (getDayLog(dateStr).checks || {}));
     // Per-session AUTO_WORKOUT items (eating-day checklists)
     const wim = (typeof WORKOUT_ITEM_SESSION !== 'undefined') ? WORKOUT_ITEM_SESSION : {};
-    Object.keys(wim).forEach(itemId => {
-      const sessType = wim[itemId];
-      const sess = sessions[sessType];
+    // v8.10.9: only the plan's declared session items — this used to overwrite
+    // hand-ticked items (e.g. bone broth) that merely shared an id — and give
+    // morning items the same evening fallback TODAY uses.
+    getAutoWorkoutIds(getActivePlan()).forEach(itemId => {
+      const sessType = wim[itemId] || 'evening';
+      const sess = sessions[sessType] || (sessType === 'morning' ? sessions['evening'] : null);
       if(sess && sess.total > 0) {
         newChecks[itemId] = (sess.done / sess.total) >= 0.8;
       }

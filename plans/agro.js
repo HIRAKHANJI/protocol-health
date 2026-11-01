@@ -26,6 +26,8 @@ export const agro = {
     // days. Weekly weighted: 4×1.70 + 3×1.35 = 1.55. Replaces the static
     // 1.725 default which was correct only for training days, not the mix.
     activityByDayType: { eatDay: 1.70, fastDay: 1.35 },
+    // Checklist ids derived from WORKOUTS-tab progress ('e1' change-clothes is a hand-ticked habit).
+    autoWorkoutIds: ['m2','m3','e2','e3'],
 
     defaultTimes: { wakeTime:'05:30', lastMealTime:'18:00', eveningSessionTime:'17:00', eatingWindowStart:'11:00' },
 
@@ -38,7 +40,7 @@ export const agro = {
       3:'WEDNESDAY — Morning A: Push + Pull Superset · Hip CARs → Push-ups + Superman · Dead bug · Mountain climbers',
       4:'THURSDAY — Morning B: Lower + Hinge · Hip CARs → Squats · Good morning · Reverse lunge',
       5:'FRIDAY — Morning A: Push + Pull Superset · Hip CARs → Push-ups + Superman · Plank · Mountain climbers',
-      6:'SATURDAY — Morning B: Lower + Hinge · Hip CARs → Squats · Good morning · Single-leg RDL'
+      6:'SATURDAY — Morning B: Lower + Hinge · Hip CARs → Squats · Good morning · Reverse lunge'
     },
     eveningSub: {
       0:'SUNDAY — Rest. Walk + full hip session. No structured workout.',
@@ -50,12 +52,12 @@ export const agro = {
       6:'SATURDAY — Run + Conditioning · 5 min walk → 30 min run → circuit: push-ups/jump squats/sprawls/plank × 3 rounds'
     },
     stretchSub: {
-      0:'Sunday full hip session: 90/90 · frog · pigeon (extra right side) · cossack · deep squat · neck isometrics · shoulder dislocates · thread needle (20 min)',
+      0:'Sunday full hip session: 90/90 · frog · pigeon (extra time on your tighter side) · cossack · deep squat · neck isometrics · shoulder dislocates · thread needle (20 min)',
       1:'Monday cooldown: Doorframe chest stretch · Shoulder dislocates · Wrist extension · Rear shoulder stretch (10 min)',
-      2:'Tuesday cooldown: Pigeon 90s each (right +30s) · Figure-4 · Hamstring · Child\'s pose · Calf stretch (12 min)',
+      2:'Tuesday cooldown: Pigeon 90s each (+30s on your tighter side) · Figure-4 · Hamstring · Child\'s pose · Calf stretch (12 min)',
       3:'Wednesday post-run: Pigeon 60s/side · Hamstring · Calf stretch (8 min)',
       4:'Thursday cooldown: Full shoulder sequence · Thread needle · Hip flexor lunge · Neck isometrics (12 min)',
-      5:'Friday cooldown: Pigeon 90s each (right +30s) · Figure-4 · Hamstring · Child\'s pose · Calf stretch (12 min)',
+      5:'Friday cooldown: Pigeon 90s each (+30s on your tighter side) · Figure-4 · Hamstring · Child\'s pose · Calf stretch (12 min)',
       6:'Saturday post-run: Lower body flush — pigeon · hamstring · quad · calf (10 min)'
     },
 
@@ -74,14 +76,13 @@ export const agro = {
       { id:'e3', group:'EVENING', label:'Post-workout stretch protocol', sub:'Cooldown per day \u2014 see WORKOUTS tab' },
       { id:'s1', group:'SUPPLEMENTS', label:'Morning supplements taken', sub:'Tap to expand',
         subItems: [
-          { id:'s1_a', name:'Osteocare', dose:'2 tabs', when:'With breakfast' },
-          { id:'s1_b', name:'D3+K2', dose:'1 tab', when:'With MCT gel for absorption' },
-          { id:'s1_c', name:'Zinc 50mg', dose:'1 tab', when:'Mon/Fri only', days:[1,5] },
-          { id:'s1_d', name:'MCT gel', dose:'1 gel', when:'Fat carrier for D3' }
+          { id:'s1_a', name:'Calcium (only if dietary intake is low)', dose:'≤500mg', when:'With breakfast' },
+          { id:'s1_b', name:'Vitamin D3', dose:'1,000-2,000 IU', when:'With breakfast — the meal’s fat aids absorption' },
+          { id:'s1_c', name:'Zinc 50mg', dose:'1 tab', when:'Mon/Fri only', days:[1,5] }
         ]
       },
-      { id:'s2', group:'SUPPLEMENTS', label:'Omega-3 with largest meal', sub:'3 caps with lunch or dinner. 2,475mg EPA+DHA total.' },
-      { id:'s3', group:'SUPPLEMENTS', label:'Magnesium before bed', sub:'1 serving (~67.6mg elemental). Every night, 7 days.' },
+      { id:'s2', group:'SUPPLEMENTS', label:'Omega-3 with largest meal', sub:'1-2g EPA+DHA (per your label) with lunch or dinner.' },
+      { id:'s3', group:'SUPPLEMENTS', label:'Magnesium before bed', sub:'200-300mg elemental (per your label). Every night, 7 days.' },
       { id:'n2', group:'NIGHT', label:'Sleep before midnight', sub:'Recovery is training. Don\'t skip it.' }
     ],
     checklistFast: [
@@ -92,19 +93,16 @@ export const agro = {
       { id:'wf7', group:'FAST', label:'Fast day intensity: 70-80% only', sub:'Training fasted is fine. Don\'t push 100% on zero calories.' },
       { id:'sf1', group:'SUPPLEMENTS', label:'Morning supplements', sub:'Tap to expand',
         subItems: [
-          { id:'sf1_a', name:'D3+K2', dose:'1 tab', when:'With MCT gel on waking' },
           { id:'sf1_b', name:'Zinc 50mg', dose:'1 tab', when:'Wed only', days:[3] },
-          { id:'sf1_c', name:'MCT gel', dose:'1 gel', when:'Morning — fat carrier for D3' },
-          { id:'sf1_d', name:'Electrolyte tablet', dose:'99mg potassium', when:'Mid-morning (9–10am)' }
+          { id:'sf1_d', name:'Electrolyte tablet', dose:'99mg potassium', when:'Mid-morning' }
         ]
       },
       { id:'wf2', group:'SUPPLEMENTS', label:'Pre-training supplements', sub:'Tap to expand',
         subItems: [
-          { id:'wf2_a', name:'MCT gel', dose:'1 gel', when:'Pre-training (~20 min before)' },
           { id:'wf3', name:'Electrolyte tablet', dose:'99mg potassium', when:'Pre-training — prevents palpitations during fasted work' }
         ]
       },
-      { id:'sf2', group:'SUPPLEMENTS', label:'Magnesium before bed', sub:'1 serving (~67.6mg elemental). Every night including fast days.' }
+      { id:'sf2', group:'SUPPLEMENTS', label:'Magnesium before bed', sub:'200-300mg elemental (per your label). Every night including fast days.' }
     ],
 
     foodGroupLabel: 'AGRO EATING',
@@ -121,6 +119,7 @@ export const agro = {
         exRow('Jumping jacks / high knees','Warm-up','2 min')+
         exRowWithLevel('push','Push-ups','Full range, chest to floor','3\u00d710\u201315')+
         exRowWithLevel('pull','Superman hold','Face down, lift arms + chest. Immediately after push-ups.','3\u00d720\u201330 sec')+
+        exRow('Towel row','Towel round a sturdy post or door handle, lean back, row to ribs \u2014 keeps the week pull-dominant','2\u00d710')+
         exRowWithLevel('core','Plank OR Dead bug','Alternate between sessions','2\u00d730 sec')+
         exRow('Mountain climbers','Controlled pace','2\u00d720'),
         stretchRow('Chest opener','Doorframe or arms wide','60 sec')+
@@ -135,7 +134,7 @@ export const agro = {
         exRowWithLevel('hinge','Hip hinge / Good morning','Slow eccentric (4 sec down)','3\u00d712')+
         exRow('Reverse lunge','Step back, knee hovers floor','2\u00d710/leg'),
         stretchRow('Deep squat hold','Heels flat','60 sec')+
-        stretchRow('Hip CARs extra','Right hip gets 2 extra circles','1 min'),
+        stretchRow('Hip CARs extra','Tighter hip gets 2 extra circles','1 min'),
         'TUE'
       )}
 
@@ -144,6 +143,7 @@ export const agro = {
         exRow('Jumping jacks / high knees','Warm-up','2 min')+
         exRowWithLevel('push','Push-ups','Full range, chest to floor','3\u00d710\u201315')+
         exRowWithLevel('pull','Superman hold','Face down, lift arms + chest. Immediately after push-ups.','3\u00d720\u201330 sec')+
+        exRow('Towel row','Towel round a sturdy post or door handle, lean back, row to ribs \u2014 keeps the week pull-dominant','2\u00d710')+
         exRowWithLevel('core','Plank OR Dead bug','Alternate between sessions','2\u00d730 sec')+
         exRow('Mountain climbers','Controlled pace','2\u00d720'),
         stretchRow('Chest opener','Doorframe or arms wide','60 sec')+
@@ -158,7 +158,7 @@ export const agro = {
         exRowWithLevel('hinge','Hip hinge / Good morning','Slow eccentric (4 sec down)','3\u00d712')+
         exRow('Reverse lunge','Step back, knee hovers floor','2\u00d710/leg'),
         stretchRow('Deep squat hold','Heels flat','60 sec')+
-        stretchRow('Hip CARs extra','Right hip gets 2 extra circles','1 min'),
+        stretchRow('Hip CARs extra','Tighter hip gets 2 extra circles','1 min'),
         'THU'
       )}
 
@@ -167,6 +167,7 @@ export const agro = {
         exRow('Jumping jacks / high knees','Warm-up','2 min')+
         exRowWithLevel('push','Push-ups','Full range, chest to floor','3\u00d710\u201315')+
         exRowWithLevel('pull','Superman hold','Face down, lift arms + chest. Immediately after push-ups.','3\u00d720\u201330 sec')+
+        exRow('Towel row','Towel round a sturdy post or door handle, lean back, row to ribs \u2014 keeps the week pull-dominant','2\u00d710')+
         exRowWithLevel('core','Plank OR Dead bug','Alternate between sessions','2\u00d730 sec')+
         exRow('Mountain climbers','Controlled pace','2\u00d720'),
         stretchRow('Chest opener','Doorframe or arms wide','60 sec')+
@@ -181,7 +182,7 @@ export const agro = {
         exRowWithLevel('hinge','Hip hinge / Good morning','Slow eccentric (4 sec down)','3\u00d712')+
         exRow('Reverse lunge','Step back, knee hovers floor','2\u00d710/leg'),
         stretchRow('Deep squat hold','Heels flat','60 sec')+
-        stretchRow('Hip CARs extra','Right hip gets 2 extra circles','1 min'),
+        stretchRow('Hip CARs extra','Tighter hip gets 2 extra circles','1 min'),
         'SAT'
       )}
 
@@ -189,7 +190,7 @@ export const agro = {
         exRow('Walk','Minimum 30 min outdoors. Not optional.','30 min'),
         stretchRow('90/90 hip stretch','2 min each side','4 min')+
         stretchRow('Frog stretch','Knees wide, push hips back','2 min')+
-        stretchRow('Pigeon pose','90 sec each (right side +30 sec)','3+ min')+
+        stretchRow('Pigeon pose','90 sec each (+30 sec on your tighter side)','3+ min')+
         stretchRow('Cossack squat stretch','60 sec each side','2 min')+
         stretchRow('Deep squat hold','Full depth','2 min')+
         stretchRow('Neck isometrics','4 directions \u00d7 30 sec','2 min')+
@@ -231,7 +232,7 @@ export const agro = {
         exRow('Wall sit','90\u00b0 hold','2\u00d745 sec')+
         exRow('Side plank + hip dip','Lateral core \u2014 was missing from this session','3\u00d712/side')+
         exRowWithLevel('core','Hollow body hold','Lower back protection','2\u00d730 sec'),
-        stretchRow('Pigeon pose','90 sec each (right side +30 sec)','3+ min')+
+        stretchRow('Pigeon pose','90 sec each (+30 sec on your tighter side)','3+ min')+
         stretchRow('Figure-4 stretch','Lying on back, ankle over knee','60 sec each')+
         stretchRow('Hamstring stretch','One leg extended reach','60 sec each')+
         stretchRow('Child\'s pose','Lower back release','60 sec')+
@@ -349,8 +350,8 @@ export const agro = {
         const _midH = (_wh + 4) % 24;
         const _midRange = formatTime(String(_midH).padStart(2,'0')+':00') + '-' + formatTime(String((_midH+1)%24).padStart(2,'0')+':00');
         return `<div class="rule-card">
-        <div class="rule-num">FAST DAY PROTOCOL \u2014 SUN/WED/SAT</div>
-        <div class="rule-text">Wake: 500ml water + salt \u00b7 ${_midRange}: electrolyte tab #1 (99mg K) \u00b7 Pre-training: 2\u00d7 MCT gels (2,000mg) \u00b7 During/post: 500ml water \u00b7 Mid-afternoon: electrolyte tab #2 \u00b7 Throughout: 3.5L total water \u00b7 Before bed: Magnesium Complex</div>
+        <div class="rule-num">FAST DAY PROTOCOL</div>
+        <div class="rule-text">Wake: 500ml water + salt \u00b7 ${_midRange}: electrolyte tab #1 (99mg K) \u00b7 During/post: 500ml water \u00b7 Mid-afternoon: electrolyte tab #2 \u00b7 Throughout: 3.5L total water \u00b7 Before bed: magnesium</div>
         <div class="rule-sub" style="color:#cc4444">STOP IF: palpitations \u00b7 chest tightness \u00b7 vision narrowing. Salt water + 50-100g carbs immediately.</div>
       </div>`;
       })()}
@@ -382,27 +383,17 @@ export const agro = {
         let cards = '';
         // === MORNING STACK ===
         if(_isFast) {
-          const pills = ['D3+K2 1 tab + MCT gel (fat carrier for D3 absorption)'];
-          if(_isZincDay) pills.push('Zinc 50mg');
+          const pills = [_isZincDay ? 'Zinc 50mg' : 'Nothing needed this morning'];
           cards += ruleCard('MORNING STACK \u2014 ' + _dayNames[_dow].toUpperCase() + ' (FAST DAY)',
             pills.join(' \u00b7 '),
-            'Take at ' + _wkFmt + ' on waking. No Osteocare today \u2014 calcium needs food for full absorption. No omega-3 today \u2014 effects are chronic, one day off has zero impact.',
+            'Take at ' + _wkFmt + ' on waking. Vitamin D, calcium and omega-3 wait for your next eating day \u2014 they absorb best with food and their effects are chronic.',
             '#82e0aa');
         } else {
-          const pills = ['Osteocare 2 tabs (calcium + D3 + zinc base)', 'D3+K2 1 tab (4,000 IU + K2 for calcium routing)'];
+          const pills = ['Vitamin D3 1,000-2,000 IU', 'Calcium ≤500mg only if your diet is low in dairy/greens'];
           if(_isZincDay) pills.push('Zinc 50mg (alternate-day dose)');
-          pills.push('MCT 1 gel (fat carrier for D3 absorption)');
           cards += ruleCard('MORNING STACK \u2014 ' + _dayNames[_dow].toUpperCase() + ' (EATING DAY)',
             pills.join(' \u00b7 '),
-            'Take at ' + _ews + ' with breakfast. D3+K2 needs dietary fat for absorption \u2014 meal provides it.',
-            '#82e0aa');
-        }
-
-        // === MCT PRE-TRAINING (fast days) ===
-        if(_isFast) {
-          cards += ruleCard('MCT GELS \u2014 PRE-TRAINING',
-            '2\u00d7 MCT gels (~2,000mg total) before evening session.',
-            'Take at ~' + _preTime + ' (20 min before ' + _evFmt + ' training). Provides small fat energy source for fasted work.',
+            'Take at ' + _ews + ' with breakfast \u2014 the meal\u2019s fat aids vitamin D absorption. Stay under 4,000 IU D3 and 600mg supplemental calcium per day across ALL products (NIH ULs).',
             '#82e0aa');
         }
 
@@ -422,8 +413,8 @@ export const agro = {
         // === OMEGA-3 ===
         if(!_isFast) {
           cards += ruleCard('OMEGA-3 FISH OIL \u2014 WITH LARGEST MEAL',
-            '3 caps (1,485mg EPA + 990mg DHA = 2,475mg total).',
-            'Take with your largest meal. Meets anti-inflammatory threshold (\u22652,400mg).',
+            '1-2g EPA+DHA combined (check your label).',
+            'Take with your largest meal.',
             '#82e0aa');
         } else {
           cards += ruleCard('OMEGA-3 \u2014 SKIP TODAY',
@@ -441,9 +432,9 @@ export const agro = {
         }
 
         // === MAGNESIUM (every night) ===
-        cards += ruleCard('MAGNESIUM COMPLEX \u2014 TONIGHT',
-          '1 serving (~67.6mg elemental Mg). Glycinate + Malate blend.',
-          'Take before bed. Glycinate targets sleep/NMDA pathway. Malate supports Krebs cycle. Most critical supplement \u2014 runs out first.',
+        cards += ruleCard('MAGNESIUM \u2014 TONIGHT',
+          '200-300mg elemental magnesium (glycinate is well tolerated).',
+          'Take before bed. Stay under 350mg/day supplemental (NIH UL).',
           '#82e0aa');
 
         return cards;
@@ -462,12 +453,12 @@ export const agro = {
         const _preMin3 = _em3-20<0 ? _em3+40 : _em3-20;
         const _preH3 = ((_em3-20<0 ? _eh3-1 : _eh3)+24)%24;
         const _preTime3 = formatTime(String(_preH3).padStart(2,'0')+':'+String(_preMin3).padStart(2,'0'));
-        return ruleCard('EATING DAY STACK','At ' + _ews2 + ' with breakfast: Osteocare 2 tabs \u00b7 D3+K2 1 tab \u00b7 MCT 1 gel \u00b7 Zinc 50mg (Mon/Fri only)','D3+K2 needs dietary fat for absorption \u2014 meal provides it.','#666')
-        + ruleCard('FAST DAY STACK','At ' + _wkFmt2 + ' on waking: D3+K2 1 tab + MCT gel (fat carrier) \u00b7 Zinc (Wed only) \u00b7 2 MCT gels pre-training (~' + _preTime3 + ')','No Osteocare on fast days \u2014 calcium needs food for full absorption.','#666')
+        return ruleCard('EATING DAY STACK','At ' + _ews2 + ' with breakfast: vitamin D3 1,000-2,000 IU \u00b7 calcium \u2264500mg only if dietary intake is low \u00b7 Zinc 50mg (Mon/Fri only)','Totals across all products: D3 \u22644,000 IU, supplemental calcium \u2264600mg (NIH).','#666')
+        + ruleCard('FAST DAY STACK','At ' + _wkFmt2 + ' on waking: Zinc (Wed only) \u00b7 electrolytes through the day','Vitamin D, calcium and omega-3 wait for the next eating day \u2014 they absorb best with food.','#666')
         + ruleCard('ZINC SCHEDULE','Mon \u00b7 Wed \u00b7 Fri. True alternate days, never consecutive. 150mg/week = 21.4mg/day avg (under 40mg NIH limit).','Each dose covers that day + next day. No gaps, no consecutive dosing.','#666')
-        + ruleCard('OMEGA-3','3 caps with largest meal on eating days. 1,485mg EPA + 990mg DHA = 2,475mg.','Skip on fast days \u2014 effects are chronic not acute.','#666')
-        + ruleCard('MAGNESIUM','1 serving before bed, all 7 days. ~67.6mg elemental Mg (Glycinate + Malate).','Glycinate targets sleep/NMDA. Malate supports Krebs cycle.','#666')
-        + ruleCard('ELECTROLYTES','Fast days only (Sun/Wed/Sat): Tab 1 mid-morning (~' + _midR3 + ') \u00b7 Tab 2 pre-evening (~' + _preTime3 + '). 99mg potassium each.','Prevents fasted session palpitations, cramps, headaches.','#666');
+        + ruleCard('OMEGA-3','1-2g EPA+DHA with the largest meal on eating days.','Skip on fast days \u2014 effects are chronic not acute.','#666')
+        + ruleCard('MAGNESIUM','200-300mg elemental before bed, all 7 days.','Under 350mg/day supplemental (NIH UL).','#666')
+        + ruleCard('ELECTROLYTES','Fast days only: Tab 1 mid-morning (~' + _midR3 + ') \u00b7 Tab 2 pre-evening (~' + _preTime3 + '). 99mg potassium each.','Prevents fasted session palpitations, cramps, headaches.','#666');
       })()}
       </div>
 

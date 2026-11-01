@@ -296,7 +296,7 @@ export function generateExport() {
     out += `${lvl} ${heading}\n\n`;
     if(eatingDates.length) out += nutritionBlock('Eating Days', eatingDates, s.calories, false);
     if(lightEatingDates.length) {
-      const lightCeiling = Math.round((s.tdee||2600)*0.6);
+      const lightCeiling = Math.round((s.tdee||2600)*(typeof getLightDayFraction === 'function' ? getLightDayFraction() : 0.6));
       out += nutritionBlock('Light Eating Days', lightEatingDates, lightCeiling, false);
     }
     if(fastEatingDates.length) out += nutritionBlock('Broken Fast Days', fastEatingDates, null, true);

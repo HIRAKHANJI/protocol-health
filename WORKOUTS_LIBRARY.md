@@ -8002,6 +8002,37 @@ Stop immediately on any dizziness, tingling, or sharp pain.
 
 ---
 
+### v8.10.9 Additions — CYCLE + push:pull rebalancing
+
+Added so every exercise prescribed by `plans/cycle.js` and the v8.10.9 pull-volume
+rebalance in LITE / CUT / BULK has a library entry (§16 Rule 1). All zero-equipment
+by default; a loaded backpack or water bottles provide progressive resistance.
+Evidence base: progressive loading and rep-range flexibility (Schoenfeld 2021,
+Plotkin 2022), push:pull balance (Cools 2016, Prinold 2016), isometrics
+(Oranchuk 2019), all in CLAUDE.md §15.
+
+| Exercise | Pattern | Prescription (plan) | Key cues | Safety |
+|---|---|---|---|---|
+| Stomach vacuum | Core (transverse abdominis isometric) | 3×20-30s daily (CYCLE) | Empty stomach, full exhale, draw navel to spine, shallow breaths | Stop if dizzy; avoid in pregnancy |
+| Pseudo-planche lean hold | Push (straight-arm, serratus) | 3×15-20s (CYCLE Mon) | Hands turned out, shoulders past wrists, protract hard | Wrist warm-up first; skip with active wrist injury (§2.3) |
+| Chair dips | Push (triceps/chest) | 3×8-12 (CYCLE Mon) | Two sturdy chairs or counter, slow lowering, shoulders down | Stop above 90° elbow if shoulder pain |
+| Side raises (bottles/bag) | Push-adjacent (lateral delt) | 3×12-15 (CYCLE Mon) | Slight elbow bend, no swing, to shoulder height | Light load; stop on impingement pain |
+| Table/towel rows | Pull (horizontal) | 3×10 Mon, 4×8-12 Wed (CYCLE); 3×10/side (CUT Mon, BULK Mon/Fri) | Sturdy table edge or towel round a post/door handle; chest to hands, 3-count lowering | Check the anchor holds bodyweight before loading |
+| Pull-up strength work | Pull (vertical) | 5×3-5, 2-3 min rest (CYCLE Wed) | Full hang to chin over bar; negatives (5s) if not yet able | Not at >120kg (§2.1); stop on elbow/shoulder pain |
+| Scapular pulls | Pull (scapular depression) | 2×10 (CYCLE Wed) | Dead hang, depress blades without bending elbows | Same bar safety as pull-ups |
+| Hanging knee → leg raise | Core (hip/trunk flexion) | 4×8-12 (CYCLE Wed) | No swing, posterior pelvic tilt at top; lying leg raises with backpack if no bar | Avoid with active lower-back injury |
+| Prone W-raises | Pull (scapular retraction) | 3×12 (CYCLE Thu) | Face down, elbows bent to a W, squeeze blades down and back | Low risk |
+| Sliding leg curl | Hinge (hamstrings) | 3×8-12 (CYCLE Fri) | Socks/towel on smooth floor, bridge then slide heels out slowly | Keep hips up; stop on hamstring cramp |
+| Single-leg hip thrust | Hinge (glutes) | 4×10-12/leg (CYCLE Fri) | Shoulders on sofa, backpack on hips, 2s squeeze at top | Neutral spine; no lumbar hyperextension |
+| Backpack loaded crunch | Core (spinal flexion, loaded) | 4×10-15 (CYCLE Fri) | Bag hugged to chest, slow curl, add load as reps get easy | Avoid with active disc injury |
+| Bag side bend + suitcase carry | Core (lateral, anti-lateral flexion) | 3×12/side + 3×40 steps/side (CYCLE Fri) | Upright posture, no leaning on the carry | Low risk |
+| Hip-flexor couch stretch | Mobility (hip flexors) | 2×60s/side daily (CYCLE) | Kneeling lunge, squeeze same-side glute, gentle forward hips | Pad the knee |
+| Seated towel row | Pull (horizontal, seated) | 2×10 Mon/Fri (LITE) | Towel looped round feet, sit tall, elbows back, 2s squeeze | Suitable for limited mobility |
+| Seated reverse fly | Pull (rear delt) | 2×10 (LITE Mon) | Lean slightly forward, light bottles, open arms out | Very light load |
+| Shoulder blade squeezes | Pull (scapular retraction, isometric) | 2×10, 3s holds (LITE Fri) | Sit tall, squeeze blades together and down | Low risk |
+
+---
+
 ## AUTO-PRESCRIPTION DATA MODEL
 
 > **Status: NOT YET IMPLEMENTED in `app.html`.** This section defines the data

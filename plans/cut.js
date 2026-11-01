@@ -24,6 +24,8 @@ export const cut = {
   // every day is an eat day. Multiplier matches "moderate" baseline (3-5
   // training days/week + walking + life). Weekly weighted: 7×1.55 = 1.55.
   activityByDayType: { eatDay: 1.55 },
+  // Checklist ids derived from WORKOUTS-tab progress (breakfast, walks, stretches are hand-ticked).
+  autoWorkoutIds: ['m2'],
 
   defaultTimes: { wakeTime:'06:00', lastMealTime:'20:00', eveningSessionTime:'18:00', eatingWindowStart:null },
 
@@ -62,8 +64,8 @@ export const cut = {
     { id:'m2', group:'MORNING', label:'Morning training session', sub:'See WORKOUTS tab. Resistance or HIIT depending on the day.' },
     { id:'m3', group:'MORNING', label:'Protein-rich breakfast', sub:'30\u201340g protein. Eggs, Greek yogurt, or protein oats.' },
     { id:'m4', group:'MORNING', label:'Log morning weight', sub:'Same conditions: after waking, before food, after bathroom.' },
-    { id:'f1', group:'EATING', label:'Stayed under calorie ceiling', sub:'This drives fat loss. Track or estimate \u2014 consistency matters.' },
-    { id:'f2', group:'EATING', label:'Hit protein target', sub:'1.6g/kg minimum. Muscle does not preserve itself.', type:'info' },
+    { id:'f1', group:'EATING', label:'Stayed under calorie ceiling', sub:'This drives fat loss. Track or estimate \u2014 consistency matters.', type:'info' },
+    { id:'f2', group:'EATING', label:'Hit protein target', sub:'1.6g/kg minimum. Muscle does not preserve itself.' },
     { id:'f3', group:'EATING', label:'No liquid calories', sub:'Water, black coffee, plain tea only. No juice, soda, or milk drinks.' },
     { id:'f4', group:'EATING', label:'2.5L+ water today', sub:'500ml on waking. 250ml before each meal. Sip the rest.', type:'water', waterTarget:2.5 },
     { id:'f5', group:'EATING', label:'Vegetables at lunch and dinner', sub:'Volume + fibre. Half your plate.' },
@@ -104,6 +106,7 @@ export const cut = {
       exRow('Diamond push-up','Hands together under chest \u2014 triceps','3\u00d78\u201310')+
       exRowWithLevel('pull','Inverted row / Superman','Back + biceps \u2014 table edge or floor','3\u00d78\u201310')+
       exRow('Prone Y-T-W raises','Face down \u2014 rear delt + mid-trap','3\u00d78 each')+
+      exRow('Towel row','Towel looped round a sturdy post or door handle, lean back, row to ribs \u2014 keeps push:pull \u2264 1:1','3\u00d710/side')+
       exRow('Plank hold','Elbows, stay tight','3\u00d720\u201330 sec'),
       stretchRow('Chest + shoulder stretch','Doorframe or behind-back clasp','5 min'),
       'MON'
@@ -128,7 +131,7 @@ export const cut = {
       'TUE'
     )}
 
-    ${workoutCard('ACTIVE RECOVERY: WALK + YOGA','WED \u00b7 30\u201340 MIN',
+    ${workoutCard('ACTIVE RECOVERY: YOGA FLOW','WED \u00b7 WALK + YOGA \u00b7 30\u201340 MIN',
       exRow('Walk','15\u201320 min conversational pace','15\u201320 min')+
       exRow('Cat-cow','Arch and round spine gently','8 reps')+
       exRow('Downward dog','Hold, pedal feet','30 sec')+
@@ -176,7 +179,8 @@ export const cut = {
       exRow('Good morning bodyweight','Hinge at hips, slight knee bend','3\u00d712')+
       exRowWithLevel('core','Dead bug','Lower back glued to floor','3\u00d78/side')+
       exRow('Bicycle crunch','Slow and deliberate','3\u00d715/side')+
-      exRow('Superman hold','Posterior chain endurance','3\u00d720 sec'),
+      exRow('Superman hold','Posterior chain endurance','3\u00d720 sec')+
+      exRow('Reverse snow angels','Face down, sweep straight arms from hips to overhead \u2014 mid/lower traps','3\u00d710'),
       stretchRow('Full body stretch','Neck, shoulders, chest, hips, hamstrings','5\u201310 min'),
       'SAT'
     )}
