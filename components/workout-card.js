@@ -6,7 +6,11 @@ let _exRowInstanceCount = {};
 let _wexCounter = 0;
 export function _resetExRowInstances() { _exRowInstanceCount = {}; _wexCounter = 0; }
 
-export function exRowWithLevel(groupId, fallbackName, fallbackDetail, fallbackSets) {
+// keepSets (v8.10.9, optional): when true the plan's own prescription
+// (fallbackSets) is shown even after a level is chosen — strength-focused plans
+// prescribe e.g. 4×5-8 on the hardest variation, which the level's default
+// rep range (often 3×12-15) used to silently replace.
+export function exRowWithLevel(groupId, fallbackName, fallbackDetail, fallbackSets, keepSets) {
   // Track instance count per groupId so duplicates get unique storage keys
   if(!_exRowInstanceCount[groupId]) _exRowInstanceCount[groupId] = 0;
   _exRowInstanceCount[groupId]++;
@@ -20,7 +24,7 @@ export function exRowWithLevel(groupId, fallbackName, fallbackDetail, fallbackSe
   if(level !== null && prog) {
     const l = prog.levels.find(lv => lv.level === level);
     if(l) {
-      return `<div class="exercise-row wex-row" data-wid="${wid}" onclick="toggleWorkoutEx(this)"><div style="display:flex;gap:8px;align-items:flex-start"><div class="wex-cb"><span class="wex-tick">✓</span></div><div><div class="ex-name">${l.exercise}</div><div class="ex-detail">${l.notes || fallbackDetail}</div></div></div><div style="display:flex;align-items:center;gap:8px"><div class="ex-sets">${l.sets}</div><button class="level-badge" onclick="event.stopPropagation();openLevelSelector('${instanceKey}','${groupId}')">Lv${level}<span class="level-max">/${prog.levels[prog.levels.length-1].level}</span></button></div></div>`;
+      return `<div class="exercise-row wex-row" data-wid="${wid}" onclick="toggleWorkoutEx(this)"><div style="display:flex;gap:8px;align-items:flex-start"><div class="wex-cb"><span class="wex-tick">✓</span></div><div><div class="ex-name">${l.exercise}</div><div class="ex-detail">${l.notes || fallbackDetail}</div></div></div><div style="display:flex;align-items:center;gap:8px"><div class="ex-sets">${keepSets ? fallbackSets : l.sets}</div><button class="level-badge" onclick="event.stopPropagation();openLevelSelector('${instanceKey}','${groupId}')">Lv${level}<span class="level-max">/${prog.levels[prog.levels.length-1].level}</span></button></div></div>`;
     }
   }
   const maxLvl = prog ? prog.levels[prog.levels.length-1].level : '?';

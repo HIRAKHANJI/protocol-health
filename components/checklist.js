@@ -9,7 +9,13 @@ export function renderTodayChecklist() {
   const _rawItems = dayType === 'fast' ? plan.checklistFast : (dayType === 'light' && plan.checklistLight ? plan.checklistLight : plan.checklistNormal);
   const _supEnabled = s.supplementsEnabled !== false;
   const items = _rawItems.filter(item => !(item.group === 'SUPPLEMENTS' && !_supEnabled));
+  const _autoIds = getAutoWorkoutIds(plan);
+  const _noSessionToday = getCountableWorkoutRows(todayStr()) === 0;
   const container = document.getElementById('todayChecklistContainer');
+  // v8.10.9: remember which date this checklist was rendered for, so a tick
+  // made after midnight with the app left open can't write yesterday's state
+  // into today (see saveAllChecks / toggle).
+  if (container) container.dataset.renderedFor = todayStr();
   if(!container) return;
 
   let html = '';
@@ -91,7 +97,11 @@ export function renderTodayChecklist() {
         ? '<span style="color:var(--danger);font-weight:bold;font-size:12px">\u2717</span>'
         : (cs.band === 'green' ? '<span style="color:var(--accent);font-weight:bold;font-size:10px">\u2714</span>' : '');
       html += `<div class="check-item${calPass ? '' : ' auto-status fail'}" style="background:${cardBg};cursor:default;opacity:0.95" data-id="${item.id}" data-type="info" data-cal-pass="${calPass}"><div style="width:22px;display:flex;align-items:center;justify-content:center">${iconHtml}</div><div class="item-content"><div class="item-title">${label}</div><div style="font-family:'DM Mono',monospace;font-size:0.8rem;margin-top:4px;color:var(--text)" data-cal-status>${statusText}</div></div></div>`;
-    } else if(AUTO_WORKOUT_IDS.includes(item.id)) {
+    } else if(_autoIds.includes(item.id) && _noSessionToday) {
+      // v8.10.9: nothing countable scheduled today — the session item is N/A,
+      // shown greyed and excluded from completion (rest/walk days can go green).
+      html += `<div class="check-item na-item" style="opacity:0.45;cursor:default" data-id="${item.id}" data-na="1"><div class="checkbox"><span class="checkbox-tick">–</span></div><div class="item-content"><div class="item-title">${label}</div><div class="auto-val">No session scheduled today</div></div></div>`;
+    } else if(_autoIds.includes(item.id)) {
       // Auto workout items — reads PER-SESSION counts (morning/evening), not global total
       const wLog = getDayLog(todayStr());
       const sessions = wLog.workoutSessions || {};
@@ -109,8 +119,8 @@ export function renderTodayChecklist() {
   });
   if(currentGroup) html += '</div>';
   // If no workout auto-items were rendered (e.g. fast/light day checklists), inject a WORKOUT section
-  const hasWorkoutItems = items.some(i => AUTO_WORKOUT_IDS.includes(i.id));
-  if(!hasWorkoutItems) {
+  const hasWorkoutItems = items.some(i => _autoIds.includes(i.id));
+  if(!hasWorkoutItems && !_noSessionToday) {
     const wLog = getDayLog(todayStr());
     const wTotal = wLog.workoutTodayTotal || 0;
     const wDone = wLog.workoutTodayDone || 0;
@@ -213,8 +223,15 @@ export function updateSupCount(parentId, done, total) {
 // Flips its done state, saves all checks to storage, updates the progress bar,
 // and fires DAY_SAVED so the calendar cell color updates too.
 export function toggle(el) {
-  // Water, auto-status, and info items are not manually toggleable
-  if(el.dataset.waterTarget || el.dataset.auto || el.dataset.type === 'info') return;
+  // Water, auto-status, N/A and info items are not manually toggleable
+  if(el.dataset.waterTarget || el.dataset.auto || el.dataset.na || el.dataset.type === 'info') return;
+  // v8.10.9: the app was left open across midnight — re-render for the new day
+  // instead of saving yesterday's on-screen ticks into today's log.
+  const _c = document.getElementById('todayChecklistContainer');
+  if (_c && _c.dataset.renderedFor && _c.dataset.renderedFor !== todayStr()) {
+    if (typeof dispatch === 'function') dispatch('PLAN_CHANGED');
+    return;
+  }
   el.classList.toggle('done');
   saveAllChecks();
   updateProgress();
@@ -265,11 +282,13 @@ export function updateWaterCardState(itemId, target, liters) {
 // Skips auto-status items (cal/workout) — those are synced separately via syncAutoStatusChecks.
 // Handles: regular items, sub-items, water items, auto-status items.
 export function saveAllChecks() {
+  const _c = document.getElementById('todayChecklistContainer');
+  if (_c && _c.dataset.renderedFor && _c.dataset.renderedFor !== todayStr()) return; // stale (pre-midnight) checklist
   const log = getDayLog(todayStr());
   const checks = Object.assign({}, log.checks || {});
   // Regular items (not sub-items parents, not water, not auto-status)
   document.querySelectorAll('.check-item:not(.has-subitems)').forEach(item => {
-    if(item.dataset.waterTarget || item.dataset.auto) return;
+    if(item.dataset.waterTarget || item.dataset.auto || item.dataset.na) return;
     // Info items (calorie card): pass/fail based on data-cal-pass attribute
     if(item.dataset.type === 'info') {
       checks[item.dataset.id] = item.dataset.calPass === 'true';

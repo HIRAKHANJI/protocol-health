@@ -4,6 +4,34 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 8.10.9 — 2026-11-01
+
+**Scope:** Patch (de-personalization + multi-perspective bug sweep; patch level because the rollover rule reserves v9.0.0 for the Workout Engine consolidation). No new SK key; additive settings fields `tdeeSource`, `tdeeCalibrationRatio`; additive plan fields `autoWorkoutIds`, `lightDayCalFraction`; additive day-log field `checksArchive`. No migration.
+**Banner:** none (patch).
+**CACHE_NAME:** v52 → v53.
+
+### Why
+
+Owner: "the app is severely flawed and super personalised by leaking details about me … personalise it for the person using it based on the info they dump in there. I suspect a lot of bugs." Five parallel scans (personal data · data layer · math engines · daily UX in a real browser · plan content) produced ~127 personal-detail leaks and ~30 HIGH/MEDIUM bugs. Full register: `docs/v8.10.9-audit-report.md`.
+
+### What changed (summary — see the register for every item)
+
+- **De-personalized:** CYCLE rewritten to derive every number from Settings + logs (computed GLIDE/BAND/BELOW modes, protein floor 1.6 g/kg); neutral HTML defaults/placeholders; no 104/91kg fallbacks; `risk` default `standard`; AGRO supplement stack generic and within NIH ULs; landing-page changelog + demo data generic.
+- **Checklist:** per-plan `autoWorkoutIds` (ordinary items hand-tickable on every plan); rest/walk days N/A for session items so they can complete; plan switches archive ticks instead of deleting; midnight-rollover guard.
+- **Math:** `tdeeSource` keeps calibrated/typed TDEE across launches; ADJUST uses the user's TDEE; per-plan light-day intake; calories ≤ 0 can't be scheduled; inference ATP double-count fixed; observed-TDEE off-by-one; ATP measured from plan start; projection compliance fixes; radar direction from goal.
+- **Data/boot:** CONFIRM no longer resets the plan start date; restore never rolls back the schema record and normalises retired plan keys; fresh install stamps the latest schema (no empty auto-backup downloads, no banner); bounded IndexedDB restore; boot-error alert; migration 3→4 keeps real sessions and uses local-midnight times.
+- **Plans:** push:pull ≤ 1:1 in all six plans; CUT/BULK Wednesday cards count as sessions; calorie card on the calorie item; LITE/MAINT wording consistent; missing exercises added to WORKOUTS_LIBRARY.
+
+### Verification
+
+`node --check` clean (all modules + 7 inline blocks) · plan conformance suite ALL CHECKS PASSED · headless Chromium e2e at 375px: 37 checks pass (one probe expectation corrected after confirming the app was right) · §12 stale-ref grep clean.
+
+### Files changed
+
+`app.html` · `plans/{cycle,agro,lite,cut,bulk,maintenance}.js` · `modules/{calendar,calibration,radar,export}.js` · `components/{checklist,fast-window,workout-card}.js` · `migrations/{runner,registry}.js` · `sw.js` (v53) · `index.html` · `WORKOUTS_LIBRARY.md` · `CLAUDE.md` · `README.md` · `docs/v8.10.9-audit-report.md` (new) · `UPDATE_LOG.md`.
+
+---
+
 ## Version 8.10.8 — 2026-09-22
 
 **Scope:** Patch (CYCLE sprint-awareness + owner-requested full-loop health check). No schema change, no migration, no SK key touched.

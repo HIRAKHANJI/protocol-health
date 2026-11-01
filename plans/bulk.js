@@ -26,6 +26,10 @@ export const bulk = {
   // days. Eat-day multiplier matches moderate hypertrophy training; light
   // day reflects lower output. Weekly weighted: 5×1.55 + 2×1.40 = 1.51.
   activityByDayType: { eatDay: 1.55, lightDay: 1.40 },
+  // Checklist ids derived from WORKOUTS-tab progress (breakfast, walks, stretches are hand-ticked).
+  autoWorkoutIds: ['m2'],
+  // Light days: eat at or slightly below TDEE (gut recovery, not a cut).
+  lightDayCalFraction: 0.95,
 
   defaultTimes: { wakeTime:'07:00', lastMealTime:'20:00', eveningSessionTime:'18:00', eatingWindowStart:null },
 
@@ -64,8 +68,8 @@ export const bulk = {
     { id:'m2', group:'MORNING', label:'Morning training session', sub:'See WORKOUTS tab. Tempo training on all primary exercises (3-1-2-0).' },
     { id:'m3', group:'MORNING', label:'Protein-rich breakfast', sub:'30\u201340g protein. Eggs, oats with nuts, or Greek yogurt bowl.' },
     { id:'m4', group:'MORNING', label:'Log morning weight (weekly)', sub:'Weekly average matters, not daily fluctuations.' },
-    { id:'f1', group:'EATING', label:'Hit calorie ceiling (surplus)', sub:'You MUST eat enough. Under-eating wastes the training stimulus.' },
-    { id:'f2', group:'EATING', label:'Hit protein target', sub:'1.6\u20132.2g/kg across 3\u20134 meals. 0.40\u20130.55g/kg per meal.', type:'info' },
+    { id:'f1', group:'EATING', label:'Hit calorie ceiling (surplus)', sub:'You MUST eat enough. Under-eating wastes the training stimulus.', type:'info' },
+    { id:'f2', group:'EATING', label:'Hit protein target', sub:'1.6\u20132.2g/kg across 3\u20134 meals. 0.40\u20130.55g/kg per meal.' },
     { id:'f3', group:'EATING', label:'Carbs around training', sub:'Pre-training meal 1\u20132 hrs before. Post-training protein within 60 min.' },
     { id:'f4', group:'EATING', label:'2.5\u20133L water today', sub:'More on training days. Sip throughout.', type:'water', waterTarget:2.5 },
     { id:'f5', group:'EATING', label:'Ate 3\u20134 structured meals', sub:'Distribute protein evenly. Do not backload everything at dinner.' },
@@ -111,10 +115,11 @@ export const bulk = {
     ${workoutCard('PUSH VOLUME','MON \u00b7 40\u201350 MIN \u00b7 TEMPO 3-1-2-0',
       exRow('Arm circles + push-up negatives warm-up','Small to large circles, then 3 slow negatives','5 min')+
       exRowWithLevel('push','Push-up progression','Tempo 3-1-2-0 \u2014 chest, shoulders, triceps','4\u00d712\u201315')+
-      exRow('Decline push-up','Feet on chair \u2014 upper chest focus, tempo 3-1-2-0','4\u00d710\u201312')+
+      exRow('Decline push-up','Feet on chair \u2014 upper chest focus, tempo 3-1-2-0','3\u00d710\u201312')+
       exRowWithLevel('shoulder','Pike push-up progression','Hips high, tempo 3-1-2-0 \u2014 shoulders','3\u00d710')+
-      exRow('Diamond push-up','Hands together, tempo 3-1-2-0 \u2014 triceps','3\u00d710\u201312')+
       exRow('Tricep dips (chair edge)','Tempo 2-1-2-0','3\u00d712')+
+      exRow('Towel row','Towel over a door or round a post, unilateral, tempo 2-1-2-0 \u2014 pull balance on push day','3\u00d710/side')+
+      exRow('Prone Y-T-W raises','Rear delt + mid-trap, tempo 2-2-0-0','2\u00d710 each')+
       exRow('Plank to downdog','Flow movement, 2 sec each','3\u00d710')+
       exRow('ISOMETRIC: Push-up bottom hold','Hold 1 inch off floor (Oranchuk 2019)','3\u00d710\u201315 sec'),
       stretchRow('Chest + shoulder + wrist stretch','Doorframe, behind-back clasp, wrist flexors','5 min'),
@@ -134,7 +139,7 @@ export const bulk = {
       'TUE'
     )}
 
-    ${workoutCard('ANIMAL FLOW MOBILITY + WALK','WED \u00b7 30\u201335 MIN',
+    ${workoutCard('ANIMAL FLOW MOBILITY','WED \u00b7 + 15-MIN WALK \u00b7 30\u201335 MIN',
       exRow('Walk','15 min easy pace','15 min')+
       exRow('Wrist mobilizations','Circles, flexion, extension','3 min')+
       exRow('Beast hold','On all fours, knees 1 inch off ground','3\u00d715 sec')+
@@ -169,6 +174,7 @@ export const bulk = {
       exRowWithLevel('pull','Inverted row progression','Superset after ladder, tempo 3-1-2-0','3\u00d78\u201310')+
       exRowWithLevel('push','Archer push-up','Unilateral, tempo 3-1-2-0','3\u00d76/side')+
       exRow('Prone Y-T-W raises','Rear delt + mid-trap balance','3\u00d710 each')+
+      exRow('Towel row','Unilateral, tempo 2-1-2-0','3\u00d710/side')+
       exRowWithLevel('shoulder','Pike push-up progression','Tempo 3-1-2-0','3\u00d710')+
       exRowWithLevel('core','Hollow body hold','True core tension','3\u00d720\u201330 sec'),
       stretchRow('Chest + shoulder stretch','Doorframe or behind-back clasp','5 min'),

@@ -26,6 +26,8 @@ export const lite = {
     // exercises / tai chi / pilates / walking; fast-day = recovery, no
     // training. Weekly weighted: 4×1.375 + 3×1.20 = 1.30.
     activityByDayType: { eatDay: 1.375, fastDay: 1.20 },
+    // Checklist ids derived from WORKOUTS-tab progress (the rest are hand-ticked).
+    autoWorkoutIds: ['m2','e1'],
 
     // Default timing values — used when user hasn't set custom times in Settings
     defaultTimes: { wakeTime:'05:30', lastMealTime:'18:00', eveningSessionTime:'17:00', eatingWindowStart:'11:00' },
@@ -90,7 +92,7 @@ export const lite = {
       { id:'wf1', group:'FAST', label:'500ml water on waking', sub:'Hydrate first.' },
       { id:'wf2', group:'FAST', label:'Stay hydrated \u2014 2L+ water today', sub:'Sip constantly. Herbal tea allowed.', type:'water', waterTarget:2.0 },
       { id:'wf3', group:'FAST', label:'No food today', sub:'If you feel unwell, eat something. Health first.' },
-      { id:'wf4', group:'FAST', label:'Light walk only if feeling good', sub:'No structured exercise on fast days. Listen to your body.' },
+      { id:'wf4', group:'FAST', label:'Light walk only if feeling good', sub:'Any scheduled session is optional and gentle on fast days. Listen to your body.' },
       { id:'wf5', group:'FAST', label:'Resume normal eating tomorrow', sub:'Don\'t overeat after a fast. Normal portions.' }
     ],
     checklistLight: [
@@ -117,7 +119,8 @@ export const lite = {
         exRow('Seated Arm Raises','Sit tall, raise arms overhead slowly','2\u00d710')+
         exRow('Seated Bicep Curls','Light weight or water bottles','2\u00d710')+
         exRow('Seated Shoulder Press','Press up from shoulder height','2\u00d78')+
-        exRow('Seated Row (resistance band)','Pull elbows back, squeeze shoulder blades','2\u00d710')+
+        exRow('Seated Towel Row','Loop a towel round your feet, sit tall, pull elbows back, squeeze shoulder blades','2\u00d710')+
+        exRow('Seated Reverse Fly','Lean slightly forward, water bottles in hands, open arms out to the sides','2\u00d710')+
         exRow('Wrist Circles','Gentle mobility for hands and forearms','10 each way'),
         stretchRow('Neck + Shoulder Stretch','Gentle side bends, shoulder rolls','3 min'),
         'MON'
@@ -138,6 +141,8 @@ export const lite = {
         exRow('Seated Chest Press Hold','Press palms together at chest, hold','3\u00d710 sec')+
         exRow('Seated Leg Extension Hold','Straighten leg, hold at top','3\u00d710 sec/leg')+
         exRow('Wall Sit (45\u00b0 angle)','Back against wall, slide down gently','2\u00d710\u201315 sec')+
+        exRow('Seated Towel Row','Towel round your feet, pull elbows back, 2-sec squeeze','2\u00d710')+
+        exRow('Shoulder Blade Squeezes','Sit tall, squeeze shoulder blades together, hold 3 sec','2\u00d710')+
         exRow('Seated Arm Circles','Small circles forward then backward','10 each way'),
         stretchRow('Full Body Seated Stretch','Neck, shoulders, hips, ankles','3 min'),
         'FRI'
@@ -213,7 +218,7 @@ export const lite = {
       </div>
       <div class="rule-card">
         <div class="rule-num">GENTLE DEFICIT</div>
-        <div class="rule-text">300\u2013500 cal below TDEE. Aim for 0.25\u20130.5 kg/week. Sustainable, not aggressive.</div>
+        <div class="rule-text">Eating days: 300\u2013500 cal below TDEE. The weekly fast days add most of the deficit \u2014 together aim for roughly 0.25\u20130.75 kg/week. Sustainable, not aggressive.</div>
       </div>
       <div class="rule-card">
         <div class="rule-num">MEAL STRUCTURE</div>
@@ -262,8 +267,8 @@ export const lite = {
       ${ruleCard('RULE 02','Vegetables at lunch and dinner.','Half your plate. Any vegetable counts \u2014 fresh, frozen, or cooked.')}
       ${ruleCard('RULE 03','No sugary drinks.','Water, tea, black coffee only. Avoid juice, soda, and sweetened drinks.')}
       ${ruleCard('RULE 04','1.5\u20132 litres of water daily.','Sip regularly throughout the day. Herbal tea counts.')}
-      ${ruleCard('RULE 05','Eat 3 meals and 1\u20132 small snacks.','Do not skip meals. Steady energy throughout the day.')}
-      ${ruleCard('RULE 06','Gentle calorie deficit.','300\u2013500 cal below TDEE. No crash dieting. Sustainable loss only.')}
+      ${ruleCard('RULE 05','On eating days: 3 meals and 1\u20132 small snacks.','Do not skip meals on eating days. Steady energy throughout the day.')}
+      ${ruleCard('RULE 06','Gentle calorie deficit.','300\u2013500 cal below TDEE on eating days; fast days do the rest. No crash dieting. Sustainable loss only.')}
       <div class="section-title" style="margin-top:8px">TRAINING <span>RULES</span></div>
       ${ruleCard('RULE 07','Move every day.','Even 15 minutes of walking counts. Something is always better than nothing.','var(--accent2)')}
       ${ruleCard('RULE 08','Chair exercises are real exercises.','Seated strength work builds muscle and bone density. Do not underestimate it.','var(--accent2)')}

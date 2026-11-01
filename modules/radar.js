@@ -142,7 +142,7 @@ export function computeRadarMetrics(days) {
       if (lightDaysMap[ds]) {
         fastScheduled++;
         const dc = getDayCalories(ds);
-        const lightCeil = Math.round((s.tdee || 2600) * 0.6);
+        const lightCeil = Math.round((s.tdee || 2600) * (typeof getLightDayFraction === 'function' ? getLightDayFraction() : 0.6));
         if (!dc.hasData || dc.total <= lightCeil) fastCompleted++;
         else fastCompleted += 0.5;
       }
@@ -168,7 +168,10 @@ export function computeRadarMetrics(days) {
   // 5. WEIGHT TREND — normalised score based on whether weight is moving in the right direction
   let weightTrend = null;
   const radarCurrentW = weights.length > 0 ? weights[0].weight : s.currentKg;
-  const isBulkRadar = s.targetKg && radarCurrentW && s.targetKg > radarCurrentW;
+  // v8.10.9: direction comes from the plan's goal, not from whether the user
+  // happens to be above/below target (overshooting a cut flipped it to "bulk").
+  const _radarGoal = (typeof getActivePlan === 'function' && getActivePlan()) ? getActivePlan().goalMode : null;
+  const isBulkRadar = _radarGoal ? _radarGoal === 'bulk' : !!(s.targetKg && radarCurrentW && s.targetKg > radarCurrentW);
   if (weights.length >= 2) {
     const windowWeights = weights.filter(w => {
       const wd = strToDate(w.date);
@@ -214,9 +217,10 @@ export function computeRadarMetrics(days) {
   // 6. GOAL PROGRESS — overall progress toward target weight
   // This is all-time by nature, BUT we show window-specific rate in the legend
   let goalProgress = null;
-  if (weights.length > 0) {
-    const target = s.targetKg || 91;
-    const start = weights.length ? weights[weights.length - 1].weight : (s.currentKg || 104);
+  // v8.10.9: no hardcoded personal target/start — no target set = no GOAL axis.
+  if (weights.length > 0 && s.targetKg) {
+    const target = s.targetKg;
+    const start = weights[weights.length - 1].weight;
     const current = weights[0].weight;
     const totalChange = isBulkRadar ? (target - start) : (start - target);
     const progress = isBulkRadar ? (current - start) : (start - current);
