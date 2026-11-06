@@ -8031,6 +8031,31 @@ Plotkin 2022), push:pull balance (Cools 2016, Prinold 2016), isometrics
 | Seated reverse fly | Pull (rear delt) | 2×10 (LITE Mon) | Lean slightly forward, light bottles, open arms out | Very light load |
 | Shoulder blade squeezes | Pull (scapular retraction, isometric) | 2×10, 3s holds (LITE Fri) | Sit tall, squeeze blades together and down | Low risk |
 
+### v8.10.10 Additions — CYCLE v2
+
+New CYCLE prescriptions (§16 Rule 1). Zero-equipment by default. Evidence: core
+stability/anti-rotation work and progressive bodyweight loading (Schoenfeld 2021,
+Plotkin 2022), isometrics (Oranchuk 2019), WHO 2020 activity guidance, HIIT/sprint
+interval evidence (Boutcher 2011, Schoenfeld 2021) — all in CLAUDE.md §15.
+Changed prescriptions for existing CYCLE rows: prone W-raises move to Wed (3×12);
+hanging raises 3×8-12; single-leg hip thrusts 3×10-15/leg; Bulgarians 3×8-12/leg;
+loaded crunch 3×12; suitcase carries 3×30-40m/side; hinge track (single-leg RDL) 3×8/leg.
+
+| Exercise | Pattern | Prescription (plan) | Key cues | Safety |
+|---|---|---|---|---|
+| Wall slides | Mobility / scapular upward rotation | 2×10 warm-up (CYCLE Mon) | Back, head and forearms on the wall, slide up without losing contact | Low risk |
+| Side plank | Core (anti-lateral flexion) | 3×30s/side (CYCLE Tue) | Elbow under shoulder, straight line, hips high | Knee-down version if shoulder pain |
+| Bird dog | Core (anti-rotation, spinal stability) | 3×8/side, 2s hold (CYCLE Tue) | Reach opposite arm and leg long, no hip rotation | Low risk |
+| Hollow body hold | Core (anterior chain isometric) | 3×20s (CYCLE Mon) | Lower back pressed down, arms and legs long; tuck to regress | Avoid with active lower-back injury |
+| Reverse crunch | Core (posterior pelvic tilt) | 2×10 (CYCLE Fri) | Curl hips off the floor slowly, no swing | Low risk |
+| Single-leg calf raise | Ankle plantar flexion | 3×12-15 (CYCLE Fri) | Off a step, full stretch at the bottom, slow | Hold a wall for balance |
+| Tuck → L-sit hold | Core + straight-arm support | 5×10s (CYCLE Sat) | Chair edges or floor, shoulders depressed, hips lifted | Wrist warm-up first |
+| Shadowbox rounds | Conditioning (striking) | 5×2 min, 1 min rest (CYCLE Sat) | Fast hands, real footwork, breathe out on strikes | Low impact |
+| Jump rope intervals | Conditioning (plyometric, low amplitude) | 10×30s (CYCLE Sat) | Quick low contacts; at 100kg+ low hops/step-overs only | §2.3 — keep short at 100kg+ |
+| Dashes | Speed (short sprint) | 6-10 × 60m at 80-90%, walk-back recovery, from ramp week 4 (CYCLE Sat) | Full warm-up first, flat ground or grass, relaxed fast form | Start at 80%; hamstring/Achilles pain = stop |
+| Run/walk ramp | Aerobic base | Tue, 8 graded steps → 5K easy, then steady-finish 5K and 400m repeats (CYCLE) | Conversational pace, ≤10-15% distance increase per week | Never on a fast day; chest symptoms = stop |
+| Fast-day walk | Low-intensity steady state | 60-90 min on fast days (CYCLE Thu/Sun in GLIDE) | Easy-brisk, splitting allowed, salted water | No running or strength work while fasted 24h+ |
+
 ---
 
 ## AUTO-PRESCRIPTION DATA MODEL
