@@ -4,6 +4,29 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 8.10.11 — 2026-11-06
+
+**Scope:** Patch (CYCLE NUTRITION content — owner request). No logic, SK key, settings or migration change.
+**Banner:** none (patch). `APP_VERSION_MSG` updated for the record.
+**CACHE_NAME:** v54 → v55.
+
+### What changed
+
+- **FRESH MENU** section on CYCLE's NUTRITION tab, built for cravings for cold, watery, fresh food: drinks (cucumber-mint water, iced hibiscus, cold ginger/chamomile — marked FAST OK — salted laban, watermelon cooler, laban berry smoothie, coconut water), snacks (~80–250 cal, fruit + protein pairings) and filling fresh meals (big chicken Caesar, shawarma bowl, egg shakshuka, occasional salmon plate, lean beef bowl, lentil soup + chicken), each with calories and protein.
+- Sample ~1,500-cal / ~150g-protein day, optional protein-powder card (inside the window, never on a fast day), heartburn-friendly hydration notes.
+- Owner preference: no tuna anywhere in CYCLE — meal template, checklist examples and shopping list now use eggs, chicken, Greek yogurt and laban; salmon fillet is an occasional swap (with a protein top-up note).
+- New `_menu()` render helper inside `plans/cycle.js` (plan-local).
+
+### Verification
+
+`node --check` clean · plan conformance suite ALL CHECKS PASSED · e2e 48/48 · new cards render at 375px with no horizontal scroll.
+
+### Files changed
+
+`plans/cycle.js` · `app.html` (version) · `sw.js` (v55) · `index.html` · `CLAUDE.md` · `README.md` · `UPDATE_LOG.md`.
+
+---
+
 ## Version 8.10.10 — 2026-11-06
 
 **Scope:** Patch (CYCLE v2 — owner-approved plan rework; patch level because the rollover rule reserves v9.0.0 for the Workout Engine). No SK key, no settings field, no migration. `plans/cycle.js` rewritten; one-line cache-key fix in `app.html`.

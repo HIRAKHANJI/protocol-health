@@ -87,6 +87,17 @@ function _weekMath() {
   return { cal, tdee, fasts, eat, weekly, kg, pct };
 }
 
+// A compact food/drink list card. rows: [name, detail, cal, protein, fastOk]
+function _menu(title, color, rows) {
+  const row = ([n, d, c, p, fastOk]) =>
+    '<div style="display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)">' +
+      '<div style="min-width:0"><div style="font-size:0.78rem">' + n + (fastOk ? ' <span style="font-family:\'DM Mono\',monospace;font-size:0.55rem;color:var(--fast)">FAST OK</span>' : '') + '</div>' +
+      (d ? '<div style="font-size:0.66rem;color:var(--muted);line-height:1.4">' + d + '</div>' : '') + '</div>' +
+      '<div style="font-family:\'DM Mono\',monospace;font-size:0.62rem;text-align:right;white-space:nowrap;color:var(--muted)">' + c + ' cal' + (p ? '<br>' + p + ' P' : '') + '</div>' +
+    '</div>';
+  return '<div class="rule-card" style="border-left-color:' + color + '"><div class="rule-num">' + title + '</div>' + rows.map(row).join('') + '</div>';
+}
+
 const _DAYN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 // The run ramp — Tuesday is the main run; Saturday adds short dashes from week 4.
@@ -190,12 +201,12 @@ export const cycle = {
       { id:'m1', group:'MORNING', label:'Wake: 500ml water + creatine 5g + weigh & log', sub:'The weekly AVERAGE is the number that counts — single days are noise.' },
       { id:'m2', group:'MORNING', label:'Stomach vacuums 3×20-30s', sub:'Empty stomach, exhale fully, navel to spine. Daily.' },
       { id:'m4', group:'MORNING', label:'Steps: 7-8k across the day', sub:'Calls, errands, stairs. The cheapest calorie lever there is, and it spares muscle.' },
-      { id:'f6', group:'EATING', get label() { return 'MEAL 1 at ' + _times().open + ' — protein first + D3 + multivitamin'; }, sub:'e.g. eggs + bread + tuna + veg. Opens the eating window.' },
+      { id:'f6', group:'EATING', get label() { return 'MEAL 1 at ' + _times().open + ' — protein first + D3 + multivitamin'; }, sub:'e.g. egg shakshuka + pita + Greek yogurt. Opens the eating window.' },
       { id:'f3', group:'EATING', label:'Last meal before 4PM', sub:'MEAL 2 — protein + rice/bread + veg (+ laban/yogurt). After this the kitchen is closed: water, black coffee, plain tea only.' },
       { id:'f1', group:'EATING', label:'Protein floor hit (see NUTRITION for your number)', sub:'Split across the two meals. Anchor each one with a protein source first.' },
       { id:'f2', group:'EATING', label:'Stayed at today’s calorie ceiling (Settings)', sub:'Log meals in FOOD LOG — save your staples to the library once and they autocomplete.', type:'info' },
       { id:'f4', group:'EATING', get label() { return 'Water: ' + _water().eat + 'L today'; }, sub:'+0.5L per hour of training. Front-load it: most of it before the evening.', type:'water', get waterTarget() { return _water().eat; } },
-      { id:'f5', group:'EATING', label:'No money-trap “diet foods” (bars, rice cakes, juices)', sub:'They cost several times more per gram of protein than eggs, chicken, tuna, lentils and rice.' },
+      { id:'f5', group:'EATING', label:'No money-trap “diet foods” (bars, rice cakes, juices)', sub:'They cost several times more per gram of protein than eggs, chicken, laban, lentils and rice.' },
       { id:'e2', group:'EVENING', label:'Session done (PUSH Mon · RUN Tue · PULL Wed · LEGS Fri · SKILL Sat)', sub:'Mon/Wed/Fri strength days are the ones that protect muscle. Miss food if life happens — not the sessions.' },
       { id:'e3', group:'EVENING', label:'Cooldown stretch + hip-flexor stretch', sub:'The hip-flexor stretch is daily — it helps untilt a forward-tipped pelvis.' },
       { id:'s1', group:'SUPPLEMENTS', label:'Supplements taken', sub:'Tap to expand',
@@ -217,7 +228,7 @@ export const cycle = {
       { id:'wf4', group:'FAST', label:'Walk 60-90 min easy-brisk + 10 min mobility', sub:'Split 2×40 is fine. No running, no strength work — the walk IS the session.' },
       { id:'wf7', group:'FAST', label:'Stomach vacuums 3×20s', sub:'Easy on an empty stomach.' },
       { id:'wf9', group:'FAST', label:'Magnesium 200-300mg before bed', sub:'Helps sleep and fast-day cramps.' },
-      { id:'wf10', group:'FAST', label:'Tomorrow’s break-fast meal is planned', sub:'Protein first, normal size — e.g. eggs + bread + tuna. Post-fast hunger is when binges happen.' },
+      { id:'wf10', group:'FAST', label:'Tomorrow’s break-fast meal is planned', sub:'Protein first, normal size — e.g. egg shakshuka + pita + Greek yogurt. Post-fast hunger is when binges happen.' },
       { id:'wf8', group:'FAST', label:'STOP check: no palpitations / chest tightness / dizziness', sub:'Any of these → salt water + some food immediately, fast over, zero shame.' }
     ],
 
@@ -447,7 +458,7 @@ export const cycle = {
 
       <div class="rule-card" style="border-left-color:#ff9966">
         <div class="rule-num">THE TWO MEALS — ${open}–${close}</div>
-        <div class="rule-text">MEAL 1 · ${open} · ~${m1} cal — e.g. 4 eggs + 1 pita + 1 can tuna in water + cucumber/tomato. Take D3 + multivitamin here.<br>MEAL 2 · by ${close} · ~${m2} cal — e.g. 200g cooked chicken breast + 150g cooked rice + salad/pickles + 500ml low-fat laban or a yogurt.<br>${_floorTxt}</div>
+        <div class="rule-text">MEAL 1 · ${open} · ~${m1} cal — e.g. 4-egg shakshuka + 1 pita + a Greek yogurt (~48g protein). Take D3 + multivitamin here.<br>MEAL 2 · by ${close} · ~${m2} cal — e.g. 200g chicken breast + 150g cooked rice + salad + garlic-yogurt sauce + 500ml low-fat laban (~89g protein). Salmon night: 150g fillet instead of the chicken — ~30g less protein, so add 2 eggs or a yogurt that day.<br>${_floorTxt}</div>
         <div class="rule-sub">Examples are sized for ~1,500 cal (~140g protein) — scale the rice/bread to your ceiling; keep the protein anchors. Lentils and chickpeas are cheap protein top-ups. Outside the window: water, black coffee, plain tea only. Train 1-2h after meal 2, or before it on days a fast follows.</div>
       </div>
 
@@ -467,7 +478,7 @@ export const cycle = {
 
       <div class="rule-card" style="border-left-color:#82e0aa">
         <div class="rule-num">THE WEEKLY SHOP — ONE TRIP, BORING FOOD</div>
-        <div class="rule-text">A tray of eggs · chicken breast or whole chickens · canned tuna in water · laban, yogurt or milk · dry lentils or chickpeas · a big bag of rice + pita/bread · cucumbers, tomatoes, pickles, frozen veg · bananas + citrus</div>
+        <div class="rule-text">A tray of eggs · chicken breast or whole chickens · salmon fillet now and then · laban, Greek yogurt, milk · canned chickpeas + dry lentils · rice, pita, oats · lettuce, cucumbers, tomatoes, carrots, peppers · frozen mixed berries · a whole pineapple, watermelon, apples, oranges, bananas, grapes · hibiscus, chamomile + ginger tea</div>
         <div class="rule-sub">Skip the “diet foods” — protein bars, rice cakes, processed deli meat, juice. Per gram of protein they usually cost several times what whole foods do.</div>
       </div>
 
@@ -480,7 +491,45 @@ export const cycle = {
       <div class="section-title" style="margin-top:8px">SKIN — <span>THE SLOW-LOSS DEFENSE</span></div>
       ${ruleCard('RATE CONTROL','Skin remodels over months behind the loss. The faster the loss, the more the strength work and protein floor matter.','Patience does the rest once you reach BAND.','#82e0aa')}
       ${ruleCard('BONE BROTH + VITAMIN C','Chicken bones + a splash of vinegar, simmered 3-4h — glycine and proline, collagen building blocks. Have it with meal 2. Fruit and veg supply the vitamin C collagen synthesis needs.','Collagen peptides are the paid version — modest evidence, optional.','#82e0aa')}
-      ${ruleCard('MUSCLE FILLS THE SPACE','The strength sessions, glute work and loaded core build tissue under the skin as fat leaves.','This is why the sessions matter more than any single meal.','#82e0aa')}`;
+      ${ruleCard('MUSCLE FILLS THE SPACE','The strength sessions, glute work and loaded core build tissue under the skin as fat leaves.','This is why the sessions matter more than any single meal.','#82e0aa')}
+      <div class="section-title" style="margin-top:8px">FRESH <span>MENU</span></div>
+      <p class="section-note">Cold, crunchy, watery food inside the window — answer the craving before it turns into a binge. A snack comes out of the day’s ceiling: shrink meal 1 or 2 by the same amount.</p>
+      ${_menu('DRINKS — EASY + HYDRATING', '#88ccff', [
+        ['Cucumber-mint water', 'Slices + a few leaves in a fridge jug', '0', '', true],
+        ['Iced hibiscus tea', 'Brew, chill, no sugar — tart + fresh', '0', '', true],
+        ['Cold ginger or chamomile tea', 'Brew, chill', '0', '', true],
+        ['Salted laban', '250ml laban + pinch of salt + dried mint + ice — great after training', '~100', '8g'],
+        ['Watermelon cooler', '2 cups watermelon + ice + a little lime, blended', '~90', ''],
+        ['Strawberry-lemon water', 'A few sliced strawberries + a lemon slice, overnight', '~10', ''],
+        ['Laban berry smoothie', '200ml laban + 1 cup frozen berries + ½ banana — the acai-bowl fix', '~230', '10g'],
+        ['Coconut water', '250ml, as a treat', '~50', ''],
+        ['Zero-sugar soda', 'Occasionally — skip if it triggers heartburn', '0', '']
+      ])}
+      ${_menu('SNACKS — ~80-250 CAL', '#82e0aa', [
+        ['Greek yogurt + ½ cup pineapple', '', '~170', '15g'],
+        ['Chicken salad cup', '100g leftover chicken + 2 tbsp yogurt + lemon + cucumber', '~200', '32g'],
+        ['Apple + 2 boiled eggs', '', '~250', '13g'],
+        ['Pineapple with chili-salt', '', '~80', ''],
+        ['Frozen grapes, 1 cup', 'Eat like sweets', '~100', '1g'],
+        ['Watermelon, 2 cups, cold', '', '~90', '2g'],
+        ['Orange or 2 mandarins', '', '~80', '1g'],
+        ['Strawberries + 150ml laban', '', '~140', '6g'],
+        ['Cucumber + carrots + 3 tbsp hummus', '', '~150', '4g'],
+        ['Chickpea salad cup', 'Chickpeas, tomato, cucumber, lemon, salt', '~200', '9g'],
+        ['Frozen yogurt bark', 'Greek yogurt spread thin + berries, frozen, snapped', '~150', '12g']
+      ])}
+      ${_menu('FRESH MEALS THAT ACTUALLY FILL YOU', '#ff9966', [
+        ['Big chicken Caesar', '200g chicken + lots of lettuce + 1 pita or 150g rice/potato + parmesan + 1-2 tbsp dressing', '~750', '~65g'],
+        ['Chicken shawarma bowl', '200g spiced chicken + 150g rice + chopped salad + garlic-yogurt sauce', '~700', '~70g'],
+        ['Egg shakshuka', '4 eggs in tomato-pepper sauce + 1 pita + a Greek yogurt', '~620', '~48g'],
+        ['Salmon plate (now and then)', '150g fillet + 150g rice or potato + big salad + lemon', '~650', '~35g'],
+        ['Lean beef rice bowl', '150g lean mince + onion + spices + 150g rice + big salad', '~700', '~45g'],
+        ['Lentil soup + chicken', 'Big bowl of lentil soup + 150g chicken + lemon', '~600', '~55g'],
+        ['Watermelon-feta side', 'Watermelon cubes + a little feta + cucumber + mint', '~150', '5g']
+      ])}
+      ${ruleCard('SAMPLE DAY — ~1,500 CAL, ~150G PROTEIN', open + ' egg shakshuka + pita + Greek yogurt (~620) · midday Greek yogurt + pineapple + watermelon cooler (~260) · by ' + close + ' chicken shawarma bowl or big Caesar + salted laban (~800) · after ' + close + ': hibiscus, cucumber-mint water, cold tea — unlimited.', 'Saturday prep makes this automatic: cook chicken + rice, wash + chop salad veg, make a jug each of hibiscus and cucumber water.', '#ff9966')}
+      ${ruleCard('PROTEIN POWDER — OPTIONAL BACKUP', 'Only on days protein ran short: 1 scoop ≈ 120 cal + ~24g protein, inside the window, never on a fast day (it breaks the fast). Make it taste better: iced latte (coffee + milk + ice, shaken) · blended with laban + frozen banana · ½ scoop stirred into Greek yogurt with diced apple · stirred into oats after cooking.', 'Cold, half-scoop, milk or laban — never just water.', '#82e0aa')}
+      ${ruleCard('HEARTBURN + HYDRATION', 'Sip, don’t gulp; room-temperature water on an empty stomach; don’t lie down within 2-3h of eating. Watery fruit, laban and cold teas all count toward the water target.', 'Citrus, tomato, mint and fizz set off reflux in some people — if one burns, drop that one and keep the rest.', '#88ccff')}`;
     },
 
     rulesContent(s) {
