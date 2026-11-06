@@ -1863,8 +1863,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '8.10.9';
-const APP_VERSION_MSG = 'Cleanup + bug-fix release: the app no longer contains anyone’s built-in personal details — plans, defaults and targets now come only from your Settings and logs. Checklist items can always be ticked by hand, rest days can reach full completion, plan switches keep your history, and calibrated or typed TDEE values are no longer reset on every launch.';
+const APP_VERSION = '8.10.10';
+const APP_VERSION_MSG = 'CYCLE v2: two meals inside a 9AM–4PM window, a daily water target from your weight, a weekly supplement track, and fast days that follow your mode (Thu + Sun while cutting, Sunday only near target, none below it). New daily sessions, a run ramp that tracks your week number and keeps progressing past week 12, and a live weekly deficit card.';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
 
@@ -1908,7 +1908,8 @@ function getCountableWorkoutRows(dateStr) {
   const plan = (typeof getActivePlan === 'function') ? getActivePlan() : null;
   if (!plan || typeof plan.workoutContent !== 'function') return null;
   const dow = DAYS_SHORT[strToDate(dateStr).getDay()];
-  const key = (plan.name || '') + '|' + dow;
+  // v8.10.10: fast-day pattern in the key — CYCLE's Thursday card changes with its mode.
+  const key = (plan.name || '') + '|' + dow + '|' + (plan.fastDaysDow || []).join(',');
   if (Object.prototype.hasOwnProperty.call(_countableRowsCache, key)) return _countableRowsCache[key];
   let count = 0;
   try {

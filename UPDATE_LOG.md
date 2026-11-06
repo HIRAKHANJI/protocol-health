@@ -4,6 +4,39 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 8.10.10 — 2026-11-06
+
+**Scope:** Patch (CYCLE v2 — owner-approved plan rework; patch level because the rollover rule reserves v9.0.0 for the Workout Engine). No SK key, no settings field, no migration. `plans/cycle.js` rewritten; one-line cache-key fix in `app.html`.
+**Banner:** none (patch). `APP_VERSION_MSG` updated for the record.
+**CACHE_NAME:** v53 → v54.
+
+### Why
+
+Owner asked for the 55-day plan discussed in chat to live inside CYCLE "so it can last against coming months, not just 55 days": two meals inside 9AM–4PM, a daily water requirement, a supplement track, two fast days while cutting, the daily sessions, run management, and room to add harder workouts later.
+
+### What changed
+
+- **Eating window:** `defaultTimes` 9AM–4PM (editable in Settings). Checklist: MEAL 1 at window open (+ D3 + multivitamin) and "Last meal before <close>" (meal 2); evening broth item removed (outside the window). NUTRITION shows a two-meal template scaled to the user's ceiling (~45% / 55%).
+- **Fast days follow the computed mode** (getters on `fastDaysDow` / `fastDaysPerWeek`): GLIDE → Thu + Sun, BAND → Sun, BELOW → none, no data → Sun. Calculator, calendar auto-set, projection, export and radar read the current mode. Thursday card/subs/icon switch between FAST + WALK and RUN 2 + SKILL.
+- **Water target** from bodyweight (~33 ml/kg, 0.5L steps, 2.5–4.0L; fast days +0.5L, max 4.5L) on the checklist water items + a NUTRITION card with pacing and a salt-per-litre note on fast days. Basis: DRI adequate intake for water (CLAUDE.md §15 DRI tables), scaled to body size.
+- **Protein floor:** 1.6 g/kg of TARGET weight while in GLIDE (protein needs follow lean mass — ISSN Protein & Exercise / Diets & Body Composition); 1.6 g/kg of current weight otherwise.
+- **Supplement track:** weekly grid (creatine daily · D3 1,000–2,000 IU + multivitamin + optional omega-3 on eating days · magnesium glycinate 200–300mg nightly · salt on fast days · caffeine ≤400mg before 2PM). All within the §15 hard limits (D3 UL 4,000 IU, supplemental Mg 350mg, creatine 5g no loading, no extra zinc).
+- **Sessions:** Mon PUSH · Tue RUN + spine armor (dead bugs, side plank, bird dogs, bridges) · Wed PULL (W-raises moved here) · Thu FAST + walk (GLIDE) / RUN 2 + skill · Fri LEGS + GLUTES + loaded core (Bulgarians, single-leg hip thrusts, sliding curls, hinge track, single-leg calves, loaded crunch, suitcase carries, dead bug + reverse crunch) · Sat SKILL + SPEED + CONDITIONING (handstand, L-sit, crow, shadowbox, rope, dashes from week 4) · Sun FAST/REST + walk. Push:pull 13:17 = 0.76.
+- **Run ramp** keyed to the week since the plan start date: 8 graded steps, weeks 9–12 steady finish, week 13+ open-ended (alternating steady 5K / 400m repeats). Saturday dashes progress alongside. Week 1 shows a 70%-volume note.
+- **Weekly numbers card:** eating days × (TDEE − ceiling) + fasts × 0.95·TDEE → kg/week and % bodyweight, with a muscle-protection note above 1.2%/week.
+- **Rules:** kitchen-hours and fast-day laws, ease-off triggers, waist at navel + love-handle line (never the morning after a fast), start/illness re-entry (week 1 no fasts, week 2 Sunday only), 12-week checkpoint where harder blocks get added.
+- **app.html:** `getCountableWorkoutRows` cache key includes the plan's fast-day pattern (CYCLE's Thursday card changes with its mode).
+
+### Verification
+
+`node --check` clean · plan conformance suite (all six plans + CYCLE v2 modes, fasts, water, protein, ramp week) ALL CHECKS PASSED · headless Chromium e2e at 375px: 48 checks pass (incl. Thu fast checklist + 4L water at 102kg, 0 countable rows on the GLIDE Thursday, 9AM–4PM window labels, schedule auto-set marks Thu + Sun, ~142g protein at 1,500 cal, all plans boot clean) · no horizontal scroll · §12 stale-ref grep clean.
+
+### Files changed
+
+`plans/cycle.js` · `app.html` · `sw.js` (v54) · `index.html` · `WORKOUTS_LIBRARY.md` · `CLAUDE.md` · `README.md` · `docs/v8.10.10-cycle-v2.md` (new) · `UPDATE_LOG.md`.
+
+---
+
 ## Version 8.10.9 — 2026-11-01
 
 **Scope:** Patch (de-personalization + multi-perspective bug sweep; patch level because the rollover rule reserves v9.0.0 for the Workout Engine consolidation). No new SK key; additive settings fields `tdeeSource`, `tdeeCalibrationRatio`; additive plan fields `autoWorkoutIds`, `lightDayCalFraction`; additive day-log field `checksArchive`. No migration.
