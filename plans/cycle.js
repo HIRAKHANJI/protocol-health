@@ -200,7 +200,7 @@ export const cycle = {
     checklistNormal: [
       { id:'m1', group:'MORNING', label:'Wake: 500ml water + creatine 5g + weigh & log', sub:'The weekly AVERAGE is the number that counts — single days are noise.' },
       { id:'m2', group:'MORNING', label:'Stomach vacuums 3×20-30s', sub:'Empty stomach, exhale fully, navel to spine. Daily.' },
-      { id:'m4', group:'MORNING', label:'Steps: 7-8k across the day', sub:'Calls, errands, stairs. The cheapest calorie lever there is, and it spares muscle.' },
+      { id:'m4', group:'MORNING', label:'Steps: 5k+ across the day (+~1k in training)', sub:'Calls, errands, stairs. Fast days: the 60-90 min walk takes you past 10k. Every extra 1,000 steps a day ≈ 40-50 cal and spares muscle.' },
       { id:'f6', group:'EATING', get label() { return 'MEAL 1 at ' + _times().open + ' — protein first + D3 + multivitamin'; }, sub:'e.g. egg shakshuka + pita + Greek yogurt. Opens the eating window.' },
       { id:'f3', group:'EATING', label:'Last meal before 4PM', sub:'MEAL 2 — protein + rice/bread + veg (+ laban/yogurt). After this the kitchen is closed: water, black coffee, plain tea only.' },
       { id:'f1', group:'EATING', label:'Protein floor hit (see NUTRITION for your number)', sub:'Split across the two meals. Anchor each one with a protein source first.' },
@@ -213,9 +213,9 @@ export const cycle = {
         subItems: [
           { id:'s1_a', name:'Creatine monohydrate', dose:'5g', when:'On waking, every day incl. fasts — no loading phase (ISSN 2018)' },
           { id:'s1_d', name:'Vitamin D3', dose:'1,000-2,000 IU', when:'With meal 1 (needs some fat). Stay under 4,000 IU/day' },
-          { id:'s1_e', name:'Basic multivitamin', dose:'1 tablet', when:'With meal 1 — covers gaps on low calories' },
-          { id:'s1_c', name:'Omega-3 (optional)', dose:'1-2g EPA+DHA', when:'With a meal' },
-          { id:'s1_b', name:'Magnesium glycinate', dose:'200-300mg elemental', when:'Before bed' }
+          { id:'s1_e', name:'Basic multivitamin', dose:'1 tablet', when:'With meal 1 — mornings only if it contains ginseng or other stimulants' },
+          { id:'s1_b', name:'Magnesium — or a calcium + magnesium combo', dose:'≤350mg Mg/day from supplements', when:'Combo: 1 tablet with meal 2. No combo that day: magnesium capsule before bed. Not both — the multivitamin’s magnesium counts too' },
+          { id:'s1_g', name:'Pump pre-workout (if you use one)', dose:'1 serving (½ on run days)', when:'30-45 min before training — stim-free', days:[1,2,3,5,6] }
         ]
       },
       { id:'n2', group:'NIGHT', label:'Sleep 7-9h · bed at a consistent time', sub:'Short sleep in a deficit shifts the loss from fat toward muscle. 6h is the hard floor. Two wrecked nights in a row → next day is walk + core only.' }
@@ -295,11 +295,13 @@ export const cycle = {
         exRow('Warmup','Arm circles + scap push-ups 2×10 + wall slides 2×10.','8 min')+
         exRowWithLevel('push','Push-up progression track','MAIN LIFT — hardest clean variation you own (decline → archer → pseudo-planche), 1-2 reps in reserve. 2 min rests. Level up when 4×8 is clean.','4×5-8',true)+
         exRowWithLevel('shoulder','Pike press → wall handstand push-up track','The overhead press, no bar needed. Slow lowering.','3×6-10',true)+
-        exRow('Chair dips','Two sturdy chairs or a counter edge, slow lowering. UPGRADE: chest press machine 3×8-12.','3×8-12')+
+        exRow('Chair dips','Two sturdy chairs or a counter edge, slow lowering.','3×8-12')+
+        exRow('Chest press (machine) / deficit push-ups','Home or gym machine: log the pin, add a plate when 3×12 is clean. No machine: hands on two chairs, chest below the hands.','3×8-12')+
         exRow('Pseudo-planche lean holds','Push-up position, hands turned out, shoulders past wrists, lean and hold. Serratus + straight-arm strength.','3×20s')+
         exRow('Table/towel rows','Under a sturdy table or towel round a post — slow 3-count lowering. Keeps the week pull-dominant.','3×10')+
         exRow('Side raises','Water bottles or a loaded bag, strict, no swing. UPGRADE: DBs.','3×12-15')+
-        exRow('Plank + hollow hold','Squeeze-everything plank 3×30-45s, then hollow body hold 3×20s.','2 moves'),
+        exRow('Plank + hollow hold','Squeeze-everything plank 3×30-45s, then hollow body hold 3×20s.','2 moves')+
+        exRow('Ab block: kneeling cable crunch','On a pulldown/cable: rope or towel beside your head, round your spine to curl elbows toward knees, hips still. No machine: backpack crunch. Abs last — 45-60 min after any pre-workout drink.','4×10-15'),
         stretchRow('Doorframe chest + dislocates + wrists + hip-flexor stretch','','8 min'),
         'MON'
       )}
@@ -317,10 +319,11 @@ export const cycle = {
       ${workoutCard('WEDNESDAY — PULL','THE STRENGTH CENTERPIECE + BACK + HANGING CORE · ~60 MIN',
         exRow('Warmup','Dead hang 2×20-30s + scap pulls 2×8.','6 min')+
         exRow('Pull-up strength work','MAIN LIFT — 5 sets of 3-5, 2-3 MIN rests, any bar. Not there yet: jump up + 5-second negatives, 5×3. No bar at all: heavy towel rows under a solid table, 5×5, same rests.','5×3-5')+
-        exRow('Table/towel rows','Slow 3-count lowering, chest to the edge. UPGRADE: pulldown machine.','4×8-12')+
+        exRow('Lat pulldown (machine) / heavy towel rows','Log the pin; +1 plate when 3×8 is clean. Pull-ups usually arrive near 85-90% of bodyweight × 5 reps. No machine: 4 more sets of heavy towel rows.','4×8-10')+
+        exRow('Table/towel rows','Slow 3-count lowering, chest to the edge.','4×8-12')+
         exRow('Prone Y-T-W','Face down, raise straight arms into each letter, squeeze the blades.','2×8 each')+
         exRow('Prone W-raises','Face down, elbows bent to a W, squeeze the shoulder blades down and back.','3×12')+
-        exRow('Hanging knee → leg raise track','On the bar: knees up slow, no swing → straight legs as you progress. No bar: lying leg raises with the backpack on your ankles.','3×8-12')+
+        exRow('Ab block: reverse crunch → hanging knee raise','Floor reverse crunch first (curl the hips up, lower slow); progress to hanging knee raises, then straighter legs. No swing.','3×10-12')+
         exRow('Grip: towel hang or bag hold','Towel over the bar and hang, or hold the loaded backpack by the straps.','2×30s'),
         stretchRow('Full shoulder sequence + hip-flexor stretch','','10 min'),
         'WED'
@@ -348,8 +351,9 @@ export const cycle = {
         exRow('Single-leg hip thrusts','Shoulders on the sofa, backpack on the hips, drive up, squeeze 2s. The main glute-shape move.','3×10-15/leg')+
         exRow('Sliding leg curls','Towel or socks under the heels, bridge, slide out slow, drag back.','3×8-12')+
         exRowWithLevel('hinge','Hinge progression track (single-leg RDL by default)','Flat back — hamstrings, glutes, balance, lower back.','3×8/leg',true)+
+        exRow('Leg extension (machine) / wall sit','Machine: slow, 2s squeeze at the top, log the pin. No machine: wall sit 3×45s.','3×12-15')+
         exRow('Single-leg calf raises','Slow, off a step, full stretch at the bottom.','3×12-15')+
-        exRow('Backpack loaded crunch','Bag hugged to the chest, crunch slow, add books as it gets easy — abs grow from load like any muscle.','3×12')+
+        exRow('Ab block: backpack loaded crunch','Bag hugged to the chest, crunch slow, add books as it gets easy — abs grow from load like any muscle. Any tingling down a leg → swap for reverse crunches.','3×12')+
         exRow('Suitcase carries','One-hand bag carry, dead-straight posture — obliques, the muscle under the love handles.','3×30-40m/side')+
         exRow('Dead bug + reverse crunch','Pelvic-tilt control to finish.','2×10 each'),
         stretchRow('Pigeon + figure-4 + hamstring + hip-flexor stretch','','12 min'),
@@ -359,10 +363,11 @@ export const cycle = {
       ${workoutCard('SATURDAY — SKILL + SPEED + CONDITIONING','SKILL · CONDITIONING · DASHES · BATCH-COOK · ~60 MIN',
         exRow('Wall handstand holds','Kick up, arms locked, bail sideways. Log your seconds.','5×20-30s')+
         exRow('Tuck → L-sit holds','Chair edges or floor, hips lifted, shoulders down.','5×10s')+
-        exRow('Crow practice','Knees on elbows, lean until the feet float.','5 attempts')+
+        exRow('Frog stand → crow practice','Knees on elbows, fingers spread, lean until the toes float. Build to 10s holds.','5×5-10s')+
         exRow('Shadowbox','Fast hands, real footwork, 1 min rest between rounds.','5×2 min')+
         exRow('Jump rope','Light, quick contacts.' + (_heavy ? ' At 100kg+ use low hops or step-overs and keep it short; skip jump squats/burpees (WORKOUTS_LIBRARY §2.3).' : ''),'10×30s')+
         exRow('Dashes (from ramp week 4)','After the warm-up: ~60m at the ramp’s effort, walk back between each. Flat ground or grass. This week: ' + _step.dash + '.','6-10 × 60m')+
+        exRow('Ab block: hollow hold + dead bug','Lower back pressed down the whole time; arms overhead makes it harder.','3×20-30s + 2×10')+
         exRow('BATCH-COOK','Cook the week’s chicken + rice, portion, refrigerate/freeze.','~30 min'),
         stretchRow('Wrists + shoulders + gentle full-body flow','','10 min'),
         'SAT'
@@ -375,6 +380,18 @@ export const cycle = {
         stretchRow('Nothing aggressive — recovery day','','—'),
         'SUN'
       )}
+
+      <div class="rule-card" style="border-left-color:#c8f542">
+        <div class="rule-num">THE AB PROGRAM — GROW THEM SO THEY SHOW SOONER</div>
+        <div class="rule-text">Mon: kneeling cable (or backpack) crunch 4×10-15 · Wed: reverse crunch → hanging knee raise 3×10-12 · Fri: backpack crunch + suitcase carries · Sat: hollow hold + dead bug. About 12 hard sets a week — add a rep, a plate or a book each week.</div>
+        <div class="rule-sub">Abs are a muscle: thicker abs show through more fat. Visible abs still need low body fat — roughly 12-15%, or ~15-18% once they are well built. Do them at the end of the session, 45-60 min after any pre-workout drink. Lower back or leg symptoms → dead bugs and reverse crunches only.</div>
+      </div>
+
+      <div class="rule-card" style="border-left-color:#70c8ff">
+        <div class="rule-num">BONUS BLOCK — OPTIONAL, ≤15 MIN</div>
+        <div class="rule-text">The extra work you crave goes here, after the main session: curls (machine/preacher or backpack), extra push-up sets, pulldowns, skill holds. Moderate effort, never to failure.</div>
+        <div class="rule-sub">Write it in the day’s notes (MONTHS → tap the day) so your burn estimate stays honest. Joints achy or sleep short → skip it, not the main session.</div>
+      </div>
 
       <div class="rule-card" style="border-left-color:var(--accent2)">
         <div class="rule-num">THE RUN RAMP — JOINTS FIRST${_wk ? ' · YOU ARE IN WEEK ' + _wk : ''}</div>
@@ -411,15 +428,17 @@ export const cycle = {
         ['Creatine 5g', d => '✓'],
         ['Multivitamin', d => _fd.includes(d) ? '—' : '✓'],
         ['D3 1-2k IU', d => _fd.includes(d) ? '—' : '✓'],
-        ['Omega-3 (opt)', d => _fd.includes(d) ? '—' : '✓'],
-        ['Salt in water', d => _fd.includes(d) ? '✓' : '—'],
-        ['Magnesium', d => '✓']
+        ['Ca+Mg combo (opt)', d => _fd.includes(d) ? '—' : '✓'],
+        ['Magnesium (bed)', d => _fd.includes(d) ? '✓' : '◐'],
+        ['Pump pre (opt)', d => (d === 0 || _fd.includes(d)) ? '—' : (d === 2 || d === 4) ? '½' : '✓'],
+        ['Stim pre (opt)', d => (d === 1 || d === 5) && !_fd.includes(d) ? '½' : '—'],
+        ['Salt in water', d => _fd.includes(d) ? '✓' : '—']
       ];
       const _order = [1, 2, 3, 4, 5, 6, 0];
       const _cell = 'padding:3px 2px;text-align:center;border-bottom:1px solid var(--border)';
       const _supTable = '<table style="width:100%;border-collapse:collapse;font-family:\'DM Mono\',monospace;font-size:0.58rem;margin-top:6px">' +
         '<tr><th style="' + _cell + ';text-align:left"></th>' + _order.map(d => '<th style="' + _cell + ';color:' + (_fd.includes(d) ? 'var(--fast)' : 'var(--muted)') + '">' + _DAYN[d].charAt(0) + (_fd.includes(d) ? '·F' : '') + '</th>').join('') + '</tr>' +
-        _supRows.map(([n, f]) => '<tr><td style="' + _cell + ';text-align:left;white-space:nowrap">' + n + '</td>' + _order.map(d => '<td style="' + _cell + ';color:' + (f(d) === '✓' ? 'var(--accent)' : 'var(--muted)') + '">' + f(d) + '</td>').join('') + '</tr>').join('') +
+        _supRows.map(([n, f]) => '<tr><td style="' + _cell + ';text-align:left;white-space:nowrap">' + n + '</td>' + _order.map(d => '<td style="' + _cell + ';color:' + (f(d) === '—' ? 'var(--muted)' : 'var(--accent)') + '">' + f(d) + '</td>').join('') + '</tr>').join('') +
         '</table>';
 
       let _mathCard = '';
@@ -472,14 +491,14 @@ export const cycle = {
 
       <div class="rule-card" style="border-left-color:#82e0aa">
         <div class="rule-num">SUPPLEMENT TRACK — THE WEEK</div>
-        <div class="rule-text">Creatine on waking · D3 + multivitamin (+ omega-3) with meal 1 · magnesium before bed · salt only on fast days.${_supTable}</div>
-        <div class="rule-sub">F = fast day in your current mode. Creatine 5g, no loading (ISSN 2018) · D3 1,000-2,000 IU (NIH UL 4,000) · magnesium glycinate 200-300mg elemental (UL 350 supplemental) · caffeine ≤400mg/day, before 2PM. Check with a doctor first if you take medication or have a kidney condition. The multivitamin covers zinc — don’t add extra.</div>
+        <div class="rule-text">Creatine on waking · multivitamin + D3 with meal 1 · calcium+magnesium combo with meal 2 (optional) · magnesium at bed on fast days, or on days without the combo (◐) · stim-free pump before sessions · salt only on fast days.${_supTable}</div>
+        <div class="rule-sub">F = fast day in your current mode. Creatine 5g, no loading (ISSN 2018) · D3 1,000-2,000 IU (NIH UL 4,000) · magnesium glycinate 200-300mg elemental (UL 350 supplemental) · supplemental calcium ≤600mg/day · caffeine ≤400mg/day, before 2PM. Stimulant pre-workout (optional): ½ serving max, strength days only, with food in you and before ~3PM — never after vomiting, a short night, or on run days. The multivitamin covers zinc — don’t add zinc pills. Omega-3 1-2g with a meal is optional. Check with a doctor first if you take medication or have a kidney condition.</div>
       </div>
 
       <div class="rule-card" style="border-left-color:#82e0aa">
         <div class="rule-num">THE WEEKLY SHOP — ONE TRIP, BORING FOOD</div>
         <div class="rule-text">A tray of eggs · chicken breast or whole chickens · salmon fillet now and then · laban, Greek yogurt, milk · canned chickpeas + dry lentils · rice, pita, oats · lettuce, cucumbers, tomatoes, carrots, peppers · frozen mixed berries · a whole pineapple, watermelon, apples, oranges, bananas, grapes · hibiscus, chamomile + ginger tea</div>
-        <div class="rule-sub">Skip the “diet foods” — protein bars, rice cakes, processed deli meat, juice. Per gram of protein they usually cost several times what whole foods do.</div>
+        <div class="rule-sub">Skip the “diet foods” — rice cakes, processed deli meat, juice, low-protein snack bars. A genuinely high-protein bar (~40g+ protein) or a scoop of whey is fine as an emergency protein backup.</div>
       </div>
 
       <div class="rule-card" style="border-left-color:var(--accent2)">
@@ -542,7 +561,7 @@ export const cycle = {
       ${ruleCard('LAW 02','Kitchen hours: ' + open + '–' + close + '. Two meals.','Outside the window: water, black coffee, plain tea. Change the window in Settings if your day shifts — the plan follows it.')}
       ${ruleCard('LAW 03','Fast days follow your mode — GLIDE: Thu + Sun · BAND: Sun · BELOW: none.','A fast runs from the last meal the day before to meal 1 the day after. Never two in a row. No training on a fast — the walk is the session. Break it with the planned, protein-first meal.')}
       ${ruleCard('LAW 04','Respect the calorie floor.','Settings warns you below the plan floor (' + (cycle.minCalories || 1400) + ' cal). Very low intake loses muscle and rebounds.')}
-      ${ruleCard('LAW 05','Walks are the lever, never the punishment.','7-8k steps on eating days, 60-90 min on fast days. On a wrecked day, cut the walk length — not the strength session.')}
+      ${ruleCard('LAW 05','Walks are the lever, never the punishment.','5k+ steps on eating days (+ training), 60-90 min on fast days. On a wrecked day, cut the walk length — not the strength session.')}
       ${ruleCard('LAW 06','STOP cluster: palpitations · chest tightness · dizziness or vision changes','Salt water + some food immediately, whatever day it is. Persistent symptoms → see a doctor.')}
       ${ruleCard('LAW 07','Sleep 7-9 hours. 6 is the hard floor.','Two wrecked nights in a row → next day is walk + core only. Recovery happens in bed.')}
       ${ruleCard('LAW 08','No diet-food purchases.','Bars, rice cakes, processed meats, juices. Whole foods are cheaper per gram of protein and more filling.')}

@@ -8056,6 +8056,21 @@ loaded crunch 3×12; suitcase carries 3×30-40m/side; hinge track (single-leg RD
 | Run/walk ramp | Aerobic base | Tue, 8 graded steps → 5K easy, then steady-finish 5K and 400m repeats (CYCLE) | Conversational pace, ≤10-15% distance increase per week | Never on a fast day; chest symptoms = stop |
 | Fast-day walk | Low-intensity steady state | 60-90 min on fast days (CYCLE Thu/Sun in GLIDE) | Easy-brisk, splitting allowed, salted water | No running or strength work while fasted 24h+ |
 
+### v8.10.12 Additions — CYCLE ab program + optional machine rows
+
+Optional machine rows always list a zero-equipment alternative (bodyweight-first rule).
+Evidence: progressive loading builds any muscle incl. the rectus abdominis (Schoenfeld
+2021, Plotkin 2022); isometrics (Oranchuk 2019) — CLAUDE.md §15.
+
+| Exercise | Pattern | Prescription (plan) | Key cues | Safety |
+|---|---|---|---|---|
+| Kneeling cable crunch | Core (loaded spinal flexion) | 4×10-15 (CYCLE Mon) | Rope/towel beside the head, round the spine, hips still | Light while any back/leg nerve symptoms; swap for reverse crunch |
+| Reverse crunch → hanging knee raise | Core (posterior pelvic tilt) | 3×10-12 (CYCLE Wed) | Curl hips up, lower slowly, no swing | Low risk |
+| Lat pulldown (machine) | Pull (vertical) | 4×8-10 (CYCLE Wed, optional; alt: heavy towel rows) | Chest up, bar to upper chest, log the pin | Shoulder pain → narrower grip, lighter |
+| Chest press (machine) / deficit push-ups | Push (horizontal) | 3×8-12 (CYCLE Mon) | Shoulder blades back, full controlled range | Stop on shoulder pinch |
+| Leg extension (machine) / wall sit | Knee extension (quads) | 3×12-15 / 3×45s (CYCLE Fri) | Slow, 2s squeeze at the top | Knee pain → partial range or wall sit |
+| Frog stand → crow | Skill (balance, wrists) | 5×5-10s (CYCLE Sat) | Knees on elbows, fingers spread, lean until toes float | Wrist warm-up first |
+
 ---
 
 ## AUTO-PRESCRIPTION DATA MODEL
