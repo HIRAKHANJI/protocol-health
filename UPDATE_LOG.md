@@ -4,6 +4,33 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 8.10.12 — 2026-11-21
+
+**Scope:** Patch (CYCLE content — owner-approved plan update). No logic, SK key, settings or migration change.
+**Banner:** none (patch). `APP_VERSION_MSG` updated for the record.
+**CACHE_NAME:** v55 → v56.
+
+### What changed
+
+- **Ab program:** Mon kneeling cable crunch (backpack crunch without a machine) 4×10-15 · Wed reverse crunch → hanging knee raise 3×10-12 (replaces the hanging raise row) · Fri backpack loaded crunch + carries · Sat hollow hold + dead bug. Programme card on WORKOUTS explains progression and the body-fat reality of visible abs.
+- **Optional machine rows with bodyweight alternatives** (bodyweight-first rule kept): chest press / deficit push-ups (Mon), lat pulldown / heavy towel rows (Wed, pin logging + pull-up threshold note), leg extension / wall sit (Fri).
+- **Frog stand → crow practice** (Sat, 5×5-10s).
+- **Bonus block card** (optional, ≤15 min, logged in day notes).
+- **Steps:** target 5k+ on eating days (+~1k in training), 10k+ on fast days via the walk; LAW 05 updated.
+- **Supplement track:** checklist sub-items now creatine · D3 · multivitamin (morning if it contains ginseng) · magnesium *or* a calcium+magnesium combo (≤350mg Mg/day from supplements) · stim-free pump (training days). Weekly grid adds Ca+Mg combo, magnesium-at-bed on fast days, pump, and stimulant pre-workout (½ serving max, strength days only, before ~3PM, never after vomiting/short sleep/run days). Calcium ≤600mg supplemental and no extra zinc noted. Omega-3 moved to an optional note.
+- Shopping-list note: high-protein bars (~40g+) / whey allowed as emergency protein.
+- Push:pull 16:21 (0.76).
+
+### Verification
+
+`node --check` clean · plan conformance suite ALL CHECKS PASSED (verifier counts "machine" as pull via its "chin" pattern; manual count 16:21) · e2e 48/48 · 375px, no horizontal scroll.
+
+### Files changed
+
+`plans/cycle.js` · `app.html` (version) · `sw.js` (v56) · `index.html` · `WORKOUTS_LIBRARY.md` · `CLAUDE.md` · `README.md` · `UPDATE_LOG.md`.
+
+---
+
 ## Version 8.10.11 — 2026-11-06
 
 **Scope:** Patch (CYCLE NUTRITION content — owner request). No logic, SK key, settings or migration change.
