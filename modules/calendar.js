@@ -161,7 +161,7 @@ export function openDayModal(dateStr, dt) {
     ${isFast?'⚡ WATER FAST DAY — TAP TO UNSET':'+ SET AS WATER FAST DAY'}
   </button>`;
   html += `<button class="light-toggle ${isLight?'active':''}" onclick="toggleLightDay('${dateStr}')">
-    ${isLight?'🍽 LIGHT EATING DAY — TAP TO UNSET':'+ SET AS LIGHT EATING DAY'}
+    ${isLight?'🍽 '+(plan.lightDayName||'LIGHT EATING DAY')+' — TAP TO UNSET':'+ SET AS '+(plan.lightDayName||'LIGHT EATING DAY')}
   </button>`;
 
   if(isFast) html+=`<div class="fast-protocol-box"><div class="fast-protocol-title">⚡ FAST PROTOCOL</div>
@@ -173,7 +173,9 @@ export function openDayModal(dateStr, dt) {
     html += renderDayModalFastEditor(dateStr);
   }
 
-  if(isLight) html+=`<div class="light-protocol-box"><div class="light-protocol-title">🍽 LIGHT EATING PROTOCOL</div>
+  if(isLight && plan.lightDayProtocol) html+=`<div class="light-protocol-box"><div class="light-protocol-title">🍽 ${plan.lightDayName||'LIGHT EATING'} PROTOCOL</div>
+    <div class="light-protocol-body">${plan.lightDayProtocol}</div></div>`;
+  else if(isLight) html+=`<div class="light-protocol-box"><div class="light-protocol-title">🍽 LIGHT EATING PROTOCOL</div>
     <div class="light-protocol-body">Low-cal, easy digestion day. Protein-focused · small portions · no heavy carbs or junk · hydrate well · give the gut a rest<br><strong style="color:var(--light)">Goal:</strong> recovery and digestive reset while maintaining nutrition</div></div>`;
 
   if(isFuture) {

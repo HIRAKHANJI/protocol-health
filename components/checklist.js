@@ -34,13 +34,13 @@ export function renderTodayChecklist() {
       let timeLabel = '';
       if(item.group==='EATING') timeLabel = cal + ' cal' + (ew ? ' · ' + ew : (lmt ? ' · by ' + lmt : ''));
       else if(item.group==='FAST') timeLabel = 'Zero food protocol';
-      else if(item.group==='LIGHT') timeLabel = 'Light eating protocol';
+      else if(item.group==='LIGHT') timeLabel = plan.lightDayName ? Math.round((s.tdee || 2600) * (typeof getLightDayFraction === 'function' ? getLightDayFraction(plan) : 0.6)) + ' cal · lean protein + veg' : 'Light eating protocol';
       else if(item.group==='MORNING') timeLabel = wt ? 'From ' + wt : 'Morning';
       else if(item.group==='EVENING') timeLabel = est ? 'From ' + est : 'Evening';
       else if(item.group==='NIGHT') timeLabel = 'Before sleep';
       else if(item.group==='SUPPLEMENTS') timeLabel = dayType === 'fast' ? 'Fast day stack' : 'Eating day stack';
       const foodStyle = (item.group==='EATING' && plan.foodGroupBg) ? ` style="background:${plan.foodGroupBg};color:${plan.foodGroupColor}"` : '';
-      html += `<div class="checklist-group"${groupId}><div class="group-header"><span class="group-tag ${tagColor}"${foodStyle}>${item.group==='EATING' ? (plan.foodGroupLabel||'EATING') : item.group}</span><span class="group-time">${timeLabel}</span></div>`;
+      html += `<div class="checklist-group"${groupId}><div class="group-header"><span class="group-tag ${tagColor}"${foodStyle}>${item.group==='EATING' ? (plan.foodGroupLabel||'EATING') : (item.group==='LIGHT' && plan.lightDayName ? plan.lightDayName : item.group)}</span><span class="group-time">${timeLabel}</span></div>`;
     }
     // Inject day-specific sub-text for morning/evening/stretch items
     let sub = item.sub;
