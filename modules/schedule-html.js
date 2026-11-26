@@ -41,7 +41,7 @@ export function downloadScheduleHTML() {
     const dayName = dayNames[dow];
     const isFast = fastDow.includes(dow);
     const isLight = lightDow.includes(dow);
-    const dayType = isFast ? 'WATER FAST' : isLight ? 'LIGHT EATING' : 'EATING DAY';
+    const dayType = isFast ? 'WATER FAST' : isLight ? (plan.lightDayName || 'LIGHT EATING') : 'EATING DAY';
     const dayColor = isFast ? '#b388ff' : isLight ? '#f5a623' : '#c8f542';
     const icon = (plan.weekIcons && plan.weekIcons[dow]) || '';
 

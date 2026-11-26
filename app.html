@@ -1863,8 +1863,8 @@ const SK = {
 // Minor (+0.1.0): new feature, meaningful UI change, or 4+ bug fixes. Popup shown.
 // Major (+1.0.0): new plan, core system rework, new tab. Popup shown.
 // CACHE_NAME in sw.js still bumps on every deploy independently.
-const APP_VERSION = '8.10.12';
-const APP_VERSION_MSG = 'CYCLE update: ab program (Mon/Wed/Fri/Sat, progressive), optional machine options with pin logging (lat pulldown, chest press, leg extension), frog stand practice, a bonus block for extra work, 5k+ step target, and a supplement track with calcium+magnesium combo, pump pre-workout and stimulant pre-workout rules.';
+const APP_VERSION = '8.10.13';
+const APP_VERSION_MSG = 'CYCLE max recomp: Thursday becomes a ~750-cal protein day (Sunday stays the fast), protein target 1.7 g/kg (1.9 preferred) over three meals, 11k steps, a 45-60 min session formula with weekly load increases, a Saturday sprint finisher, and a no-stimulants-near-bed rule.';
 // Expose to window so migrations/runner.js (ES module) can read it for auto-backup metadata.
 window.APP_VERSION = APP_VERSION;
 
@@ -1909,7 +1909,8 @@ function getCountableWorkoutRows(dateStr) {
   if (!plan || typeof plan.workoutContent !== 'function') return null;
   const dow = DAYS_SHORT[strToDate(dateStr).getDay()];
   // v8.10.10: fast-day pattern in the key — CYCLE's Thursday card changes with its mode.
-  const key = (plan.name || '') + '|' + dow + '|' + (plan.fastDaysDow || []).join(',');
+  // v8.10.13: light-day pattern too — CYCLE's Thursday protein day is a light day.
+  const key = (plan.name || '') + '|' + dow + '|' + (plan.fastDaysDow || []).join(',') + '|' + (plan.lightDaysDow || []).join(',');
   if (Object.prototype.hasOwnProperty.call(_countableRowsCache, key)) return _countableRowsCache[key];
   let count = 0;
   try {
@@ -2177,7 +2178,10 @@ function computeMacros(dateStr) {
 
   // Determine signal and base split (priority order)
   let proteinPct, carbsPct, fatPct, signal;
-  if(isRestDay) {
+  if(lightDay && splits.light) {
+    // v8.10.13: plan-declared light-day split (CYCLE protein day = mostly protein).
+    [proteinPct, carbsPct, fatPct] = splits.light; signal = 'light';
+  } else if(isRestDay) {
     [proteinPct, carbsPct, fatPct] = splits.rest; signal = 'rest';
   } else if(isTomorrowFast) {
     [proteinPct, carbsPct, fatPct] = splits.preFast; signal = 'pre-fast';
@@ -2212,7 +2216,12 @@ function computeMacros(dateStr) {
 
   // Enforce biological floors
   const warnings = [];
-  if(!isFeasible) {
+  // v8.10.13: a plan-declared light-day split is exact by design (CYCLE's
+  // ~750-cal protein day is mostly protein, once a week) — skip the daily floors.
+  const _planLightSplit = lightDay && !!splits.light;
+  if(_planLightSplit) {
+    // no floor enforcement
+  } else if(!isFeasible) {
     proteinG = proteinFloor;
     fatG     = fatFloor;
     carbsG   = Math.max(0, Math.round((cal - proteinFloorCal - fatFloorCal) / 4));
@@ -2231,13 +2240,13 @@ function computeMacros(dateStr) {
       warnings.push('Fat floor enforced — 20g minimum for hormonal function.');
     }
   }
-  if(carbsG < 30 && !isRestDay) {
+  if(carbsG < 30 && !isRestDay && !_planLightSplit) {
     warnings.push('Carbs very low (' + carbsG + 'g) — ensure electrolytes and 3.5L+ water.');
   }
 
   if(lightDay) {
     signal = 'light';
-    warnings.unshift('Light eating day — macros calculated at ' + cal + ' cal (~60% of TDEE).');
+    warnings.unshift((plan.lightDayName ? plan.lightDayName.charAt(0) + plan.lightDayName.slice(1).toLowerCase() : 'Light eating day') + ' — macros calculated at ' + cal + ' cal (~' + Math.round(getLightDayFraction(plan) * 100) + '% of TDEE).');
   }
 
   return { cal, proteinG, carbsG, fatG, proteinPct, carbsPct, fatPct, warnings, signal, isFastDay:false, isFeasible };
@@ -3075,6 +3084,13 @@ function updateFastUI() {
   const dayType = getDayType(today);
   document.getElementById('fastBanner').classList.toggle('visible', dayType === 'fast');
   document.getElementById('lightBanner').classList.toggle('visible', dayType === 'light');
+  // v8.10.13: a plan may name its light day (CYCLE: PROTEIN DAY) and supply banner copy.
+  const _lp = getActivePlan();
+  const _lb = (_lp && _lp.lightDayBanner) || null;
+  const _lbt = document.querySelector('#lightBanner .light-banner-title');
+  const _lbs = document.querySelector('#lightBanner .light-banner-sub');
+  if (_lbt && !_lbt.dataset.def) { _lbt.dataset.def = _lbt.innerHTML; _lbs.dataset.def = _lbs.innerHTML; }
+  if (_lbt) { _lbt.innerHTML = _lb ? _lb.title : _lbt.dataset.def; _lbs.innerHTML = _lb ? _lb.sub : _lbs.dataset.def; }
   renderTodayChecklist();
   // Phase C: render the START/STOP/EDIT controls inside the fast banner.
   if (typeof renderTodayFastUI === 'function') renderTodayFastUI();

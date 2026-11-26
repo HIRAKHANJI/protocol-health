@@ -4,6 +4,32 @@ All version history for the app. Each entry records version number, date, scope,
 
 ---
 
+## Version 8.10.13 — 2026-11-26
+
+**Scope:** Patch (CYCLE max-recomp update — owner-approved after a 3,000-run simulation review; stays on 8.10.x because 9.0.0 is reserved for the Workout Engine). Small generic light-day hooks in `app.html`, `modules/calendar.js`, `components/checklist.js`, `modules/schedule-html.js`. No SK key, settings or migration change.
+**Banner:** none (patch). `APP_VERSION_MSG` updated for the record.
+**CACHE_NAME:** v56 → v57.
+
+### What changed
+
+- **Thursday PROTEIN DAY replaces the GLIDE Thursday water fast.** Stored as a light day (`lightDaysDow` getter → `[4]` in GLIDE), ~750 cal of lean protein + veg in three small meals (~135P/10F/28C), walk 60-90 min, no strength session. `lightDayCalFraction` getter = 750 / TDEE. Fasts: GLIDE Sun · BAND Sun · BELOW none. Simulation (3,000 runs, Alpert 2005 fat-release ceiling): ~0.3kg less fat over 5 weeks than two water fasts, about double the lean-mass gain.
+- **Protein target 1.7 g/kg, 1.9 preferred** (of target weight in GLIDE) — `proteinFloorMultiplier` 1.6 → 1.7; checklist item shows both numbers. Three protein meals inside the window (new `f7` midday meal; `f6`/`f3` labels carry ~55g protein examples with full cal + P/F/C). `macroSplit` base 40/32/28; `macroSplit.light` 72/16/12.
+- **NUTRITION:** THE THREE PROTEIN MEALS card (sample day ~1,420 cal · 176P/43F/74C), protein-per-100-cal buying list, Thursday protein-day card, PROTEIN DAY ACTIVE intake card, second sample day with macros, whey card with Longland 2016 evidence, supplement grid marks protein days (P) and the stimulant rule.
+- **WORKOUTS:** SESSION FORMULA card (45-60 min; 1-3 reps in reserve; add load when every set hits the top of the range), Saturday sprint finisher (8 × 20s / 40s; impact-free options before ramp week 4 or above 100kg), Cossack-squat sciatic swap note on the squat track, Thursday protein-day + walk card (0 countable rows).
+- **Steps 11k+** (12k+ on fast/protein days; LAW 05 notes ~14k as the useful ceiling). **Sleep item + LAW 07:** no stimulant pre-workout within ~8h of bed (Nedeltcheva 2010). LAW 03/04/06 updated (protein day, no make-up fasts after a slip, vomiting after meals → see a doctor).
+- **Generic light-day hooks (all optional, other plans unchanged):** `plan.lightDayName`, `plan.lightDayBanner`, `plan.lightDayProtocol`, `macroSplit.light` (skips the daily protein/fat floors on that day); light-day macro note shows the real % of TDEE instead of a hardcoded 60%; `getCountableWorkoutRows` cache key includes `lightDaysDow`; `activityByDayType.lightDay` 1.45 for CYCLE.
+- Existing CYCLE users with Thursday fasts already on the calendar: REMOVE + re-add the schedule (or tap the days) to switch them to protein days — stated in RULES → AUTOPILOT.
+
+### Verification
+
+`node --check` clean · e2e suite (updated for the new pattern) ALL CHECKS PASSED — incl. GLIDE Sun fast + Thu protein day, auto-set, 750-cal protein-day macros 135P/10F/30C, PROTEIN DAY banner/tag/modal, 0 countable rows on Thursday, BAND Thursday run + skill, maintenance light days unchanged · push:pull 13:27 (verifier) · no page errors.
+
+### Files changed
+
+`plans/cycle.js` · `app.html` · `modules/calendar.js` · `components/checklist.js` · `modules/schedule-html.js` · `sw.js` (v57) · `index.html` · `WORKOUTS_LIBRARY.md` · `CLAUDE.md` · `README.md` · `UPDATE_LOG.md`.
+
+---
+
 ## Version 8.10.12 — 2026-11-21
 
 **Scope:** Patch (CYCLE content — owner-approved plan update). No logic, SK key, settings or migration change.

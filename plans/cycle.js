@@ -20,8 +20,23 @@
 //   • Run ramp keyed to the week number since the plan start date, with an
 //     open-ended progression after week 12.
 // Training week: Mon PUSH · Tue RUN + spine armor · Wed PULL ·
-// Thu FAST + walk (GLIDE) or RUN 2 + skill (BAND/BELOW) ·
+// Thu PROTEIN DAY + walk (GLIDE) or RUN 2 + skill (BAND/BELOW) ·
 // Fri LEGS + GLUTES + loaded core · Sat SKILL + SPEED + CONDITIONING · Sun FAST + walk.
+//
+// v8.10.13 — max recomp:
+//   • GLIDE's Thursday water fast becomes a PROTEIN DAY (light day, ~750 cal,
+//     lean protein + veg only). Same week-scale fat loss within ~0.1kg/week,
+//     but no protein-free day mid-week, so more muscle is kept and built
+//     (Longland 2016: high protein in a deep deficit + hard training).
+//     Fasts: GLIDE Sun · BAND Sun · BELOW none.
+//   • Protein target 1.7 g/kg (of TARGET weight in GLIDE), 1.9 g/kg preferred,
+//     across three protein meals inside the window.
+//   • 11k steps (12k+ on the walk days), 45-60 min session formula with
+//     1-3 reps in reserve + weekly load increases, Saturday sprint finisher,
+//     no stimulant pre-workout within ~8h of bed.
+
+// Calories on a GLIDE protein day.
+const PROTEIN_DAY_CAL = 750;
 
 function _cycleState() {
   const s = (typeof getSettings === 'function') ? getSettings() : {};
@@ -38,12 +53,28 @@ function _cycleState() {
   return { s, w, t, tdee, mode, fmt };
 }
 
-// Fast-day weekdays for the current mode (0 = Sun, 4 = Thu).
+// Fast-day weekdays for the current mode (0 = Sun).
 function _fastDow() {
   const { mode } = _cycleState();
-  if (mode === 'glide') return [0, 4];
   if (mode === 'below') return [];
   return [0];
+}
+
+// Protein-day (light day) weekdays: Thursday while in GLIDE.
+function _lightDow() {
+  const { mode } = _cycleState();
+  return mode === 'glide' ? [4] : [];
+}
+
+// Daily protein: target 1.7 g/kg, preferred 1.9 g/kg — of TARGET weight in
+// GLIDE (protein needs follow lean mass, not stored fat), else current weight.
+// ≈ 2.1-2.4 g/kg of lean mass for a ~25-30% body-fat cutter (Helms 2014;
+// Longland 2016 used 2.4 g/kg bodyweight).
+function _protein() {
+  const { w, t, mode } = _cycleState();
+  const base = (mode === 'glide' && t) ? t : w;
+  if (!base) return null;
+  return { floor: Math.round(base * 1.7), pref: Math.round(base * 1.9), base, onTarget: mode === 'glide' && !!t };
 }
 
 // Daily water targets in litres, from bodyweight (~33 ml/kg — in line with
@@ -79,12 +110,13 @@ function _weekMath() {
   const cal = s.calories || null;
   if (!tdee || !cal) return null;
   const fasts = _fastDow().length;
-  const eat = 7 - fasts;
-  // Fast days burn a little less (no training session) — ~95% of TDEE.
-  const weekly = eat * (tdee - cal) + fasts * Math.round(tdee * 0.95);
+  const prot = _lightDow().length;
+  const eat = 7 - fasts - prot;
+  // Fast and protein days burn a little less (no training session) — ~95% of TDEE.
+  const weekly = eat * (tdee - cal) + fasts * Math.round(tdee * 0.95) + prot * Math.max(0, Math.round(tdee * 0.95) - PROTEIN_DAY_CAL);
   const kg = weekly / 7700;
   const pct = w ? (kg / w) * 100 : null;
-  return { cal, tdee, fasts, eat, weekly, kg, pct };
+  return { cal, tdee, fasts, prot, eat, weekly, kg, pct };
 }
 
 // A compact food/drink list card. rows: [name, detail, cal, protein, fastOk]
@@ -130,62 +162,71 @@ export const cycle = {
     badge: 'CYCLE',
     badgeClass: '',
     descClass: '',
-    subtitle: 'Seasons recomp. Bodyweight-first. 9AM–4PM, two meals. Fasts follow your mode. Waist over scale.',
+    subtitle: 'Seasons recomp. Bodyweight-first. 9AM–4PM, three protein meals. Sunday fast + Thursday protein day. Waist over scale.',
     bannerColor: '#82e0aa',
     bannerBg: 'rgba(130,224,170,0.07)',
     bannerBorder: 'rgba(130,224,170,0.35)',
-    lightDaysPerWeek: 0,
-    lightDaysDow: [],
-    // [protein%, carbs%, fat%] — the protein floor below is the real constraint.
-    macroSplit: { base:[30,42,28], rest:[30,42,28], preFast:[30,42,28], stall:[30,42,28], satiety:[30,42,28] },
-    // 1.6 g/kg (ISSN Protein & Exercise; Morton 2018). While well above target
-    // the floor is 1.6 g/kg of TARGET weight — protein needs follow lean mass,
-    // not stored fat — expressed as a multiplier of current weight here.
+    // v8.10.13: GLIDE Thursday = PROTEIN DAY, stored as a light day.
+    get lightDaysDow() { return _lightDow(); },
+    get lightDaysPerWeek() { return _lightDow().length; },
+    // ~750 cal as a fraction of the user's TDEE (read at call time).
+    get lightDayCalFraction() {
+      const s = (typeof getSettings === 'function') ? getSettings() : {};
+      const tdee = s.tdee || 2600;
+      return Math.max(0.15, Math.min(0.5, Math.round(PROTEIN_DAY_CAL / tdee * 100) / 100));
+    },
+    lightDayName: 'PROTEIN DAY',
+    lightDayBanner: { title: '🍗 PROTEIN DAY', sub: '~750 cal · lean protein + veg only · 3 small meals inside the window<br>Walk 60-90 min · no strength session · water + a pinch of salt' },
+    lightDayProtocol: 'About 750 cal of lean protein + vegetables: e.g. Greek yogurt + whey · 200g chicken breast + veg · egg whites + veg (~130-140g protein). No bread, rice, oil, sauces or sweets. Walk 60-90 min, no strength session.',
+    // [protein%, carbs%, fat%] — the protein target below is the real constraint.
+    macroSplit: { base:[40,32,28], rest:[40,32,28], preFast:[40,32,28], stall:[40,32,28], satiety:[40,32,28], light:[72,16,12] },
+    // v8.10.13: 1.7 g/kg (1.9 preferred) — of TARGET weight while in GLIDE,
+    // expressed as a multiplier of current weight here. See _protein().
     get proteinFloorMultiplier() {
       const { w, t, mode } = _cycleState();
-      if (mode === 'glide' && w && t) return Math.round(1.6 * t / w * 100) / 100;
-      return 1.6;
+      if (mode === 'glide' && w && t) return Math.round(1.7 * t / w * 100) / 100;
+      return 1.7;
     },
     caloriesMode: 'floor',
     minCalories: 1400,
-    activityByDayType: { eatDay: 1.65, fastDay: 1.35 },
+    activityByDayType: { eatDay: 1.65, fastDay: 1.35, lightDay: 1.45 },
     // Only the session item is derived from WORKOUTS-tab progress.
     autoWorkoutIds: ['e2'],
 
     defaultTimes: { wakeTime:'06:30', eatingWindowStart:'09:00', lastMealTime:'16:00', eveningSessionTime:'17:00' },
 
     get weekIcons() {
-      const thu = _fastDow().includes(4);
-      return {0:'🔥',1:'💪',2:'🏃',3:'💪',4: thu ? '🔥' : '🏃',5:'🦵',6:'🤸'};
+      const thu = _lightDow().includes(4);
+      return {0:'🔥',1:'💪',2:'🏃',3:'💪',4: thu ? '🍗' : '🏃',5:'🦵',6:'🤸'};
     },
 
     get morningSub() {
-      const thu = _fastDow().includes(4);
+      const thu = _lightDow().includes(4);
       const { open } = _times();
       return {
         0:'SUNDAY — FAST day. Salted water + creatine on waking. Weigh + log.',
-        1:'MONDAY — Weigh + log. Meal 1 at ' + open + ' (+ D3 + multivitamin). Push session today.',
+        1:'MONDAY — Weigh + log (the morning-after-fast reading). Break the fast at ' + open + ' with a normal-size, protein-first meal 1 (+ D3 + multivitamin). Push session today.',
         2:'TUESDAY — Weigh + log. Run day — check this week’s RUN RAMP step.',
-        3:'WEDNESDAY — Weigh + log. Pull day.' + (thu ? ' Last meal by the kitchen close — tomorrow is a fast.' : ''),
-        4: thu ? 'THURSDAY — FAST day. Salted water + creatine on waking. Weigh + log.' : 'THURSDAY — Weigh + log. Run 2 + skill practice today.',
-        5:'FRIDAY — Weigh + log.' + (thu ? ' Break the fast at ' + open + ' with the planned meal — protein first.' : '') + ' Legs + glutes + loaded core today.',
+        3:'WEDNESDAY — Weigh + log. Pull day.',
+        4: thu ? 'THURSDAY — PROTEIN DAY. Weigh + log. ~750 cal of lean protein + veg, three small meals. Walk is the session.' : 'THURSDAY — Weigh + log. Run 2 + skill practice today.',
+        5:'FRIDAY — Weigh + log. Legs + glutes + loaded core today.',
         6:'SATURDAY — Weigh + WAIST TAPE (navel + love-handle line). Skill + speed session, then batch-cook.'
       };
     },
     get eveningSub() {
-      const thu = _fastDow().includes(4);
+      const thu = _lightDow().includes(4);
       return {
         0:'SUNDAY — Walk 60-90 min easy + 10 min mobility. Salted water. That’s the whole day.',
         1:'MONDAY — SESSION: PUSH. Push-up track, pike track, dips, planche leans, rows, side raises, plank + hollow.',
         2:'TUESDAY — RUN per the ramp (see WORKOUTS) + spine armor core block.',
         3:'WEDNESDAY — SESSION: PULL. Pull-ups or negatives 5×3-5 with long rests, rows, Y-T-W, W-raises, hanging raises, grip.',
-        4: thu ? 'THURSDAY — FAST: walk 60-90 min + 10 min mobility. No training — the walk IS the session.' : 'THURSDAY — RUN 2 (easy) + 15 min fresh skill: handstand, L-sit, crow.',
+        4: thu ? 'THURSDAY — PROTEIN DAY: walk 60-90 min + 10 min mobility. No strength session — the walk IS the session.' : 'THURSDAY — RUN 2 (easy) + 15 min fresh skill: handstand, L-sit, crow.',
         5:'FRIDAY — SESSION: LEGS + GLUTES + LOADED CORE. Squat track, Bulgarians, hip thrusts, sliding curls, RDLs, carries.',
         6:'SATURDAY — SESSION: SKILL + SPEED + CONDITIONING. Handstand/L-sit/crow · shadowbox · rope · dashes (week 4+).'
       };
     },
     get stretchSub() {
-      const thu = _fastDow().includes(4);
+      const thu = _lightDow().includes(4);
       return {
         0:'Mobility: hips, upper back, hamstrings + hip-flexor stretch (10 min).',
         1:'Doorframe chest + shoulder dislocates + wrists + hip-flexor stretch (8 min).',
@@ -200,10 +241,11 @@ export const cycle = {
     checklistNormal: [
       { id:'m1', group:'MORNING', label:'Wake: 500ml water + creatine 5g + weigh & log', sub:'The weekly AVERAGE is the number that counts — single days are noise.' },
       { id:'m2', group:'MORNING', label:'Stomach vacuums 3×20-30s', sub:'Empty stomach, exhale fully, navel to spine. Daily.' },
-      { id:'m4', group:'MORNING', label:'Steps: 5k+ across the day (+~1k in training)', sub:'Calls, errands, stairs. Fast days: the 60-90 min walk takes you past 10k. Every extra 1,000 steps a day ≈ 40-50 cal and spares muscle.' },
-      { id:'f6', group:'EATING', get label() { return 'MEAL 1 at ' + _times().open + ' — protein first + D3 + multivitamin'; }, sub:'e.g. egg shakshuka + pita + Greek yogurt. Opens the eating window.' },
-      { id:'f3', group:'EATING', label:'Last meal before 4PM', sub:'MEAL 2 — protein + rice/bread + veg (+ laban/yogurt). After this the kitchen is closed: water, black coffee, plain tea only.' },
-      { id:'f1', group:'EATING', label:'Protein floor hit (see NUTRITION for your number)', sub:'Split across the two meals. Anchor each one with a protein source first.' },
+      { id:'m4', group:'MORNING', label:'Steps: 11k+ across the day', sub:'20-min walk at lunch (~2.5k) + 30 min around the session (~3.5k) + daily life. Fast and protein days: the 60-90 min walk takes you past 12k. The safest extra burn — ~250-350 cal/day without costing muscle.' },
+      { id:'f6', group:'EATING', get label() { return 'MEAL 1 at ' + _times().open + ' — ~55g protein + D3 + multivitamin'; }, sub:'e.g. 300g nonfat Greek yogurt + 1 scoop whey + berries (~340 cal · 56P/2F/26C). Opens the eating window.' },
+      { id:'f7', group:'EATING', label:'MEAL 2 (midday) — ~55-65g protein', sub:'e.g. 200g chicken breast + 100g cooked rice + big salad + 1 tbsp olive oil (~620 cal · 67P/21F/36C). Most of the day’s carbs go in the meal before training.' },
+      { id:'f3', group:'EATING', get label() { return 'MEAL 3 by ' + _times().close + ' — ~40-55g protein, then the kitchen closes'; }, sub:'e.g. 120g salmon (or 150g chicken / lean beef) + 200g egg-white omelette with veg + 10g almonds (~460 cal · 53P/20F/12C). After this: water, black coffee, plain tea only.' },
+      { id:'f1', group:'EATING', get label() { const p = _protein(); return p ? 'Protein: ' + p.floor + 'g+ (' + p.pref + 'g preferred)' : 'Protein target hit (see NUTRITION for your number)'; }, sub:'Lean sources with ~20g protein per 100 cal: chicken breast, egg whites, whey, nonfat Greek yogurt, shrimp, white fish. Fat 40-50g (never under 40) · carbs fill the rest.' },
       { id:'f2', group:'EATING', label:'Stayed at today’s calorie ceiling (Settings)', sub:'Log meals in FOOD LOG — save your staples to the library once and they autocomplete.', type:'info' },
       { id:'f4', group:'EATING', get label() { return 'Water: ' + _water().eat + 'L today'; }, sub:'+0.5L per hour of training. Front-load it: most of it before the evening.', type:'water', get waterTarget() { return _water().eat; } },
       { id:'f5', group:'EATING', label:'No money-trap “diet foods” (bars, rice cakes, juices)', sub:'They cost several times more per gram of protein than eggs, chicken, laban, lentils and rice.' },
@@ -218,7 +260,28 @@ export const cycle = {
           { id:'s1_g', name:'Pump pre-workout (if you use one)', dose:'1 serving (½ on run days)', when:'30-45 min before training — stim-free', days:[1,2,3,5,6] }
         ]
       },
-      { id:'n2', group:'NIGHT', label:'Sleep 7-9h · bed at a consistent time', sub:'Short sleep in a deficit shifts the loss from fat toward muscle. 6h is the hard floor. Two wrecked nights in a row → next day is walk + core only.' }
+      { id:'n2', group:'NIGHT', label:'Sleep 7-9h · bed at a consistent time · no stimulant pre-workout within ~8h of bed', sub:'On the same diet, 5.5h vs 8.5h sleep cut fat loss by ~55% and raised muscle loss by ~60% (Nedeltcheva 2010). Evening session = stim-free pump only. Two wrecked nights in a row → next day is walk + core only.' }
+    ],
+    // v8.10.13: GLIDE Thursday PROTEIN DAY (stored as a light day).
+    checklistLight: [
+      { id:'pd1', group:'MORNING', label:'Wake: 500ml water + creatine 5g + weigh & log', sub:'Normal morning — this is a low-calorie eating day, not a fast.' },
+      { id:'pd2', group:'MORNING', label:'Stomach vacuums 3×20-30s', sub:'Empty stomach, exhale fully, navel to spine.' },
+      { id:'pd3', group:'MORNING', label:'Steps: 12k+ (the long walk gets you there)', sub:'Walk 60-90 min easy-brisk, split 2×40 if you like.' },
+      { id:'pd4', group:'LIGHT', get label() { return 'Meal 1 at ' + _times().open + ' — Greek yogurt + whey (+ D3 + multivitamin)'; }, sub:'200g nonfat Greek yogurt + 1 scoop whey (~230 cal · 45g protein).' },
+      { id:'pd5', group:'LIGHT', label:'Meal 2 — 200g chicken breast + vegetables', sub:'Grilled or air-fried, no oil or sauce; salad, cucumber, peppers, tomato (~370 cal · 64g protein).' },
+      { id:'pd6', group:'LIGHT', get label() { return 'Meal 3 by ' + _times().close + ' — egg whites or white fish + vegetables'; }, sub:'200g egg whites as an omelette, or 150g white fish / shrimp, with veg (~150 cal · 25-35g protein).' },
+      { id:'pd7', group:'LIGHT', label:'Stayed at ~750 cal — lean protein + veg only', sub:'No bread, rice, oil, sauces, sweets or snacks. Hungry: water, tea, cucumber. Day total ≈ 130-140g protein.', type:'info' },
+      { id:'pd8', group:'LIGHT', get label() { return 'Water: ' + _water().eat + 'L today'; }, sub:'A pinch of salt in one litre helps on low-food days.', type:'water', get waterTarget() { return _water().eat; } },
+      { id:'pd9', group:'EVENING', label:'Walk 60-90 min + 10 min mobility — no strength session', sub:'Recovery for Friday legs. Hips, upper back, hamstrings + hip-flexor stretch.' },
+      { id:'s1', group:'SUPPLEMENTS', label:'Supplements taken', sub:'Tap to expand',
+        subItems: [
+          { id:'s1_a', name:'Creatine monohydrate', dose:'5g', when:'On waking — every day' },
+          { id:'s1_d', name:'Vitamin D3', dose:'1,000-2,000 IU', when:'With meal 1. Stay under 4,000 IU/day' },
+          { id:'s1_e', name:'Basic multivitamin', dose:'1 tablet', when:'With meal 1' },
+          { id:'s1_b', name:'Magnesium — or a calcium + magnesium combo', dose:'≤350mg Mg/day from supplements', when:'Combo with meal 2, or magnesium capsule before bed. Not both' }
+        ]
+      },
+      { id:'n2', group:'NIGHT', label:'Sleep 7-9h · bed at a consistent time', sub:'Tomorrow is legs — the biggest session of the week.' }
     ],
     checklistFast: [
       { id:'wf1', group:'FAST', label:'Wake: 500ml salted water + creatine 5g + weigh & log', sub:'Creatine needs no food and doesn’t break the fast.' },
@@ -240,20 +303,20 @@ export const cycle = {
       const { w, t, tdee, mode, fmt, s } = _cycleState();
       const _ds = todayStr();
       const _fd = _fastDow();
-      const _thuFast = _fd.includes(4);
+      const _thuProt = _lightDow().includes(4);
       const _wm = _weekMath();
       const _wk = _planWeek();
       const _ri = _rampIndex(_wk);
       const _step = _RAMP[_ri];
-      const _fastNames = _fd.length ? _fd.map(d => _DAYN[d]).join(' + ') : 'none';
+      const _fastNames = (_fd.length ? _fd.map(d => _DAYN[d]).join(' + ') : 'none') + (_thuProt ? ' · protein day: Thu' : '');
       const _mathTxt = _wm ? ' At your numbers (' + _wm.cal + ' cal on ' + _wm.eat + ' eating days, TDEE ' + _wm.tdee + '): ≈ ' + Math.round(_wm.weekly).toLocaleString() + ' cal/week deficit ≈ ' + fmt(_wm.kg) + 'kg/week.' : '';
       let _mode;
       if (!w || !t) {
         _mode = { label:'SET YOUR NUMBERS', text:'Log a morning weight (TRACK tab) and set a target weight, calorie ceiling and TDEE in Settings — CYCLE then picks your mode, fast days and targets.' };
       } else if (mode === 'glide') {
-        _mode = { label:'MODE: GLIDE — ' + fmt(w - t) + 'KG ABOVE TARGET', text:'Fasts: Thu + Sun. Eating days at your Settings ceiling' + (s.calories ? ' (' + s.calories + ' cal)' : '') + ', two meals inside the window.' + _mathTxt + ' When you’re within 2kg of ' + fmt(t) + 'kg the plan switches itself to BAND (Sunday fast only).' };
+        _mode = { label:'MODE: GLIDE — ' + fmt(w - t) + 'KG ABOVE TARGET', text:'Sunday water fast + Thursday PROTEIN DAY (~' + PROTEIN_DAY_CAL + ' cal, lean protein + veg). Eating days at your Settings ceiling' + (s.calories ? ' (' + s.calories + ' cal)' : '') + ', three protein meals inside the window.' + _mathTxt + ' When you’re within 2kg of ' + fmt(t) + 'kg the plan switches itself to BAND (Thursday becomes a normal run + skill day).' };
       } else if (mode === 'band') {
-        _mode = { label:'MODE: BAND — HOLDING ' + fmt(t - 2) + '–' + fmt(t + 2) + 'KG', text:'Recomp territory: Sunday fast only, eat around maintenance (' + (tdee ? tdee + ' cal' : 'your TDEE') + ') and let training reshape you. Above ' + fmt(t + 2) + 'kg the plan returns to GLIDE (Thursday fast comes back); below ' + fmt(t - 2) + 'kg it goes to BELOW (+200 cal, no fasts).' };
+        _mode = { label:'MODE: BAND — HOLDING ' + fmt(t - 2) + '–' + fmt(t + 2) + 'KG', text:'Recomp territory: Sunday fast only, eat around maintenance (' + (tdee ? tdee + ' cal' : 'your TDEE') + ') and let training reshape you. Above ' + fmt(t + 2) + 'kg the plan returns to GLIDE (Thursday protein day comes back); below ' + fmt(t - 2) + 'kg it goes to BELOW (+200 cal, no fasts).' };
       } else {
         _mode = { label:'MODE: BELOW BAND — ' + fmt(t - w) + 'KG UNDER TARGET', text:'No fasts. Eat a little above maintenance (' + (tdee ? (tdee + 200) + ' cal' : 'TDEE + 200') + ') until you’re back inside ' + fmt(t - 2) + '–' + fmt(t + 2) + 'kg, or lower your target in Settings.' };
       }
@@ -262,16 +325,20 @@ export const cycle = {
         0: { fast:true, label:'SUNDAY — FAST + WALK', what:'No food. Walk 60-90 min easy + 10 min mobility. Salted water all day.' },
         1: { label:'MONDAY — PUSH', what:'Push-up track, pike track, dips, planche leans, rows, side raises, plank + hollow.' },
         2: { label:'TUESDAY — RUN + SPINE ARMOR', what:'This week: ' + _step.run + ' Then dead bugs, side planks, bird dogs, bridges.' },
-        3: { label:'WEDNESDAY — PULL (THE STRENGTH CENTERPIECE)', what:'5×3-5 pull-ups or negatives with 2-3 min rests, then rows, Y-T-W, W-raises, hanging raises, grip.' + (_thuFast ? ' Train before meal 2 if your day allows — tomorrow is a fast.' : '') },
-        4: _thuFast ? { fast:true, label:'THURSDAY — FAST + WALK', what:'No food. Walk 60-90 min easy + 10 min mobility. No training.' } : { label:'THURSDAY — RUN 2 + SKILL', what:'Easy 3-5K + 15 min of fresh handstand/L-sit/crow practice.' },
+        3: { label:'WEDNESDAY — PULL (THE STRENGTH CENTERPIECE)', what:'5×3-5 pull-ups or negatives with 2-3 min rests, then rows, Y-T-W, W-raises, hanging raises, grip.' },
+        4: _thuProt ? { rest:true, label:'THURSDAY — PROTEIN DAY + WALK', what:'~' + PROTEIN_DAY_CAL + ' cal of lean protein + veg in three small meals. Walk 60-90 min easy + 10 min mobility. No strength session.' } : { label:'THURSDAY — RUN 2 + SKILL', what:'Easy 3-5K + 15 min of fresh handstand/L-sit/crow practice.' },
         5: { label:'FRIDAY — LEGS + GLUTES + LOADED CORE', what:'Squat track, Bulgarians, single-leg hip thrusts, sliding curls, RDLs, calves, loaded crunch, carries.' },
-        6: { label:'SATURDAY — SKILL + SPEED + CONDITIONING', what:'Handstand/L-sit/crow → shadowbox → rope' + (_ri >= 3 ? ' → dashes (' + _step.dash + ')' : '') + '. Then batch-cook the week. Waist tape this morning.' }
+        6: { label:'SATURDAY — SKILL + SPEED + CONDITIONING', what:'Handstand/L-sit/crow → shadowbox → rope' + (_ri >= 3 ? ' → dashes (' + _step.dash + ')' : '') + ' → sprint finisher 8 × 20s hard / 40s easy. Then batch-cook the week. Waist tape this morning.' }
       };
       const _dowNow = new Date().getDay();
       let _t = _todayByDow[_dowNow];
-      if (typeof getDayType === 'function' && getDayType(_ds) === 'fast' && !_t.fast) {
+      const _dtNow = (typeof getDayType === 'function') ? getDayType(_ds) : 'normal';
+      if (_dtNow === 'fast' && !_t.fast) {
         _t = { label: _t.label + ' · FASTED TODAY',
                what: 'This date is marked as a fast. Swap the session for a 60-90 min walk, or cap it at 75-80% with 2 reps in the tank. Salted water. Original slot: ' + _t.what };
+      } else if (_dtNow === 'light' && !_t.rest && !_t.fast) {
+        _t = { label: _t.label + ' · PROTEIN DAY TODAY',
+               what: 'This date is marked as a protein day (~' + PROTEIN_DAY_CAL + ' cal). Keep the session short and 2 reps in the tank, or swap it for a 60-90 min walk. Original slot: ' + _t.what };
       }
       const _wk1 = _wk === 1 ? '<div class="rule-sub" style="color:var(--accent2)">WEEK 1 = 70%: 3 sets wherever it says 4, one level easier on every track. No fasts this week if you’re returning from a break or illness (see RULES).</div>' : '';
       return `
@@ -287,6 +354,12 @@ export const cycle = {
         <div class="rule-num">${_mode.label}</div>
         <div class="rule-text">${_mode.text}</div>
         <div class="rule-sub">Fast days this mode: ${_fastNames}. Design law: every exercise below is zero-equipment by default — the only "weight" is a backpack with books or bottles. Load = a harder variation, not a heavier weight. DBs, machines and bars are UPGRADES, never requirements.</div>
+      </div>
+
+      <div class="rule-card" style="border-left-color:var(--accent)">
+        <div class="rule-num">THE SESSION FORMULA — 45-60 MIN, EVERY TRAINING DAY</div>
+        <div class="rule-text">1 · Warm-up — 5 min<br>2 · Skill — 5-8 min, while fresh (frog stand, tuck lever, handstand)<br>3 · Main work — 30-35 min: the day’s 4 main exercises × 3-4 sets, every set stopped <strong>1-3 reps before failure</strong><br>4 · Ab block — 6-8 min<br>Progress rule: when every set hits the top of its rep range, add load next session — one more pin/plate, a heavier backpack, a harder variation or one more rep.</div>
+        <div class="rule-sub">25 minutes keeps the habit; 45-60 minutes of hard sets is what builds muscle in a deficit. Strength numbers going up while the scale goes down = muscle being built. Log pins, reps and hold seconds in the day notes (MONTHS → tap the day).</div>
       </div>
 
       <div class="section-title">THE WEEK <span>— DECISIONS MADE ONCE</span></div>
@@ -329,11 +402,11 @@ export const cycle = {
         'WED'
       )}
 
-      ${_thuFast ? workoutCard('THURSDAY — FAST + WALK','REST FROM TRAINING · THE WALK IS THE SESSION',
+      ${_thuProt ? workoutCard('THURSDAY — PROTEIN DAY + WALK','REST FROM TRAINING · THE WALK IS THE SESSION · ~' + PROTEIN_DAY_CAL + ' CAL',
         exRow('Walk','60-90 min easy-brisk, split 2×40 if you like. No running.','60-90 min')+
         exRow('Mobility','Hips, upper back, hamstrings + hip-flexor stretch.','10 min')+
-        exRow('Stomach vacuums','Optional — easy on an empty stomach.','3×20s')+
-        exRow('Salted water','Pinch of salt per litre, ' + _water().fast + 'L across the day.','all day'),
+        exRow('Stomach vacuums','Optional.','3×20s')+
+        exRow('Protein meals','Yogurt + whey · 200g chicken + veg · egg whites or white fish + veg — about 130-140g protein in ~' + PROTEIN_DAY_CAL + ' cal.','3 meals'),
         stretchRow('Nothing aggressive — recovery day','','—'),
         'THU'
       ) : workoutCard('THURSDAY — RUN 2 + SKILL','EASY RUN + SKILL WHILE FRESH',
@@ -346,7 +419,7 @@ export const cycle = {
       )}
 
       ${workoutCard('FRIDAY — LEGS + GLUTES + LOADED CORE','THE BACKPACK DAY · ~65 MIN',
-        exRowWithLevel('squat','Squat → pistol progression track','MAIN LIFT — split squat → shrimp → pistol; hardest clean variation, 1-2 reps in reserve. Backpack optional.','4×6-10',true)+
+        exRowWithLevel('squat','Squat → pistol progression track','MAIN LIFT — split squat → shrimp → pistol; hardest clean variation, 1-2 reps in reserve. Backpack optional. Any tingling, numbness or pain down a leg (sciatic nerve) on Cossack squats → stay on Bulgarian split squats and load them with the backpack instead.','4×6-10',true)+
         exRow('Bulgarian split squats','Rear foot on a chair, bag hugged to the chest once bodyweight passes 12-15 reps, slow lowering.','3×8-12/leg')+
         exRow('Single-leg hip thrusts','Shoulders on the sofa, backpack on the hips, drive up, squeeze 2s. The main glute-shape move.','3×10-15/leg')+
         exRow('Sliding leg curls','Towel or socks under the heels, bridge, slide out slow, drag back.','3×8-12')+
@@ -367,6 +440,7 @@ export const cycle = {
         exRow('Shadowbox','Fast hands, real footwork, 1 min rest between rounds.','5×2 min')+
         exRow('Jump rope','Light, quick contacts.' + (_heavy ? ' At 100kg+ use low hops or step-overs and keep it short; skip jump squats/burpees (WORKOUTS_LIBRARY §2.3).' : ''),'10×30s')+
         exRow('Dashes (from ramp week 4)','After the warm-up: ~60m at the ramp’s effort, walk back between each. Flat ground or grass. This week: ' + _step.dash + '.','6-10 × 60m')+
+        exRow('Sprint finisher','After the main work: 8 rounds of 20s hard / 40s easy. Before ramp week 4 or above 100kg: shadowbox flurries, fast high-knee marching or hill walks; flat-ground running sprints from week 4.','8 × 20s')+
         exRow('Ab block: hollow hold + dead bug','Lower back pressed down the whole time; arms overhead makes it harder.','3×20-30s + 2×10')+
         exRow('BATCH-COOK','Cook the week’s chicken + rice, portion, refrigerate/freeze.','~30 min'),
         stretchRow('Wrists + shoulders + gentle full-body flow','','10 min'),
@@ -414,15 +488,14 @@ export const cycle = {
         `<div style="border-left:3px solid var(--accent2);padding:6px 10px;margin-bottom:6px;border-radius:4px;background:var(--surface);font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--accent2);line-height:1.6">${w}</div>`
       ).join('') : '';
       const { w, t, mode, fmt } = _cycleState();
-      const _pfm = cycle.proteinFloorMultiplier || 1.6;
-      const _floorG = w ? Math.round(w * _pfm) : null;
-      const _floorTxt = !_floorG ? 'Log a weight to see your protein floor'
-        : (mode === 'glide' && t ? 'Protein floor: ~' + _floorG + 'g (1.6 g/kg × your ' + fmt(t) + 'kg target)' : 'Protein floor: ~' + _floorG + 'g (1.6 g/kg × your latest ' + fmt(w) + 'kg)');
+      const _p = _protein();
+      const _floorTxt = !_p ? 'Log a weight to see your protein target'
+        : 'Protein: <strong>' + _p.floor + 'g target · ' + _p.pref + 'g preferred</strong> (1.7 / 1.9 g/kg × your ' + (_p.onTarget ? fmt(t) + 'kg target' : 'latest ' + fmt(w) + 'kg') + ')';
       const { open, close } = _times();
       const _wt = _water();
       const _fd = _fastDow();
+      const _ld = _lightDow();
       const _wm = _weekMath();
-      const m1 = Math.round(cal * 0.45 / 10) * 10, m2 = cal - m1;
 
       const _supRows = [
         ['Creatine 5g', d => '✓'],
@@ -430,14 +503,15 @@ export const cycle = {
         ['D3 1-2k IU', d => _fd.includes(d) ? '—' : '✓'],
         ['Ca+Mg combo (opt)', d => _fd.includes(d) ? '—' : '✓'],
         ['Magnesium (bed)', d => _fd.includes(d) ? '✓' : '◐'],
-        ['Pump pre (opt)', d => (d === 0 || _fd.includes(d)) ? '—' : (d === 2 || d === 4) ? '½' : '✓'],
-        ['Stim pre (opt)', d => (d === 1 || d === 5) && !_fd.includes(d) ? '½' : '—'],
+        ['Pump pre (opt)', d => (d === 0 || _fd.includes(d) || _ld.includes(d)) ? '—' : (d === 2 || d === 4) ? '½' : '✓'],
+        ['Stim pre (opt)', d => (d === 1 || d === 5) && !_fd.includes(d) ? '½*' : '—'],
         ['Salt in water', d => _fd.includes(d) ? '✓' : '—']
       ];
       const _order = [1, 2, 3, 4, 5, 6, 0];
       const _cell = 'padding:3px 2px;text-align:center;border-bottom:1px solid var(--border)';
+      const _dayTag = d => _fd.includes(d) ? '·F' : _ld.includes(d) ? '·P' : '';
       const _supTable = '<table style="width:100%;border-collapse:collapse;font-family:\'DM Mono\',monospace;font-size:0.58rem;margin-top:6px">' +
-        '<tr><th style="' + _cell + ';text-align:left"></th>' + _order.map(d => '<th style="' + _cell + ';color:' + (_fd.includes(d) ? 'var(--fast)' : 'var(--muted)') + '">' + _DAYN[d].charAt(0) + (_fd.includes(d) ? '·F' : '') + '</th>').join('') + '</tr>' +
+        '<tr><th style="' + _cell + ';text-align:left"></th>' + _order.map(d => '<th style="' + _cell + ';color:' + (_fd.includes(d) ? 'var(--fast)' : _ld.includes(d) ? 'var(--light)' : 'var(--muted)') + '">' + _DAYN[d].charAt(0) + _dayTag(d) + '</th>').join('') + '</tr>' +
         _supRows.map(([n, f]) => '<tr><td style="' + _cell + ';text-align:left;white-space:nowrap">' + n + '</td>' + _order.map(d => '<td style="' + _cell + ';color:' + (f(d) === '—' ? 'var(--muted)' : 'var(--accent)') + '">' + f(d) + '</td>').join('') + '</tr>').join('') +
         '</table>';
 
@@ -445,7 +519,7 @@ export const cycle = {
       if (_wm) {
         const _risk = _wm.pct != null && _wm.pct > 1.2;
         _mathCard = '<div class="rule-card" style="border-left-color:' + (_risk ? 'var(--accent2)' : '#70c8ff') + '"><div class="rule-num">YOUR WEEK IN NUMBERS</div><div class="rule-text">' +
-          'This setup: ' + _wm.eat + ' eating days at ' + _wm.cal + ' + ' + _wm.fasts + ' fast day' + (_wm.fasts === 1 ? '' : 's') + ' vs TDEE ' + _wm.tdee + '<br>' +
+          'This setup: ' + _wm.eat + ' eating days at ' + _wm.cal + ' + ' + _wm.fasts + ' fast day' + (_wm.fasts === 1 ? '' : 's') + (_wm.prot ? ' + ' + _wm.prot + ' protein day at ~' + PROTEIN_DAY_CAL : '') + ' vs TDEE ' + _wm.tdee + '<br>' +
           '→ ≈ ' + Math.round(_wm.weekly).toLocaleString() + ' cal/week deficit ≈ <strong>' + fmt(_wm.kg) + 'kg/week</strong>' + (_wm.pct != null ? ' (' + fmt(_wm.pct) + '% of bodyweight)' : '') + '<br>' +
           'Eating at maintenance every day: 0 deficit → weight holds.</div>' +
           '<div class="rule-sub">' + (_risk ? 'Fast pace — muscle is only protected if the protein floor and all three strength days happen. Ease-off triggers are in RULES. ' : '') + 'Your TDEE falls as you get lighter, so the weekly loss slows over time. Weekly calibration (TRACK) replaces the estimate with your real burn after 2-3 weeks of logs.</div></div>';
@@ -453,7 +527,7 @@ export const cycle = {
 
       return `
       <div class="section-title">CYCLE <span>NUTRITION</span></div>
-      <p class="section-note">Two meals inside ${open}–${close}, one shopping list, no diet foods. Your ceiling and protein floor come from Settings and your latest logged weight.</p>
+      <p class="section-note">Three protein meals inside ${open}–${close}, one shopping list. Your ceiling and protein target come from Settings and your latest logged weight.</p>
 
       <div class="macro-grid">
         <div class="macro-box"><div class="macro-val" style="color:#82e0aa">${cal}</div><div class="macro-lbl">Day ceiling</div></div>
@@ -467,6 +541,10 @@ export const cycle = {
         const _dt = getDayType(todayStr());
         if(_dt === 'fast') return '<div class="rule-card" style="border-left-color:var(--fast)"><div class="rule-num">FAST DAY ACTIVE</div><div class="rule-text">No food until meal 1 tomorrow (' + open + '). Water, black coffee, plain tea · pinch of salt per litre · ' + _wt.fast + 'L today · creatine still happens.</div><div class="rule-sub">Break it with the planned meal — protein first, normal size. Never two fast days in a row.</div></div>';
         const _dc = getDayCalories(todayStr());
+        if(_dt === 'light') {
+          const _lr = PROTEIN_DAY_CAL - _dc.total;
+          return '<div class="rule-card" style="border-left-color:var(--light)"><div class="rule-num">PROTEIN DAY ACTIVE — ~' + PROTEIN_DAY_CAL + ' CAL</div><div class="rule-text">' + (_dc.hasData ? _dc.total + ' / ~' + PROTEIN_DAY_CAL + ' cal · ' + (_lr >= 0 ? _lr + ' left' : Math.abs(_lr) + ' over') : 'Nothing logged yet') + '</div><div class="rule-sub">' + open + ' 200g Greek yogurt + whey (45P) · midday 200g chicken + veg (64P) · by ' + close + ' egg whites or white fish + veg (25-35P). ≈ 135g protein · ~10g fat · ~28g carbs (from veg + yogurt).</div></div>';
+        }
         const _rem = cal - _dc.total;
         const _cls = !_dc.hasData ? 'var(--muted)' : _dc.total > cal ? 'var(--danger)' : (_rem <= 100 ? 'var(--accent2)' : 'var(--accent)');
         const _remTxt = !_dc.hasData ? 'No food logged yet — tap FOOD LOG on TODAY tab' : (_rem >= 0 ? _rem + ' cal remaining' : Math.abs(_rem) + ' cal OVER ceiling');
@@ -476,10 +554,22 @@ export const cycle = {
       })()}
 
       <div class="rule-card" style="border-left-color:#ff9966">
-        <div class="rule-num">THE TWO MEALS — ${open}–${close}</div>
-        <div class="rule-text">MEAL 1 · ${open} · ~${m1} cal — e.g. 4-egg shakshuka + 1 pita + a Greek yogurt (~48g protein). Take D3 + multivitamin here.<br>MEAL 2 · by ${close} · ~${m2} cal — e.g. 200g chicken breast + 150g cooked rice + salad + garlic-yogurt sauce + 500ml low-fat laban (~89g protein). Salmon night: 150g fillet instead of the chicken — ~30g less protein, so add 2 eggs or a yogurt that day.<br>${_floorTxt}</div>
-        <div class="rule-sub">Examples are sized for ~1,500 cal (~140g protein) — scale the rice/bread to your ceiling; keep the protein anchors. Lentils and chickpeas are cheap protein top-ups. Outside the window: water, black coffee, plain tea only. Train 1-2h after meal 2, or before it on days a fast follows.</div>
+        <div class="rule-num">THE THREE PROTEIN MEALS — ${open}–${close}</div>
+        <div class="rule-text">${_floorTxt}<br>Fat 40-50g (never under 40) · carbs 70-90g, most of them in the meal before training · ~${cal} cal ceiling.<br><br>
+        MEAL 1 · ${open} — 300g nonfat Greek yogurt + 1 scoop whey + 100g berries · <strong>~340 cal · 56P / 2F / 26C</strong>. D3 + multivitamin here.<br>
+        MEAL 2 · midday — 200g chicken breast + 100g cooked rice + big salad + 1 tbsp olive oil · <strong>~620 cal · 67P / 21F / 36C</strong><br>
+        MEAL 3 · by ${close} — 120g salmon (or 150g chicken / lean beef) + 200g egg-white omelette with veg + 10g almonds · <strong>~460 cal · 53P / 20F / 12C</strong><br>
+        DAY ≈ <strong>1,420 cal · 176P / 43F / 74C</strong></div>
+        <div class="rule-sub">150g protein = three normal plates: yogurt + whey (55g) · a hand-sized 200g chicken breast (62g) · 150g chicken, lean beef or salmon, or a 6-egg-white omelette (~35g). Eating out: grilled chicken plate (shish tawook) + salad, half the bread, sauce on the side ≈ 45-50g protein for ~550 cal. Outside the window: water, black coffee, plain tea only.</div>
       </div>
+
+      ${_menu('PROTEIN PER 100 CAL — WHAT TO BUY', '#ff9966', [
+        ['~20g+ · use daily', 'Chicken breast · egg whites · whey · nonfat Greek yogurt · shrimp · white fish', '100', '20g+'],
+        ['~12-16g · fine', 'Lean beef (5%) · salmon · low-fat cottage cheese · laban', '100', '12-16g'],
+        ['Under 10g · use sparingly', 'Whole eggs · paneer (~6g) · most protein bars (~7g in a 300-cal bar) · hummus · nuts', '100', '<10g']
+      ])}
+
+      ${_ld.length ? ruleCard('THURSDAY — PROTEIN DAY (~' + PROTEIN_DAY_CAL + ' CAL)', open + ' 200g nonfat Greek yogurt + 1 scoop whey (~230 cal · 45P) · midday 200g chicken breast + veg, no oil (~370 cal · 64P) · by ' + close + ' 200g egg whites or 150g white fish + veg (~150 cal · 25-35P). Day ≈ 750 cal · ~135P / ~10F / ~28C.', 'Replaces the old Thursday water fast: nearly the same weekly fat loss (~0.1kg/week less), but no protein-free day mid-week — so more muscle is kept and built. Walk 60-90 min; no strength session.', 'var(--light)') : ''}
 
       ${_mathCard}
 
@@ -491,8 +581,8 @@ export const cycle = {
 
       <div class="rule-card" style="border-left-color:#82e0aa">
         <div class="rule-num">SUPPLEMENT TRACK — THE WEEK</div>
-        <div class="rule-text">Creatine on waking · multivitamin + D3 with meal 1 · calcium+magnesium combo with meal 2 (optional) · magnesium at bed on fast days, or on days without the combo (◐) · stim-free pump before sessions · salt only on fast days.${_supTable}</div>
-        <div class="rule-sub">F = fast day in your current mode. Creatine 5g, no loading (ISSN 2018) · D3 1,000-2,000 IU (NIH UL 4,000) · magnesium glycinate 200-300mg elemental (UL 350 supplemental) · supplemental calcium ≤600mg/day · caffeine ≤400mg/day, before 2PM. Stimulant pre-workout (optional): ½ serving max, strength days only, with food in you and before ~3PM — never after vomiting, a short night, or on run days. The multivitamin covers zinc — don’t add zinc pills. Omega-3 1-2g with a meal is optional. Check with a doctor first if you take medication or have a kidney condition.</div>
+        <div class="rule-text">Creatine on waking · multivitamin + D3 with meal 1 · calcium+magnesium combo with meal 2 (optional) · magnesium at bed on fast days, or on days without the combo (◐) · stim-free pump before sessions · salt only on fast days · whey: 1 scoop a day inside the window counts as food.${_supTable}</div>
+        <div class="rule-sub">F = fast day, P = protein day in your current mode. Creatine 5g, no loading (ISSN 2018) · D3 1,000-2,000 IU (NIH UL 4,000 — count the multivitamin’s D3 too) · magnesium glycinate 200-300mg elemental (UL 350 supplemental) · supplemental calcium ≤600mg/day · caffeine ≤400mg/day. *Stimulant pre-workout (optional): ½ serving max, strength days only, with food in you, and only for a session that ends at least ~8 hours before bed — evening session = stim-free pump only. Never after vomiting, a short night, or on run days. The multivitamin covers zinc — don’t add zinc pills. Omega-3 1-2g with a meal is optional. Check with a doctor first if you take medication or have a kidney condition.</div>
       </div>
 
       <div class="rule-card" style="border-left-color:#82e0aa">
@@ -546,8 +636,8 @@ export const cycle = {
         ['Lentil soup + chicken', 'Big bowl of lentil soup + 150g chicken + lemon', '~600', '~55g'],
         ['Watermelon-feta side', 'Watermelon cubes + a little feta + cucumber + mint', '~150', '5g']
       ])}
-      ${ruleCard('SAMPLE DAY — ~1,500 CAL, ~150G PROTEIN', open + ' egg shakshuka + pita + Greek yogurt (~620) · midday Greek yogurt + pineapple + watermelon cooler (~260) · by ' + close + ' chicken shawarma bowl or big Caesar + salted laban (~800) · after ' + close + ': hibiscus, cucumber-mint water, cold tea — unlimited.', 'Saturday prep makes this automatic: cook chicken + rice, wash + chop salad veg, make a jug each of hibiscus and cucumber water.', '#ff9966')}
-      ${ruleCard('PROTEIN POWDER — OPTIONAL BACKUP', 'Only on days protein ran short: 1 scoop ≈ 120 cal + ~24g protein, inside the window, never on a fast day (it breaks the fast). Make it taste better: iced latte (coffee + milk + ice, shaken) · blended with laban + frozen banana · ½ scoop stirred into Greek yogurt with diced apple · stirred into oats after cooking.', 'Cold, half-scoop, milk or laban — never just water.', '#82e0aa')}
+      ${ruleCard('SAMPLE DAY 2 — ~1,495 CAL, ~158G PROTEIN', open + ' 300g Greek yogurt + whey + 150g pineapple (~360 · 55P/2F/32C) · midday chicken shawarma bowl: 200g chicken + 100g rice + chopped salad + garlic-yogurt sauce + 1 tbsp olive oil (~635 · 66P/22F/35C) · by ' + close + ' 3-egg + 100g egg-white shakshuka + 1 small pita + salad with 1 tsp olive oil (~500 · 37P/21F/39C) · day ≈ 158P / 45F / 106C · after ' + close + ': hibiscus, cucumber-mint water, cold tea — unlimited.', 'Saturday prep makes this automatic: cook chicken + rice, wash + chop salad veg, make a jug each of hibiscus and cucumber water.', '#ff9966')}
+      ${ruleCard('WHEY — THE ONE POWDER WITH PROOF FOR THIS GOAL', '1 scoop ≈ 110-120 cal + ~24-25g protein, inside the window — never on a fast day (it breaks the fast). It’s what makes 150g+ fit inside the ceiling. Hate the flavour? Unflavoured whey, or hide it: stirred into Greek yogurt with fruit · iced latte (coffee + milk + ice, shaken) · blended with laban + frozen banana · stirred into oats after cooking.', 'Young men ~40% under maintenance with 2.4 g/kg protein + hard training gained ~1.2kg lean mass and lost ~4.8kg fat in 4 weeks; half the protein gained ~0.1kg (Longland 2016).', '#82e0aa')}
       ${ruleCard('HEARTBURN + HYDRATION', 'Sip, don’t gulp; room-temperature water on an empty stomach; don’t lie down within 2-3h of eating. Watery fruit, laban and cold teas all count toward the water target.', 'Citrus, tomato, mint and fizz set off reflux in some people — if one burns, drop that one and keep the rest.', '#88ccff')}`;
     },
 
@@ -558,12 +648,12 @@ export const cycle = {
       return `
       <div class="section-title">THE <span>LAWS</span></div>
       ${ruleCard('LAW 01','The Mon/Wed/Fri strength sessions are the priority.','They are what keeps muscle while fat comes off. Miss food if life happens — keep the sessions. Body + backpack + gravity is the gym.')}
-      ${ruleCard('LAW 02','Kitchen hours: ' + open + '–' + close + '. Two meals.','Outside the window: water, black coffee, plain tea. Change the window in Settings if your day shifts — the plan follows it.')}
-      ${ruleCard('LAW 03','Fast days follow your mode — GLIDE: Thu + Sun · BAND: Sun · BELOW: none.','A fast runs from the last meal the day before to meal 1 the day after. Never two in a row. No training on a fast — the walk is the session. Break it with the planned, protein-first meal.')}
-      ${ruleCard('LAW 04','Respect the calorie floor.','Settings warns you below the plan floor (' + (cycle.minCalories || 1400) + ' cal). Very low intake loses muscle and rebounds.')}
-      ${ruleCard('LAW 05','Walks are the lever, never the punishment.','5k+ steps on eating days (+ training), 60-90 min on fast days. On a wrecked day, cut the walk length — not the strength session.')}
-      ${ruleCard('LAW 06','STOP cluster: palpitations · chest tightness · dizziness or vision changes','Salt water + some food immediately, whatever day it is. Persistent symptoms → see a doctor.')}
-      ${ruleCard('LAW 07','Sleep 7-9 hours. 6 is the hard floor.','Two wrecked nights in a row → next day is walk + core only. Recovery happens in bed.')}
+      ${ruleCard('LAW 02','Kitchen hours: ' + open + '–' + close + '. Three protein meals.','Outside the window: water, black coffee, plain tea. Change the window in Settings if your day shifts — the plan follows it.')}
+      ${ruleCard('LAW 03','Fast days follow your mode — GLIDE: Sun fast + Thu protein day · BAND: Sun fast · BELOW: none.','A fast runs from the last meal the day before to meal 1 the day after. Never two in a row. No training on a fast or protein day — the walk is the session. Break a fast with a normal-size, protein-first meal — never a huge one.')}
+      ${ruleCard('LAW 04','Respect the calorie floor.','Settings warns you below the plan floor (' + (cycle.minCalories || 1400) + ' cal). Very low intake loses muscle and rebounds. A slip day is followed by a NORMAL day — never an extra fast or a cut to make up for it.')}
+      ${ruleCard('LAW 05','Walks are the lever, never the punishment.','11k+ steps every day, 12k+ on fast and protein days. Past ~14k the extra burn starts costing muscle. On a wrecked day, cut the walk length — not the strength session.')}
+      ${ruleCard('LAW 06','STOP cluster: palpitations · chest tightness · dizziness or vision changes · vomiting after meals','Salt water + some food immediately, whatever day it is. Persistent symptoms, or vomiting that keeps coming back → stop pushing the cut and see a doctor.')}
+      ${ruleCard('LAW 07','Sleep 7-9 hours. 6 is the hard floor. No stimulant pre-workout within ~8h of bed.','Short sleep turns fat loss into muscle loss (Nedeltcheva 2010). Evening session = stim-free pump. Two wrecked nights in a row → next day is walk + core only.')}
       ${ruleCard('LAW 08','No diet-food purchases.','Bars, rice cakes, processed meats, juices. Whole foods are cheaper per gram of protein and more filling.')}
 
       <div class="section-title" style="margin-top:8px">EASE-OFF <span>TRIGGERS</span></div>
@@ -573,8 +663,8 @@ export const cycle = {
       ${ruleCard('WAIST OVER SCALE','Waist tape every Saturday morning at the navel AND the love-handle line · photos every 2 weeks · PRs (pull-up reps, handstand seconds, 5K time). Scale = weekly AVERAGE only.','Never measure the morning after a fast — it reads falsely low. Creatine adds ~0.5-1kg of water inside muscle; the tape ignores it.','var(--accent2)')}
 
       <div class="section-title" style="margin-top:8px">THE <span>AUTOPILOT</span></div>
-      ${ruleCard('MODES ARE COMPUTED, NOT SCHEDULED','The plan reads your latest weight against your target: GLIDE above the band, BAND inside ' + _band + ', BELOW under it — fast days and calorie suggestions follow' + (tdee ? ' (TDEE ' + tdee + ')' : '') + '.','Changed mode? Fast days already on the calendar stay — REMOVE + re-add the schedule (or tap days in MONTHS) to apply the new pattern.','#70c8ff')}
-      ${ruleCard('THE BAND — ' + _band.toUpperCase(),'Inside the band: Sunday fast only, eat ≈ maintenance, recomp. Above it the Thursday fast returns; below it, no fasts and +200 cal.','No end date. The plan doesn’t finish — it holds.','#70c8ff')}
+      ${ruleCard('MODES ARE COMPUTED, NOT SCHEDULED','The plan reads your latest weight against your target: GLIDE above the band, BAND inside ' + _band + ', BELOW under it — fast days, protein days and calorie suggestions follow' + (tdee ? ' (TDEE ' + tdee + ')' : '') + '.','Changed mode (or updated from a version with Thursday fasts)? Fast and protein days already on the calendar stay — REMOVE + re-add the schedule (or tap days in MONTHS) to apply the new pattern.','#70c8ff')}
+      ${ruleCard('THE BAND — ' + _band.toUpperCase(),'Inside the band: Sunday fast only, eat ≈ maintenance, recomp. Above it the Thursday protein day returns; below it, no fasts and +200 cal.','No end date. The plan doesn’t finish — it holds.','#70c8ff')}
       ${ruleCard('STARTING, OR AFTER A BREAK OR ILLNESS','Week 1: no fasts, ~70% volume (3 sets wherever it says 4), one level down on each track · Week 2: Sunday fast only · Week 3: full plan. The run ramp restarts at week 1.','Breathlessness, chest tightness or lingering symptoms → get medical clearance before hard sessions. In MONTHS, tap any auto-marked fast in weeks 1-2 to unmark it.','#70c8ff')}
       ${ruleCard('12-WEEK CHECKPOINT','Every 12 weeks: photos + waist + PRs on the table → harder variations and new blocks get added deliberately, from progress — not from a bad week.','The run ramp moves to its open-ended stage at week 13.','#70c8ff')}
       ${ruleCard('MINIMUM VIABLE DAY','Protein floor + 20-min walk + one skill drill.','Bad days are part of the design. The plan survives seasons because it expects weather.','#70c8ff')}`;

@@ -8073,6 +8073,23 @@ Evidence: progressive loading builds any muscle incl. the rectus abdominis (Scho
 
 ---
 
+### v8.10.13 Additions — CYCLE max recomp
+
+Session formula on every CYCLE training day: warm-up 5 min → skill 5-8 min (fresh) → main work
+30-35 min (4 exercises × 3-4 sets, each set stopped 1-3 reps before failure) → ab block 6-8 min;
+add load when every set reaches the top of its rep range. Evidence: hard sets near failure drive
+hypertrophy across rep ranges (Schoenfeld 2021); load/rep progression (Plotkin 2022); HIIT ≈ MICT
+for fat loss with more calories per minute (Schoenfeld 2021, ACE 2024; Boutcher 2011) — CLAUDE.md §15.
+High protein in a deep deficit + resistance training + intervals: Longland 2016 (AJCN 103:738).
+
+| Exercise | Pattern | Prescription (plan) | Key cues | Safety |
+|---|---|---|---|---|
+| Sprint finisher (intervals) | Conditioning | 8 × 20s hard / 40s easy (CYCLE Sat, after main work) | Before run-ramp week 4 or above 100kg: shadowbox flurries, fast high-knee marching or hill walks; flat-ground running sprints from week 4 | §2.3: no high-impact jumping at 100kg+; stop on chest tightness or dizziness |
+| Walk (protein day) | Low-intensity steady state | 60-90 min (CYCLE Thu in GLIDE) | Easy-brisk, split 2×40 allowed | None |
+| Bulgarian split squat (Cossack swap) | Squat (unilateral) | 3×8-12/leg, backpack-loaded (CYCLE Fri) | Use instead of Cossack squats when Cossacks provoke leg nerve symptoms | Any tingling/numbness down a leg → reduce range, see a clinician if it persists |
+
+---
+
 ## AUTO-PRESCRIPTION DATA MODEL
 
 > **Status: NOT YET IMPLEMENTED in `app.html`.** This section defines the data
